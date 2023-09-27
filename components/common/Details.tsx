@@ -4,7 +4,34 @@ import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-const Episode = dynamic(() => import("../container/Episode"));
+import { Skeleton } from "../ui/skeleton";
+const Episode = dynamic(() => import("../container/Episode"), {
+  loading: () => (
+    <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
+  ),
+});
+const SeasonTabs = dynamic(() => import("../container/Seasons"), {
+  loading: () => (
+    <div className="w-[90%] flex flex-col mx-auto">
+      {Array(10)
+        .fill(null)
+        .map((_, index) => (
+          <div
+            key={index}
+            className="flex justify-between hover:bg-primary rounded p-1 cursor-pointer flex-row gap-2 items-center"
+          >
+            <Skeleton className="w-[250px] aspect-video" />
+
+            <div className="w-full gap-1 flex flex-col text-sm">
+              <Skeleton className="h-[20px] w-[100px]" />
+              <Skeleton className="h-[10px]" />
+              <Skeleton className="h-[10px]" />
+            </div>
+          </div>
+        ))}
+    </div>
+  ),
+});
 
 const Details = (props: any) => {
   const { data, type } = props;
@@ -12,10 +39,14 @@ const Details = (props: any) => {
     <>
       <div className="  lg:mx-auto">
         <div className="  pb-4 lg:w-100 ">
-          <div className="flex flex-col   lg:w-11/12 mx-auto gap-4 ">
-            <div className="relative h-full z-30">
+          <div className="flex flex-col    mx-auto gap-4 ">
+            <div className="relative  w-full h-full md:h-[350px] z-30">
               <div className="absolute -inset-0 bg-gradient-to-t from-background to-background/20"></div>
-              <img src={data.cover} className="z-0 w-full aspect-video h-1/2" />
+              <img
+                src={data.cover}
+                className="z-0 w-full h-full md:h-[350px] object-cover object-top"
+                alt="Cover Image"
+              />
             </div>
             <div className="w-[90%] flex flex-col mx-auto">
               <div className="flex flex-row p-2 gap-4 ">
@@ -53,7 +84,12 @@ const Details = (props: any) => {
                         </div>
                       </>
                     ) : (
+                      ""
+                    )}
+                    {type === "tv" ? (
                       <div>{data.totalSeasons} Seasons</div>
+                    ) : (
+                      ""
                     )}
                   </div>
                   {/* <Button className="w-full  md:w-[200px] ">Play</Button> */}
@@ -66,60 +102,15 @@ const Details = (props: any) => {
                 <Button className="w-full  md:w-[200px] ">Share</Button>
               </div>
             </div>
-            {type === "tv" && (
-              <div className="w-[90%] flex flex-col mx-auto">
-                <Tabs className="w-full">
-                  <TabsList className="gap-4 overflow-scroll w-full md:w-fit   text-white">
-                    <div className="w-fit flex overflow-auto">
-                      {data.seasons.map((season: any, index: number) => (
-                        <TabsTrigger
-                          defaultChecked={index === 0}
-                          value={season.season}
-                          key={season.season}
-                        >
-                          Season {season.season}
-                        </TabsTrigger>
-                      ))}
-                    </div>
-                  </TabsList>
-                  {data.seasons.map((season: any) => (
-                    <TabsContent value={season.season} key={season.season}>
-                      <div className="gap-1 my-3 flex flex-col">
-                        {season.isReleased &&
-                          season.episodes.map((episode: any) => (
-                            <div
-                              key={episode.id}
-                              className="flex justify-between flex-row gap-2 items-center"
-                            >
-                              <div>
-                                <img
-                                  className="rounded"
-                                  src={episode.img.mobile}
-                                  alt={episode.title}
-                                />
-                              </div>
-                              <div className="w-full text-sm">
-                                <div className="font-bold">{episode.title}</div>
-                                <div className="text-xs line-clamp-2">
-                                  {episode.description}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                      <Separator />
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              </div>
+            {type === "tv" ? (
+              <SeasonTabs seasons={data.seasons} defaultTab={0} />
+            ) : (
+              <Episode data={data} />
             )}
           </div>
         </div>
       </div>
-
-      {type === "movie" && <Episode data={data} />}
     </>
   );
 };
-4;
 export default Details;

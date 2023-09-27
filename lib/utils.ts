@@ -35,7 +35,6 @@ export async function fetchDetails(id: string, type: string) {
 export async function fetchMovieLinks(movie: string, longID: string) {
   try {
     const url = new URL(
-      // `https://spicyapi.vercel.app/meta/tmdb/watch/${movie}?id=${longID}`
       `https://api.consumet.org/meta/tmdb/watch/${movie}?id=${longID}`
     );
     const response = await fetch(url.toString());

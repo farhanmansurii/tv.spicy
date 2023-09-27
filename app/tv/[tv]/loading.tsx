@@ -1,4 +1,4 @@
-import DetailLoader from "@/components/loader-components/DetailLoader";
+import DetailLoader from "@/components/loading/DetailLoader";
 
 export default function Loading() {
   return <DetailLoader />;

@@ -1,7 +1,4 @@
-import DetailLoader from "@/components/loader-components/DetailLoader";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import DetailLoader from "@/components/loading/DetailLoader";
 import React from "react";
 
 export default function Loading() {
