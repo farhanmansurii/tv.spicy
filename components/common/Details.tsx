@@ -8,7 +8,6 @@ import { Skeleton } from "../ui/skeleton";
 import SearchBar from "../SearchBar";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import NowPlayingEpisode from "../container/NowPlayingEpisode";
 import { useEpisodeStore } from "@/store/episodeStore";
 import DetailLoader from "../loading/DetailLoader";
 import SeasonTabs from "../container/Seasons";
