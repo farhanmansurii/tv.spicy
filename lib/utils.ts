@@ -22,7 +22,7 @@ export async function fetchRowData(type: string) {
 export async function fetchDetails(id: string, type: string) {
   try {
     const url = new URL(
-      `https://spicyapi.vercel.app/meta/tmdb/info/${id}?type=${type}`
+      `https://spicy-api.vercel.app/meta/tmdb/info/${id}?type=${type}`
     );
     const response = await fetch(url.toString());
     if (!response.ok) throw new Error("Failed to fetch data");
@@ -35,7 +35,7 @@ export async function fetchDetails(id: string, type: string) {
 export async function fetchMovieLinks(movie: string, longID: string) {
   try {
     const url = new URL(
-      `https://api.consumet.org/meta/tmdb/watch/${movie}?id=${longID}`
+      `https://spicy-api.vercel.app/meta/tmdb/watch/${movie}?id=${longID}`
     );
     const response = await fetch(url.toString());
     if (!response.ok) throw new Error("Failed to fetch data");
