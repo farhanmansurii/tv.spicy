@@ -5,6 +5,9 @@ import { Separator } from "../ui/separator";
 import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Skeleton } from "../ui/skeleton";
+import SearchBar from "../SearchBar";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 const Episode = dynamic(() => import("../container/Episode"), {
   loading: () => (
     <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
@@ -46,7 +49,23 @@ const Details = (props: any) => {
                 src={data.cover}
                 className="z-0 w-full h-full md:h-[350px] object-cover object-top"
                 alt="Cover Image"
-              />
+              />{" "}
+              <div className="w-full absolute justify-center flex  top-0">
+                <div className="flex p-4 items-center w-full lg:w-11/12 justify-between mx-auto">
+                  <Link href="/">
+                    <Button
+                      size="icon"
+                      className="rounded-full w-12 h-12  md:w-16 md:h-16 "
+                    >
+                      <ArrowLeft className="  rounded" />
+                    </Button>
+                  </Link>
+                  <div>
+                    {" "}
+                    <SearchBar />
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="w-[90%] flex flex-col mx-auto">
               <div className="flex flex-row p-2 gap-4 ">

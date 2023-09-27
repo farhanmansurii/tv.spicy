@@ -45,8 +45,12 @@ export default function SearchBar() {
   };
   return (
     <div>
-      <Button size="icon" onClick={() => toggle()} className="rounded-full p-2">
-        <Search />
+      <Button
+        onClick={() => toggle()}
+        size="icon"
+        className="rounded-full w-12 h-12  md:w-16 md:h-16 "
+      >
+        <Search className="  rounded" />
       </Button>
       <CommandDialog open={open} onOpenChange={toggle}>
         <DebouncedInput
@@ -75,7 +79,9 @@ export default function SearchBar() {
                     </div>
                     <Button
                       className={`border-0  ${
-                        show.media_type === "tv" ? "bg-primary" : "bg-white text-primary"
+                        show.media_type === "tv"
+                          ? "bg-primary"
+                          : "bg-white text-primary"
                       }`}
                       size="xs"
                     >
