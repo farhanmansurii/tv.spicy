@@ -66,46 +66,53 @@ const Details = (props: any) => {
                 <Button className="w-full  md:w-[200px] ">Share</Button>
               </div>
             </div>
-           { type==='tv' &&<div className="w-[90%] flex flex-col mx-auto">
-              <Tabs   className="w-full">
-                <TabsList className="gap-4 overflow-scroll bg-primary-background text-white">
-                  {data.seasons.map((season :any,index:number) => (
-                    <TabsTrigger defaultChecked={index===0} value={season.season} key={season.season}>
-                      Season {season.season}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                {data.seasons.map((season:any) => (
-                  <TabsContent value={season.season} key={season.season}>
-                   
-                    <div className="gap-1 my-3 flex flex-col">
-                      {season.isReleased &&
-                        season.episodes.map((episode:any) => (
-                          <div
-                            key={episode.id}
-                            className="flex justify-between flex-row gap-2 items-center"
-                          >
-                            <div>
-                              <img
-                                className="rounded"
-                                src={episode.img.mobile}
-                                alt={episode.title}
-                              />
-                            </div>
-                            <div className="w-full text-sm">
-                              <div className="font-bold">{episode.title}</div>
-                              <div className="text-xs line-clamp-2">
-                                {episode.description}
+            {type === "tv" && (
+              <div className="w-[90%] flex flex-col mx-auto">
+                <Tabs className="w-full">
+                  <TabsList className="gap-4 overflow-scroll w-full md:w-fit   text-white">
+                    <div className="w-fit flex overflow-auto">
+                      {data.seasons.map((season: any, index: number) => (
+                        <TabsTrigger
+                          defaultChecked={index === 0}
+                          value={season.season}
+                          key={season.season}
+                        >
+                          Season {season.season}
+                        </TabsTrigger>
+                      ))}
+                    </div>
+                  </TabsList>
+                  {data.seasons.map((season: any) => (
+                    <TabsContent value={season.season} key={season.season}>
+                      <div className="gap-1 my-3 flex flex-col">
+                        {season.isReleased &&
+                          season.episodes.map((episode: any) => (
+                            <div
+                              key={episode.id}
+                              className="flex justify-between flex-row gap-2 items-center"
+                            >
+                              <div>
+                                <img
+                                  className="rounded"
+                                  src={episode.img.mobile}
+                                  alt={episode.title}
+                                />
+                              </div>
+                              <div className="w-full text-sm">
+                                <div className="font-bold">{episode.title}</div>
+                                <div className="text-xs line-clamp-2">
+                                  {episode.description}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                    </div>
-                    <Separator />
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </div>}
+                          ))}
+                      </div>
+                      <Separator />
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </div>
+            )}
           </div>
         </div>
       </div>
