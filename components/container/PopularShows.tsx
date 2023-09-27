@@ -8,7 +8,7 @@ export default async function PopularShows() {
   const allShowsByCategory: any[] = [
     {
       title: "New TV Shows",
-      shows: allShows.trendingTvs,
+      shows: allShows.popularTvs,
       type: "tv",
     },
     {

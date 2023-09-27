@@ -1,98 +1,74 @@
-// "use client";
-// import * as React from "react";
-// import {
-//   CommandDialog,
-//   CommandEmpty,
-//   CommandGroup,
-//   CommandInput,
-//   CommandItem,
-//   CommandList,
-//   CommandSeparator,
-// } from "@/components/ui/command";
-// import { CommandIcon, Search, SearchIcon } from "lucide-react";
-// import Link from "next/link";
-// import { DebouncedInput } from "./common/DebouncedInput";
-
-// export function SearchBar() {
-//   const [open, setOpen] = React.useState(false);
-//   const [term, setTerm] = React.useState("");
-//   const [results, setResults] = React.useState<any[]>([]);
-
-//   // Throttle the search by using a flag
-//   const searchInProgress = React.useRef(false);
-//   const handleSearch = async (searchTerm: string) => {
-//     if (searchInProgress.current) {
-//       return;
-//     }
-  
-//     searchInProgress.current = true;
-//     try {
-//       // Your search logic here, e.g., fetching data based on searchTerm
-//       const res = await seae
-//       setResults(res.results);
-//     } catch (err) {
-//       console.error(err);
-//     } finally {
-//       searchInProgress.current = false;
-//     }
-//   };
-  
-//   // Remove the previous handleInputChange function
-  
-//   const down = (e: React.KeyboardEvent) => {
-//     if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
-//       e.preventDefault();
-//       setOpen((open) => !open);
-//     }
-//   };
-
-//   const toggleOpen = () => {
-//     setOpen((prev) => !prev);
-//     setResults([]);
-//     setTerm("");
-//   };
-//   return (
-//     <>
-//       <div
-//         onClick={() => toggleOpen()}
-//         className="bg-primary rounded-full p-2.5"
-//       >
-//         <SearchIcon />
-//       </div>
-//       <CommandDialog open={open} onOpenChange={toggleOpen}>
-//         <DebouncedInput
-//           value={term}
-//           onChange={(value) => handleSearch(value)}
-//           placeholder="Search..."
-//           className="bg-primary rounded-full p-2.5"
-//         />
-//         <CommandList className=" pb-1.5">
-//           {term.length > 0 ? (
-//             results.length === 0 ? (
-//               <CommandEmpty>No results found.</CommandEmpty>
-//             ) : (
-//               <>
-//                 <CommandSeparator />
-//                 <CommandGroup
-//                   className=" "
-//                   heading="Top Results"
-//                 ></CommandGroup>
-//               </>
-//             )
-//           ) : (
-//             ""
-//           )}
-//         </CommandList>
-//       </CommandDialog>
-//     </>
-//   );
-// }
-
-
-import React from 'react'
+"use client";
+import React, { useState } from "react";
+import { DebouncedInput } from "./common/DebouncedInput";
+import { useSearchStore } from "@/store/searchStore";
+import { searchShows } from "@/lib/utils";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "./ui/command";
+import { ButtonIcon } from "@radix-ui/react-icons";
+import { Button } from "./ui/button";
+import { Search } from "lucide-react";
+import Link from "next/link";
 
 export default function SearchBar() {
+  const [open, setOpen] = useState(false)
+  const searchStore = useSearchStore();
+  async function searchShowsByQuery(value: string) {
+    searchStore.setQuery(value);
+    const shows = await searchShows(value);
+    console.log(shows.results);
+    searchStore.setShows(shows.results);
+  }
+
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
   return (
-    <div>SearchBar</div>
-  )
+    <div>
+     <Button size='icon' onClick={()=>setOpen(true)} className="rounded-full p-2"><Search/></Button>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <DebouncedInput
+          setQuery={searchStore.setQuery}
+          setData={searchStore.setShows}
+          value={searchStore.query}
+          onChange={(value) => void searchShowsByQuery(value.toString())}
+        />
+        <CommandList>
+          {searchStore.shows? (
+            <CommandGroup heading="Search Results">
+              {searchStore.shows.map((show, index) => (
+               <Link key={index} href={`/movie/${show.id}`} >
+               <CommandItem className="border" key={index}>{show.name}</CommandItem>
+               </Link>
+              ))}
+            </CommandGroup>
+          ) : (
+            <CommandEmpty>No results found.</CommandEmpty>
+          )}
+          {/* <CommandGroup heading="Suggestions">
+            <CommandItem>Calendar</CommandItem>
+            <CommandItem>Search Emoji</CommandItem>
+            <CommandItem>Calculator</CommandItem>
+          </CommandGroup> */}
+        </CommandList>
+      </CommandDialog>
+    
+    </div>
+  );
 }

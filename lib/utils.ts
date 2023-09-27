@@ -90,7 +90,7 @@ export async function getNewAndPopularShows() {
 
 export async function searchShows(query: string) {
   const res = await fetch(
-    `https://api.themoviedb.org/3/search/multi?api_key=${ process.env.TMDB_API_KEY}&query=${encodeURIComponent(query)}`
+    `https://api.themoviedb.org/3/search/multi?api_key=e3ca0f283f1ab903fd5e2324faadd88e&query=${encodeURIComponent(query)}`
   );
 
   if (!res.ok) {

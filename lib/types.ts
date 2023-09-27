@@ -1,6 +1,7 @@
 export type Show = {
   adult: boolean
   backdrop_path: string | null
+  media_type: string | null,
   budget: number | null
   homepage: string | null
   showId: string
