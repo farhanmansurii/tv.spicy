@@ -19,12 +19,11 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 
 export default function SearchBar() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   const searchStore = useSearchStore();
   async function searchShowsByQuery(value: string) {
     searchStore.setQuery(value);
     const shows = await searchShows(value);
-    console.log(shows.results);
     searchStore.setShows(shows.results);
   }
 
@@ -39,10 +38,17 @@ export default function SearchBar() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+  const toggle = () => {
+    setOpen((prev) => !prev);
+    searchStore.setShows([]);
+    searchStore.setQuery("");
+  };
   return (
     <div>
-     <Button size='icon' onClick={()=>setOpen(true)} className="rounded-full p-2"><Search/></Button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <Button size="icon" onClick={() => toggle()} className="rounded-full p-2">
+        <Search />
+      </Button>
+      <CommandDialog open={open} onOpenChange={toggle}>
         <DebouncedInput
           setQuery={searchStore.setQuery}
           setData={searchStore.setShows}
@@ -50,25 +56,40 @@ export default function SearchBar() {
           onChange={(value) => void searchShowsByQuery(value.toString())}
         />
         <CommandList>
-          {searchStore.shows? (
+          {searchStore.shows ? (
             <CommandGroup heading="Search Results">
               {searchStore.shows.map((show, index) => (
-               <Link key={index} href={`/movie/${show.id}`} >
-               <CommandItem className="border" key={index}>{show.name}</CommandItem>
-               </Link>
+                <Link key={index} href={`/movie/${show.id}`}>
+                  <CommandItem
+                    className=" flex my-2 cursor-pointer justify-between gap-2"
+                    key={index}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div>{show.name || show.title}</div>
+                      {show.release_date || show.first_air_date ? (
+                        <Button className="border-0" size="xs">
+                          {show.release_date?.split("-")[0] ||
+                            show.first_air_date?.split("-")[0]}
+                        </Button>
+                      ) : null}
+                    </div>
+                    <Button
+                      className={`border-0  ${
+                        show.media_type === "tv" ? "bg-primary" : "bg-white text-primary"
+                      }`}
+                      size="xs"
+                    >
+                      {show.media_type === "tv" ? "TV" : "Movie"}
+                    </Button>
+                  </CommandItem>
+                </Link>
               ))}
             </CommandGroup>
           ) : (
             <CommandEmpty>No results found.</CommandEmpty>
           )}
-          {/* <CommandGroup heading="Suggestions">
-            <CommandItem>Calendar</CommandItem>
-            <CommandItem>Search Emoji</CommandItem>
-            <CommandItem>Calculator</CommandItem>
-          </CommandGroup> */}
         </CommandList>
       </CommandDialog>
-    
     </div>
   );
 }

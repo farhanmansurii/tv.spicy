@@ -12,7 +12,6 @@ const Details = (props: any) => {
   const { data } = props;
   return (
     <>
-   
       <div className="  lg:mx-auto">
         <div className="  pb-4 lg:w-100 ">
           <div className="flex flex-col   lg:w-11/12 mx-auto gap-4 ">
@@ -48,18 +47,14 @@ const Details = (props: any) => {
                       min
                     </div>
                   </div>
-                  <Button size="lg" className="w-full md:w-fit px-5">
-                    Play Movie
-                  </Button>
+                  <Button className="w-full  md:w-[200px] ">Play</Button>
                   <div className="text-sm">{data.description}</div>
                 </div>
               </div>
               <Separator />
-              <div className="justify-between gap-5 p-3  flex ">
-                <Button className="w-full">Add to List</Button>
-                <Button className="w-full">
-                  <Share1Icon className="mr-2" /> Share
-                </Button>
+              <div className=" gap-5 p-3  flex ">
+                <Button className="w-full  md:w-[200px] ">Play</Button>
+                <Button className="w-full  md:w-[200px] ">Share</Button>
               </div>
             </div>
           </div>
