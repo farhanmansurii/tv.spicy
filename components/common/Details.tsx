@@ -1,15 +1,13 @@
+"use client";
 import React from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
-import { Share2 } from "lucide-react";
-import { Share1Icon } from "@radix-ui/react-icons";
-import PlayButton from "./PlayButton";
 import dynamic from "next/dynamic";
-import { Skeleton } from "../ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 const Episode = dynamic(() => import("../container/Episode"));
 
 const Details = (props: any) => {
-  const { data } = props;
+  const { data, type } = props;
   return (
     <>
       <div className="  lg:mx-auto">
@@ -41,13 +39,24 @@ const Details = (props: any) => {
                     <Separator orientation="vertical" />
                     <div>{data.genres.slice(0, 2).join(" / ")}</div>
                     <Separator className="h-full" orientation="vertical" />
-                    <div>
-                      {" "}
-                      {Math.floor(data.duration / 60)} hr {data.duration % 60}{" "}
-                      min
-                    </div>
+                    {type === "movie " ? (
+                      <>
+                        <div>
+                          {" "}
+                          {Math.floor(data.duration / 60)} hr{" "}
+                          {data.duration % 60} min
+                        </div>
+                        <div>
+                          {" "}
+                          {Math.floor(data.duration / 60)} hr{" "}
+                          {data.duration % 60} min
+                        </div>
+                      </>
+                    ) : (
+                      <div>{data.totalSeasons} Seasons</div>
+                    )}
                   </div>
-                  <Button className="w-full  md:w-[200px] ">Play</Button>
+                  {/* <Button className="w-full  md:w-[200px] ">Play</Button> */}
                   <div className="text-sm">{data.description}</div>
                 </div>
               </div>
@@ -57,10 +66,51 @@ const Details = (props: any) => {
                 <Button className="w-full  md:w-[200px] ">Share</Button>
               </div>
             </div>
+           { type==='tv' &&<div className="w-[90%] flex flex-col mx-auto">
+              <Tabs   className="w-full">
+                <TabsList className="gap-4 overflow-scroll bg-primary-background text-white">
+                  {data.seasons.map((season :any,index:number) => (
+                    <TabsTrigger defaultChecked={index===0} value={season.season} key={season.season}>
+                      Season {season.season}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {data.seasons.map((season:any) => (
+                  <TabsContent value={season.season} key={season.season}>
+                   
+                    <div className="gap-1 my-3 flex flex-col">
+                      {season.isReleased &&
+                        season.episodes.map((episode:any) => (
+                          <div
+                            key={episode.id}
+                            className="flex justify-between flex-row gap-2 items-center"
+                          >
+                            <div>
+                              <img
+                                className="rounded"
+                                src={episode.img.mobile}
+                                alt={episode.title}
+                              />
+                            </div>
+                            <div className="w-full text-sm">
+                              <div className="font-bold">{episode.title}</div>
+                              <div className="text-xs line-clamp-2">
+                                {episode.description}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                    <Separator />
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </div>}
           </div>
         </div>
       </div>
-      <Episode data={data} />
+
+      {type === "movie" && <Episode data={data} />}
     </>
   );
 };

@@ -19,10 +19,10 @@ export async function fetchRowData(type: string) {
     console.log(error);
   }
 }
-export async function fetchMovie(id: string) {
+export async function fetchDetails(id: string, type: string) {
   try {
     const url = new URL(
-      `https://spicyapi.vercel.app/meta/tmdb/info/${id}?type=MOVIE`
+      `https://spicyapi.vercel.app/meta/tmdb/info/${id}?type=${type}`
     );
     const response = await fetch(url.toString());
     if (!response.ok) throw new Error("Failed to fetch data");
@@ -90,7 +90,9 @@ export async function getNewAndPopularShows() {
 
 export async function searchShows(query: string) {
   const res = await fetch(
-    `https://api.themoviedb.org/3/search/multi?api_key=e3ca0f283f1ab903fd5e2324faadd88e&query=${encodeURIComponent(query)}`
+    `https://api.themoviedb.org/3/search/multi?api_key=e3ca0f283f1ab903fd5e2324faadd88e&query=${encodeURIComponent(
+      query
+    )}`
   );
 
   if (!res.ok) {

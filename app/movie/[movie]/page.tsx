@@ -1,6 +1,5 @@
 import Details from "@/components/common/Details";
-import { fetchMovie, fetchMovieLinks } from "@/lib/utils";
-import dynamic from "next/dynamic";
+import { fetchDetails } from "@/lib/utils";
 import React from "react";
 export default async function TVDetails({
   params,
@@ -8,12 +7,12 @@ export default async function TVDetails({
   params: { movie: string };
 }) {
   const { movie } = params;
-  const data = await fetchMovie(movie);
+  const data = await fetchDetails(movie, "movie");
 
   if (!data) return <div>Loadimg</div>;
   return (
     <div>
-      <Details data={data} />
+      <Details data={data} type={"movie"} />
     </div>
   );
 }

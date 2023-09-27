@@ -59,7 +59,7 @@ export default function SearchBar() {
           {searchStore.shows ? (
             <CommandGroup heading="Search Results">
               {searchStore.shows.map((show, index) => (
-                <Link key={index} href={`/movie/${show.id}`}>
+                <Link key={index} href={`/${show.media_type}/${show.id}`}>
                   <CommandItem
                     className=" flex my-2 cursor-pointer justify-between gap-2"
                     key={index}

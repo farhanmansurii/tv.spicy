@@ -1,7 +1,18 @@
-import React from 'react'
+import Details from "@/components/common/Details";
+import { fetchDetails } from "@/lib/utils";
+import React from "react";
 
-export default function TVDetails({params}:{ params: { tv: string }}) {
+export default async function TVDetails({
+  params,
+}: {
+  params: { tv: string };
+}) {
+  const data = await fetchDetails(params.tv, "tv");
+
+  if (!data) return <div>Loadimg</div>;
   return (
-    <div>{params.tv}</div>
-  )
+    <div>
+      <Details data={data} type={"tv"} />
+    </div>
+  );
 }
