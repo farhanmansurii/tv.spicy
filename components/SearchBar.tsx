@@ -23,8 +23,12 @@ export default function SearchBar() {
   const searchStore = useSearchStore();
   async function searchShowsByQuery(value: string) {
     searchStore.setQuery(value);
-    const shows = await searchShows(value);
-    searchStore.setShows(shows.results);
+    if (value) searchStore.setLoading(true);
+    if (value.length >= 3) {
+      const shows = await searchShows(value);
+      searchStore.setShows(shows.results);
+      searchStore.setLoading(false);
+    }
   }
 
   React.useEffect(() => {
@@ -90,6 +94,20 @@ export default function SearchBar() {
                   </CommandItem>
                 </Link>
               ))}
+              {searchStore.loading && (
+                <>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
+                  </CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
+                  </CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
+                  </CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
+                  </CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
+                  </CommandItem>
+                </>
+              )}
             </CommandGroup>
           ) : (
             <CommandEmpty>No results found.</CommandEmpty>
