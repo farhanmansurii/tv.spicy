@@ -59,3 +59,61 @@
     @apply bg-background text-foreground;
   }
 }
+body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+::-webkit-scrollbar {
+  display: none;
+
+ 
+}
+.backward,
+.forward {
+  transition: 0.4s opacity, 0.4s visibility;
+}
+
+[data-ctrl-hidden="true"] .forward,
+[data-ctrl-hidden="true"] .backward {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.backward,
+.forward {
+  width: 2em;
+  color: #fff;
+  position: absolute;
+  background: none;
+  outline: none;
+  border: none;
+}
+
+@media screen and (min-width: 768px) {
+  .backward,
+  .forward {
+    width: 3em; /* Set to 3em for larger screens */
+  }
+}
+
+.backward {
+  left: 25%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.forward {
+  right: 25%;
+  top: 50%;
+  transform: translate(50%, -50%);
+}
+
+.backward:active svg {
+  transform: rotate(-45deg);
+  transition: 0.1s transform;
+}
+
+.forward:active svg {
+  transform: rotate(45deg);
+  transition: 0.1s transform;
+}

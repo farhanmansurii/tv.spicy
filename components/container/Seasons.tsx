@@ -1,7 +1,7 @@
-"use client";
-import React from "react"; // Import React if not already imported
+import React, { useState } from "react"; // Import React if not already imported
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { SeasonContent } from "./SeasonContent";
+import { useEpisodeStore } from "@/store/episodeStore";
 
 interface Season {
   season: number;
@@ -21,33 +21,42 @@ interface Episode {
 
 interface SeasonTabsProps {
   seasons: Season[];
-  defaultTab: number;
+  id: string;
 }
 
-const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, defaultTab }) => (
-  <Tabs className="w-[90%] flex flex-col mx-auto">
-    <TabsList
-      defaultValue="Season 1"
-      className="gap-4 overflow-scroll w-full md:w-fit text-white"
-    >
-      <div className="w-fit flex overflow-auto">
-        {seasons.map((season, index) => (
-          <TabsTrigger value={`Season ${season.season}`} key={season.season}>
-            Season {season.season}
-          </TabsTrigger>
+const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id }) => {
+  
+  return (
+    <>
+      <Tabs defaultValue={"Season " + seasons[0].season} className="w-full flex flex-col mx-auto">
+        <TabsList
+          
+          className="gap-4 overflow-scroll w-full md:w-fit text-white"
+        >
+          <div className="w-fit flex overflow-auto">
+            {seasons.map((season, index) => (
+              <TabsTrigger
+                value={"Season " + season.season}
+                key={season.season}
+              >
+                Season {season.season}
+              </TabsTrigger>
+            ))}
+          </div>
+        </TabsList>
+        {seasons.map((season) => (
+          <TabsContent value={`Season ${season.season}`} key={season.season}>
+            <SeasonContent id={id} season={season} />
+          </TabsContent>
         ))}
-      </div>
-    </TabsList>
-    {seasons.map((season) => (
-      <TabsContent value={`Season ${season.season}`} key={season.season}>
-        <SeasonContent season={season} />
-      </TabsContent>
-    ))}
-  </Tabs>
-);
+      </Tabs>
+    </>
+  );
+};
 
 export interface SeasonContentProps {
   season: Season;
+  id: string;
 }
 
 export default SeasonTabs;

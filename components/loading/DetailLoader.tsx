@@ -9,9 +9,9 @@ export default function DetailLoader() {
     <div className="lg:mx-auto">
       <div className="pb-4 lg:w-100">
         <div className="flex flex-col w-full mx-auto gap-4">
-          <div className="relative h-full z-30">
+          <div className="relative w-full  h-full z-30">
             
-            <div className="z-0 w-full bg-background h-full md:h-[350px] " />
+            <div className="z-0 w-full bg-background aspect-video h-full md:h-[350px] " />
           </div>
           <div className="w-[90%] flex flex-col mx-auto">
             <div className="flex flex-row p-2 gap-4">

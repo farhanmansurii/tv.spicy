@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { Suspense, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import dynamic from "next/dynamic";
@@ -8,36 +8,22 @@ import { Skeleton } from "../ui/skeleton";
 import SearchBar from "../SearchBar";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-const Episode = dynamic(() => import("../container/Episode"), {
-  loading: () => (
-    <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
-  ),
-});
-const SeasonTabs = dynamic(() => import("../container/Seasons"), {
-  loading: () => (
-    <div className="w-[90%] flex flex-col mx-auto">
-      {Array(10)
-        .fill(null)
-        .map((_, index) => (
-          <div
-            key={index}
-            className="flex justify-between hover:bg-primary rounded p-1 cursor-pointer flex-row gap-2 items-center"
-          >
-            <Skeleton className="w-[250px] aspect-video" />
-
-            <div className="w-full gap-1 flex flex-col text-sm">
-              <Skeleton className="h-[20px] w-[100px]" />
-              <Skeleton className="h-[10px]" />
-              <Skeleton className="h-[10px]" />
-            </div>
-          </div>
-        ))}
-    </div>
-  ),
-});
+import NowPlayingEpisode from "../container/NowPlayingEpisode";
+import { useEpisodeStore } from "@/store/episodeStore";
+import DetailLoader from "../loading/DetailLoader";
+import SeasonTabs from "../container/Seasons";
+import Episode from "../container/Episode";
 
 const Details = (props: any) => {
   const { data, type } = props;
+  const { activeEP, setActiveEP } = useEpisodeStore();
+  useEffect(() => {
+    if (type === "tv") {
+      if (activeEP.tv_id !== data.id) {
+        setActiveEP({ tv_id: data.id, ...data.seasons[0].episodes[0] });
+      }
+    }
+  }, [data, activeEP]);
   return (
     <>
       <div className="  lg:mx-auto">
@@ -121,11 +107,38 @@ const Details = (props: any) => {
                 <Button className="w-full  md:w-[200px] ">Share</Button>
               </div>
             </div>
-            {type === "tv" ? (
-              <SeasonTabs seasons={data.seasons} defaultTab={0} />
-            ) : (
-              <Episode data={data} />
-            )}
+            <div className="w-[90%] flex mx-auto items-center flex-col">
+              {type === "tv" ? (
+                <>
+                  {activeEP && activeEP.tv_id === data.id && (
+                    <Suspense
+                      fallback={
+                        <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
+                      }
+                    >
+                      <Episode
+                        episodeId={activeEP?.id}
+                        id={activeEP.tv_id}
+                        type="tv"
+                      />
+                    </Suspense>
+                  )}
+                  <SeasonTabs seasons={data.seasons} id={data.id} />
+                </>
+              ) : (
+                <Suspense
+                  fallback={
+                    <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
+                  }
+                >
+                  <Episode
+                    episodeId={data.episodeId}
+                    id={data.id}
+                    type={type}
+                  />
+                </Suspense>
+              )}
+            </div>
           </div>
         </div>
       </div>
