@@ -32,6 +32,19 @@ export async function fetchDetails(id: string, type: string) {
     console.log(error);
   }
 }
+export async function fetchDetailsTMDB(id: string, type: string) {
+  try {
+    const url = new URL(
+      `https://api.themoviedb.org/3/${type}/${id}?api_key=${process.env.TMDB_API_KEY}`
+    );
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error("Failed to fetch data");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
 export async function fetchMovieLinks(movie: string, longID: string) {
   try {
     const url = new URL(

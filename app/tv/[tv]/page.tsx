@@ -1,5 +1,5 @@
 import Details from "@/components/common/Details";
-import { fetchDetails } from "@/lib/utils";
+import { fetchDetails, fetchDetailsTMDB } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import React from "react";
 
@@ -8,12 +8,11 @@ export default async function TVDetails({
 }: {
   params: { tv: string };
 }) {
-  const data = await fetchDetails(params.tv, "tv");
-
-  if (!data) return notFound()
+  const tmdb = await fetchDetailsTMDB(params.tv, "tv");
+  if (!tmdb) return notFound();
   return (
     <div>
-      <Details data={data} type={"tv"} />
+      <Details data={tmdb} type={"tv"} />
     </div>
   );
 }

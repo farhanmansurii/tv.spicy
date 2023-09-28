@@ -1,15 +1,23 @@
 "use client";
 import { useEpisodeStore } from "@/store/episodeStore";
+import useTVShowStore from "@/store/recentsStore";
 import React from "react";
 
 export default function EpisodeCard(props: any) {
-  const { episode,id } = props;
+  const { episode, id } = props;
   const { activeEP, setActiveEP } = useEpisodeStore();
+  const { addToRecentlyWatched } = useTVShowStore();
+  const toggle = () => {
+    setActiveEP({ tv_id: id, ...episode });
+    addToRecentlyWatched({ tv_id: id, ...episode });
+  };
   return (
     <div
       key={episode.id}
-      onClick={() => setActiveEP({tv_id:id,...episode})}
-      className={`flex justify-between hover:bg-primary rounded p-1 cursor-pointer flex-row gap-2 items-center ${activeEP.id===episode.id ? 'bg-primary':''} `}
+      onClick={() => toggle()}
+      className={`flex justify-between hover:bg-primary/20 rounded p-1 cursor-pointer flex-row gap-2 items-center ${
+        activeEP.id === episode.id ? "bg-primary" : ""
+      } `}
     >
       <div className="w-[250px]  h-full">
         <img

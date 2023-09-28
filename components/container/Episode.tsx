@@ -3,7 +3,7 @@ import React from "react";
 import OPlayer from "../common/Player";
 
 export default async function Episode(props: any) {
-  const { episodeId, id, type } = props;
+  const { episodeId, id, type,next } = props;
   const episode = await fetchMovieLinks(episodeId, id);
   if (!episode)
     return (
@@ -13,12 +13,11 @@ export default async function Episode(props: any) {
       </div>
     );
   return (
-    <div>
       <OPlayer
         sources={episode.sources}
         subtitles={episode.subtitles}
         type={type}
+        key={episode.sources[0]}
       />
-    </div>
   );
 }

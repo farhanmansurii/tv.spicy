@@ -17,6 +17,7 @@ import { ButtonIcon } from "@radix-ui/react-icons";
 import { Button } from "./ui/button";
 import { Search } from "lucide-react";
 import Link from "next/link";
+import useTVShowStore from "@/store/recentsStore";
 
 export default function SearchBar() {
   const [open, setOpen] = useState(false);
@@ -30,7 +31,11 @@ export default function SearchBar() {
       searchStore.setLoading(false);
     }
   }
-
+  const { addToRecentlySearched, recentlySearched, loadRecentlySearched } =
+    useTVShowStore();
+  const handleAddToHistory = (ep: any) => {
+    addToRecentlySearched(ep);
+  };
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
@@ -47,6 +52,9 @@ export default function SearchBar() {
     searchStore.setShows([]);
     searchStore.setQuery("");
   };
+  React.useEffect(() => {
+    loadRecentlySearched();
+  }, []);
   return (
     <div>
       <Button
@@ -67,7 +75,11 @@ export default function SearchBar() {
           {searchStore.shows ? (
             <CommandGroup heading="Search Results">
               {searchStore.shows.map((show, index) => (
-                <Link key={index} href={`/${show.media_type}/${show.id}`}>
+                <Link
+                  onClick={() => handleAddToHistory(show)}
+                  key={index}
+                  href={`/${show.media_type}/${show.id}`}
+                >
                   <CommandItem
                     className=" flex my-2 cursor-pointer justify-between gap-2"
                     key={index}
@@ -96,21 +108,32 @@ export default function SearchBar() {
               ))}
               {searchStore.loading && (
                 <>
-                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
-                  </CommandItem>
-                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
-                  </CommandItem>
-                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
-                  </CommandItem>
-                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
-                  </CommandItem>
-                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2">
-                  </CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2"></CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2"></CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2"></CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2"></CommandItem>
+                  <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2"></CommandItem>
                 </>
               )}
             </CommandGroup>
           ) : (
             <CommandEmpty>No results found.</CommandEmpty>
+          )}
+          {recentlySearched.length > 0 && (
+            <CommandGroup heading="Recent Searches">
+              {recentlySearched.map((result) => (
+                <Link
+                  key={result.id}
+                  onClick={() => {
+                    handleAddToHistory(result);
+                    toggle();
+                  }}
+                  href={`/${result.media_type}/${result.id}`}
+                >
+                  <CommandItem>{result.title || result.name}</CommandItem>
+                </Link>
+              ))}
+            </CommandGroup>
           )}
         </CommandList>
       </CommandDialog>

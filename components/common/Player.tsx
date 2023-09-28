@@ -85,7 +85,7 @@ export default function OPlayer({
             playerRef?.current?.changeQuality({ src: value, title });
           },
         },
-      ],
+      ]
     }),
     OHls(),
   ];
@@ -136,7 +136,7 @@ export default function OPlayer({
   return (
     <div
       id="oplayer"
-      className="aspect-video w-full lg:w-[600px]  mx-auto my-4"
+      className="aspect-video w-full md:w-[600px]  mx-auto my-4"
     />
   );
 }
