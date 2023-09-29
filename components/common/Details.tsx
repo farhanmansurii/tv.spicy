@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import SearchBar from "../SearchBar";
-import { ArrowLeft} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 const ShowContainer = dynamic(() => import("./ShowContainer"));

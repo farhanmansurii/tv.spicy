@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-function Card(props) {
+function Card(props:any) {
   const { data, type } = props;
 
   return (
@@ -12,9 +12,6 @@ function Card(props) {
             src={`https://image.tmdb.org/t/p/w500${data.poster_path}`}
             alt={data.title}
           />
-          <div className="absolute inset-0 p-3 bg-black/30 w-full flex flex-col justify-between">
-            {/* Your content */}
-          </div>
         </div>
       </div>
     </Link>
