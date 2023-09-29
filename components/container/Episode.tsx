@@ -9,7 +9,6 @@ export default function Episode(props: any) {
   const [episode, setEpisode] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Memoize the fetchData function
   const fetchData = useMemo(
     () => async () => {
       try {
@@ -23,7 +22,6 @@ export default function Episode(props: any) {
     },
     [episodeId, id]
   );
-
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -35,13 +33,11 @@ export default function Episode(props: any) {
       </div>
     );
   }
-
   if (!episode) {
     return (
       <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
     );
   }
-
   return (
     <OPlayer
       sources={episode.sources}

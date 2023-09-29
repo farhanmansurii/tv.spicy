@@ -19,14 +19,15 @@ export default function EpisodeCard(props: any) {
         activeEP.id === episode.id ? "bg-primary" : ""
       } `}
     >
-      <div className="w-[250px]  h-full">
+      <div className="w-[250px]  aspect-video">
         <img
           className="rounded"
           src={episode.img?.mobile || episode.img?.hd}
           alt={episode.title}
         />
       </div>
-      <div className="w-full text-sm">
+      <div className="w-full flex  flex-col  text-sm">
+        <div className="text-[10px] -mb-1 text-gray-100/50">Episode {episode.episode}</div>
         <div className="font-bold">{episode.title}</div>
         <div className="text-[10px] md:text-xs leading-tight line-clamp-2">
           {episode.description}

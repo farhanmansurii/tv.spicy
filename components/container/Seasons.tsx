@@ -10,6 +10,7 @@ interface Season {
 }
 
 interface Episode {
+  releaseDate: string | number | Date;
   id: string;
   title: string;
   description: string;

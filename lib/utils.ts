@@ -45,6 +45,23 @@ export async function fetchDetailsTMDB(id: string, type: string) {
     console.log(error);
   }
 }
+export async function fetchRecommendations(
+  id: string,
+  showType: string,
+  type: string
+) {
+  try {
+    const url = new URL(
+      `https://api.themoviedb.org/3/${showType}/${id}/${type}?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`
+    );
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error("Failed to fetch data");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
 export async function fetchMovieLinks(movie: string, longID: string) {
   try {
     const url = new URL(
@@ -59,44 +76,44 @@ export async function fetchMovieLinks(movie: string, longID: string) {
   }
 }
 export async function getNewAndPopularShows() {
-  const [popularTvRes, popularMovieRes, trendingTvRes, trendingMovieRes] =
+  const [topRatedTVres, topRatedMovieRes, trendingMovieRes, trendingTvRes] =
     await Promise.all([
       fetch(
-        `https://api.themoviedb.org/3/tv/popular?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`
+        `https://api.themoviedb.org/3/tv/top_rated?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`
       ),
       fetch(
-        `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`
+        `https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&&watch_region=USpage=1`
       ),
       fetch(
-        `https://api.themoviedb.org/3/trending/tv/day?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&&watch_region=USpage=1`
+        `https://api.themoviedb.org/3/trending/movie/week?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`
       ),
       fetch(
-        `https://api.themoviedb.org/3/trending/movie/day?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&&watch_region=USpage=1`
+        `https://api.themoviedb.org/3/trending/tv/week?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&&watch_region=USpage=1`
       ),
     ]);
 
   if (
-    !popularTvRes.ok ||
-    !popularMovieRes.ok ||
-    !trendingTvRes.ok ||
-    !trendingMovieRes.ok
+    !topRatedTVres.ok ||
+    !topRatedMovieRes.ok ||
+    !trendingMovieRes.ok ||
+    !trendingTvRes.ok
   ) {
     throw new Error("Failed to fetch shows");
   }
 
-  const [popularTvs, popularMovies, trendingTvs, trendingMovies] =
+  const [topRatedTV, topRatedMovie, trendingMovie, trendingTv] =
     (await Promise.all([
-      popularTvRes.json(),
-      popularMovieRes.json(),
-      trendingTvRes.json(),
+      topRatedTVres.json(),
+      topRatedMovieRes.json(),
       trendingMovieRes.json(),
+      trendingTvRes.json(),
     ])) as { results: Show[] }[];
 
   return {
-    popularTvs: popularTvs?.results,
-    popularMovies: popularMovies?.results,
-    trendingTvs: trendingTvs?.results,
-    trendingMovies: trendingMovies?.results,
+    topRatedTV: topRatedTV?.results,
+    topRatedMovie: topRatedMovie?.results,
+    trendingTv: trendingTv?.results,
+    trendingMovie: trendingMovie?.results,
   };
 }
 

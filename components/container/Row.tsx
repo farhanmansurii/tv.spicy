@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import { Button } from "../ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import MovieCard from "../common/Card";
+import { Skeleton } from "../ui/skeleton";
 
 interface RowProps {
   shows?: any[];
@@ -26,7 +27,7 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
   };
 
   return (
-    <div className="w-11/12 mx-auto mb-10">
+    <div className="w-full flex gap-0 flex-col mx-auto mb-10">
       <div
         className="flex  items-center
        justify-between"
@@ -49,7 +50,7 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
           </Button>
         </div>
       </div>
-      <div
+      <div className=""
         ref={scrollContainerRef}
         style={{
           display: "flex",
@@ -63,9 +64,12 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
         {shows
           ?.sort((a, b) => b.popularity - a.popularity)
           .map((e) => (
-            <div key={e.id} className="py-2">
+            <>
+            <div key={e.id} className=" py-3">
               <MovieCard data={e} type={type} />
             </div>
+            
+            </>
           ))}
       </div>
     </div>

@@ -1,11 +1,13 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import SearchBar from "../SearchBar";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-const ShowContainer = dynamic(() => import("./ShowContainer"));
+import DetailLoader from "../loading/DetailLoader";
+import { Skeleton } from "../ui/skeleton";
+import ShowContainer from "./ShowContainer";
 const Details = (props: any) => {
   const { data, type } = props;
   return (
@@ -15,11 +17,13 @@ const Details = (props: any) => {
           <div className="flex flex-col    mx-auto gap-4 ">
             <div className="relative  w-full h-full md:h-[400px] z-30">
               <div className="absolute -inset-0 -inset-y-2 bg-gradient-to-t from-background to-background/20"></div>
-              <img
-                src={`https://image.tmdb.org/t/p/original${data.backdrop_path}`}
-                className="z-0 w-full h-full md:h-[400px] object-cover object-top"
-                alt="Cover Image"
-              />{" "}
+              <div className="w-full aspect-video md:h-[400px] ">
+                <img
+                  src={`https://image.tmdb.org/t/p/original${data.backdrop_path}`}
+                  className="z-0 w-full h-full md:h-[400px] object-cover object-top"
+                  alt=""
+                />
+              </div>
               <div className="w-full absolute justify-center flex  top-0">
                 <div className="flex p-4 items-center w-full lg:w-11/12 justify-between mx-auto">
                   <Link href="/">
@@ -91,7 +95,13 @@ const Details = (props: any) => {
                 </Button>
               </div>
             </div>
+            <Suspense
+              fallback={
+                <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
+              }
+            >
             <ShowContainer id={data.id} type={type} />
+            </Suspense>
           </div>
         </div>
       </div>

@@ -7,28 +7,28 @@ export default async function PopularShows() {
 
   const allShowsByCategory: any[] = [
     {
-      title: "New TV Shows",
-      shows: allShows.popularTvs,
+      title: "Top TV Shows",
+      shows: allShows.topRatedTV,
       type: "tv",
     },
     {
-      title: "New Movies",
-      shows: allShows.trendingMovies,
+      title: "Top Movies",
+      shows: allShows.topRatedMovie,
       type: "movie",
     },
     {
-      title: "Popular TV Shows",
-      shows: allShows.popularTvs,
+      title: "Trending TV Shows",
+      shows: allShows.trendingTv,
       type: "tv",
     },
     {
-      title: "Popular Movies",
-      shows: allShows.popularMovies,
+      title: "Trending Movies",
+      shows: allShows.trendingMovie,
       type: "movie",
     },
   ];
   return (
-    <div>
+    <div className="w-11/12 mx-auto">
       {allShowsByCategory.map((category) => (
         <Row key={category.title} text={category.title} type={category.type} shows={category.shows} />
       ))}

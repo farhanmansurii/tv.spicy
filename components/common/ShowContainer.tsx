@@ -4,6 +4,8 @@ import Episode from "../container/Episode";
 import SeasonTabs from "../container/Seasons";
 import { fetchDetails, fetchMovieLinks } from "@/lib/utils";
 import { TVContainer } from "./TVContainer";
+import Row from "../container/Row";
+import RecommendationsContainer from "./RecommendationsContainer";
 interface ShowContainerProps {
   type: string;
   id: string;
@@ -30,13 +32,15 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
             <SeasonTabs seasons={showData?.seasons} id={showData.id} />
           </>
         ) : (
-          
-            <Episode
-              episodeId={showData.episodeId}
-              id={showData.id}
-              type={type}
-            />
+          <Episode
+            episodeId={showData.episodeId}
+            id={showData.id}
+            type={type}
+          />
         ))}
+      <Suspense>
+        <RecommendationsContainer id={id} type={type} />
+      </Suspense>
     </div>
   );
 };
