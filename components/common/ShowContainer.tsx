@@ -18,7 +18,7 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
     streamingLinks = await fetchMovieLinks(id, showData.id);
   }
   return (
-    <div className="w-[90%] flex mx-auto items-center flex-col">
+    <div className="w-[90%] flex mx-auto items-center gap-10  flex-col">
       {showData &&
         (type === "tv" ? (
           <>
@@ -38,6 +38,7 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
             type={type}
           />
         ))}
+
       <Suspense>
         <RecommendationsContainer id={id} type={type} />
       </Suspense>

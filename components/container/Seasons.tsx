@@ -32,7 +32,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id }) => {
       <Tabs defaultValue={"Season " + seasons[0].season} className="w-full flex flex-col mx-auto">
         <TabsList
           
-          className="gap-4 overflow-scroll w-full md:w-fit text-white"
+          className="gap-4 overflow-scroll w-full sm:w-fit text-white"
         >
           <div className="w-fit flex overflow-auto">
             {seasons.map((season, index) => (
