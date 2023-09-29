@@ -5,13 +5,11 @@ import { SeasonContentProps } from "./Seasons";
 import EpisodeCard from "../common/EpisodeCard";
 import { useEpisodeStore } from "@/store/episodeStore";
 
-export const SeasonContent: React.FC<SeasonContentProps> = ({ season ,id}) => {
- 
- 
-
+export const SeasonContent: React.FC<SeasonContentProps> = ({ season, id }) => {
   return (
     <div className="gap-1 my-3 flex flex-col">
-        { season.isReleased &&
+      {
+        season.isReleased &&
           season.episodes.map((episode) => (
             <EpisodeCard id={id} episode={episode} key={episode.id} />
           ))
@@ -31,7 +29,7 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({ season ,id}) => {
         //         </div>
         //       </div>
         //     ))
-            }
+      }
       <Separator />
     </div>
   );
