@@ -54,7 +54,7 @@ export default function SearchBar() {
   };
   React.useEffect(() => {
     loadRecentlySearched();
-  }, []);
+}, []);
   return (
     <div>
       <Button
