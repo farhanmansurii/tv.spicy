@@ -10,7 +10,7 @@ export default function ContinueWatchingButton(props: any) {
   const { recentlyWatched } = useTVShowStore();
   const { activeEP, setActiveEP } = useEpisodeStore();
   const recentlyWatchedEpisode = recentlyWatched.find(
-    (episode) => episode.tv_id === props.id
+    (episode:any) => episode.tv_id === props.id
   );
 
 
