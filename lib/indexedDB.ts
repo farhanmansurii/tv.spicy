@@ -186,10 +186,4 @@ export async function deleteAllRecentlySearchedFromDB(): Promise<void> {
   });
 }
 
-window.addEventListener("DOMContentLoaded", async () => {
-  try {
-    await loadEpisodesFromDB();
-  } catch (error) {
-    console.error("Error loading episodes from IndexedDB:", error);
-  }
-});
+

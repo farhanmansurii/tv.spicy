@@ -12,8 +12,6 @@ export default function ContinueWatchingButton(props: any) {
   const recentlyWatchedEpisode = recentlyWatched.find(
     (episode:any) => episode.tv_id === props.id
   );
-
-
   return (
     <div className="flex gap-2">
       {recentlyWatchedEpisode ? (
