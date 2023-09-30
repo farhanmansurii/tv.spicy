@@ -31,10 +31,8 @@ export default function SearchBar() {
       searchStore.setLoading(false);
     }
   }
-  const { addToRecentlySearched, recentlySearched, loadRecentlySearched } =
-    useTVShowStore();
   const handleAddToHistory = (ep: any) => {
-    addToRecentlySearched(ep);
+    // addToRecentlySearched(ep);
   };
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -52,9 +50,7 @@ export default function SearchBar() {
     searchStore.setShows([]);
     searchStore.setQuery("");
   };
-  React.useEffect(() => {
-    loadRecentlySearched();
-}, []);
+  
   return (
     <div>
       <Button
@@ -119,7 +115,7 @@ export default function SearchBar() {
           ) : (
             <CommandEmpty>No results found.</CommandEmpty>
           )}
-          {recentlySearched.length > 0 && (
+          {/* {recentlySearched.length > 0 && (
             <CommandGroup heading="Recent Searches">
               {recentlySearched.map((result) => (
                 <Link
@@ -134,7 +130,7 @@ export default function SearchBar() {
                 </Link>
               ))}
             </CommandGroup>
-          )}
+          )} */}
         </CommandList>
       </CommandDialog>
     </div>

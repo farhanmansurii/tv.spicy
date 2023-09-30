@@ -1,41 +1,40 @@
-import {
-  addRecentlySearched,
-  addRecentlyWatched,
-  getRecentlySearched,
-  getRecentlyWatched,
-} from "@/lib/indexedDB";
+// useTVShowStore.ts
+
 import { create } from "zustand";
+import { saveEpisodesToDB, loadEpisodesFromDB, deleteAllEpisodesFromDB } from "../lib/indexedDB"; // Import the IndexedDB utility functions
 
 interface TVShowStore {
-  recentlyWatched: any[];
-  recentlySearched: any[];
-  addToRecentlyWatched: (tvShow: any) => void;
-  addToRecentlySearched: (tvShow: any) => void;
-  loadRecentlyWatched: () => void;
-  loadRecentlySearched: () => void;
+  recentlyWatched: any;
+  addRecentlyWatched: (episode: any) => void;
+  loadEpisodes: () => Promise<void>;
+  deleteRecentlyWatched: () => any; // Return type should match TVShowStore
 }
 
 const useTVShowStore = create<TVShowStore>((set) => ({
   recentlyWatched: [],
-  recentlySearched: [],
-  addToRecentlyWatched: async (tvShow) => {
-    await addRecentlyWatched(tvShow);
-    set((state) => ({ recentlyWatched: [tvShow, ...state.recentlyWatched] }));
-  },
-  addToRecentlySearched: async (tvShow) => {
-    await addRecentlySearched(tvShow);
+  addRecentlyWatched: (episode) => {
     set((state) => {
-      const recentlySearched = [tvShow, ...state.recentlySearched].slice(0, 5);
-      return { recentlySearched };
+      const existingIndex = state.recentlyWatched.findIndex(
+        (existingEpisode: any) => existingEpisode.tv_id === episode.tv_id
+      );
+      const updatedRecentlyWatched = existingIndex !== -1
+        ? [episode, ...state.recentlyWatched.filter((e:any) => e.tv_id !== episode.tv_id)]
+        : [episode, ...state.recentlyWatched];
+      saveEpisodesToDB(updatedRecentlyWatched);
+      return { recentlyWatched: updatedRecentlyWatched };
     });
   },
-  loadRecentlyWatched: async () => {
-    const recentlyWatched = await getRecentlyWatched();
-    set({ recentlyWatched });
+  loadEpisodes: async () => {
+    try {
+      const episodes = await loadEpisodesFromDB();
+      set({ recentlyWatched: episodes });
+    } catch (error) {
+      console.error("Error loading episodes from IndexedDB:", error);
+    }
   },
-  loadRecentlySearched: async () => {
-    const recentlySearched = await getRecentlySearched();
-    set({ recentlySearched });
+  deleteRecentlyWatched: () => {
+    set({ recentlyWatched: [] });
+    deleteAllEpisodesFromDB(); // Save an empty array to IndexedDB
   },
 }));
 

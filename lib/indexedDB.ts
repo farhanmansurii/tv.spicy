@@ -1,52 +1,195 @@
-import { openDB, IDBPDatabase, IDBPTransaction } from 'idb';
-
-interface TVShowDB {
-  recentlyWatched: any[];
-  recentlySearched: any[];
+interface Episode {
+  tv_id: string;
+  name: string;
 }
 
-const DB_NAME = 'tvShowDB'; // Change the database name
-const DB_VERSION = 1;
+const DB_NAME = "TVShowDB";
+const STORE_NAME = "recentlyWatchedEpisodes";
+const SEARCH_STORE_NAME = "recentlySearchedEpisodes";
 
-const initDB = async (): Promise<IDBPDatabase<TVShowDB>> => {
-  return openDB<TVShowDB>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains('recentlyWatched')) {
-        db.createObjectStore('recentlyWatched', { keyPath: 'tv_id' }); // Change the key path
+function openDB(): Promise<IDBDatabase> {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+
+    request.onupgradeneeded = (event) => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: "tv_id" });
       }
-      if (!db.objectStoreNames.contains('recentlySearched')) {
-        db.createObjectStore('recentlySearched', { keyPath: 'id' });
-      }
-    },
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      resolve(db);
+    };
+
+    request.onerror = () => {
+      reject(new Error("Failed to open IndexedDB"));
+    };
   });
-};
+}
 
-export const addRecentlyWatched = async (tvShow: any) => { // Change the parameter name
-  const db = await initDB();
-  const tx = db.transaction('recentlyWatched', 'readwrite');
-  const store = tx.objectStore('recentlyWatched');
-  await store.put(tvShow);
-};
+export async function saveEpisodesToDB(episodes: Episode[]): Promise<void> {
+  const db = await openDB();
+  const transaction = db.transaction(STORE_NAME, "readwrite");
+  const store = transaction.objectStore(STORE_NAME);
 
-export const getRecentlyWatched = async (): Promise<any[]> => {
-  const db = await initDB();
-  const tx = db.transaction('recentlyWatched', 'readonly');
-  const store = tx.objectStore('recentlyWatched');
-  const recentlyWatched = await store.getAll();
-  return recentlyWatched;
-};
+  for (const episode of episodes) {
+    store.put(episode);
+  }
 
-export const addRecentlySearched = async (tvShow: any) => { // Change the parameter name
-  const db = await initDB();
-  const tx = db.transaction('recentlySearched', 'readwrite');
-  const store = tx.objectStore('recentlySearched');
-  await store.add(tvShow);
-};
+  return new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => {
+      db.close();
+      resolve();
+    };
 
-export const getRecentlySearched = async (): Promise<any[]> => {
-  const db = await initDB();
-  const tx = db.transaction('recentlySearched', 'readonly');
-  const store = tx.objectStore('recentlySearched');
-  const recentlySearched = await store.getAll();
-  return recentlySearched;
-};
+    transaction.onerror = () => {
+      db.close();
+      reject(new Error("Failed to save episodes to IndexedDB"));
+    };
+  });
+}
+
+export async function loadEpisodesFromDB(): Promise<Episode[]> {
+  const db = await openDB();
+  const transaction = db.transaction(STORE_NAME, "readonly");
+  const store = transaction.objectStore(STORE_NAME);
+
+  const episodes: Episode[] = [];
+
+  return new Promise<Episode[]>((resolve, reject) => {
+    const request = store.openCursor();
+
+    request.onsuccess = (event) => {
+      const cursor = request.result;
+      if (cursor) {
+        episodes.push(cursor.value);
+        cursor.continue();
+      } else {
+        resolve(episodes);
+      }
+    };
+
+    transaction.oncomplete = () => {
+      db.close();
+    };
+
+    transaction.onerror = () => {
+      db.close();
+      reject(new Error("Failed to load episodes from IndexedDB"));
+    };
+  });
+}
+
+export async function deleteAllEpisodesFromDB(): Promise<void> {
+  const db = await openDB();
+  const transaction = db.transaction(STORE_NAME, "readwrite");
+  const store = transaction.objectStore(STORE_NAME);
+
+  return new Promise<void>((resolve, reject) => {
+    const request = store.openCursor();
+
+    request.onsuccess = (event) => {
+      const cursor = request.result;
+      if (cursor) {
+        cursor.delete();
+        cursor.continue();
+      } else {
+        db.close();
+        resolve();
+      }
+    };
+
+    request.onerror = () => {
+      db.close();
+      reject(new Error("Failed to delete episodes from IndexedDB"));
+    };
+  });
+}
+export async function saveRecentlySearchedToDB(recentlySearchedItems: any[]): Promise<void> {
+  const db = await openDB();
+  const transaction = db.transaction(SEARCH_STORE_NAME, "readwrite");
+  const store = transaction.objectStore(SEARCH_STORE_NAME);
+
+  for (const item of recentlySearchedItems) {
+    store.add(item);
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+
+    transaction.onerror = () => {
+      db.close();
+      reject(new Error("Failed to save recently searched items to IndexedDB"));
+    };
+  });
+}
+
+export async function loadRecentlySearchedFromDB(): Promise<any[]> {
+  const db = await openDB();
+  const transaction = db.transaction(SEARCH_STORE_NAME, "readonly");
+  const store = transaction.objectStore(SEARCH_STORE_NAME);
+
+  const recentlySearchedItems: any[] = [];
+
+  return new Promise<any[]>((resolve, reject) => {
+    const request = store.openCursor();
+
+    request.onsuccess = (event) => {
+      const cursor = request.result;
+      if (cursor) {
+        recentlySearchedItems.push(cursor.value);
+        cursor.continue();
+      } else {
+        resolve(recentlySearchedItems);
+      }
+    };
+
+    transaction.oncomplete = () => {
+      db.close();
+    };
+
+    transaction.onerror = () => {
+      db.close();
+      reject(new Error("Failed to load recently searched items from IndexedDB"));
+    };
+  });
+}
+
+export async function deleteAllRecentlySearchedFromDB(): Promise<void> {
+  const db = await openDB();
+  const transaction = db.transaction(SEARCH_STORE_NAME, "readwrite");
+  const store = transaction.objectStore(SEARCH_STORE_NAME);
+
+  return new Promise<void>((resolve, reject) => {
+    const request = store.openCursor();
+
+    request.onsuccess = (event) => {
+      const cursor = request.result;
+      if (cursor) {
+        cursor.delete();
+        cursor.continue();
+      } else {
+        db.close();
+        resolve();
+      }
+    };
+
+    request.onerror = () => {
+      db.close();
+      reject(new Error("Failed to delete recently searched items from IndexedDB"));
+    };
+  });
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await loadEpisodesFromDB();
+  } catch (error) {
+    console.error("Error loading episodes from IndexedDB:", error);
+  }
+});

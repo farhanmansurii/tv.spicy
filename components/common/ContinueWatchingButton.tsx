@@ -7,14 +7,12 @@ import { PlayIcon } from "@radix-ui/react-icons";
 import { Plus } from "lucide-react";
 
 export default function ContinueWatchingButton(props: any) {
-  const { recentlyWatched, loadRecentlyWatched } = useTVShowStore();
+  const { recentlyWatched } = useTVShowStore();
   const { activeEP, setActiveEP } = useEpisodeStore();
   const recentlyWatchedEpisode = recentlyWatched.find(
     (episode) => episode.tv_id === props.id
   );
-  useEffect(() => {
-    loadRecentlyWatched();
-  }, []);
+
 
   return (
     <div className="flex gap-2">

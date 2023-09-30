@@ -24,7 +24,7 @@ export default function Episode(props: any) {
   );
   useEffect(() => {
     fetchData();
-    console.log('rerender')
+    console.log('render')
   }, [fetchData]);
 
   if (error) {

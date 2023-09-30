@@ -7,11 +7,11 @@ import React from "react";
 export default function EpisodeCard(props: any) {
   const { episode, id, tv_id } = props;
   const { activeEP, setActiveEP } = useEpisodeStore();
-  const { addToRecentlyWatched } = useTVShowStore();
+  const { addRecentlyWatched } = useTVShowStore();
   const toggle = () => {
     setActiveEP({ tv_id: tv_id, ...episode });
-    addToRecentlyWatched({ tv_id: tv_id, ...episode });
-  console.log(activeEP)
+    addRecentlyWatched({ tv_id: tv_id, ...episode });
+    console.log(activeEP);
   };
 
   return (
