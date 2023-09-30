@@ -56,9 +56,9 @@ export default function SearchBar() {
       <Button
         onClick={() => toggle()}
         size="icon"
-        className="rounded-full w-12 h-12  md:w-16 md:h-16 "
+        className="rounded-full w-10 h-10 md:w-16 md:h-16 "
       >
-        <Search className="  rounded" />
+        <Search className=" p-1 rounded" />
       </Button>
       <CommandDialog open={open} onOpenChange={toggle}>
         <DebouncedInput
