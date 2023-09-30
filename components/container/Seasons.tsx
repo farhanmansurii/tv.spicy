@@ -37,13 +37,14 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id,tv_id }) => {
       >
         <TabsList
           className="gap-4 bg-transparent overflow-scroll max-w-full justify-start
-           sm:w-fit text-white"
+           sm:w-fit "
         >
           <div className="w-fit flex overflow-auto">
             {seasons.map((season, index) => (
               <TabsTrigger
                 value={"Season " + season.season}
                 key={season.season}
+                className=""
               >
                 Season {season.season}
               </TabsTrigger>

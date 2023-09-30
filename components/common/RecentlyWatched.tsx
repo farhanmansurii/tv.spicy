@@ -3,7 +3,7 @@ import useTVShowStore from "@/store/recentsStore";
 import Link from "next/link";
 import React, { useEffect, useRef } from "react";
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const RecentlyWatched = () => {
   const { recentlyWatched, loadEpisodes, deleteRecentlyWatched } =
@@ -39,18 +39,20 @@ const RecentlyWatched = () => {
             <h2 className="text-2xl lg:text-3xl  mx-2">Continue Watching</h2>
 
             <div className="flex gap-3 items-center">
-              <Button onClick={clearRecentlyWatched}>Clear</Button>
+              <Button className="w-6 h-6 p-1 rounded-full" size="icon" onClick={clearRecentlyWatched}>
+                <X  className="w-5 h-5"/>
+              </Button>
               <Button
                 size="icon"
                 onClick={() => scrollTo(-400)}
-                className=" bg-secondary rounded-full w-6 h-6 p-1"
+                className=" bg-secondary text-primary rounded-full w-6 h-6 p-1"
               >
                 <ChevronLeft />
               </Button>
               <Button
                 size="icon"
                 onClick={() => scrollTo(400)}
-                className=" bg-secondary rounded-full w-6 h-6 p-1"
+                className=" bg-secondary text-primary rounded-full w-6 h-6 p-1"
               >
                 <ChevronRight />
               </Button>

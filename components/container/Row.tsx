@@ -33,18 +33,18 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
        justify-between"
       >
         <h2 className="text-2xl lg:text-3xl  mx-2">{text}</h2>
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3   items-center">
           <Button
             size="icon"
             onClick={() => scrollTo(-400)}
-            className=" bg-secondary rounded-full w-6 h-6 p-1"
+            className=" bg-secondary text-primary rounded-full w-6 h-6 p-1"
           >
             <ChevronLeft />
           </Button>
           <Button
             size="icon"
             onClick={() => scrollTo(400)}
-            className=" bg-secondary rounded-full w-6 h-6 p-1"
+            className=" bg-secondary text-primary rounded-full w-6 h-6 p-1"
           >
             <ChevronRight />
           </Button>

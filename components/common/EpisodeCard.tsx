@@ -19,7 +19,7 @@ export default function EpisodeCard(props: any) {
       key={episode.id}
       onClick={() => toggle()}
       className={`flex justify-between  rounded p-1 cursor-pointer flex-row gap-2 items-center ${
-        activeEP.id === episode.id && "bg-primary"
+        activeEP.id === episode.id && "bg-secondary"
       } `}
     >
       <div className="w-[300px]  h-[130px] relative">

@@ -49,7 +49,7 @@ const Details = (props: any) => {
                     <h1 className=" text-4xl font-bold  lg:text-5xl">
                       {data.name || data.title}
                     </h1>
-                    <Button size="xs" className=" mt-1 bg-secondary ">
+                    <Button size="xs" className=" mt-1  ">
                       {data?.vote_average?.toFixed(1)}
                     </Button>
                   </div>
