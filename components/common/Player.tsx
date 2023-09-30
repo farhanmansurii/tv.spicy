@@ -52,7 +52,7 @@ export default function OPlayer({
       screenshot: false,
       pictureInPicture: false,
       showControls: "always",
-      theme: { primaryColor: "#DC2627" },
+      theme: { primaryColor: "gray" },
       speeds: ["2.0", "1.75", "1.25", "1.0", "0.75", "0.5"],
       slideToSeek: "none",
       controlBar: { back: "always" },
