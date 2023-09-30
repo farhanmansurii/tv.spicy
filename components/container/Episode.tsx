@@ -14,7 +14,7 @@ export default function Episode(props: any) {
       try {
         const episodeData = await fetchMovieLinks(episodeId, id);
         setEpisode(episodeData);
-        setError(null); // Clear any previous errors
+        setError(null); 
       } catch (error) {
         console.error("Error fetching episode data:", error);
         setError("Error playing episode :/");
@@ -24,6 +24,7 @@ export default function Episode(props: any) {
   );
   useEffect(() => {
     fetchData();
+    console.log('rerender')
   }, [fetchData]);
 
   if (error) {

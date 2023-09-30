@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import DetailLoader from "../loading/DetailLoader";
 import { Skeleton } from "../ui/skeleton";
 import ShowContainer from "./ShowContainer";
+import ContinueWatchingButton from "./ContinueWatchingButton";
 const Details = (props: any) => {
   const { data, type } = props;
   return (
@@ -42,7 +43,7 @@ const Details = (props: any) => {
               </div>
             </div>
             <div className="w-[90%] flex flex-col mx-auto">
-              <div className="flex flex-row p-2 gap-4 ">
+              <div className="flex flex-row  gap-4 ">
                 <div className="flex flex-col  justify-center gap-2">
                   <div className="flex  gap-4  items-center">
                     <h1 className=" text-4xl font-bold  lg:text-5xl">
@@ -52,17 +53,15 @@ const Details = (props: any) => {
                       {data?.vote_average?.toFixed(1)}
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex line-clamp-1 flex-row  gap-2">
                     <div>
                       {data.first_air_date?.split("-")[0] ||
                         data.release_date?.split("-")[0]}
                     </div>
                     <Separator orientation="vertical" />
-                    <div>
-                      {data.genres
-                        .slice(0, 2)
-                        .map((genre: any) => genre.name)
-                        .join(" / ")}
+                    <div className="line-clamp-1">
+                      {data.genres[0]?.name.split("&")[0]} /{" "}
+                      {data.genres[1]?.name?.split("&")[0]}
                     </div>
                     <Separator className="h-full" orientation="vertical" />
                     {data.runtime && (
@@ -82,25 +81,20 @@ const Details = (props: any) => {
                       {`"${data.tagline}"`}
                     </blockquote>
                   )}
-                  <div className="text-sm opacity-50">{data.overview}</div>
+                  <ContinueWatchingButton id={data.id} />
+                  <div className="text-sm opacity-50 line-clamp-5">
+                    {data.overview}
+                  </div>
                 </div>
               </div>
-              <Separator />
-              <div className=" gap-2 py-3  lg:justify-normal flex ">
-                <Button size="sm" className="w-fit text-xs  gap-2 ">
-                  Add to watchlist
-                </Button>
-                <Button size="sm" className="w-fit text-xs  gap-2">
-                  Share
-                </Button>
-              </div>
             </div>
+            <Separator className="w-[90%] mx-auto" />
             <Suspense
               fallback={
-                <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
+                <Skeleton className="aspect-video w-[90%] lg:w-[600px]  mx-auto " />
               }
             >
-            <ShowContainer id={data.id} type={type} />
+              <ShowContainer id={data.id} type={type} />
             </Suspense>
           </div>
         </div>

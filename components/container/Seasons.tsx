@@ -2,6 +2,8 @@ import React, { useState } from "react"; // Import React if not already imported
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { SeasonContent } from "./SeasonContent";
 import { useEpisodeStore } from "@/store/episodeStore";
+import { ChevronRight } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface Season {
   season: number;
@@ -23,16 +25,19 @@ interface Episode {
 interface SeasonTabsProps {
   seasons: Season[];
   id: string;
+  tv_id:string
 }
 
-const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id }) => {
-  
+const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id,tv_id }) => {
   return (
     <>
-      <Tabs defaultValue={"Season " + seasons[0].season} className="w-full flex flex-col mx-auto">
+      <Tabs
+        defaultValue={"Season " + seasons[0].season}
+        className="w-full flex flex-col mx-auto"
+      >
         <TabsList
-          
-          className="gap-4 overflow-scroll w-full sm:w-fit text-white"
+          className="gap-4 bg-transparent overflow-scroll max-w-full justify-start
+           sm:w-fit text-white"
         >
           <div className="w-fit flex overflow-auto">
             {seasons.map((season, index) => (
@@ -44,10 +49,15 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id }) => {
               </TabsTrigger>
             ))}
           </div>
+          {seasons.length > 4 && (
+            <Button  size='icon' className=" px-2  w-7 h-7  rounded-full text-sm">
+              <ChevronRight />
+            </Button>
+          )}
         </TabsList>
         {seasons.map((season) => (
           <TabsContent value={`Season ${season.season}`} key={season.season}>
-            <SeasonContent id={id} season={season} />
+            <SeasonContent id={id} tv_id={tv_id} season={season} />
           </TabsContent>
         ))}
       </Tabs>
@@ -58,6 +68,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id }) => {
 export interface SeasonContentProps {
   season: Season;
   id: string;
+  tv_id:string
 }
 
 export default SeasonTabs;

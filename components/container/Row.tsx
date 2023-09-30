@@ -27,7 +27,7 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
   };
 
   return (
-    <div className="w-full flex gap-0 flex-col mx-auto mb-10">
+    <div className="w-full flex gap-0 flex-col mx-auto mb-5">
       <div
         className="flex  items-center
        justify-between"

@@ -16,9 +16,17 @@ export default async function RecommendationsContainer(
   );
   const similar = await fetchRecommendations(id, type, "similar");
   return (
-    <>
-      <Row text="Recommendations" type={type} shows={recommendations?.results} />
-      <Row text="Similar" type={type} shows={similar?.results} />
-    </>
+    <div className="w-full">
+      {recommendations?.results?.length > 1 && (
+        <Row
+          text="Recommendations"
+          type={type}
+          shows={recommendations?.results}
+        />
+      )}
+      {similar?.results?.length > 1 && (
+        <Row text="Similar" type={type} shows={similar?.results} />
+      )}
+    </div>
   );
 }

@@ -8,27 +8,20 @@ import { Skeleton } from "../ui/skeleton";
 
 interface T {
   tv: any;
+  tv_id: string;
 }
 
-export const TVContainer: React.FC<T> = ({ tv }: T) => {
-  const { recentlyWatched } = useTVShowStore();
+export const TVContainer: React.FC<T> = ({ tv, tv_id }: T) => {
   const { activeEP, setActiveEP } = useEpisodeStore();
-  const recentlyWatchedEpisode = recentlyWatched.find(
-    (episode) => episode.tv_id === tv?.id
-  );
-
   useEffect(() => {
-    if (activeEP.tv_id !== tv?.id) {
-      setActiveEP({ tv_id: tv?.id, ...(tv?.seasons[0]?.episodes[0] || {}) });
+    if (activeEP.tv_id !== tv_id) {
+      setActiveEP({ tv_id: tv_id, ...(tv?.seasons[0]?.episodes[0] || {}) });
     }
-  }, [activeEP]);
+    console.log(activeEP.tv_id !== tv_id)
+  }, [activeEP,tv.id]);
 
   return (
     <>
-      {recentlyWatchedEpisode &&
-        recentlyWatchedEpisode.episode !== activeEP?.episode && (
-          <Button onClick={()=>setActiveEP(recentlyWatchedEpisode)}>Continue S{recentlyWatchedEpisode.season}E{recentlyWatchedEpisode?.episode}</Button>
-        )}
       {activeEP?.id && (
         <Suspense
           fallback={

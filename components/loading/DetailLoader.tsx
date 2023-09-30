@@ -16,7 +16,7 @@ export default function DetailLoader() {
               <div className="flex flex-row p-2 gap-4">
                 <div className="flex flex-col justify-center gap-2">
                   <div className="flex gap-4 items-center">
-                    <Skeleton className="text-4xl h-[3.2rem]  font-bold lg:text-5xl w-64 "/> 
+                    <Skeleton className="text-4xl h-[3.2rem]  font-bold lg:text-5xl w-64 " />
                     <Button size="xs" className="mt-1 h-6 bg-secondary w-10" />
                   </div>
                   <div className="flex flex-wrap h-6 gap-2">
@@ -26,18 +26,12 @@ export default function DetailLoader() {
                   </div>
 
                   <Skeleton className="text-sm h-5 w-52" />
+                  <Button className="flex gap-2 lg:w-[300px] w-full">
+                   
+                  </Button>
                   <Skeleton className="text-sm h-16 " />
                 </div>
               </div>
-              <div className=" gap-2 py-3  lg:justify-normal opacity-40 text-transparent flex ">
-                <Button size="sm" className="w-fit text-xs  text-transparent  gap-2 ">
-                  Add to watchlist
-                </Button>
-                <Button size="sm" className="w-fit text-xs text-transparent  gap-2">
-                  Share
-                </Button>
-              </div>
-             
             </div>
           </div>
         </div>
