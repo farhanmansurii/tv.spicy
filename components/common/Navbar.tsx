@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <div className="w-full  py-8 ">
       <div className="flex gap-4 justify-between  items-center flex-row w-[90%] mx-auto text-lg">
-        <Link href="">Spicy-tv</Link>
+        <Link href="">Spicy-TV</Link>
         <SearchBar />
       </div>
     </div>

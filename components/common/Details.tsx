@@ -30,7 +30,7 @@ const Details = (props: any) => {
                   <Link href="/">
                     <Button
                       size="icon"
-                      className="rounded-full w-10 h-10  md:w-16 md:h-16 "
+                      className="rounded-full w-10 h-10  md:w-12 md:h-12 "
                     >
                       <ArrowLeft className="  rounded p-1" />
                     </Button>
@@ -41,6 +41,7 @@ const Details = (props: any) => {
                     {" "}
                     <SearchBar />
                   </div>
+
                 </div>
               </div>
             </div>

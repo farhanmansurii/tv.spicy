@@ -56,7 +56,7 @@ export default function SearchBar() {
       <Button
         onClick={() => toggle()}
         size="icon"
-        className="rounded-full w-10 h-10 md:w-16 md:h-16 "
+        className="rounded-full w-10 h-10 md:w-12 md:h-12 "
       >
         <Search className=" p-1 rounded" />
       </Button>
