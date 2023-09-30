@@ -50,7 +50,8 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
           </Button>
         </div>
       </div>
-      <div className=""
+      <div
+        className=""
         ref={scrollContainerRef}
         style={{
           display: "flex",
@@ -61,17 +62,14 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
           WebkitOverflowScrolling: "touch", // Enable smooth scrolling on iOS
         }}
       >
-        {shows
-          ?.sort((a, b) => b.popularity - a.popularity)
-          .map((e) => (
-            <>
+        {shows?.map((e) => (
+          <>
             <div key={e.id} className=" py-3">
               <MovieCard data={e} type={type} />
             </div>
-            
-            </>
-          ))}
-      </div>
+          </>
+        ))}
+    </div>
     </div>
   );
 };
