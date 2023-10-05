@@ -4,20 +4,30 @@ import { Button } from "../ui/button";
 import useTVShowStore from "@/store/recentsStore";
 import { useEpisodeStore } from "@/store/episodeStore";
 import { PlayIcon } from "@radix-ui/react-icons";
-import { Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
+import { Show } from "@/lib/types";
+import { useWatchListStore } from "@/store/watchlistStore";
 interface ContinueWatchingButtonProps {
   id: string; // Adjust the type accordingly
+  show: Show;
 }
 export default function ContinueWatchingButton(
   props: ContinueWatchingButtonProps
 ) {
   const { recentlyWatched, loadEpisodes } = useTVShowStore();
   const { activeEP, setActiveEP } = useEpisodeStore();
-  console.log("recentlyWatched:", recentlyWatched);
-  console.log("activeEP:", activeEP);
+  const { addToWatchlist, watchlist, removeFromWatchList } =
+    useWatchListStore();
+
+  let isAdded = watchlist.some((show: any) => show.id === props.id);
   useEffect(() => {
     loadEpisodes();
   }, [loadEpisodes]);
+  const addToList = (show: Show) => {
+    if (!isAdded) addToWatchlist(show);
+    else removeFromWatchList(show.id);
+  };
+
   const recentlyWatchedEpisode = recentlyWatched.find(
     (episode: any) => episode.tv_id === props.id
   );
@@ -25,8 +35,19 @@ export default function ContinueWatchingButton(
   const renderWatchButton = () => {
     if (!recentlyWatchedEpisode) {
       return (
-        <Button className="flex gap-2 w-full lg:w-[300px]">
-          <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
+        <Button
+          onClick={() => addToList(props.show)}
+          className="flex gap-2 w-full lg:w-[300px]"
+        >
+          {isAdded ? (
+            <>
+              <Check size="sm" className="w-5 h-5" /> Added
+            </>
+          ) : (
+            <>
+              <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
+            </>
+          )}
         </Button>
       );
     }
@@ -44,16 +65,34 @@ export default function ContinueWatchingButton(
             Play Season {recentlyWatchedEpisode.season} Episode{" "}
             {recentlyWatchedEpisode?.episode}
           </Button>
-          <Button className="flex gap-2 w-fit">
-            <Plus size="sm" className="w-5 h-5" />
+          <Button
+            onClick={() => addToList(props.show)}
+            className="flex gap-2 w-fit"
+          >
+            {isAdded ? (
+              <Check size="sm" className="w-5 h-5" />
+            ) : (
+              <Plus size="sm" className="w-5 h-5" />
+            )}
           </Button>
         </div>
       );
     }
 
     return (
-      <Button className="flex gap-2 w-full lg:w-[300px]">
-        <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
+      <Button
+        onClick={() => addToList(props.show)}
+        className="flex gap-2 w-full lg:w-[300px]"
+      >
+        {isAdded ? (
+          <>
+            <Check size="sm" className="w-5 h-5" /> Added
+          </>
+        ) : (
+          <>
+            <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
+          </>
+        )}
       </Button>
     );
   };
