@@ -10,6 +10,7 @@ import { Skeleton } from "../ui/skeleton";
 import ShowContainer from "./ShowContainer";
 import ContinueWatchingButton from "./ContinueWatchingButton";
 import { formatRelativeTime } from "@/lib/utils";
+import ThemeButton from "./ThemeButton";
 const Details = (props: any) => {
   const { data, type } = props;
 
@@ -38,8 +39,8 @@ const Details = (props: any) => {
                       <ArrowLeft className="  rounded p-1" />
                     </Button>
                   </Link>
-                  <div>
-                    {" "}
+                  <div className="flex items-center justify-center gap-4">
+                   <ThemeButton/>
                     <SearchBar />
                   </div>
                 </div>

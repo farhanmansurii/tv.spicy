@@ -6,6 +6,7 @@ import { fetchDetails, fetchMovieLinks } from "@/lib/utils";
 import { TVContainer } from "./TVContainer";
 import Row from "../container/Row";
 import RecommendationsContainer from "./RecommendationsContainer";
+import RowLoader from "../loading/RowLoader";
 interface ShowContainerProps {
   type: string;
   id: string;
@@ -49,7 +50,14 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
           </Suspense>
         ))}
 
-      <Suspense>
+      <Suspense
+        fallback={
+          <div className="flex w-full">
+            <RowLoader />
+            <RowLoader />
+          </div>
+        }
+      >
         <RecommendationsContainer id={id} type={type} />
       </Suspense>
     </div>

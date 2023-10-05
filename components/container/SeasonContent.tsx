@@ -18,6 +18,7 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
   );
   const { activeEP, setActiveEP } = useEpisodeStore();
   const { addRecentlyWatched } = useTVShowStore();
+
   const toggle = (episode: any) => {
     setActiveEP(null);
     setActiveEP({ tv_id: tv_id, ...episode });
@@ -27,7 +28,7 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
 
   return (
     <div className="gap-1 my-4 flex flex-col">
-      {season.isReleased &&
+      {season.isReleased && releasedEpisodes?.length > 0 ? (
         releasedEpisodes?.map((episode) => (
           <EpisodeCard
             tv_id={tv_id}
@@ -37,21 +38,12 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
             episode={episode}
             key={episode.id}
           />
-        ))}
+        ))
+      ) : (
+        <div className="h-[130px] items-center justify-center flex text-center text-lg">No released episodes for this season.</div>
+      )}
       <Separator />
     </div>
   );
 };
 
-//       <div
-//         key={index}
-//         className="flex justify-between hover:bg-primary rounded p-1 cursor-pointer flex-row gap-2 items-center"
-//       >
-//         <Skeleton className="w-[250px] aspect-video" />
-
-//         <div className="w-full gap-1 flex flex-col text-sm">
-//           <Skeleton className="h-[20px] w-[100px]" />
-//           <Skeleton className="h-[10px]" />
-//           <Skeleton className="h-[10px]" />
-//         </div>
-//       </div>

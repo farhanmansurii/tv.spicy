@@ -23,7 +23,8 @@ export default function OPlayer({
 }) {
   const { activeEP } = useEpisodeStore();
   const playerRef = useRef<Player<Ctx>>();
-  let image: string, title: string;
+  let image: string = "",
+    title: string = "";
   if (type === "tv") {
     image = activeEP.img.hd;
     title =

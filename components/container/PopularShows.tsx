@@ -1,6 +1,7 @@
 import { getNewAndPopularShows } from "@/lib/utils";
-import React from "react";
+import React, { Suspense } from "react";
 import Row from "./Row";
+import RowLoader from "../loading/RowLoader";
 
 export default async function PopularShows() {
   const allShows = await getNewAndPopularShows();
@@ -30,7 +31,14 @@ export default async function PopularShows() {
   return (
     <div className="w-11/12 mx-auto">
       {allShowsByCategory.map((category) => (
-        <Row key={category.title} text={category.title} type={category.type} shows={category.shows} />
+        <Suspense fallback={<RowLoader />} key={category.title}>
+          <Row
+            key={category.title}
+            text={category.title}
+            type={category.type}
+            shows={category.shows}
+          />
+        </Suspense>
       ))}
     </div>
   );

@@ -15,7 +15,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers attribute="class" defaultTheme="light" enableSystem>
+        <Providers
+          themes={["redDark", "redLight", "light", "dark"]}
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+        >
           {children}
         </Providers>
       </body>

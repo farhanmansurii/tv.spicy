@@ -64,12 +64,13 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
       >
         {shows?.map((e) => (
           <>
+          
             <div key={e.id} className=" py-3">
               <MovieCard data={e} type={type} />
             </div>
           </>
         ))}
-    </div>
+      </div>
     </div>
   );
 };

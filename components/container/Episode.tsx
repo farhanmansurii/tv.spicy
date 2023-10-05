@@ -42,10 +42,10 @@ export default function Episode(props: EpisodeProps) {
 
   if (error) {
     return (
-      <div className="aspect-video gap-2 text-2xl flex-col items-center flex justify-center bg-secondary rounded-lg w-full lg:w-[600px] mx-auto my-4">
+      <div className="aspect-video gap-2 text-xl flex-col items-center flex justify-center bg-secondary rounded-lg w-full lg:w-[600px] mx-auto my-4">
         <div> {error || "Something went wrong"} :/</div>
         <Button
-          className="bg-red-500 text-sm gap-2 text-white"
+          className="bg-primary text-sm gap-2 text-white"
           onClick={() => fetchData()}
         >
           Retry <RotateCw className="w-4 h-4" />
@@ -60,10 +60,23 @@ export default function Episode(props: EpisodeProps) {
     );
   }
 
+  if (!episode) {
+    return (
+      <div className="aspect-video gap-2 text-xl flex-col items-center flex justify-center bg-secondary rounded-lg w-full lg:w-[600px] mx-auto my-4">
+      <div> { "Something went wrong"} :/</div>
+      <Button
+        className="bg-primary text-sm gap-2 text-white"
+        onClick={() => fetchData()}
+      >
+        Retry <RotateCw className="w-4 h-4" />
+      </Button>
+    </div>
+    );
+  }
   return (
     <OPlayer
-      sources={episode?.sources || []}
-      subtitles={episode?.subtitles || []}
+      sources={episode.sources}
+      subtitles={episode.subtitles}
       type={type}
     />
   );
