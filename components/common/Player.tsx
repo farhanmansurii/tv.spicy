@@ -85,7 +85,7 @@ export default function OPlayer({
             playerRef?.current?.changeQuality({ src: value, title });
           },
         },
-      ]
+      ],
     }),
     OHls(),
   ];

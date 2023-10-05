@@ -5,47 +5,58 @@ import useTVShowStore from "@/store/recentsStore";
 import { useEpisodeStore } from "@/store/episodeStore";
 import { PlayIcon } from "@radix-ui/react-icons";
 import { Plus } from "lucide-react";
-
-export default function ContinueWatchingButton(props: any) {
-  const { recentlyWatched } = useTVShowStore();
+interface ContinueWatchingButtonProps {
+  id: string; // Adjust the type accordingly
+}
+export default function ContinueWatchingButton(
+  props: ContinueWatchingButtonProps
+) {
+  const { recentlyWatched, loadEpisodes } = useTVShowStore();
   const { activeEP, setActiveEP } = useEpisodeStore();
+  console.log("recentlyWatched:", recentlyWatched);
+  console.log("activeEP:", activeEP);
+  useEffect(() => {
+    loadEpisodes();
+  }, [loadEpisodes]);
   const recentlyWatchedEpisode = recentlyWatched.find(
-    (episode:any) => episode.tv_id === props.id
+    (episode: any) => episode.tv_id === props.id
   );
-  return (
-    <div className="flex gap-2">
-      {recentlyWatchedEpisode ? (
-        recentlyWatchedEpisode.episode !== activeEP?.episode ? (
-          <div className="flex gap-2">
-            <Button
-              className="flex gap-2 lg:w-[300px] w-full"
-              onClick={() => setActiveEP(recentlyWatchedEpisode)}
-            >
-              <svg
-                fill="currentColor"
-                viewBox="0 0 16 16"
-                height="1.2rem"
-                width="1.2rem"
-              >
-                <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
-              </svg>
-              Play Season {recentlyWatchedEpisode.season} Episode{" "}
-              {recentlyWatchedEpisode?.episode}
-            </Button>
-            <Button className="flex gap-2 w-fit">
-              <Plus size="sm" className="w-5 h-5" />
-            </Button>
-          </div>
-        ) : (
-          <Button className="flex gap-2 w-full lg:w-[300px]">
-            <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
-          </Button>
-        )
-      ) : (
+
+  const renderWatchButton = () => {
+    if (!recentlyWatchedEpisode) {
+      return (
         <Button className="flex gap-2 w-full lg:w-[300px]">
           <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
         </Button>
-      )}
-    </div>
-  );
+      );
+    }
+
+    if (recentlyWatchedEpisode.episode !== activeEP?.episode) {
+      return (
+        <div className="flex gap-2">
+          <Button
+            className="flex gap-2 lg:w-[300px] w-full"
+            onClick={() => setActiveEP(recentlyWatchedEpisode)}
+          >
+            <svg viewBox="0 0 512 512" fill="currentColor" className="w-5 h-5">
+              <path d="M133 440a35.37 35.37 0 01-17.5-4.67c-12-6.8-19.46-20-19.46-34.33V111c0-14.37 7.46-27.53 19.46-34.33a35.13 35.13 0 0135.77.45l247.85 148.36a36 36 0 010 61l-247.89 148.4A35.5 35.5 0 01133 440z" />
+            </svg>
+            Play Season {recentlyWatchedEpisode.season} Episode{" "}
+            {recentlyWatchedEpisode?.episode}
+          </Button>
+          <Button className="flex gap-2 w-fit">
+            <Plus size="sm" className="w-5 h-5" />
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <Button className="flex gap-2 w-full lg:w-[300px]">
+        <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
+      </Button>
+    );
+  };
+
+  return <div className="flex gap-2">{renderWatchButton()}</div>;
 }

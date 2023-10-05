@@ -9,8 +9,11 @@ import DetailLoader from "../loading/DetailLoader";
 import { Skeleton } from "../ui/skeleton";
 import ShowContainer from "./ShowContainer";
 import ContinueWatchingButton from "./ContinueWatchingButton";
+import { formatRelativeTime } from "@/lib/utils";
 const Details = (props: any) => {
   const { data, type } = props;
+
+  console.log(data);
   return (
     <>
       <div className="  lg:mx-auto">
@@ -34,14 +37,11 @@ const Details = (props: any) => {
                     >
                       <ArrowLeft className="  rounded p-1" />
                     </Button>
-
-                  
                   </Link>
                   <div>
                     {" "}
                     <SearchBar />
                   </div>
-
                 </div>
               </div>
             </div>
@@ -84,7 +84,15 @@ const Details = (props: any) => {
                       {`"${data.tagline}"`}
                     </blockquote>
                   )}
+
+                  {}
+
                   <ContinueWatchingButton id={data.id} />
+                  {data.next_episode_to_air && (
+                    <>
+                      {formatRelativeTime(data.next_episode_to_air.air_date)}
+                    </>
+                  )}
                   <div className="text-sm opacity-50 line-clamp-5">
                     {data.overview}
                   </div>

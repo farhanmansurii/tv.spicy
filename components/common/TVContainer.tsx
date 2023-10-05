@@ -18,15 +18,9 @@ export const TVContainer: React.FC<T> = ({ tv, tv_id }: T) => {
   }, [activeEP, tv]);
   return (
     <>
-      {activeEP?.id && (
-        <Suspense
-          fallback={
-            <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
-          }
-        >
+      {activeEP ? (
           <Episode episodeId={activeEP.id} id={tv.id} type={"tv"} />
-        </Suspense>
-      )}
+      ) : ''}
     </>
   );
 };

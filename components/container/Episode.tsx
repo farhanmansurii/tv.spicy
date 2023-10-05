@@ -1,49 +1,66 @@
 "use client";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import OPlayer from "../common/Player";
 import { fetchMovieLinks } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
+import { Button } from "../ui/button";
+import { RotateCw, XCircle } from "lucide-react";
 
-export default function Episode(props: any) {
-  const { episodeId, id, type, next } = props;
-  const [episode, setEpisode] = useState<any | null>(null);
+interface EpisodeProps {
+  episodeId: string;
+  id: string;
+  type: string;
+}
+
+interface EpisodeData {
+  sources: string[];
+  subtitles: string[];
+}
+
+export default function Episode(props: EpisodeProps) {
+  const { episodeId, id, type } = props;
+  const [episode, setEpisode] = useState<EpisodeData | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useMemo(
-    () => async () => {
-      try {
-        const episodeData = await fetchMovieLinks(episodeId, id);
-        setEpisode(episodeData);
-        setError(null); 
-      } catch (error) {
-        console.error("Error fetching episode data:", error);
-        setError("Error playing episode :/");
-      }
-    },
-    [episodeId, id]
-  );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  async function fetchData() {
+    setIsLoading(true);
+    try {
+      const episodeData = await fetchMovieLinks(episodeId, id);
+      setEpisode(episodeData);
+      setError(null);
+      console.log("fetched");
+    } catch (error) {
+      console.error("Error fetching episode data:", error);
+      setError("Error playing episode :/");
+    } finally {
+      setIsLoading(false);
+    }
+  }
   useEffect(() => {
     fetchData();
-    console.log('render')
-  }, [fetchData]);
+  }, [episodeId, id]);
 
   if (error) {
     return (
-      <div className="aspect-video items-center flex justify-center bg-secondary rounded-lg w-full lg:w-[600px] mx-auto my-4">
-        {error}
+      <div className="aspect-video gap-2 text-2xl flex-col items-center flex justify-center bg-secondary rounded-lg w-full lg:w-[600px] mx-auto my-4">
+        <div> {error || "Something went wrong"} :/</div>
+        <Button
+          className="bg-red-500 text-sm gap-2 text-white"
+          onClick={() => fetchData()}
+        >
+          Retry <RotateCw className="w-4 h-4" />
+        </Button>
       </div>
     );
   }
-  if (!episode) {
+
+  if (isLoading) {
     return (
       <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
     );
   }
+
   return (
-    <OPlayer
-      sources={episode.sources}
-      subtitles={episode.subtitles}
-      type={type}
-    />
+  ""
   );
 }

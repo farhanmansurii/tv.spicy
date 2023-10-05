@@ -39,8 +39,12 @@ const RecentlyWatched = () => {
             <h2 className="text-2xl lg:text-3xl  mx-2">Continue Watching</h2>
 
             <div className="flex gap-3 items-center">
-              <Button className="w-6 h-6 p-1 rounded-full" size="icon" onClick={clearRecentlyWatched}>
-                <X  className="w-5 h-5"/>
+              <Button
+                className="w-6 h-6 p-1 rounded-full"
+                size="icon"
+                onClick={clearRecentlyWatched}
+              >
+                <X className="w-5 h-5" />
               </Button>
               <Button
                 size="icon"
@@ -70,7 +74,11 @@ const RecentlyWatched = () => {
             }}
           >
             {recentlyWatched.map((e: any) => (
-              <div className="flex flex-col py-3" key={e.tvid}>
+              <Link
+                href={`/tv/${e.tv_id}`}
+                className="flex flex-col py-3"
+                key={e.tvid}
+              >
                 <div
                   key={e.tvid}
                   className=" flex-none relative w-72 h-40   max-w-xs"
@@ -84,15 +92,13 @@ const RecentlyWatched = () => {
                     />
                   </div>
 
-                  <Link key={e.tvid} href={`/tv/${e.tv_id}`}>
-                    <div className="text-xs opacity-60 absolute bottom-2 w-full px-4 text-white">
-                      S{e.season} E{e.episode}
-                      <h3 className="text-lg  line-clamp-1">{e.title}</h3>
-                    </div>
-                  </Link>
+                  <div className="text-xs opacity-60 absolute bottom-2 w-full px-4 text-white">
+                    S{e.season} E{e.episode}
+                    <h3 className="text-lg  line-clamp-1">{e.title}</h3>
+                  </div>
                 </div>
                 <div></div>
-              </div>
+              </Link>
             ))}
           </div>
         </>

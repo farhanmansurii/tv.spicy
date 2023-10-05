@@ -9,7 +9,6 @@ export default function DetailLoader() {
         <div className="pb-4 lg:w-100">
           <div className="flex flex-col w-full mx-auto gap-4">
             <div className="relative w-full h-full z-30">
-              {/* Replace the background placeholder with a Skeleton */}
               <Skeleton className="z-0 w-full bg-background aspect-video h-full md:h-[350px]" />
             </div>
             <div className="w-[90%] flex flex-col mx-auto">

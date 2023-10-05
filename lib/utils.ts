@@ -138,3 +138,19 @@ export async function searchShows(query: string) {
     results: popularShows,
   };
 }
+
+export function formatRelativeTime(airDate: string): string {
+  const now = new Date();
+  const episodeDate = new Date(airDate);
+  const timeDifference = episodeDate.getTime() - now.getTime();
+  const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+  if (daysDifference > 1) {
+    return `${daysDifference} days`;
+  } else if (daysDifference === 1) {
+    return "1 day";
+  } else {
+    const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60));
+    if (hoursDifference >= 0) return `${hoursDifference} hours`;
+    else return ''
+  }
+}
