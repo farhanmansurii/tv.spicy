@@ -29,14 +29,24 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
             >
               <TVContainer tv={showData} tv_id={id} />
             </Suspense>
-            <SeasonTabs seasons={showData?.seasons} id={showData.id}  tv_id={id}/>
+            <SeasonTabs
+              seasons={showData?.seasons}
+              id={showData.id}
+              tv_id={id}
+            />
           </>
         ) : (
-          <Episode
-            episodeId={showData.episodeId}
-            id={showData.id}
-            type={type}
-          />
+          <Suspense
+            fallback={
+              <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
+            }
+          >
+            <Episode
+              episodeId={showData.episodeId}
+              id={showData.id}
+              type={type}
+            />
+          </Suspense>
         ))}
 
       <Suspense>
