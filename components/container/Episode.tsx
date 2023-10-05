@@ -61,6 +61,10 @@ export default function Episode(props: EpisodeProps) {
   }
 
   return (
-  ""
+    <OPlayer
+      sources={episode?.sources || []}
+      subtitles={episode?.subtitles || []}
+      type={type}
+    />
   );
 }

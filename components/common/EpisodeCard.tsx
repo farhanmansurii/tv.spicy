@@ -5,7 +5,6 @@ import React from "react";
 
 export default function EpisodeCard(props: any) {
   const { episode, active, toggle } = props;
-  console.log(episode);
   return (
     <div
       key={episode.id}
