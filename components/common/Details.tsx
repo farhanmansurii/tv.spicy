@@ -89,9 +89,9 @@ const Details = (props: any) => {
 
                   <ContinueWatchingButton id={data.id} />
                   {data.next_episode_to_air && (
-                    <>
-                      {formatRelativeTime(data.next_episode_to_air.air_date)}
-                    </>
+                    <Button variant='secondary' className="w-fit">
+                      {formatRelativeTime(data.next_episode_to_air.air_date) + " for new episode !! "}
+                    </Button>
                   )}
                   <div className="text-sm opacity-50 line-clamp-5">
                     {data.overview}
