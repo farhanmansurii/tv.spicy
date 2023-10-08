@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useRef } from "react";
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import MovieCard from "../common/Card";
 import { Skeleton } from "../ui/skeleton";
 
@@ -10,9 +10,10 @@ interface RowProps {
   shows?: any[];
   text: string;
   type: string;
+  action?: any;
 }
 
-const Row: React.FC<RowProps> = ({ shows, text, type }) => {
+const Row: React.FC<RowProps> = ({ shows, text, type, action }) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollTo = (scrollOffset: number) => {
     if (scrollContainerRef.current) {
@@ -34,6 +35,15 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
       >
         <h2 className="text-2xl lg:text-3xl  mx-2">{text}</h2>
         <div className="flex gap-3   items-center">
+          {action && (
+            <Button
+              className="w-6 h-6 p-1 rounded-full"
+              size="icon"
+              onClick={action}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
           <Button
             size="icon"
             onClick={() => scrollTo(-400)}
@@ -64,7 +74,6 @@ const Row: React.FC<RowProps> = ({ shows, text, type }) => {
       >
         {shows?.map((e) => (
           <>
-          
             <div key={e.id} className=" py-3">
               <MovieCard data={e} type={type} />
             </div>

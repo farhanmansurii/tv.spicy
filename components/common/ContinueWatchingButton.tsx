@@ -6,26 +6,47 @@ import { useEpisodeStore } from "@/store/episodeStore";
 import { PlayIcon } from "@radix-ui/react-icons";
 import { Check, Plus } from "lucide-react";
 import { Show } from "@/lib/types";
-import { useWatchListStore } from "@/store/watchlistStore";
+import useWatchListStore from "@/store/watchlistStore";
 interface ContinueWatchingButtonProps {
   id: string; // Adjust the type accordingly
   show: Show;
+  type: string;
 }
 export default function ContinueWatchingButton(
   props: ContinueWatchingButtonProps
 ) {
   const { recentlyWatched, loadEpisodes } = useTVShowStore();
   const { activeEP, setActiveEP } = useEpisodeStore();
-  const { addToWatchlist, watchlist, removeFromWatchList } =
-    useWatchListStore();
-
-  let isAdded = watchlist.some((show: any) => show.id === props.id);
+  const {
+    addToWatchlist,
+    watchlist,
+    removeFromWatchList,
+    tvwatchlist,
+    addToTvWatchlist,
+    removeFromTvWatchList,
+  } = useWatchListStore();
+  let isAdded: boolean;
+  if (props.type === "movie")
+    isAdded = watchlist.some((show: any) => show.id === props.id);
+  else isAdded = tvwatchlist.some((show: any) => show.id === props.id);
   useEffect(() => {
     loadEpisodes();
   }, [loadEpisodes]);
   const addToList = (show: Show) => {
-    if (!isAdded) addToWatchlist(show);
-    else removeFromWatchList(show.id);
+    console.log(props.type)
+    if (!isAdded) {
+      if (props.type === "movie") {
+        addToWatchlist(show);
+      } else {
+        addToTvWatchlist(show);
+      }
+    } else {
+      if (props.type === "movie") {
+        removeFromWatchList(show.id);
+      } else {
+        removeFromTvWatchList(show.id);
+      }
+    }
   };
 
   const recentlyWatchedEpisode = recentlyWatched.find(

@@ -4,24 +4,23 @@ import { DebouncedInput } from "./common/DebouncedInput";
 import { useSearchStore } from "@/store/searchStore";
 import { searchShows } from "@/lib/utils";
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
 } from "./ui/command";
-import { ButtonIcon } from "@radix-ui/react-icons";
 import { Button } from "./ui/button";
 import { Search } from "lucide-react";
 import Link from "next/link";
-import useTVShowStore from "@/store/recentsStore";
+import useRecentSearchStore from "@/store/recentsSearchStore";
 
 export default function SearchBar() {
   const [open, setOpen] = useState(false);
   const searchStore = useSearchStore();
+  const { searches, addToSearchList, clearSearchList, removeFromSearchList } =
+    useRecentSearchStore();
   async function searchShowsByQuery(value: string) {
     searchStore.setQuery(value);
     if (value) searchStore.setLoading(true);
@@ -32,7 +31,7 @@ export default function SearchBar() {
     }
   }
   const handleAddToHistory = (ep: any) => {
-    // addToRecentlySearched(ep);
+    addToSearchList(ep);
   };
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -50,7 +49,7 @@ export default function SearchBar() {
     searchStore.setShows([]);
     searchStore.setQuery("");
   };
-  
+
   return (
     <div>
       <Button
@@ -68,7 +67,7 @@ export default function SearchBar() {
           onChange={(value) => void searchShowsByQuery(value.toString())}
         />
         <CommandList>
-          {searchStore.shows ? (
+          {searchStore.shows.length > 0 && searchStore.query.length > 3 ? (
             <CommandGroup heading="Search Results">
               {searchStore.shows.map((show, index) => (
                 <Link
@@ -111,13 +110,14 @@ export default function SearchBar() {
                   <CommandItem className=" flex my-2 bg-secondary animate-pulse cursor-pointer h-10 justify-between gap-2"></CommandItem>
                 </>
               )}
+              {searches.length > 0 && <CommandSeparator className="mb-3" />}
             </CommandGroup>
           ) : (
             <CommandEmpty>No results found.</CommandEmpty>
           )}
-          {/* {recentlySearched.length > 0 && (
-            <CommandGroup heading="Recent Searches">
-              {recentlySearched.map((result) => (
+          {searches.length > 0 && (
+            <CommandGroup  heading="Recent Searches">
+              {searches.map((result) => (
                 <Link
                   key={result.id}
                   onClick={() => {
@@ -126,12 +126,36 @@ export default function SearchBar() {
                   }}
                   href={`/${result.media_type}/${result.id}`}
                 >
-                  <CommandItem>{result.title || result.name}</CommandItem>
+                  <CommandItem
+                    className=" flex my-2 cursor-pointer justify-between gap-2"
+                    key={result.id}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div>{result.name || result.title}</div>
+                      {result.release_date || result.first_air_date ? (
+                        <Button className="border-0" size="xs">
+                          {result.release_date?.split("-")[0] ||
+                            result.first_air_date?.split("-")[0]}
+                        </Button>
+                      ) : null}
+                    </div>
+                    <Button
+                      className={`border-0  ${
+                        result.media_type === "tv"
+                          ? "bg-primary"
+                          : "bg-white text-primary"
+                      }`}
+                      size="xs"
+                    >
+                      {result.media_type === "tv" ? "TV" : "Movie"}
+                    </Button>
+                  </CommandItem>
                 </Link>
               ))}
             </CommandGroup>
-          )} */}
+          )}
         </CommandList>
+        
       </CommandDialog>
     </div>
   );

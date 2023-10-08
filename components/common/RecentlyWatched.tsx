@@ -36,7 +36,7 @@ const RecentlyWatched = () => {
             className="flex  items-center
        justify-between"
           >
-            <h2 className="text-2xl lg:text-3xl  mx-2">Continue Watching</h2>
+            <h2 className="text-2xl lg:text-3xl  mx-2">Watch History</h2>
 
             <div className="flex gap-3 items-center">
               <Button

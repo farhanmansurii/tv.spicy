@@ -13,8 +13,6 @@ import { formatRelativeTime } from "@/lib/utils";
 import ThemeButton from "./ThemeButton";
 const Details = (props: any) => {
   const { data, type } = props;
-
-  console.log(data);
   return (
     <>
       <div className="  lg:mx-auto">
@@ -64,8 +62,8 @@ const Details = (props: any) => {
                     </div>
                     <Separator orientation="vertical" />
                     <div className="line-clamp-1">
-                      {data.genres[0]?.name.split("&")[0]} /{" "}
-                      {data.genres[1]?.name?.split("&")[0]}
+                      {data.genres[0]?.name} / 
+                      {data.genres[1]?.name}
                     </div>
                     <Separator className="h-full" orientation="vertical" />
                     {data.runtime && (
@@ -88,7 +86,7 @@ const Details = (props: any) => {
 
                   {}
 
-                  <ContinueWatchingButton id={data.id} show={data} />
+                  <ContinueWatchingButton id={data.id} show={data} type={type} />
                   {data.next_episode_to_air && (
                     <Button variant='secondary' className="w-fit">
                       {formatRelativeTime(data.next_episode_to_air.air_date) + " for new episode !! "}

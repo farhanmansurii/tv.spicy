@@ -51,7 +51,7 @@ export default function OPlayer({
       miniProgressBar: true,
       forceLandscapeOnFullscreen: true,
       screenshot: false,
-      pictureInPicture: false,
+      pictureInPicture: true,
       showControls: "always",
       theme: { primaryColor: "gray" },
       speeds: ["2.0", "1.75", "1.25", "1.0", "0.75", "0.5"],
@@ -83,7 +83,7 @@ export default function OPlayer({
             default: source.quality === "auto",
           })),
           onChange({ value }) {
-            playerRef?.current?.changeQuality({ src: value, title });
+          console.log({ src: value, title });
           },
         },
       ],

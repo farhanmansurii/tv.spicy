@@ -28,7 +28,6 @@ export default function Episode(props: EpisodeProps) {
       const episodeData = await fetchMovieLinks(episodeId, id);
       setEpisode(episodeData);
       setError(null);
-      console.log("fetched");
     } catch (error) {
       console.error("Error fetching episode data:", error);
       setError("Error playing episode :/");

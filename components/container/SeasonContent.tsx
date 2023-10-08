@@ -23,7 +23,6 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
     setActiveEP(null);
     setActiveEP({ tv_id: tv_id, ...episode });
     addRecentlyWatched({ tv_id: tv_id, ...episode });
-    console.log(activeEP);
   };
 
   return (
