@@ -30,11 +30,11 @@ export const Carousal = async () => {
               </div>
             </div>
             <div className="absolute w-full bottom-0">
-              <div className="flex p-4  flex-col  mb-3 w-full lg:w-11/12 justify-between mx-auto">
-                <h1 className=" text-4xl mb-2 font-bold  lg:text-5xl">
+              <div className="flex p-4  flex-col  mb-3 w-11/12 justify-between mx-auto">
+                <h1 className=" text-3xl mb-2 font-bold  lg:text-5xl">
                   {tvwatchlist[0].title}
                 </h1>
-                <div className="opacity-70 lg:w-5/12 mb-3 italic line-clamp-3 text-[10px] md:text-sm">
+                <div className="opacity-70 hidden md:block lg:w-5/12 mb-3 italic line-clamp-3 text-[10px] md:text-sm">
                   {tvwatchlist[0].overview}
                 </div>
                 <div className="gap-2 flex text-[10px]">
