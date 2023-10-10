@@ -167,7 +167,9 @@ export default function OPlayer({
       .catch((err) => console.log(err));
 
     oplayer.context.ui.subtitle?.changeSource(subtitlesList);
-    const ep = recentlyWatched.find((epi: any) => epi.tv_id === activeEP.tv_id);
+    const ep = recentlyWatched.find(
+      (epi: any) => epi?.tv_id === activeEP?.tv_id && epi?.id === activeEP?.id
+    );
     if (type === "tv" && ep && ep.time) {
       oplayer.on("loadedmetadata", () => {
         const calculatedTime = calculateTimeFromPercentage(
