@@ -16,7 +16,10 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
   const showData = await fetchDetails(id, type);
   let streamingLinks;
   if (type === "movie") {
-    streamingLinks = await fetchMovieLinks(id, showData.id);
+    await fetchMovieLinks(id, showData.id, (err: any, res: any) => {
+      if (err) console.log(err);
+      streamingLinks = res;
+    });
   }
   return (
     <div className="w-[90%] flex mx-auto items-center gap-10  flex-col">

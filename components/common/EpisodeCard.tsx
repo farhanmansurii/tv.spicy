@@ -15,7 +15,7 @@ export default function EpisodeCard(props: any) {
     >
       <div className="w-[300px]  h-[100px] relative">
         <img
-          className="rounded w-full h-full object-cover"
+          className=" w-full h-full object-cover"
           src={episode.img?.mobile || episode.img?.hd}
           alt={episode.title}
         />{" "}
@@ -28,7 +28,7 @@ export default function EpisodeCard(props: any) {
           Episode {episode.episode} 
         </div>
         <div className="font-bold" >{episode.title}</div>
-        <div className="text-[10px] md:text-xs opacity-50 leading-tight line-clamp-2">
+        <div className="text-[10px] w-9/12 md:text-xs opacity-50 leading-tight line-clamp-2">
           {episode.description}
         </div>
         <div className="w-full text-[10px] italic text-accent-foreground/70 text-end">{episode.releaseDate}</div>

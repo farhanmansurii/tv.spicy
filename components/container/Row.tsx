@@ -67,7 +67,7 @@ const Row: React.FC<RowProps> = ({ shows, text, type, action }) => {
           display: "flex",
           overflowX: "scroll",
           overflowY: "unset",
-          gap: "2px",
+          gap: "1px",
           scrollbarWidth: "none", // Hide the scrollbar in Firefox
           WebkitOverflowScrolling: "touch", // Enable smooth scrolling on iOS
         }}

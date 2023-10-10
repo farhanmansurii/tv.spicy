@@ -4,6 +4,7 @@ import Player from "@oplayer/core";
 import OUI from "@oplayer/ui";
 import OHls from "@oplayer/hls";
 import { useEpisodeStore } from "@/store/episodeStore";
+import useTVShowStore from "@/store/recentsStore";
 type Ctx = {
   ui: ReturnType<typeof OUI>;
   hls: ReturnType<typeof OHls>;
@@ -22,16 +23,36 @@ export default function OPlayer({
   type: string;
 }) {
   const { activeEP } = useEpisodeStore();
-  function findAutoQualityUrl(videoUrls:any) {
-    const autoQualityVideos = videoUrls.filter((video:any) => video.quality === 'auto');
-    
+  const { recentlyWatched } = useTVShowStore();
+  function calculateTimeFromPercentage(
+    percentage: number,
+    totalTime: number | undefined
+  ): number | null {
+    if (
+      totalTime &&
+      !isNaN(totalTime) &&
+      percentage >= 0 &&
+      percentage <= 100
+    ) {
+      return (percentage / 100) * totalTime;
+    } else {
+      return null; // Return null when totalTime is not available or percentage is invalid
+    }
+  }
+
+  const { updateTimeWatched } = useTVShowStore();
+  function findAutoQualityUrl(videoUrls: any) {
+    const autoQualityVideos = videoUrls.filter(
+      (video: any) => video.quality === "auto"
+    );
+
     if (autoQualityVideos.length > 0) {
       return autoQualityVideos[0].url;
     } else {
       return null;
     }
   }
-  
+
   const playerRef = useRef<Player<Ctx>>();
   let image: string = "",
     title: string = "";
@@ -53,7 +74,6 @@ export default function OPlayer({
     default: index === 0,
     name: subtitle.lang,
   }));
-console.log( sources)
   const plugins = [
     OUI({
       fullscreen: true,
@@ -61,6 +81,10 @@ console.log( sources)
       miniProgressBar: true,
       forceLandscapeOnFullscreen: true,
       screenshot: false,
+      highlight: {
+        color: "#fff", //default
+        source: [],
+      },
       pictureInPicture: true,
       showControls: "always",
       theme: { primaryColor: "gray" },
@@ -141,8 +165,51 @@ console.log( sources)
         title,
       })
       .catch((err) => console.log(err));
+
     oplayer.context.ui.subtitle?.changeSource(subtitlesList);
+    const ep = recentlyWatched.find((epi: any) => epi.tv_id === activeEP.tv_id);
+    if (type === "tv" && ep && ep.time) {
+      oplayer.on("loadedmetadata", () => {
+        const calculatedTime = calculateTimeFromPercentage(
+          ep.time,
+          oplayer?.duration
+        );
+        if (calculatedTime) {
+          oplayer.seek(calculatedTime);
+          oplayer.context.ui.changHighlightSource([
+            {
+              time: calculatedTime,
+              text: "Continue Watching",
+            },
+          ]);
+        }
+      });
+    }
   }, [sources, subtitles]);
+  const watchTimeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    const handleTimeUpdate = () => {
+      clearTimeout(watchTimeTimeoutRef.current!); // Clear previous timeout (if any)
+      watchTimeTimeoutRef.current = setTimeout(() => {
+        if (playerRef.current) {
+          const currentTime = playerRef.current.currentTime;
+          const totalTime = playerRef.current.duration;
+          const watchTimePercent = Math.floor((currentTime / totalTime) * 100);
+          if (watchTimePercent > 3)
+            updateTimeWatched(activeEP.tv_id, watchTimePercent);
+        }
+      }, 500);
+    };
+    if (playerRef.current) {
+      playerRef.current?.on("timeupdate", handleTimeUpdate);
+    }
+
+    return () => {
+      if (watchTimeTimeoutRef.current) {
+        clearTimeout(watchTimeTimeoutRef.current);
+      }
+    };
+  }, [playerRef]);
 
   return (
     <div

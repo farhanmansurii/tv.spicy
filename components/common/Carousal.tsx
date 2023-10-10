@@ -12,12 +12,12 @@ export const Carousal = async () => {
     <div className="  lg:mx-auto">
       <div className="  pb-4 lg:w-100 ">
         <div className="flex flex-col    mx-auto gap-4 ">
-          <div className="relative  w-full h-full md:h-[400px] z-30">
-            <div className="absolute -inset-0 -inset-y-2 bg-gradient-to-t from-background to-background/20"></div>
-            <div className="w-full aspect-video md:h-[400px] ">
+          <div className="relative  w-full h-[300px] lg:h-[500px] z-30">
+            <div className="absolute -inset-0 -inset-y-2 bg-gradient-to-t from-background to-background/5"></div>
+            <div className="w-full aspect-video md:h-[300px] lg:h-[500px] ">
               <img
                 src={`https://image.tmdb.org/t/p/original${tvwatchlist[0].backdrop_path}`}
-                className="z-0 w-full h-full md:h-[400px] object-cover object-top"
+                className="z-0 w-full h-[300px] lg:h-[500px] object-cover object-top"
                 alt=""
               />
             </div>
@@ -34,14 +34,14 @@ export const Carousal = async () => {
                 <h1 className=" text-3xl mb-2 font-bold  lg:text-5xl">
                   {tvwatchlist[0].title}
                 </h1>
-                <div className="opacity-70 hidden md:block lg:w-5/12 mb-3 italic line-clamp-3 text-[10px] md:text-sm">
+                <div className="opacity-70  block lg:w-5/12 mb-3 italic line-clamp-3 text-[10px] md:text-sm">
                   {tvwatchlist[0].overview}
                 </div>
                 <div className="gap-2 flex text-[10px]">
                   <Link href={`/movie/${tvwatchlist[0].id}`}>
                     <Button
                       size="sm"
-                      className="text-[10px] md:text-xs  rounded-full gap-2 "
+                      className="text-[10px] md:text-xs   gap-2 "
                     >
                       <svg
                         viewBox="0 0 512 512"
@@ -55,9 +55,9 @@ export const Carousal = async () => {
                   </Link>
                   <Link href={`/movie/${tvwatchlist[0].id}`}>
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
-                      className="text-[10px] md:text-xs rounded-full "
+                      className="text-[10px] md:text-xs  "
                     >
                       More Info
                     </Button>

@@ -25,12 +25,15 @@ export default function Episode(props: EpisodeProps) {
   async function fetchData() {
     setIsLoading(true);
     try {
-      const episodeData = await fetchMovieLinks(episodeId, id);
-      setEpisode(episodeData);
-      setError(null);
+      await fetchMovieLinks(episodeId, id, (err:any, res:any) => {
+        if (err) setError("Error playing episode :/");
+        else {
+          setEpisode(res);
+          setError(null);
+        }
+      });
     } catch (error) {
       console.error("Error fetching episode data:", error);
-      setError("Error playing episode :/");
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +53,7 @@ export default function Episode(props: EpisodeProps) {
       <div className="aspect-video an gap-2 text-xl flex-col items-center flex justify-center bg-destructive rounded-lg w-full lg:w-[600px] mx-auto my-4">
         <div> {error || "Something went wrong"} :/</div>
         <Button
-          className="bg-primary text-sm gap-2 "
+          className="bg-primary text-sm gap-2"
           onClick={() => fetchData()}
         >
           Retry <RotateCw className="w-4 h-4" />

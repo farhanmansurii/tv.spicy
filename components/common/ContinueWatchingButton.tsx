@@ -58,7 +58,7 @@ export default function ContinueWatchingButton(
       return (
         <Button
           onClick={() => addToList(props.show)}
-          className="flex gap-2 w-full lg:w-[300px]"
+          className="flex gap-2 w-fit lg:w-[300px]"
         >
           {isAdded ? (
             <>
@@ -75,9 +75,9 @@ export default function ContinueWatchingButton(
 
     if (recentlyWatchedEpisode.episode !== activeEP?.episode) {
       return (
-        <div className="flex gap-2">
+        <div className="flex max-w-full gap-2">
           <Button
-            className="flex gap-2 w-[300px] "
+            className="flex gap-2  w-fit flex-grow"
             onClick={() => setActiveEP(recentlyWatchedEpisode)}
           >
             <svg viewBox="0 0 512 512" fill="currentColor" className="w-5 h-5">
@@ -103,7 +103,7 @@ export default function ContinueWatchingButton(
     return (
       <Button
         onClick={() => addToList(props.show)}
-        className="flex gap-2 w-[300px]"
+        className="flex gap-2"
       >
         {isAdded ? (
           <>

@@ -28,6 +28,7 @@ const RecentlyWatched = () => {
     const store = useTVShowStore.getState();
     store.deleteRecentlyWatched();
   }
+  console.log(recentlyWatched);
   return (
     <div className="w-11/12 mx-auto  mb-5">
       {recentlyWatched && recentlyWatched.length > 0 && (
@@ -96,8 +97,18 @@ const RecentlyWatched = () => {
                     S{e.season} E{e.episode}
                     <h3 className="text-lg  line-clamp-1">{e.title}</h3>
                   </div>
+                  <div className="w-full relative bottom-1 h-[2px]">
+                    <div  className="bg-secondary"
+                      style={{
+                        width: e?.time ? `${e.time}%` : "0%", // Set the width dynamically based on e?.time
+                        borderRadius: "4px", // Rounded corners
+                        marginLeft: "2px", // Add margin to the left
+                        height: "2px", // Set the height
+                        transition: "width 0.3s ease-in-out", // Add a transition for smooth width changes
+                      }}
+                    ></div>
+                  </div>
                 </div>
-                <div></div>
               </Link>
             ))}
           </div>

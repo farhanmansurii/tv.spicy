@@ -62,7 +62,11 @@ export async function fetchRecommendations(
     console.log(error);
   }
 }
-export async function fetchMovieLinks(movie: string, longID: string) {
+export async function fetchMovieLinks(
+  movie: string,
+  longID: string,
+  callback: any
+) {
   try {
     const url = new URL(
       `https://spicy-api.vercel.app/meta/tmdb/watch/${movie}?id=${longID}`
@@ -70,16 +74,14 @@ export async function fetchMovieLinks(movie: string, longID: string) {
     const response = await fetch(url.toString());
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
-    return data;
+    callback(null, data);
   } catch (error) {
-    console.log(error);
+    callback(error);
   }
 }
 export async function fetchsusflixLinks(movie: string) {
   try {
-    const url = new URL(
-      `https://susflix.tv/api/movie?id=${movie}`
-    );
+    const url = new URL(`https://susflix.tv/api/movie?id=${movie}`);
     const response = await fetch(url.href);
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
@@ -88,7 +90,6 @@ export async function fetchsusflixLinks(movie: string) {
     console.log(error);
   }
 }
-
 
 export async function getNewAndPopularShows() {
   const [topRatedTVres, topRatedMovieRes, trendingMovieRes, trendingTvRes] =
@@ -166,6 +167,6 @@ export function formatRelativeTime(airDate: string): string {
   } else {
     const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60));
     if (hoursDifference >= 0) return `${hoursDifference} hours`;
-    else return ''
+    else return "";
   }
 }

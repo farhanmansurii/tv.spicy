@@ -38,7 +38,7 @@ const Details = (props: any) => {
                     </Button>
                   </Link>
                   <div className="flex items-center justify-center gap-4">
-                   <ThemeButton/>
+                    <ThemeButton />
                     <SearchBar />
                   </div>
                 </div>
@@ -47,7 +47,7 @@ const Details = (props: any) => {
             <div className="w-[90%] flex flex-col mx-auto">
               <div className="flex flex-row  gap-4 ">
                 <div className="flex flex-col  justify-center gap-2">
-                  <div className="flex  gap-4  items-center">
+                  <div className="flex  gap-4  items-center w-11/12 ">
                     <h1 className=" text-4xl font-bold  lg:text-5xl">
                       {data.name || data.title}
                     </h1>
@@ -55,15 +55,15 @@ const Details = (props: any) => {
                       {data?.vote_average?.toFixed(1)}
                     </Button>
                   </div>
-                  <div className="flex line-clamp-1 flex-row  gap-2">
+                  <div className="flex line-clamp-1 w-11/12 whitespace-nowrap flex-row  gap-2">
                     <div>
                       {data.first_air_date?.split("-")[0] ||
                         data.release_date?.split("-")[0]}
                     </div>
                     <Separator orientation="vertical" />
-                    <div className="line-clamp-1">
-                      {data.genres[0]?.name} / 
-                      {data.genres[1]?.name}
+                    <div className="line-clamp-1 whitespace-nowrap">
+                      {data.genres[0]?.name}
+                      {data.genres[1] && "/" + data.genres[1]?.name}
                     </div>
                     <Separator className="h-full" orientation="vertical" />
                     {data.runtime && (
@@ -74,7 +74,7 @@ const Details = (props: any) => {
                     )}
 
                     {data.number_of_seasons && (
-                      <div>{data?.number_of_episodes} Episodes</div>
+                      <div className="whitespace-nowrap ">{data?.number_of_episodes} Episodes</div>
                     )}
                   </div>
                   {/* <Button className="w-fit px-4 ">Play</Button> */}
@@ -86,10 +86,15 @@ const Details = (props: any) => {
 
                   {}
 
-                  <ContinueWatchingButton id={data.id} show={data} type={type} />
+                  <ContinueWatchingButton
+                    id={data.id}
+                    show={data}
+                    type={type}
+                  />
                   {data.next_episode_to_air && (
-                    <Button variant='secondary' className="w-fit">
-                      {formatRelativeTime(data.next_episode_to_air.air_date) + " for new episode !! "}
+                    <Button variant="secondary" className="w-fit">
+                      {formatRelativeTime(data.next_episode_to_air.air_date) +
+                        " for new episode !! "}
                     </Button>
                   )}
                   <div className="text-sm opacity-50 line-clamp-5">
