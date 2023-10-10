@@ -21,8 +21,8 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
 
   const toggle = (episode: any) => {
     setActiveEP(null);
-    setActiveEP({ tv_id: tv_id, ...episode });
-    addRecentlyWatched({ tv_id: tv_id, ...episode });
+    setActiveEP({ tv_id: tv_id, time: 0, ...episode });
+    addRecentlyWatched({ tv_id: tv_id, time: 0, ...episode });
   };
 
   return (
@@ -39,10 +39,11 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
           />
         ))
       ) : (
-        <div className="h-[130px] items-center justify-center flex text-center text-lg">No released episodes for this season.</div>
+        <div className="h-[130px] items-center justify-center flex text-center text-lg">
+          No released episodes for this season.
+        </div>
       )}
       <Separator />
     </div>
   );
 };
-

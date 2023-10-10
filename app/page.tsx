@@ -16,7 +16,7 @@ export default function Home() {
       <Carousal />
       <RecentlyWatched />
       <WatchList />
-      <HomePage />4
+      <HomePage />
     </div>
   );
 }

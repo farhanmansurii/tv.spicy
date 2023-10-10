@@ -98,7 +98,8 @@ const RecentlyWatched = () => {
                     <h3 className="text-lg  line-clamp-1">{e.title}</h3>
                   </div>
                   <div className="w-full relative bottom-1 h-[2px]">
-                    <div  className="bg-secondary"
+                    <div     className="absolute inset-0 bg-blend-difference"
+
                       style={{
                         width: e?.time ? `${e.time}%` : "0%", // Set the width dynamically based on e?.time
                         borderRadius: "4px", // Rounded corners
