@@ -28,7 +28,6 @@ const RecentlyWatched = () => {
     const store = useTVShowStore.getState();
     store.deleteRecentlyWatched();
   }
-  console.log(recentlyWatched);
   return (
     <div className="w-11/12 mx-auto  mb-5">
       {recentlyWatched && recentlyWatched.length > 0 && (
@@ -116,6 +115,7 @@ const RecentlyWatched = () => {
         </>
       )}
     </div>
+
   );
 };
 
