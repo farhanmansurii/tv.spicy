@@ -9,11 +9,11 @@ export default function EpisodeCard(props: any) {
     <div
       key={episode.id}
       onClick={() => toggle(episode)}
-      className={`flex justify-between  rounded p-1 cursor-pointer flex-row gap-2 items-center       
+      className={`flex justify-between  rounded cursor-pointer flex-row gap-2 items-center       
       ${active && "bg-muted"}
       `}
     >
-      <div className="w-[300px]  h-[130px] relative">
+      <div className="w-[300px]  h-[100px] relative">
         <img
           className="rounded w-full h-full object-cover"
           src={episode.img?.mobile || episode.img?.hd}
@@ -23,15 +23,15 @@ export default function EpisodeCard(props: any) {
           <Play fill="white" className="w-10 h-10 shadow-2xl" />
         </div>
       </div>
-      <div className="w-full flex  flex-col  text-sm">
-        <div className="text-[10px] text-gray-100/50">
+      <div className="w-full flex  flex-col -gap-2  text-sm">
+        <div className="text-[10px] text-accent-foreground/70">
           Episode {episode.episode} 
         </div>
-        <div className="font-bold">{episode.title}</div>
+        <div className="font-bold" >{episode.title}</div>
         <div className="text-[10px] md:text-xs opacity-50 leading-tight line-clamp-2">
           {episode.description}
         </div>
-        <div className="w-full text-[10px] italic text-gray-100/50 text-end">{episode.releaseDate}</div>
+        <div className="w-full text-[10px] italic text-accent-foreground/70 text-end">{episode.releaseDate}</div>
       </div>
     </div>
   );

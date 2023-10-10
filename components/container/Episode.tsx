@@ -45,7 +45,7 @@ export default function Episode(props: EpisodeProps) {
     );
   }
 
-  if ((!episode && !isLoading) || error) {
+  if (error) {
     return (
       <div className="aspect-video an gap-2 text-xl flex-col items-center flex justify-center bg-destructive rounded-lg w-full lg:w-[600px] mx-auto my-4">
         <div> {error || "Something went wrong"} :/</div>
