@@ -75,6 +75,21 @@ export async function fetchMovieLinks(movie: string, longID: string) {
     console.log(error);
   }
 }
+export async function fetchsusflixLinks(movie: string) {
+  try {
+    const url = new URL(
+      `https://susflix.tv/api/movie?id=${movie}`
+    );
+    const response = await fetch(url.href);
+    if (!response.ok) throw new Error("Failed to fetch data");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
 export async function getNewAndPopularShows() {
   const [topRatedTVres, topRatedMovieRes, trendingMovieRes, trendingTvRes] =
     await Promise.all([

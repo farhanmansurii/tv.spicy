@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import OPlayer from "../common/Player";
-import { fetchMovieLinks } from "@/lib/utils";
+import { fetchMovieLinks, fetchsusflixLinks } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { RotateCw, XCircle } from "lucide-react";
