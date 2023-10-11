@@ -5,7 +5,18 @@ import SeasonTabs from "../container/Seasons";
 import { fetchDetails, fetchMovieLinks } from "@/lib/utils";
 import { TVContainer } from "./TVContainer";
 import Row from "../container/Row";
-import RecommendationsContainer from "./RecommendationsContainer";
+import dynamic from "next/dynamic";
+const RecommendationsContainer = dynamic(
+  () => import("./RecommendationsContainer"),
+  {
+    loading: () => (
+      <div className="flex w-full">
+        <RowLoader />
+        <RowLoader />
+      </div>
+    ),
+  }
+);
 import RowLoader from "../loading/RowLoader";
 interface ShowContainerProps {
   type: string;
@@ -53,16 +64,7 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
           </Suspense>
         ))}
 
-      <Suspense
-        fallback={
-          <div className="flex w-full">
-            <RowLoader />
-            <RowLoader />
-          </div>
-        }
-      >
-        <RecommendationsContainer id={id} type={type} />
-      </Suspense>
+      <RecommendationsContainer id={id} type={type} />
     </div>
   );
 };
