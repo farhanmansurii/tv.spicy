@@ -42,7 +42,7 @@ export default function Episode(props: EpisodeProps) {
     fetchData();
   }, [episodeId, id]);
 
-  if (isLoading) {
+if (isLoading) {
     return (
       <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
     );

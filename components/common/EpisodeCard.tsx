@@ -13,7 +13,7 @@ export default function EpisodeCard(props: any) {
       ${active && "bg-muted"}
       `}
     >
-      <div className="w-[300px]  h-[100px] relative">
+      <div className="w-[300px]  aspect-video drop drop-shadow-lg relative">
         <img
           className=" w-full h-full object-cover"
           src={episode.img?.mobile || episode.img?.hd}
@@ -25,13 +25,15 @@ export default function EpisodeCard(props: any) {
       </div>
       <div className="w-full flex  flex-col -gap-2  text-sm">
         <div className="text-[10px] text-accent-foreground/70">
-          Episode {episode.episode} 
+          Episode {episode.episode}
         </div>
-        <div className="font-bold" >{episode.title}</div>
+        <div className="font-bold">{episode.title}</div>
         <div className="text-[10px] w-9/12 md:text-xs opacity-50 leading-tight line-clamp-2">
           {episode.description}
         </div>
-        <div className="w-full text-[10px] italic text-accent-foreground/70 text-end">{episode.releaseDate}</div>
+        <div className="w-full text-[10px] italic text-accent-foreground/70 text-end">
+          {episode.releaseDate}
+        </div>
       </div>
     </div>
   );
