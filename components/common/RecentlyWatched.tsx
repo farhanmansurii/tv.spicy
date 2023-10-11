@@ -54,7 +54,7 @@ const RecentlyWatched = () => {
                 <ChevronLeft />
               </Button>
               <Button
-     i           size="icon"
+               size="icon"
                 onClick={() => scrollTo(400)}
                 className=" bg-secondary text-primary rounded-full w-6 h-6 p-1"
               >
