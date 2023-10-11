@@ -25,8 +25,8 @@ export default function Episode(props: EpisodeProps) {
   async function fetchData() {
     setIsLoading(true);
     try {
-      await fetchMovieLinks(episodeId, id, (err:any, res:any) => {
-        if (err) setError("Error playing episode :/");
+      await fetchMovieLinks(episodeId, id, (err: any, res: any) => {
+        if (err) setError("Error playing episode");
         else {
           setEpisode(res);
           setError(null);
@@ -42,7 +42,7 @@ export default function Episode(props: EpisodeProps) {
     fetchData();
   }, [episodeId, id]);
 
-if (isLoading) {
+  if (isLoading) {
     return (
       <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
     );

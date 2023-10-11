@@ -1,10 +1,8 @@
 "use client";
-import Link from "next/link";
 import React, { useRef } from "react";
 import { Button } from "../ui/button";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import MovieCard from "../common/Card";
-import { Skeleton } from "../ui/skeleton";
 
 interface RowProps {
   shows?: any[];
@@ -26,7 +24,6 @@ const Row: React.FC<RowProps> = ({ shows, text, type, action }) => {
       });
     }
   };
-console.log(shows)
   return (
     <div className="w-full flex gap-0 flex-col mx-auto mb-5">
       <div

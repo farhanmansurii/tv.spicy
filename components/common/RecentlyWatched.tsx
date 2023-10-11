@@ -96,14 +96,14 @@ const RecentlyWatched = () => {
                     S{e.season} E{e.episode}
                     <h3 className="text-lg  line-clamp-1">{e.title}</h3>
                   </div>
-                  <div className="w-full relative bottom-1 h-[2px]">
+                  <div className="w-full relative bottom-[5px] h-[3px]">
                     <div     className="absolute inset-0  dark:bg-white bg-primary-foreground"
 
                       style={{
                         width: e?.time ? `${e.time}%` : "0%", // Set the width dynamically based on e?.time
                         borderRadius: "4px", // Rounded corners
                         marginLeft: "2px", // Add margin to the left
-                        height: "2px", // Set the height
+                        height: "4px", // Set the height
                         transition: "width 0.3s ease-in-out", // Add a transition for smooth width changes
                       }}
                     ></div>
