@@ -12,14 +12,15 @@ interface T {
 }
 export const TVContainer: React.FC<T> = ({ tv, tv_id }: T) => {
   const { activeEP, setActiveEP } = useEpisodeStore();
-  console.log(activeEP)
+  useEffect(() => {
+    if (activeEP?.tv_id !== tv_id)
+      setActiveEP(null);
+  }, [activeEP, tv]);
   return (
     <>
-      {activeEP.id ? (
-        <Episode episodeId={activeEP.id} id={tv.id} type={"tv"} />
-      ) : (
-        ""
-      )}
+      {activeEP ? (
+          <Episode episodeId={activeEP?.id} id={tv.id} type={"tv"} />
+      ) : ''}
     </>
   );
 };

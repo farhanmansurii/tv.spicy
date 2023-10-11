@@ -32,7 +32,7 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
           <EpisodeCard
             tv_id={tv_id}
             id={id}
-            active={episode.id === activeEP.id}
+            active={episode.id === activeEP?.id}
             toggle={toggle}
             episode={episode}
             key={episode.id}
