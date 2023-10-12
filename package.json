@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@imbios/next-pwa": "^1.1.1",
     "@oplayer/core": "^1.2.31",
     "@oplayer/hls": "^1.2.23",
     "@oplayer/react": "^1.2.8",

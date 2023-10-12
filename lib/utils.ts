@@ -24,7 +24,7 @@ export async function fetchDetails(id: string, type: string) {
     const url = new URL(
       `https://spicy-api.vercel.app/meta/tmdb/info/${id}?type=${type}`
     );
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), { cache: "no-cache" });
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
     return data;
@@ -37,7 +37,7 @@ export async function fetchDetailsTMDB(id: string, type: string) {
     const url = new URL(
       `https://api.themoviedb.org/3/${type}/${id}?api_key=${process.env.TMDB_API_KEY}`
     );
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(),{ cache: "no-cache" });
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
     return data;

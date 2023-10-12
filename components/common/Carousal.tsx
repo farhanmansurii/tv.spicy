@@ -6,16 +6,8 @@ import Link from "next/link";
 import ThemeButton from "./ThemeButton";
 import SearchBar from "../SearchBar";
 import dynamic from "next/dynamic";
-const CarousalComponent =  dynamic(
-  () => import("./CarousalComponent"),
-  {
-    loading: () => (
-      <div className="flex w-full">
-       Loading
-      </div>
-    ),
-  }
-);
+import CarousalComponent from "./CarousalComponent";
+
 export const Carousal = async () => {
   const tvwatchlist = await fetchRowData("discover");
   return <CarousalComponent items={tvwatchlist} />;

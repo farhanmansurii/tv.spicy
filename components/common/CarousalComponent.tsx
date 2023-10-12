@@ -45,6 +45,7 @@ export default function CarousalComponent(props: any) {
           depth: 60,
           slideShadows:false
         }}
+        mousewheel={true}
         initialSlide={1}
         style={{paddingBlock:'6rem'}}
         className=""
@@ -86,7 +87,7 @@ export default function CarousalComponent(props: any) {
               )}
             </div>
 
-            <div className="hidden lg:block     relative">
+            <div className="hidden md:block     relative">
               <img
                 src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`}
                 className={`w-full   h-full rounded-xl`}

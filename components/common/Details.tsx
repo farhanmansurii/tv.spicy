@@ -11,6 +11,7 @@ import ShowContainer from "./ShowContainer";
 import ContinueWatchingButton from "./ContinueWatchingButton";
 import { formatRelativeTime } from "@/lib/utils";
 import ThemeButton from "./ThemeButton";
+const Seperator = () => <div className="text-ring font-bold">|</div>;
 const Details = (props: any) => {
   const { data, type } = props;
   return (
@@ -55,17 +56,17 @@ const Details = (props: any) => {
                       {data?.vote_average?.toFixed(1)}
                     </Button>
                   </div>
-                  <div className="flex line-clamp-1 w-11/12 whitespace-nowrap flex-row  gap-2">
+                  <div className="flex line-clamp-1 w-11/12 flex-wrap flex-row  gap-2">
                     <div>
                       {data.first_air_date?.split("-")[0] ||
                         data.release_date?.split("-")[0]}
                     </div>
-                    <Separator orientation="vertical" />
+                    <Seperator/>
                     <div className="line-clamp-1 whitespace-nowrap">
                       {data.genres[0]?.name}
                       {data.genres[1] && "/" + data.genres[1]?.name}
                     </div>
-                    <Separator className="h-full" orientation="vertical" />
+                    <Seperator/>
                     {data.runtime && (
                       <div>
                         {Math.floor(data?.runtime / 60)} hr {data?.runtime % 60}{" "}
@@ -74,7 +75,9 @@ const Details = (props: any) => {
                     )}
 
                     {data.number_of_seasons && (
-                      <div className="whitespace-nowrap ">{data?.number_of_episodes} Episodes</div>
+                      <div className="whitespace-nowrap ">
+                        {data?.number_of_episodes} Episodes
+                      </div>
                     )}
                   </div>
                   {/* <Button className="w-fit px-4 ">Play</Button> */}
