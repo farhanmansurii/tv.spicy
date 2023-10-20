@@ -6,6 +6,7 @@ import { SeasonContentProps } from "./Seasons";
 import EpisodeCard from "../common/EpisodeCard";
 import { useEpisodeStore } from "@/store/episodeStore";
 import useTVShowStore from "@/store/recentsStore";
+import SeasonsTabLoader from "./SeasonsTabLoader";
 
 export const SeasonContent: React.FC<SeasonContentProps> = ({
   season,
@@ -26,24 +27,27 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
   };
 
   return (
-    <div className="gap-1 my-4 flex flex-col">
-      {season.isReleased && releasedEpisodes?.length > 0 ? (
-        releasedEpisodes?.map((episode) => (
-          <EpisodeCard
-            tv_id={tv_id}
-            id={id}
-            active={episode.id === activeEP?.id}
-            toggle={toggle}
-            episode={episode}
-            key={episode.id}
-          />
-        ))
-      ) : (
-        <div className="h-[130px] items-center justify-center flex text-center text-lg">
-          No released episodes for this season.
-        </div>
-      )}
-      <Separator />
-    </div>
+    <>
+      <div className="gap-1 my-4 flex flex-col">
+        {season.isReleased && releasedEpisodes?.length > 0 ? (
+          releasedEpisodes?.map((episode) => (
+            <EpisodeCard
+              tv_id={tv_id}
+              id={id}
+              active={episode.id === activeEP?.id}
+              toggle={toggle}
+              episode={episode}
+              key={episode.id}
+            />
+          ))
+        ) : (
+          <div className="h-[130px] items-center justify-center flex text-center text-lg">
+            No released episodes for this season.
+          </div>
+        )}
+
+        <Separator />
+      </div>
+    </>
   );
 };

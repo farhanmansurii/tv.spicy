@@ -11,6 +11,7 @@ import ShowContainer from "./ShowContainer";
 import ContinueWatchingButton from "./ContinueWatchingButton";
 import { formatRelativeTime } from "@/lib/utils";
 import ThemeButton from "./ThemeButton";
+import SeasonsTabLoader from "../container/SeasonsTabLoader";
 const Seperator = () => <div className="text-ring font-bold">|</div>;
 const Details = (props: any) => {
   const { data, type } = props;
@@ -109,7 +110,11 @@ const Details = (props: any) => {
             <Separator className="w-[90%] mx-auto" />
             <Suspense
               fallback={
-                <Skeleton className="aspect-video w-[90%] lg:w-[600px]  mx-auto " />
+                type === "tv" ? (
+                  <SeasonsTabLoader />
+                ) : (
+                  <Skeleton className="aspect-video w-[90%] lg:w-[600px]  mx-auto " />
+                )
               }
             >
               <ShowContainer id={data.id} type={type} />

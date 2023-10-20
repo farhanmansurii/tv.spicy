@@ -28,9 +28,9 @@ export default function EpisodeCard(props: any) {
           Episode {episode.episode}
         </div>
         <div className="font-bold">{episode.title}</div>
-        <div className="text-[10px] hidden md:block w-9/12 md:text-xs opacity-50 leading-tight line-clamp-2">
+        {/* <div className="text-[10px] hidden md:block w-9/12 md:text-xs opacity-50  line-clamp-2">
           {episode.description}
-        </div>
+        </div> */}
         <div className="w-full text-[10px] italic text-accent-foreground/70 text-end">
           {episode.releaseDate}
         </div>

@@ -2,8 +2,9 @@ import React, { useState } from "react"; // Import React if not already imported
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { SeasonContent } from "./SeasonContent";
 import { useEpisodeStore } from "@/store/episodeStore";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Play } from "lucide-react";
 import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
 
 interface Season {
   season: number;
@@ -25,10 +26,10 @@ interface Episode {
 interface SeasonTabsProps {
   seasons: Season[];
   id: string;
-  tv_id:string
+  tv_id: string;
 }
 
-const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id,tv_id }) => {
+const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
   return (
     <>
       <Tabs
@@ -51,14 +52,17 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id,tv_id }) => {
             ))}
           </div>
           {seasons.length > 4 && (
-            <Button  size='icon' className=" px-2  w-7 h-7  rounded-full text-sm">
+            <Button
+              size="icon"
+              className=" px-2  w-7 h-7  rounded-full text-sm"
+            >
               <ChevronRight />
             </Button>
           )}
         </TabsList>
         {seasons.map((season) => (
           <TabsContent value={`Season ${season.season}`} key={season.season}>
-            <SeasonContent id={id} tv_id={tv_id} season={season} />
+            <SeasonContent id={id} tv_id={tv_id} season={season} />              
           </TabsContent>
         ))}
       </Tabs>
@@ -69,7 +73,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id,tv_id }) => {
 export interface SeasonContentProps {
   season: Season;
   id: string;
-  tv_id:string
+  tv_id: string;
 }
 
 export default SeasonTabs;

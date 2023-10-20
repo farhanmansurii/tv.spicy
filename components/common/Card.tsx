@@ -8,7 +8,7 @@ function Card(props:any) {
       <div className="flex-none  hover:z-10  -z-10 bg-secondary/70  md:hover:scale-105 md:hover:shadow-2xl overscroll-y-none duration-200   h-58 md:h-72 w-32 md:w-48">
           <img
             className="object-cover  "
-            src={`https://image.tmdb.org/t/p/w500${data.poster_path}` || data.image}
+            src={`https://image.tmdb.org/t/p/w300${data.poster_path}` || data.image}
             alt={data.title}
           />
       </div>

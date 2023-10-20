@@ -18,6 +18,7 @@ const RecommendationsContainer = dynamic(
   }
 );
 import RowLoader from "../loading/RowLoader";
+import SeasonsTabLoader from "../container/SeasonsTabLoader";
 interface ShowContainerProps {
   type: string;
   id: string;
@@ -37,18 +38,16 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
       {showData &&
         (type === "tv" ? (
           <>
-            <Suspense
-              fallback={
-                <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
-              }
-            >
-              <TVContainer tv={showData} tv_id={id} />
+            <Suspense fallback={<SeasonsTabLoader />}>
+              <>
+                <TVContainer tv={showData} tv_id={id} />
+                <SeasonTabs
+                  seasons={showData?.seasons}
+                  id={showData.id}
+                  tv_id={id}
+                />
+              </>
             </Suspense>
-            <SeasonTabs
-              seasons={showData?.seasons}
-              id={showData.id}
-              tv_id={id}
-            />
           </>
         ) : (
           <Suspense

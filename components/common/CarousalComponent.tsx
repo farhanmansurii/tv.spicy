@@ -5,10 +5,8 @@ import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
 import { EffectCoverflow, Pagination } from "swiper/modules";
-
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-
 import SwiperCore from "swiper";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";

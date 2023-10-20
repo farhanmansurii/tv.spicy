@@ -91,47 +91,36 @@ export async function fetchsusflixLinks(movie: string) {
   }
 }
 
-export async function getNewAndPopularShows() {
-  const [topRatedTVres, topRatedMovieRes, trendingMovieRes, trendingTvRes] =
-    await Promise.all([
-      fetch(
-        `https://api.themoviedb.org/3/tv/top_rated?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`
-      ),
-      fetch(
-        `https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&&watch_region=USpage=1`
-      ),
-      fetch(
-        `https://api.themoviedb.org/3/trending/movie/week?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`
-      ),
-      fetch(
-        `https://api.themoviedb.org/3/trending/tv/week?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&&watch_region=USpage=1`
-      ),
-    ]);
+export async function fetchShowData(endpoint:string) {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/${endpoint}?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`,{ next: { revalidate: 21600 }});
 
-  if (
-    !topRatedTVres.ok ||
-    !topRatedMovieRes.ok ||
-    !trendingMovieRes.ok ||
-    !trendingTvRes.ok
-  ) {
-    throw new Error("Failed to fetch shows");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch data for ${endpoint}`);
   }
 
-  const [topRatedTV, topRatedMovie, trendingMovie, trendingTv] =
-    (await Promise.all([
-      topRatedTVres.json(),
-      topRatedMovieRes.json(),
-      trendingMovieRes.json(),
-      trendingTvRes.json(),
-    ])) as { results: Show[] }[];
-
-  return {
-    topRatedTV: topRatedTV?.results,
-    topRatedMovie: topRatedMovie?.results,
-    trendingTv: trendingTv?.results,
-    trendingMovie: trendingMovie?.results,
-  };
+  const { results } = await response.json();
+  return results;
 }
+
+export async function getNewAndPopularShows() {
+  try {
+    const topRatedTV = await fetchShowData('tv/top_rated');
+    const topRatedMovie = await fetchShowData('movie/top_rated');
+    const trendingMovie = await fetchShowData('trending/movie/week');
+    const trendingTv = await fetchShowData('trending/tv/week');
+
+    return {
+      topRatedTV,
+      topRatedMovie,
+      trendingTv,
+      trendingMovie,
+    };
+  } catch (error:any) {
+    throw new Error('Failed to fetch shows: ' + error.message);
+  }
+}
+
 
 export async function searchShows(query: string) {
   const res = await fetch(
