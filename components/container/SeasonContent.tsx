@@ -24,6 +24,10 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
     setActiveEP(null);
     setActiveEP({ tv_id: tv_id, time: 0, ...episode });
     addRecentlyWatched({ tv_id: tv_id, time: 0, ...episode });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   };
 
   return (
