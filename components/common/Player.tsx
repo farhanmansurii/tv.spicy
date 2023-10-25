@@ -4,6 +4,7 @@ import Player from "@oplayer/core";
 import OUI from "@oplayer/ui";
 import OHls from "@oplayer/hls";
 import { useEpisodeStore } from "@/store/episodeStore";
+import { chromecast } from "@oplayer/plugins";
 import useTVShowStore from "@/store/recentsStore";
 type Ctx = {
   ui: ReturnType<typeof OUI>;
@@ -98,30 +99,33 @@ export default function OPlayer({
       },
       settings: [
         "loop",
-        // {
-        //   name: "Quality",
-        //   key: "KEY",
-        //   type: "selector", // or 'switcher'
+        {
+          name: "Quality",
+          key: "KEY",
+          type: "selector", // or 'switcher'
 
-        //   icon: ` <svg
-        //     viewBox="0 0 24 24"
-        //     fill="currentColor"
-        //  className='w-7 h-7 '
-        //   >
-        //     <path d="M14.5 13.5h2v-3h-2M18 14a1 1 0 01-1 1h-.75v1.5h-1.5V15H14a1 1 0 01-1-1v-4a1 1 0 011-1h3a1 1 0 011 1m-7 5H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11m8-5H5c-1.11 0-2 .89-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z" />
-        //   </svg>`,
-        //   children: sources.map((source: any) => ({
-        //     name:
-        //       source.quality !== "auto" ? source.quality + "p" : source.quality,
-        //     value: source.url,
-        //     default: source.quality === "auto",
-        //   })),
-        //   onChange({ value }) {
-        //     console.log({ src: value, title });
-        //   },
-        // },
+          icon: ` <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+         className='w-7 h-7 '
+          >
+            <path d="M14.5 13.5h2v-3h-2M18 14a1 1 0 01-1 1h-.75v1.5h-1.5V15H14a1 1 0 01-1-1v-4a1 1 0 011-1h3a1 1 0 011 1m-7 5H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11m8-5H5c-1.11 0-2 .89-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z" />
+          </svg>`,
+          children: sources.map((source: any) => ({
+            name:
+              source.quality !== "auto" ? source.quality + "p" : source.quality,
+            value: source.url,
+            default: source.quality === "auto",
+          })),
+          onChange({ value }) {
+            const oplayer = playerRef.current;
+            if (!oplayer) return;
+            oplayer.changeSource({ src: value, poster: image, title }).then(() => oplayer.context.ui.subtitle?.changeSource(subtitlesList));
+          },
+        },
       ],
     }),
+    chromecast,
     OHls(),
   ];
 
@@ -164,9 +168,9 @@ export default function OPlayer({
         poster: image,
         title,
       })
+      .then(() => oplayer.context.ui.subtitle?.changeSource(subtitlesList))
       .catch((err) => console.log(err));
 
-    oplayer.context.ui.subtitle?.changeSource(subtitlesList);
     const ep = recentlyWatched.find(
       (epi: any) => epi?.tv_id === activeEP?.tv_id && epi?.id === activeEP?.id
     );

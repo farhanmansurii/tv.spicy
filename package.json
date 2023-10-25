@@ -12,6 +12,7 @@
     "@imbios/next-pwa": "^1.1.1",
     "@oplayer/core": "^1.2.31",
     "@oplayer/hls": "^1.2.23",
+    "@oplayer/plugins": "^1.0.8",
     "@oplayer/react": "^1.2.8",
     "@oplayer/ui": "^1.2.34-beta.1",
     "@radix-ui/react-dialog": "^1.0.5",
