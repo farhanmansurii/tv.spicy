@@ -13,7 +13,10 @@ import Image from "next/image";
 export default function Home() {
   return (
     <div>
-      <Carousal />
+      <div className="w-11/12 my-[3rem] mx-auto flex justify-between">
+        <div></div>
+        <SearchBar />
+      </div>
       <RecentlyWatched />
       <WatchList />
       <HomePage />
