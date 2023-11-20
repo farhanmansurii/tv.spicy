@@ -22,10 +22,10 @@ export async function fetchRowData(type: string) {
 export async function fetchDetails(id: string, type: string) {
   try {
     const url = new URL(
-      `https://spicy-api.vercel.app/meta/tmdb/info/${id}?type=${type}`
+      `https://api-spicy.vercel.app/meta/tmdb/info/${id}?type=${type}`
     );
-    const response = await fetch(url.toString(), { cache: "no-cache" });
-    if (!response.ok) throw new Error("Failed to fetch data");
+    const response = await fetch(url.toString(), { cache: 'no-cache' });
+    if (!response.ok) throw new Error('Failed to fetch data');
     const data = await response.json();
     return data;
   } catch (error) {
@@ -37,8 +37,8 @@ export async function fetchDetailsTMDB(id: string, type: string) {
     const url = new URL(
       `https://api.themoviedb.org/3/${type}/${id}?api_key=${process.env.TMDB_API_KEY}`
     );
-    const response = await fetch(url.toString(),{ cache: "no-cache" });
-    if (!response.ok) throw new Error("Failed to fetch data");
+    const response = await fetch(url.toString(), { cache: 'no-cache' });
+    if (!response.ok) throw new Error('Failed to fetch data');
     const data = await response.json();
     return data;
   } catch (error) {
@@ -55,7 +55,7 @@ export async function fetchRecommendations(
       `https://api.themoviedb.org/3/${showType}/${id}/${type}?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`
     );
     const response = await fetch(url.toString());
-    if (!response.ok) throw new Error("Failed to fetch data");
+    if (!response.ok) throw new Error('Failed to fetch data');
     const data = await response.json();
     return data;
   } catch (error) {
@@ -69,10 +69,10 @@ export async function fetchMovieLinks(
 ) {
   try {
     const url = new URL(
-      `https://spicy-api.vercel.app/meta/tmdb/watch/${movie}?id=${longID}`
+      `https://api-spicy.vercel.app/movies/flixhq/watch?episodeId=${movie}&mediaId=${longID}&server=vidcloud`
     );
     const response = await fetch(url.toString());
-    if (!response.ok) throw new Error("Failed to fetch data");
+    if (!response.ok) throw new Error('Failed to fetch data');
     const data = await response.json();
     callback(null, data);
   } catch (error) {
