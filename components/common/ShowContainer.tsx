@@ -34,19 +34,19 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
     });
   }
   return (
-    <div className="w-[90%] flex mx-auto items-center gap-10  flex-col">
+    <div className="w-[96%] flex mx-auto items-center gap-10  flex-col">
       {showData &&
         (type === "tv" ? (
           <>
             <Suspense fallback={<SeasonsTabLoader />}>
-              <>
+              <div className="">
                 <TVContainer tv={showData} tv_id={id} />
                 <SeasonTabs
                   seasons={showData?.seasons}
                   id={showData.id}
                   tv_id={id}
                 />
-              </>
+              </div>
             </Suspense>
           </>
         ) : (
@@ -63,7 +63,6 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
           </Suspense>
         ))}
 
-      <RecommendationsContainer id={id} type={type} />
     </div>
   );
 };

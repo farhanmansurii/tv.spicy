@@ -1,23 +1,45 @@
-import SearchBar from "@/components/SearchBar";
-import { Carousal } from "@/components/common/Carousal";
 import Navbar from "@/components/common/Navbar";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
 import WatchList from "@/components/common/WatchList";
-import HomePage from "@/components/container/HomePage";
 import RowLoader from "@/components/loading/RowLoader";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
+import dynamic from "next/dynamic";
+const RowContainer = dynamic(
+  () => import("@/components/container/RowContainer"),
+  {
+    ssr: false,
+    loading: () => (
+      <>
+        <RowLoader />
+        <RowLoader />
+        <RowLoader />
+        <RowLoader />
+      </>
+    ),
+  }
+);
+const Carousal = dynamic(() => import("../components/common/Carousal"), {
+  ssr: false,
+  loading: () => (
+    <>
+      <div className="flex md:hidden h-[70vh] relative">
+        <Skeleton className="absolute inset-0" />
+      </div>
+      <div className="relative h-[70vh] md:flex hidden mx-auto ">
+        <Skeleton className="absolute inset-0" />
+      </div>
+    </>
+  ),
+});
 
 export default function Home() {
   return (
     <div>
-      <div className="w-11/12 my-[3rem] mx-auto flex justify-between"></div>
+      <Navbar/>
+      <div className=" mx-auto flex justify-between"></div>
       <Carousal />
-      <RecentlyWatched />
-      <WatchList />
-      <HomePage />
+      <RecentlyWatched/>
+      <RowContainer />
     </div>
   );
 }

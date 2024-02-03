@@ -1,24 +1,34 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Show } from "./types";
+const apiKey =
+  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlM2NhMGYyODNmMWFiOTAzZmQ1ZTIzMjRmYWFkZDg4ZSIsInN1YiI6IjYzMDAyNGYwN2Q0MWFhMDA3OWJkMjU3YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.w-Eb5kO6LneizQQA9A4VOr-0P6kqDsG4_ybU9Ym3tYo";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export async function fetchRowData(type: string) {
+export async function fetchRowData(link: string) {
   try {
     const url = new URL(
-      `https://api.themoviedb.org/3/${type}/movie?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1`
+      `https://api.themoviedb.org/3/${link}?language=en-USinclude_adult=false&include_video=false`
     );
-    const response = await fetch(url.toString());
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+    };
+    const response = await fetch(url.toString(), {
+      headers,
+      next: { revalidate: 60 * 60 * 24 * 7 },
+    });
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
+
     return data.results;
   } catch (error) {
     console.log(error);
   }
 }
+
 export async function fetchDetails(id: string, type: string) {
   try {
     const url = new URL(
@@ -158,4 +168,72 @@ export function formatRelativeTime(airDate: string): string {
     if (hoursDifference >= 0) return `${hoursDifference} hours`;
     else return "";
   }
+}
+
+
+export async function fetchCarousalData(type: string) {
+  try {
+    const url = new URL(
+      `https://api.themoviedb.org/3/${type}/movie?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1`
+    );
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+    };
+    const response = await fetch(url.toString(), {
+      headers,
+      next: { revalidate: 60 * 60 * 24 * 7 },
+    });
+    if (!response.ok) throw new Error("Failed to fetch data");
+    const data = await response.json();
+    return data.results;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function fetchGenres(type: string) {
+  
+  if (!apiKey) {
+    throw new Error("TMDB API key is missing");
+  }
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+  };
+  const res = await fetch(
+    `https://api.themoviedb.org/3/genre/${type}/list?language=en`,
+    { headers, next: { revalidate: 60 * 60 * 24 * 14 } }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to find shows");
+  }
+
+  const genres = await res.json();
+  return genres.genres;
+}
+
+
+export async function fetchGenreById(
+  type: string,
+  id: string,
+  page: number = 1
+) {
+  console.log(`https://api.themoviedb.org/3/discover/${type}/?include_adult=true&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc&with_genres=${id}`)
+  if (!apiKey) {
+    throw new Error("TMDB API key is missing");
+  }
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+  };
+  const res = await fetch(
+    `https://api.themoviedb.org/3/discover/${type}?include_adult=true&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc&with_genres=${id}`,
+    { headers, next: { revalidate: 60 * 60 * 24 * 7 } }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to find shows");
+  }
+
+  const genres = await res.json();
+  return genres.results;
 }

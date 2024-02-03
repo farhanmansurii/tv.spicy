@@ -7,6 +7,7 @@ import EpisodeCard from "../common/EpisodeCard";
 import { useEpisodeStore } from "@/store/episodeStore";
 import useTVShowStore from "@/store/recentsStore";
 import SeasonsTabLoader from "./SeasonsTabLoader";
+import { Carousel } from "../ui/carousel";
 
 export const SeasonContent: React.FC<SeasonContentProps> = ({
   season,
@@ -32,7 +33,9 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
 
   return (
     <>
-      <div className="gap-1 my-4 flex flex-col">
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 gap-y-6 md:gap-y-10">
+               
         {season.isReleased && releasedEpisodes?.length > 0 ? (
           releasedEpisodes?.map((episode) => (
             <EpisodeCard
@@ -50,7 +53,6 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
           </div>
         )}
 
-        <Separator />
       </div>
     </>
   );

@@ -1,29 +1,31 @@
-export type Show = {
-  adult: boolean
-  backdrop_path: string | null
-  media_type: string | null,
-  budget: number | null
-  homepage: string | null
-  showId: string
-  id: number
-  imdb_id: string | null
-  original_language: string
-  original_title: string | null
-  overview: string | null
-  popularity: number
-  poster_path: string | null
-  number_of_seasons: number | null
-  number_of_episodes: number | null
-  release_date: string | null
-  first_air_date: string | null
-  last_air_date: string | null
-  revenue: number | null
-  runtime: number | null
-  status: string | null
-  tagline: string | null
-  title: string | null
-  name: string | null
-  video: boolean
-  vote_average: number
-  vote_count: number
+export interface Show {
+  adult: boolean;
+  backdrop_path: string;
+  genre_ids: number[];
+  id: number;
+  original_language: string;
+  original_title: string;
+  original_name: string;
+  name: string;
+  genres: any;
+  tagline: string;
+  media_type: string;
+  overview: string;
+  popularity: number;
+  first_air_date: string;
+  poster_path: string;
+  release_date: string;
+  title: string;
+  video: boolean;
+  vote_average: number;
+  vote_count: number;
+  origin_country?: string[];
+  status?: string;
+  last_air_date?: string;
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+  runtime?: number;
+  budget?: number;
+  revenue?: number;
+  spoken_languages: any;
 }

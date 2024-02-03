@@ -8,7 +8,7 @@ import { Check, Plus } from "lucide-react";
 import { Show } from "@/lib/types";
 import useWatchListStore from "@/store/watchlistStore";
 interface ContinueWatchingButtonProps {
-  id: string; // Adjust the type accordingly
+  id: any; // Adjust the type accordingly
   show: Show;
   type: string;
 }
@@ -33,7 +33,6 @@ export default function ContinueWatchingButton(
     loadEpisodes();
   }, [loadEpisodes]);
   const addToList = (show: Show) => {
-    console.log(props.type)
     if (!isAdded) {
       if (props.type === "movie") {
         addToWatchlist(show);
@@ -58,15 +57,16 @@ export default function ContinueWatchingButton(
       return (
         <Button
           onClick={() => addToList(props.show)}
-          className="flex gap-2 w-fit lg:w-[300px]"
+          className="flex   text-[13px]"
         >
           {isAdded ? (
             <>
-              <Check size="sm" className="w-5 h-5" /> Added
+              <Check className="w-7 h-7 p-1" /> Added
             </>
           ) : (
             <>
-              <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
+              <Plus className="w-7 h-7 p-1" />
+              Add to Up Next
             </>
           )}
         </Button>
@@ -75,43 +75,47 @@ export default function ContinueWatchingButton(
 
     if (recentlyWatchedEpisode.episode !== activeEP?.episode) {
       return (
-        <div className="flex max-w-full gap-2">
+        <div className="flex flex-col md:flex-row w-fit mx-auto items-center max-w-full gap-2">
           <Button
-            className="flex gap-2  w-fit flex-grow"
+            onClick={() => addToList(props.show)}
+            className="flex whitespace-nowrap w-full gap-2 "
+          >
+            {isAdded ? (
+              <>
+                <Check className="w-7 h-7 p-1" /> Added
+              </>
+            ) : (
+              <>
+                <Plus className="w-7 h-7 p-1" />
+                Add to Up Next
+              </>
+            )}
+          </Button>
+          <Button
+            className="flex gap-2  w-full "
             onClick={() => setActiveEP(recentlyWatchedEpisode)}
           >
             <svg viewBox="0 0 512 512" fill="currentColor" className="w-5 h-5">
               <path d="M133 440a35.37 35.37 0 01-17.5-4.67c-12-6.8-19.46-20-19.46-34.33V111c0-14.37 7.46-27.53 19.46-34.33a35.13 35.13 0 0135.77.45l247.85 148.36a36 36 0 010 61l-247.89 148.4A35.5 35.5 0 01133 440z" />
             </svg>
-            Play Season {recentlyWatchedEpisode.season} Episode{" "}
+            Play S{recentlyWatchedEpisode.season} E
             {recentlyWatchedEpisode?.episode}
-          </Button>
-          <Button
-            onClick={() => addToList(props.show)}
-            className="flex gap-2 w-fit"
-          >
-            {isAdded ? (
-              <Check size="sm" className="w-5 h-5" />
-            ) : (
-              <Plus size="sm" className="w-5 h-5" />
-            )}
           </Button>
         </div>
       );
     }
 
     return (
-      <Button
-        onClick={() => addToList(props.show)}
-        className="flex gap-2"
-      >
+      <Button  className="flex w-full gap-2 "  onClick={() => addToList(props.show)} >
         {isAdded ? (
           <>
-            <Check size="sm" className="w-5 h-5" /> Added
+            <Check className="w-7 h-7 p-1" />
+            Added
           </>
         ) : (
           <>
-            <Plus size="sm" className="w-5 h-5" /> Add to Watchlist
+            <Plus className="w-7 h-7 p-1" />
+            Add to Up Next
           </>
         )}
       </Button>

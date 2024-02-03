@@ -28,13 +28,20 @@ interface SeasonTabsProps {
   id: string;
   tv_id: string;
 }
-
+import {
+  SelectTrigger,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/select';
 const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
   return (
     <>
+    
       <Tabs
         defaultValue={"Season " + seasons[0].season}
-        className="w-full flex flex-col mx-auto"
+        className="w-full  flex flex-col mx-auto"
       >
         <TabsList
           className="gap-4 bg-transparent overflow-scroll max-w-full justify-start
@@ -67,6 +74,8 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
         ))}
       </Tabs>
     </>
+
+    
   );
 };
 

@@ -12,7 +12,7 @@ import {
   CommandSeparator,
 } from "./ui/command";
 import { Button } from "./ui/button";
-import { Search } from "lucide-react";
+import { Search, Share } from "lucide-react";
 import Link from "next/link";
 import useRecentSearchStore from "@/store/recentsSearchStore";
 
@@ -53,12 +53,9 @@ export default function SearchBar() {
   return (
     <div>
       <Button
-        onClick={() => toggle()}
-        size="icon"
-        className="rounded-full w-10 h-10 md:w-12 md:h-12 "
-      >
-        <Search className=" p-1 rounded" />
-      </Button>
+        onClick={() => toggle()} size={'icon'} className="rounded-full aspect-square p-2">
+            <Search className="h-full w-full" />
+          </Button>
       <CommandDialog open={open} onOpenChange={toggle}>
         <DebouncedInput
           setQuery={searchStore.setQuery}

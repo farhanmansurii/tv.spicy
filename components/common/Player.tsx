@@ -218,9 +218,6 @@ export default function OPlayer({
   }, [playerRef]);
 
   return (
-    <div
-      id="oplayer"
-      className="aspect-video w-full md:w-[600px]  mx-auto my-4"
-    />
+    <div id="oplayer" className="mx-auto mb-10  aspect-video  w-full " />
   );
 }

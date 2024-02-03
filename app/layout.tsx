@@ -23,7 +23,7 @@ export default function RootLayout({
         <Providers
           themes={["redDark", "redLight", "light", "dark"]}
           attribute="class"
-          defaultTheme="redDark"
+          defaultTheme="dark"
           enableSystem
         >
           {children}

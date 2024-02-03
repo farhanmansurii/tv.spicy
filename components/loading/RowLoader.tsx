@@ -1,47 +1,32 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import React from "react";
-import { Button } from "../ui/button";
-import { Skeleton } from "../ui/skeleton";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from '@/components/ui/carousel';
+import { Skeleton } from '@/components/ui/skeleton';
+import React from 'react';
 
 export default function RowLoader() {
   return (
-    <div className=" flex gap-0 flex-col mx-auto mb-5">
-      <div className="flex items-center justify-between">
-        <Skeleton className="text-2xl lg:text-3xl mx-2 h-10 w-32" />
-        <div className="flex gap-3 items-center">
-          <Button
-            size="icon"
-            className="bg-secondary text-primary rounded-full w-6 h-6 p-1"
-            disabled // Disable navigation while loading
-          >
-            <ChevronLeft />
-          </Button>
-          <Button
-            size="icon"
-            className="bg-secondary text-primary rounded-full w-6 h-6 p-1"
-            disabled // Disable navigation while loading
-          >
-            <ChevronRight />
-          </Button>
-        </div>
-      </div>
-      <div
-        className="w-full flex flex-row whitespace-nowrap overflow-hidden"
-        style={{
-          overflowX: "scroll",
-          scrollbarWidth: "none", // Hide the scrollbar in Firefox
-          WebkitOverflowScrolling: "touch", // Enable smooth scrolling on iOS
-        }}
-      >
-        <div className="flex gap-[2px]">
-          <Skeleton className=" my-3 rounded-none h-58 md:h-72 w-32 md:w-48" />
-          <Skeleton className=" my-3 rounded-none h-58 md:h-72 w-32 md:w-48" />
-          <Skeleton className=" my-3 rounded-none h-58 md:h-72 w-32 md:w-48" />
-          <Skeleton className=" my-3 rounded-none h-58 md:h-72 w-32 md:w-48" />
-          <Skeleton className=" my-3 rounded-none h-58 md:h-72 w-32 md:w-48" />
-          <Skeleton className=" my-3 rounded-none h-58 md:h-72 w-32 md:w-48" />
-        </div>
-      </div>
+    <div>
+      <Carousel className="w-[96%] mx-auto">
+        <CarouselContent className="w-full flex my-[3rem]  gap-1">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <CarouselItem
+              className="basis-1/2 w-full flex gap-1 flex-col md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
+              key={index}
+            >
+              <Skeleton className="aspect-video " key={index} />
+              <Skeleton className="h-4 w-32 " />
+              <div className="flex flex-row gap-1">
+                <Skeleton className="h-3 w-6 " />
+                <Skeleton className="h-3 w-6 " />
+                <Skeleton className="h-3 w-6 " />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </div>
   );
 }

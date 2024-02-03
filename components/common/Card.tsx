@@ -1,20 +1,128 @@
-import Link from "next/link";
+/* eslint-disable @next/next/no-img-element */
+import { Show } from '@/lib/types';
+import Link from 'next/link';
+import React from 'react';
+import { Motiondiv } from './MotionDiv';
 
-function Card(props:any) {
-  const { data, type } = props;
+export default function ShowCard(props: {
+  index: number;
+  variants?: any;
+  show: Show;
+  showRank?: Boolean;
+  isVertical?: Boolean;
+  type?: string;
+}) {
+  const { index, show, showRank, isVertical, type } = props;
+  const imagePath = `https://image.tmdb.org/t/p/w500/${show.backdrop_path}`;
+  const posterPath = `https://image.tmdb.org/t/p/w500/${show.poster_path}`;
 
+  const variants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+    },
+  };
+  function calculateDelay(index: number) {
+    const staggeredIndex = index % 20 !== 0 ? index % 20 : 0;
+    return staggeredIndex;
+  }
   return (
-    <Link key={data.id} href={`/${type}/${data.id}`}>
-      <div className="flex-none  hover:z-10  -z-10 bg-secondary/70  md:hover:scale-105 md:hover:shadow-2xl overscroll-y-none duration-200   h-58 md:h-72 w-32 md:w-48">
-          <img
-            className="object-cover  "
-            src={`https://image.tmdb.org/t/p/w300${data.poster_path}` || data.image}
-            alt={data.title}
-          />
-      </div>
-    
+    <Link href={`/${show.media_type || type}/${show.id}`}>
+      <Motiondiv
+        initial="hidden"
+        animate="visible"
+        transition={{
+          delay: calculateDelay(index) * 0.1,
+          ease: 'easeInOut',
+          duration: 0.5,
+        }}
+        viewport={{ amount: 0 }}
+        custom={props.index}
+        variants={variants}
+      >
+        {!isVertical ? (
+          <div key={show.id} className="relative group">
+            <img
+              alt=""
+              className="object-cover  border-transparent border group-hover:border-primary   duration-200  ease-in-out  h-full w-full "
+              src={imagePath}
+            />
+            <svg
+              fill="currentColor"
+              viewBox="0 0 16 16"
+              height="2em"
+              width="2em"
+              className="absolute mix-blend-difference group-hover:opacity-100 opacity-0 inset-0   scale-90 group-hover:scale-100 duration-200  ease-in-out bottom-0 right-0 m-4 text-white"
+            >
+              <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zM6.79 5.093A.5.5 0 006 5.5v5a.5.5 0 00.79.407l3.5-2.5a.5.5 0 000-.814l-3.5-2.5z" />
+            </svg>
+            <div className="p-1 relative flex  flex-col ">
+              {showRank && (
+                <div className="absolute -mt-[1.8rem] mix-blend-difference font-bold text-7xl ">
+                  {index + 1}
+                </div>
+              )}
+              <div
+                className={` text-sm  line-clamp-1 ${
+                  showRank && (index + 1 === 10 ? ` ml-24` : 'ml-12')
+                }`}
+              >
+                {show.title || show.name}
+              </div>
+              <div
+                className={`text-[10px]  flex gap-1 capitalize opacity-75 ${
+                  showRank && (index + 1 === 10 ? ` ml-24` : 'ml-12')
+                }`}
+              >
+                {(show.first_air_date || show.release_date)?.split('-')[0]}{' '}
+                <p
+                  className={`${
+                    (show.media_type || type)?.toLowerCase() === 'tv'
+                      ? 'uppercase'
+                      : 'capitalize'
+                  }`}
+                >
+                  • {type ? type : show.media_type}
+                </p>
+                <p className="flex gap-2 items-center">
+                  {' • ' + show.vote_average?.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            key={show.id}
+            className="relative group hover:opacity-100 duration-300 border border-transparent hover:border-primary hover:shadow-2xl md:opacity-40"
+            style={{ position: 'relative', width: '100%', height: '100%' }}
+          >
+            <img
+              alt=""
+              className="object-cover w-full h-full"
+              src={posterPath}
+            />
+
+            <svg
+              fill="currentColor"
+              viewBox="0 0 16 16"
+              height="2rem" // Adjust as needed
+              width="2rem" // Adjust as needed
+              className="absolute group-hover:opacity-100 opacity-0 scale-90 group-hover:scale-100 duration-200 ease-in-out bottom-0 right-0 m-4 text-white"
+            >
+              <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zM6.79 5.093A.5.5 0 006 5.5v5a.5.5 0 00.79.407l3.5-2.5a.5.5 0 000-.814l-3.5-2.5z" />
+            </svg>
+
+            <div className="relative flex flex-col">
+              {showRank && (
+                <div className="absolute -mt-10 font-bold text-7xl">
+                  {index + 1}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </Motiondiv>
     </Link>
   );
 }
-
-export default Card;
