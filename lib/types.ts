@@ -1,4 +1,4 @@
-export interface Show {
+export   interface Show {
   adult: boolean;
   backdrop_path: string;
   genre_ids: number[];
@@ -28,4 +28,27 @@ export interface Show {
   budget?: number;
   revenue?: number;
   spoken_languages: any;
+}
+
+ export interface Season {
+  season: number;
+  isReleased: boolean;
+  episodes: Episode[];
+}
+
+ export interface Episode {
+  releaseDate: string | number | Date;
+  id: string;
+  title: string;
+  description: string;
+  img: {
+    mobile: string;
+    hd: string;
+  };
+}
+
+ export interface SeasonTabsProps {
+  seasons: Season[];
+  id: string;
+  tv_id: string;
 }

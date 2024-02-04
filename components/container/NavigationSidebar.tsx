@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Sheet,
   SheetContent,
@@ -6,32 +6,32 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { fetchGenres } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { TabsContent, Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import Link from 'next/link';
+} from "@/components/ui/sheet";
+import { fetchGenres } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { TabsContent, Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 
 const NavigationSidebar = async () => {
-  const movieGenres = await fetchGenres('movie');
-  const tvGenres = await fetchGenres('tv');
+  const movieGenres = await fetchGenres("movie");
+  const tvGenres = await fetchGenres("tv");
 
   return (
     <div>
       <SheetContent className=" overflow-scroll py-10">
         <SheetHeader>
-          <SheetTitle>Explore</SheetTitle>
+          <SheetTitle className="">Explore</SheetTitle>
           <SheetDescription>
-            <Tabs className=' max-w-[80%]'>
-              <TabsList className='w-full bg-background' defaultValue={'tv'}>
-                <TabsTrigger value="movies">Movies </TabsTrigger>
-                <TabsTrigger value="tv">TV </TabsTrigger>
+            <Tabs className=" w-full lg:max-w-[80%]">
+              <TabsList className=" flex w-full bg-background" defaultValue={"tv"}>
+                <TabsTrigger className="w-full" value="movies">Movies </TabsTrigger>
+                <TabsTrigger className="w-full" value="tv">TV </TabsTrigger>
               </TabsList>
               <TabsContent className="  " value="tv">
-                {renderButtons(tvGenres, 'tv')}
+                {renderButtons(tvGenres, "tv")}
               </TabsContent>
               <TabsContent className=" " value="movies">
-                {renderButtons(movieGenres, 'movie')}
+                {renderButtons(movieGenres, "movie")}
               </TabsContent>
             </Tabs>
           </SheetDescription>
@@ -47,7 +47,7 @@ const renderButtons = (genres: any[], type: string) => {
       <Link href={`/discover/trending?type=${type}&title=Trending`}>
         <SheetTrigger className="w-full">
           <Button
-            variant={'ghost'}
+            variant={"ghost"}
             className="flex w-full text-start justify-start"
           >
             Trending
@@ -58,7 +58,7 @@ const renderButtons = (genres: any[], type: string) => {
       <Link href={`/discover/airing-today?type=${type}&title=Airing Today`}>
         <SheetTrigger className="w-full">
           <Button
-            variant={'ghost'}
+            variant={"ghost"}
             className="flex w-full text-start justify-start"
           >
             Airing Today
@@ -69,7 +69,7 @@ const renderButtons = (genres: any[], type: string) => {
       <Link href={`/discover/on-the-air?type=${type}&title=On The Air`}>
         <SheetTrigger className="w-full">
           <Button
-            variant={'ghost'}
+            variant={"ghost"}
             className="flex w-full text-start justify-start"
           >
             On The Air
@@ -80,7 +80,7 @@ const renderButtons = (genres: any[], type: string) => {
       <Link href={`/discover/popular?type=${type}&title=Popular`}>
         <SheetTrigger className="w-full">
           <Button
-            variant={'ghost'}
+            variant={"ghost"}
             className="flex w-full text-start justify-start"
           >
             Popular
@@ -89,10 +89,9 @@ const renderButtons = (genres: any[], type: string) => {
       </Link>
 
       <Link href={`/discover/top-rated?type=${type}&title=Top Rated`}>
-        <SheetTrigger>
-          {' '}
+        <SheetTrigger className="w-full">
           <Button
-            variant={'ghost'}
+            variant={"ghost"}
             className="flex w-full text-start justify-start"
           >
             Top Rated
@@ -108,7 +107,7 @@ const renderButtons = (genres: any[], type: string) => {
         >
           <SheetTrigger className="w-full">
             <Button
-              variant={'ghost'}
+              variant={"ghost"}
               className="flex w-full text-start justify-start"
             >
               {genre.name}

@@ -15,10 +15,11 @@ export default function ThemeButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon" className="rounded-full w-10 h-10 md:w-12 md:h-12 ">
-          <Moon className="p-1" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+       
+        <Button className="rounded-full p-2">
+        <span className="sr-only">Toggle theme</span>
+                <Moon className="h-full w-full" />
+              </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme("light")}>

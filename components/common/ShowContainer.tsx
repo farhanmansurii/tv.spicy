@@ -39,7 +39,7 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
         (type === "tv" ? (
           <>
             <Suspense fallback={<SeasonsTabLoader />}>
-              <div className="">
+              <div className="w-full">
                 <TVContainer tv={showData} tv_id={id} />
                 <SeasonTabs
                   seasons={showData?.seasons}

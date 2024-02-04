@@ -7,7 +7,7 @@ export default function EpisodeCard(props: any) {
   const { episode, tv_id, active, toggle, key } = props;
 
   return (
-    <div
+    <CarouselItem
       onClick={() => toggle(episode)}
       className={cn(
         `group basis-1/2 w-full md:basis-1/3 lg:basis-1/4 xl:basis-1/5`
@@ -49,6 +49,6 @@ export default function EpisodeCard(props: any) {
           <p>{" • " + episode.releaseDate}</p>
         </div>
       </div>
-    </div>
+    </CarouselItem>
   );
 }

@@ -40,10 +40,10 @@ export default async function RowContainer() {
   return (
     <div className="flex flex-col gap-[2rem]">
       <WatchList />
-      {trendingMovies}
+      {topRatedMovies}
       {trendingTVShows}
       {topRatedTVShows}
-      {topRatedMovies}
+      {trendingMovies}
     </div>
   );
 }

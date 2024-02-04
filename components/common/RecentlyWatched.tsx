@@ -33,90 +33,7 @@ const RecentlyWatched = () => {
     store.deleteRecentlyWatched();
   }
   return (
-    // <div className="w-11/12 mx-auto  mb-5">
-    //   {recentlyWatched && recentlyWatched.length > 0 && (
-    //     <>
-    //       <div
-    //         className="flex  items-center
-    //    justify-between"
-    //       >
-    //         <h2 className="text-2xl lg:text-3xl  mx-2">Watch History</h2>
-
-    //         <div className="flex gap-3 items-center">
-    //           <Button
-    //             className="w-6 h-6 p-1 rounded-full"
-    //             size="icon"
-    //             onClick={clearRecentlyWatched}
-    //           >
-    //             <X className="w-5 h-5" />
-    //           </Button>
-    //           <Button
-    //             size="icon"
-    //             className=" bg-secondary text-primary rounded-full w-6 h-6 p-1"
-    //           >
-    //             <ChevronLeft />
-    //           </Button>
-    //           <Button
-    //            size="icon"
-    //             className=" bg-secondary text-primary rounded-full w-6 h-6 p-1"
-    //           >
-    //             <ChevronRight />
-    //           </Button>
-    //         </div>
-    //       </div>
-    //       <div
-    //         ref={scrollContainerRef}
-    //         style={{
-    //           display: "flex",
-    //           overflowX: "scroll",
-    //           overflowY: "unset",
-    //           gap: "2px",
-    //           scrollbarWidth: "none", // Hide the scrollbar in Firefox
-    //           WebkitOverflowScrolling: "touch", // Enable smooth scrolling on iOS
-    //         }}
-    //       >
-    //         {recentlyWatched.map((e: any) => (
-    //           <Link
-    //             href={`/tv/${e.tv_id}`}
-    //             className="flex flex-col py-3"
-    //             key={e.tvid}
-    //           >
-    //             <div
-    //               key={e.tvid}
-    //               className=" flex-none relative w-72 h-40   max-w-xs"
-    //             >
-    //               <div className="overlay absolute inset-0 bg-black opacity-50 "></div>
-    //               <div className="episode-img-container w-full h-full  overflow-hidden">
-    //                 <img
-    //                   className="w-full h-full object-cover"
-    //                   src={e.img?.hd}
-    //                   alt={`Episode ${e.number}`}
-    //                 />
-    //               </div>
-
-    //               <div className="text-xs opacity-60 absolute bottom-2 w-full px-4 text-white">
-    //                 S{e.season} E{e.episode}
-    //                 <h3 className="text-lg  line-clamp-1">{e.title}</h3>
-    //               </div>
-    //               <div className="w-full relative bottom-[5px] h-[3px]">
-    //                 <div     className="absolute inset-0  dark:bg-white bg-primary-foreground"
-
-    //                   style={{
-    //                     width: e?.time ? `${e.time}%` : "0%", // Set the width dynamically based on e?.time
-    //                     borderRadius: "4px", // Rounded corners
-    //                     marginLeft: "2px", // Add margin to the left
-    //                     height: "4px", // Set the height
-    //                     transition: "width 0.3s ease-in-out", // Add a transition for smooth width changes
-    //                   }}
-    //                 ></div>
-    //               </div>
-    //             </div>
-    //           </Link>
-    //         ))}
-    //       </div>
-    //     </>
-    //   )}
-    // </div>
+   recentlyWatched.length > 0 && (
 
     <Carousel opts={{ dragFree: true }} className="w-[97%] my-[2rem] mx-auto">
       <div className="flex font-bold justify-between  mx-auto text-xl md:text-2xl items-center my-1 py-1 flex-row">
@@ -204,9 +121,7 @@ const RecentlyWatched = () => {
                             • Episode {show.episode}
                           </p>
                         </div>
-                        {/* <p className="flex gap-2 items-center">
-                  {' • ' + show.vote_average?.toFixed(2)}
-                </p> */}
+                       
                       </div>
                     </div>
                   }
@@ -216,7 +131,7 @@ const RecentlyWatched = () => {
           ))}
         </CarouselContent>
       </AnimatePresence>
-    </Carousel>
+    </Carousel>)
   );
 };
 
