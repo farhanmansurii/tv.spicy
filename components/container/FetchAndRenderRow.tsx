@@ -1,12 +1,12 @@
-import { cn, fetchRowData } from '@/lib/utils';
-import { Suspense } from 'react';
+import { cn, fetchRowData } from "@/lib/utils";
+import { Suspense } from "react";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from '@/components/ui/carousel';
-import { Skeleton } from '@/components/ui/skeleton';
-import Row from './Row';
+} from "@/components/ui/carousel";
+import { Skeleton } from "@/components/ui/skeleton";
+import Row from "./Row";
 export const FetchAndRenderRow = async (
   apiEndpoint: string,
   text: string,
@@ -25,7 +25,7 @@ export const FetchAndRenderRow = async (
               <CarouselItem
                 className={cn(
                   `basis-1/2 w-full md:basis-1/3 lg:basis-1/4 xl:basis-1/5`,
-                  index === 0 && 'ml-5'
+                  index === 0 && "ml-5"
                 )}
                 key={index}
               >
@@ -37,13 +37,19 @@ export const FetchAndRenderRow = async (
         </Carousel>
       }
     >
-      <Row
-        isVertical={isVertical}
-        text={text}
-        shows={showRank ? rowData.slice(0, 10) : rowData}
-        type={type}
-        showRank={showRank}
-      />
+      {rowData && rowData.length > 0 ? (
+        <Row
+          isVertical={isVertical}
+          text={text}
+          shows={showRank ? rowData.slice(0, 10) : rowData}
+          type={type}
+          showRank={showRank}
+        />
+      ) : (
+        <div className="w-full h-[400px] items-center justify-center text-center flex text-2xl font-bold">
+          No data found
+        </div>
+      )}
     </Suspense>
   );
 };

@@ -17,7 +17,7 @@ const MoreInfoComponent: React.FC<{ show: Show; type: string }> = ({
         <div className="font-bold">
           Release Date :{' '}
           <span className="font-normal">
-            {formatRelativeTime(show.release_date || show.first_air_date)}
+            {(show.release_date || show.first_air_date)}
           </span>
         </div>
       )}
@@ -45,7 +45,7 @@ const MoreInfoComponent: React.FC<{ show: Show; type: string }> = ({
       {type === 'tv' && show?.last_air_date && (
         <div className="font-bold">
           Last Air Date :{' '}
-          <span className="font-normal">{formatRelativeTime(show.last_air_date)}</span>
+          <span className="font-normal">{(show.last_air_date)}</span>
         </div>
       )}
       {type === 'tv' && show?.number_of_seasons && show?.number_of_episodes && (

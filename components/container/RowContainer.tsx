@@ -1,14 +1,5 @@
-import React, { Suspense } from "react";
-import RowComponent from "./Row";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import { Skeleton } from "@/components/ui/skeleton";
-import { fetchRowData } from "@/lib/utils";
+import React from "react";
 import { FetchAndRenderRow } from "./FetchAndRenderRow";
-import Row from "./Row";
 import WatchList from "../common/WatchList";
 
 export default async function RowContainer() {
@@ -44,6 +35,7 @@ export default async function RowContainer() {
       {trendingTVShows}
       {topRatedTVShows}
       {trendingMovies}
+
     </div>
   );
 }

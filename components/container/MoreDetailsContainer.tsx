@@ -16,10 +16,12 @@ export default function MoreDetailsContainer(props: {
       defaultValue="info"
     >
       <div className="mb-6  w-[96%] mx-auto">
-        <TabsList className="w-fit border">
-          <TabsTrigger value="info">More Info </TabsTrigger>
-          <TabsTrigger value="recommendations">Reccs </TabsTrigger>
-          <TabsTrigger value="similar">Similar </TabsTrigger>
+        <TabsList className="w-full flex justify-start ">
+          <TabsTrigger className='w-[40%] h-10 ' value="info">Info </TabsTrigger>
+          <TabsTrigger className='w-[40%] h-10' value="recommendations">
+           <span>Recommendations</span>
+            </TabsTrigger>
+          <TabsTrigger className='w-[40%] h-10' value="similar">Similar </TabsTrigger>
         </TabsList>
       </div>
       <TabsContent className="w-[90%] md:w-[96%] mx-auto" value="info">
