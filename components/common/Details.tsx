@@ -16,6 +16,7 @@ import CarousalCard from "./DetailsCard";
 import MoreInfoComponent from "./MoreInfoComponent";
 import MoreDetailsContainer from "../container/MoreDetailsContainer";
 import Navbar from "./Navbar";
+import RowLoader from "../loading/RowLoader";
 const Seperator = () => <div className="text-ring font-bold">|</div>;
 const Details = (props: any) => {
   const { data, type } = props;
@@ -34,7 +35,7 @@ const Details = (props: any) => {
           <Suspense
             fallback={
               type === "tv" ? (
-                <SeasonsTabLoader />
+                <RowLoader />
               ) : (
                 <Skeleton className="mx-auto mb-10  aspect-video  w-full " />
               )
