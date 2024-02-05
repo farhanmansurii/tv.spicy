@@ -44,7 +44,9 @@ export default function Episode(props: EpisodeProps) {
         seasonNumber,
         episodeNumber,
         (err: any, res: any) => {
+          console.log('err,res', err,res)
           if (err) {
+            setProvider("consumet")
             fetchMovieLinks(episodeId, id, handleMovieLinksResponse);
           } else {
             handleVidSrcResponse(res);
@@ -158,7 +160,7 @@ export default function Episode(props: EpisodeProps) {
   return (
     <>
       <Select
-        defaultValue={"vidsrc"}
+        defaultValue={provider}
         onValueChange={(value) => setProvider(value)}
       >
         <SelectTrigger className="   w-fit">

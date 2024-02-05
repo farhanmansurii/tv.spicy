@@ -8,6 +8,7 @@ export default async function TVDetails({
   params: { tv: string };
 }) {
   const tmdb = await fetchDetailsTMDB(params.tv, "tv");
+
   return (
     <div>
       <Details data={tmdb} type={"tv"} />

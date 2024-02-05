@@ -12,10 +12,8 @@ import { Button } from "@/components/ui/button";
 import { TabsContent, Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
-const NavigationSidebar = async () => {
-  const movieGenres = await fetchGenres("movie");
-  const tvGenres = await fetchGenres("tv");
-
+const NavigationSidebar = (props:{ tvGenre: any, movieGenre: any }) => {
+ const {movieGenre, tvGenre} = props;
   return (
     <div>
       <SheetContent className=" overflow-scroll py-10">
@@ -23,15 +21,22 @@ const NavigationSidebar = async () => {
           <SheetTitle className="">Explore</SheetTitle>
           <SheetDescription>
             <Tabs className=" w-full lg:max-w-[80%]">
-              <TabsList className=" flex w-full bg-background" defaultValue={"tv"}>
-                <TabsTrigger className="w-full" value="movies">Movies </TabsTrigger>
-                <TabsTrigger className="w-full" value="tv">TV </TabsTrigger>
+              <TabsList
+                className=" flex w-full bg-background"
+                defaultValue={"tv"}
+              >
+                <TabsTrigger className="w-full" value="movies">
+                  Movies{" "}
+                </TabsTrigger>
+                <TabsTrigger className="w-full" value="tv">
+                  TV{" "}
+                </TabsTrigger>
               </TabsList>
               <TabsContent className="  " value="tv">
-                {renderButtons(tvGenres, "tv")}
+                {renderButtons(tvGenre, "tv")}
               </TabsContent>
               <TabsContent className=" " value="movies">
-                {renderButtons(movieGenres, "movie")}
+                {renderButtons(movieGenre, "movie")}
               </TabsContent>
             </Tabs>
           </SheetDescription>

@@ -244,17 +244,17 @@ export async function fetchVidSrc(
   episode: number | null = null,
   callback: any
 ) {
+  const proxyUrl = "https://m3u8-proxy-cors-amber.vercel.app/cors";
   const apiBaseUrl = "https://api-movie-source.vercel.app/";
-  const url =
+  const baseURL =
     type === "movie"
       ? `${apiBaseUrl}vsrcme/${id}`
       : `${apiBaseUrl}vsrcme/${id}?s=${season}&e=${episode}`;
+  const url = `${proxyUrl}?url=${baseURL}`;
   try {
-    const res = await fetch(url, { mode: "no-cors" });
-    if (!res.ok) {
-      throw new Error("Failed to fetch data");
-    }
+    const res = await fetch(url);
     const data = await res.json();
+    console.log("data", data);
     callback(null, data);
   } catch (error) {
     console.log("error", error);
