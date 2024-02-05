@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import React, { useCallback } from "react";
 
 export default function EpisodeCard(props: any) {
-  const { episode, tv_id, active, toggle, key } = props;
+  const { episode, tv_id, active, toggle } = props;
 
   return (
     <CarouselItem

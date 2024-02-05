@@ -2,7 +2,7 @@ import React from "react";
 import { FetchAndRenderRow } from "./FetchAndRenderRow";
 import WatchList from "../common/WatchList";
 
-export default async function RowContainer() {
+export default function RowContainer() {
   const trendingMovies = FetchAndRenderRow(
     "trending/movie/week",
     "Top Movies",
