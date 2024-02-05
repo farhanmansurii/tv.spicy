@@ -249,7 +249,7 @@ export async function fetchVidSrc(
   const url =
     type === "movie"
       ? `${corsAnywhereUrl}${apiBaseUrl}vsrcme/${id}`
-      : `${corsAnywhereUrl}${apiBaseUrl}vsrcme/${id}?s=1&e=1`;
+      : `${corsAnywhereUrl}${apiBaseUrl}vsrcme/${id}?s=${season}&e=`;
 
   try {
     const res = await fetch(url);

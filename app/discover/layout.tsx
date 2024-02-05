@@ -6,11 +6,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <Navbar text="genre" />
-        {children}
-      </body>
-    </html>
+    <div>
+      <Navbar text="genre" />
+      {children}
+    </div>
   );
 }
