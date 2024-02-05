@@ -1,6 +1,5 @@
 import Details from "@/components/common/Details";
 import { fetchDetails, fetchDetailsTMDB } from "@/lib/utils";
-import { notFound } from "next/navigation";
 import React from "react";
 export default async function TVDetails({
   params,
@@ -8,8 +7,8 @@ export default async function TVDetails({
   params: { movie: string };
 }) {
   const { movie } = params;
-  const data = await fetchDetailsTMDB(movie, "movie")
-  if (!data) return notFound()
+  const data = await fetchDetailsTMDB(movie, "movie");
+  if (!data) return <div>Loading</div>;
   return (
     <div>
       <Details data={data} type={"movie"} />

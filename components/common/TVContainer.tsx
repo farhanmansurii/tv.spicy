@@ -43,14 +43,18 @@ export const TVContainer: React.FC<T> = ({ tv, tv_id }: T) => {
     }
   };
   return (
-    <>
+    <div className="w-[96%]  mx-auto">
       {activeEP && activeEP.id ? (
-        <>
-          <Episode episodeNumber={activeEP.episode} seasonNumber={activeEP.season} episodeId={activeEP?.id} id={tv_id} type={"tv"} />
-        </>
+        <Episode
+          episodeNumber={activeEP.episode}
+          seasonNumber={activeEP.season}
+          episodeId={activeEP?.id}
+          id={tv_id}
+          type={"tv"}
+        />
       ) : (
         ""
       )}
-    </>
+    </div>
   );
 };

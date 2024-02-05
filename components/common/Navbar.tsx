@@ -11,8 +11,8 @@ import ThemeButton from "./ThemeButton";
 
 export default function Navbar(props: { text?: string }) {
   return (
-    <nav className="w-full absolute top-0 z-10 ">
-      <div className="flex text-xl w-[98%] mx-auto font-bold p-2 py-4 flex-row justify-between items-center ">
+    <nav className="w-full absolute top-0 z-10">
+      <div className="flex text-xl w-[96%] mx-auto font-bold p-2 py-4 flex-row justify-between items-center ">
         <Link href="/">
           {props.text && (
             <Button size={"icon"} className="rounded-full aspect-square p-2">

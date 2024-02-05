@@ -244,15 +244,13 @@ export async function fetchVidSrc(
   episode: number | null = null,
   callback: any
 ) {
-  const corsAnywhereUrl = "https://proxy.anistreme.live/";
   const apiBaseUrl = "https://api-movie-source.vercel.app/";
   const url =
     type === "movie"
-      ? `${corsAnywhereUrl}${apiBaseUrl}vsrcme/${id}`
-      : `${corsAnywhereUrl}${apiBaseUrl}vsrcme/${id}?s=${season}&e=`;
-
+      ? `${apiBaseUrl}vsrcme/${id}`
+      : `${apiBaseUrl}vsrcme/${id}?s=${season}&e=${episode}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { mode: "no-cors" });
     if (!res.ok) {
       throw new Error("Failed to fetch data");
     }

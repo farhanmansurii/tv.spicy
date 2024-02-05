@@ -41,8 +41,8 @@ export default function Episode(props: EpisodeProps) {
       await fetchVidSrc(
         type,
         type === "movie" ? movieID : id,
-        episodeNumber,
         seasonNumber,
+        episodeNumber,
         (err: any, res: any) => {
           if (err) {
             fetchMovieLinks(episodeId, id, handleMovieLinksResponse);
@@ -118,17 +118,41 @@ export default function Episode(props: EpisodeProps) {
 
   if (error) {
     return (
-      <div className="aspect-video an gap-2 text-xl flex-col items-center flex justify-center bg-destructive rounded-lg w-full lg:w-[600px] mx-auto my-4">
-        <div> {error || "Something went wrong"} :/</div>
-        <Button
-          className="bg-primary text-sm gap-2"
-          onClick={() =>
-            provider === "vidsrc" ? fetchVidSrcData() : fetchMovieLinksData()
-          }
-        >
-          Retry <RotateCw className="w-4 h-4" />
-        </Button>
-      </div>
+      <>
+        <div className="">
+          <Select
+            defaultValue={provider}
+            onValueChange={(value) => setProvider(value)}
+          >
+            <SelectTrigger className="   w-fit">
+              <SelectValue className="">
+                <div className="pr-10">
+                  Server {provider === "vidsrc" ? 1 : 2}{" "}
+                </div>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={"vidsrc"} key={"vidsrc"}>
+                <div className="mx-1 flex gap-2">Server 1</div>
+              </SelectItem>
+              <SelectItem value={"consumet"} key={"consumet"}>
+                <div className="mx-1 flex gap-2">Server 2</div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="aspect-video an gap-2 text-xl flex-col items-center flex justify-center bg-destructive rounded-lg w-full lg:w-[600px] mx-auto my-4">
+          <div> {error || "Something went wrong"} :/</div>
+          <Button
+            className="bg-primary text-sm gap-2"
+            onClick={() =>
+              provider === "vidsrc" ? fetchVidSrcData() : fetchMovieLinksData()
+            }
+          >
+            Retry <RotateCw className="w-4 h-4" />
+          </Button>
+        </div>
+      </>
     );
   }
   return (

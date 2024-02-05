@@ -50,20 +50,21 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
             </Suspense>
           </>
         ) : (
-          <Suspense
-            fallback={
-              <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
-            }
-          >
-            <Episode
-              episodeId={showData.episodeId}
-              id={showData.id}
-              movieID={id}
-              type={type}
-            />
-          </Suspense>
+          <div className="w-[96%]  mx-auto">
+            <Suspense
+              fallback={
+                <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
+              }
+            >
+              <Episode
+                episodeId={showData.episodeId}
+                id={showData.id}
+                movieID={id}
+                type={type}
+              />
+            </Suspense>
+          </div>
         ))}
-
     </div>
   );
 };
