@@ -17,11 +17,15 @@ export default function OPlayer({
   subtitles,
   episode,
   type,
+  provider,
+  source,
 }: {
   sources: any;
   subtitles: any[];
   episode?: any;
   type: string;
+  provider: string;
+  source?: any;
 }) {
   const { activeEP } = useEpisodeStore();
   const { recentlyWatched } = useTVShowStore();
@@ -47,11 +51,7 @@ export default function OPlayer({
       (video: any) => video.quality === "auto"
     );
 
-    if (autoQualityVideos.length > 0) {
-      return autoQualityVideos[0].url;
-    } else {
-      return null;
-    }
+    return videoUrls[0].src;
   }
 
   const playerRef = useRef<Player<Ctx>>();
@@ -65,16 +65,24 @@ export default function OPlayer({
     title = "";
     image = episode?.image;
   }
-  const includesEng = subtitles.filter((subtitle) =>
-    subtitle.lang.toLowerCase().includes("eng")
+  const includesEng = subtitles.filter(
+    (subtitle) =>
+      subtitle.url.endsWith(".vtt")
   );
   // const titleToDisplay = title !== "Full" ? `E${episode.number} ${title}` : "";
 
-  const subtitlesList = includesEng.map((subtitle, index) => ({
-    src: subtitle.url,
-    default: index === 0,
-    name: subtitle.lang,
-  }));
+  const subtitlesList =
+    provider !== "vidsrc"
+      ? includesEng.map((subtitle, index) => ({
+          src: subtitle.url,
+          default: index === 0,
+          name: subtitle?.lang?.toUpperCase(),
+        }))
+      : includesEng.map((subtitle, index) => ({
+          src: subtitle.url,
+          default: index === 0,
+          name: subtitle?.lang?.toUpperCase(),
+        }));
   const plugins = [
     OUI({
       fullscreen: true,
@@ -111,16 +119,19 @@ export default function OPlayer({
           >
             <path d="M14.5 13.5h2v-3h-2M18 14a1 1 0 01-1 1h-.75v1.5h-1.5V15H14a1 1 0 01-1-1v-4a1 1 0 011-1h3a1 1 0 011 1m-7 5H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11m8-5H5c-1.11 0-2 .89-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z" />
           </svg>`,
-          children: sources.map((source: any) => ({
-            name:
-              source.quality !== "auto" ? source.quality + "p" : source.quality,
-            value: source.url,
-            default: source.quality === "auto",
+          children: sources.map((source: any, index: number) => ({
+            name: source.name,
+            value: source.src,
+            default: index === 0,
           })),
           onChange({ value }) {
             const oplayer = playerRef.current;
             if (!oplayer) return;
-            oplayer.changeSource({ src: value, poster: image, title }).then(() => oplayer.context.ui.subtitle?.changeSource(subtitlesList));
+            oplayer
+              .changeSource({ src: value, poster: image, title })
+              .then(() =>
+                oplayer.context.ui.subtitle?.changeSource(subtitlesList)
+              );
           },
         },
       ],
@@ -217,7 +228,5 @@ export default function OPlayer({
     };
   }, [playerRef]);
 
-  return (
-    <div id="oplayer" className="mx-auto mb-10  aspect-video  w-full " />
-  );
+  return <div id="oplayer" className="mx-auto mb-10  aspect-video  w-full " />;
 }

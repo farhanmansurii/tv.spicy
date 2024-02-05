@@ -34,8 +34,8 @@ export async function fetchDetails(id: string, type: string) {
     const url = new URL(
       `https://api-spicy.vercel.app/meta/tmdb/info/${id}?type=${type}`
     );
-    const response = await fetch(url.toString(), { cache: 'no-cache' });
-    if (!response.ok) throw new Error('Failed to fetch data');
+    const response = await fetch(url.toString(), { cache: "no-cache" });
+    if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
     return data;
   } catch (error) {
@@ -47,8 +47,8 @@ export async function fetchDetailsTMDB(id: string, type: string) {
     const url = new URL(
       `https://api.themoviedb.org/3/${type}/${id}?api_key=${process.env.TMDB_API_KEY}`
     );
-    const response = await fetch(url.toString(), { cache: 'no-cache' });
-    if (!response.ok) throw new Error('Failed to fetch data');
+    const response = await fetch(url.toString(), { cache: "no-cache" });
+    if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
     return data;
   } catch (error) {
@@ -65,7 +65,7 @@ export async function fetchRecommendations(
       `https://api.themoviedb.org/3/${showType}/${id}/${type}?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`
     );
     const response = await fetch(url.toString());
-    if (!response.ok) throw new Error('Failed to fetch data');
+    if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
     return data;
   } catch (error) {
@@ -82,7 +82,7 @@ export async function fetchMovieLinks(
       `https://api-spicy.vercel.app/movies/flixhq/watch?episodeId=${movie}&mediaId=${longID}&server=vidcloud`
     );
     const response = await fetch(url.toString());
-    if (!response.ok) throw new Error('Failed to fetch data');
+    if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
     callback(null, data);
   } catch (error) {
@@ -101,9 +101,11 @@ export async function fetchsusflixLinks(movie: string) {
   }
 }
 
-export async function fetchShowData(endpoint:string) {
+export async function fetchShowData(endpoint: string) {
   const response = await fetch(
-    `https://api.themoviedb.org/3/${endpoint}?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`,{ next: { revalidate: 21600 }});
+    `https://api.themoviedb.org/3/${endpoint}?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&watch_region=US&page=1`,
+    { next: { revalidate: 21600 } }
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch data for ${endpoint}`);
@@ -115,10 +117,10 @@ export async function fetchShowData(endpoint:string) {
 
 export async function getNewAndPopularShows() {
   try {
-    const topRatedTV = await fetchShowData('tv/top_rated');
-    const topRatedMovie = await fetchShowData('movie/top_rated');
-    const trendingMovie = await fetchShowData('trending/movie/week');
-    const trendingTv = await fetchShowData('trending/tv/week');
+    const topRatedTV = await fetchShowData("tv/top_rated");
+    const topRatedMovie = await fetchShowData("movie/top_rated");
+    const trendingMovie = await fetchShowData("trending/movie/week");
+    const trendingTv = await fetchShowData("trending/tv/week");
 
     return {
       topRatedTV,
@@ -126,11 +128,10 @@ export async function getNewAndPopularShows() {
       trendingTv,
       trendingMovie,
     };
-  } catch (error:any) {
-    throw new Error('Failed to fetch shows: ' + error.message);
+  } catch (error: any) {
+    throw new Error("Failed to fetch shows: " + error.message);
   }
 }
-
 
 export async function searchShows(query: string) {
   const res = await fetch(
@@ -170,7 +171,6 @@ export function formatRelativeTime(airDate: string): string {
   }
 }
 
-
 export async function fetchCarousalData(type: string) {
   try {
     const url = new URL(
@@ -192,7 +192,6 @@ export async function fetchCarousalData(type: string) {
 }
 
 export async function fetchGenres(type: string) {
-  
   if (!apiKey) {
     throw new Error("TMDB API key is missing");
   }
@@ -212,13 +211,14 @@ export async function fetchGenres(type: string) {
   return genres.genres;
 }
 
-
 export async function fetchGenreById(
   type: string,
   id: string,
   page: number = 1
 ) {
-  console.log(`https://api.themoviedb.org/3/discover/${type}/?include_adult=true&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc&with_genres=${id}`)
+  console.log(
+    `https://api.themoviedb.org/3/discover/${type}/?include_adult=true&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc&with_genres=${id}`
+  );
   if (!apiKey) {
     throw new Error("TMDB API key is missing");
   }
@@ -236,4 +236,30 @@ export async function fetchGenreById(
 
   const genres = await res.json();
   return genres.results;
+}
+export async function fetchVidSrc(
+  type: string,
+  id: string,
+  season: number | null = null,
+  episode: number | null = null,
+  callback: any
+) {
+  const corsAnywhereUrl = "https://proxy.anistreme.live/";
+  const apiBaseUrl = "https://api-movie-source.vercel.app/";
+  const url =
+    type === "movie"
+      ? `${corsAnywhereUrl}${apiBaseUrl}vsrcme/${id}`
+      : `${corsAnywhereUrl}${apiBaseUrl}vsrcme/${id}?s=1&e=1`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    const data = await res.json();
+    callback(null, data);
+  } catch (error) {
+    console.log("error", error);
+    callback(error);
+  }
 }

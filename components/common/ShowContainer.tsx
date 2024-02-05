@@ -58,6 +58,7 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
             <Episode
               episodeId={showData.episodeId}
               id={showData.id}
+              movieID={id}
               type={type}
             />
           </Suspense>

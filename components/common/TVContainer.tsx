@@ -42,12 +42,11 @@ export const TVContainer: React.FC<T> = ({ tv, tv_id }: T) => {
       }
     }
   };
-
   return (
     <>
       {activeEP && activeEP.id ? (
         <>
-          <Episode episodeId={activeEP?.id} id={tv.id} type={"tv"} />
+          <Episode episodeNumber={activeEP.episode} seasonNumber={activeEP.season} episodeId={activeEP?.id} id={tv_id} type={"tv"} />
         </>
       ) : (
         ""
