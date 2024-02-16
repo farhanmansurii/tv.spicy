@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import Player from "@oplayer/core";
 import OUI from "@oplayer/ui";
 import OHls from "@oplayer/hls";
@@ -66,18 +66,28 @@ export default function OPlayer({
   }
   const includesEng = subtitles.filter((subtitle) => {
     return (
-      subtitle.url.endsWith(".vtt") &&
-      (subtitle.lang.toLowerCase().includes("english") ||
-        subtitle.lang.toLowerCase().includes("eng"))
+      subtitle.lang.toLowerCase().includes("english") ||
+      subtitle.lang.toLowerCase().includes("eng")
     );
   });
   // const titleToDisplay = title !== "Full" ? `E${episode.number} ${title}` : "";
+  const subtitlesList = useMemo(() => {
+    let defaultFound = false;
+    return subtitles
+        ?.filter(subtitle => subtitle.url && (subtitle.url.endsWith('.vtt') || subtitle.url.endsWith('.srt')))
+        .map((subtitle, index) => {
+            const isEnglish = ['eng', 'english'].includes(subtitle?.lang?.toLowerCase());
+            const defaultSubtitle = !defaultFound && isEnglish;
+            defaultFound = defaultFound || defaultSubtitle;
+            return {
+                src: subtitle.url,
+                default: defaultSubtitle,
+                name: subtitle?.lang?.toUpperCase(),
+            };
+        }) || [];
+}, [subtitles]);
 
-  const subtitlesList = includesEng.map((subtitle, index) => ({
-    src: subtitle.url,
-    default: index === 0,
-    name: subtitle?.lang?.toUpperCase(),
-  }));
+  console.log(`🚀 ~ subtitlesList:`, subtitles);
 
   const plugins = [
     OUI({

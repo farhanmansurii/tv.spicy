@@ -244,6 +244,7 @@ export async function fetchVidSrc(
   episode: number | null = null,
   callback: any
 ) {
+  const proxyUrl = "https://localhost:3000/cors";
   const apiBaseUrl = "https://spicy-vidsrc-api.vercel.app/";
   const baseURL =
     type === "movie"
@@ -252,10 +253,10 @@ export async function fetchVidSrc(
   try {
     const res = await fetch(baseURL);
     const data = await res.json();
-    console.log("data", data);
+    console.log("data", baseURL);
     callback(null, data);
   } catch (error) {
     console.log("error", error);
-    callback(null);
+    callback(error);
   }
 }

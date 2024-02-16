@@ -45,7 +45,8 @@ export default function Episode(props: EpisodeProps) {
         episodeNumber,
         (err: any, res: any) => {
           if (err) {
-            setProvider("consumet")
+            console.log(`err`, err);
+            setProvider("consumet");
             fetchMovieLinks(episodeId, id, handleMovieLinksResponse);
           } else {
             handleVidSrcResponse(res);
@@ -64,19 +65,37 @@ export default function Episode(props: EpisodeProps) {
   }
 
   function handleVidSrcResponse(res: any) {
+    const engSubtitles = res.flatMap((e: any) => {
+      if (e.data && e.data.sub) {
+        if (Array.isArray(e.data.sub)) {
+          return e.data.sub
+            .filter(
+              (sub: any) =>
+                sub.lang &&
+                (sub.lang.toLowerCase() === "eng" ||
+                  sub.lang.toLowerCase() === "english")
+            )
+            .map((sub: any, index: number) => ({
+              lang: sub.lang,
+              url: sub.file,
+            }));
+        } else if (typeof e.data.sub === "object") {
+          const lang = Object.keys(e.data.sub)[0];
+          const url = e.data.sub[lang];
+          if (lang && url) {
+            return [{ lang, url }];
+          }
+        }
+      }
+      return [];
+    });
+
     const transformedData: EpisodeData = {
       sources: res.map((ep: any) => ({
         src: ep.data?.file,
         name: ep.name || "", // Adjust as per your actual data structure
       })),
-      subtitles: res
-        .flatMap((ep: any) =>
-          ep.data?.sub?.map((sub: any) => ({
-            lang: sub.lang,
-            url: sub.file,
-          }))
-        )
-        .filter(Boolean),
+      subtitles: engSubtitles || [],
     };
     setEpisode(transformedData);
 
@@ -156,7 +175,7 @@ export default function Episode(props: EpisodeProps) {
     );
   }
   return (
-    <div className="aspect-video w-full lg:w-[640px]  mx-auto my-4" >
+    <div className="aspect-video w-full lg:w-[640px]  mx-auto my-4">
       <Select
         defaultValue={provider}
         onValueChange={(value) => setProvider(value)}
