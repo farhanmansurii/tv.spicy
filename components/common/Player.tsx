@@ -50,8 +50,7 @@ export default function OPlayer({
     const autoQualityVideos = videoUrls.filter(
       (video: any) => video.quality === "auto"
     );
-
-    return videoUrls[0].src;
+    return autoQualityVideos[0]?.src || videoUrls[0]?.src;
   }
 
   const playerRef = useRef<Player<Ctx>>();
@@ -65,24 +64,21 @@ export default function OPlayer({
     title = "";
     image = episode?.image;
   }
-  const includesEng = subtitles.filter(
-    (subtitle) =>
-      subtitle.url.endsWith(".vtt")
-  );
+  const includesEng = subtitles.filter((subtitle) => {
+    return (
+      subtitle.url.endsWith(".vtt") &&
+      (subtitle.lang.toLowerCase().includes("english") ||
+        subtitle.lang.toLowerCase().includes("eng"))
+    );
+  });
   // const titleToDisplay = title !== "Full" ? `E${episode.number} ${title}` : "";
 
-  const subtitlesList =
-    provider !== "vidsrc"
-      ? includesEng.map((subtitle, index) => ({
-          src: subtitle.url,
-          default: index === 0,
-          name: subtitle?.lang?.toUpperCase(),
-        }))
-      : includesEng.map((subtitle, index) => ({
-          src: subtitle.url,
-          default: index === 0,
-          name: subtitle?.lang?.toUpperCase(),
-        }));
+  const subtitlesList = includesEng.map((subtitle, index) => ({
+    src: subtitle.url,
+    default: index === 0,
+    name: subtitle?.lang?.toUpperCase(),
+  }));
+
   const plugins = [
     OUI({
       fullscreen: true,

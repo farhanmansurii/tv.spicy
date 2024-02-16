@@ -26,7 +26,7 @@ const Details = (props: any) => {
         <Navbar text="details"/>
         <div className=" flex gap-10 flex-col lg:w-100 ">
           <CarousalCard
-            id={data.id}
+            id={data?.id || ''}
             type={type}
             isDetailsPage={true}
             show={data}
@@ -37,11 +37,11 @@ const Details = (props: any) => {
               type === "tv" ? (
                 <RowLoader />
               ) : (
-                <Skeleton className="mx-auto mb-10  aspect-video  w-full " />
+                <Skeleton className="mx-auto mb-10  aspect-video  w-full lg:w-[600px] " />
               )
             }
           >
-            <ShowContainer id={data.id} type={type} />
+            <ShowContainer id={data?.id} type={type} />
           </Suspense>
           <MoreDetailsContainer type={type} show={data} />
         </div>

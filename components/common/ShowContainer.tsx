@@ -6,19 +6,8 @@ import { fetchDetails, fetchMovieLinks } from "@/lib/utils";
 import { TVContainer } from "./TVContainer";
 import Row from "../container/Row";
 import dynamic from "next/dynamic";
-const RecommendationsContainer = dynamic(
-  () => import("./RecommendationsContainer"),
-  {
-    loading: () => (
-      <div className="flex w-full">
-        <RowLoader />
-        <RowLoader />
-      </div>
-    ),
-  }
-);
+
 import RowLoader from "../loading/RowLoader";
-import SeasonsTabLoader from "../container/SeasonsTabLoader";
 interface ShowContainerProps {
   type: string;
   id: string;
@@ -50,12 +39,12 @@ const ShowContainer: React.FC<ShowContainerProps> = async (props) => {
             </Suspense>
           </>
         ) : (
-          <div className="w-[96%]  mx-auto">
-            <Suspense
-              fallback={
-                <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
-              }
-            >
+          <div
+            className="w-[96%]
+          aspect-video  lg:w-[640px]  mx-auto my-4
+          "
+          >
+            <Suspense fallback={<Skeleton />}>
               <Episode
                 episodeId={showData.episodeId}
                 id={showData.id}

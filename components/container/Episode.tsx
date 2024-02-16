@@ -44,7 +44,6 @@ export default function Episode(props: EpisodeProps) {
         seasonNumber,
         episodeNumber,
         (err: any, res: any) => {
-          console.log('err,res', err,res)
           if (err) {
             setProvider("consumet")
             fetchMovieLinks(episodeId, id, handleMovieLinksResponse);
@@ -74,7 +73,6 @@ export default function Episode(props: EpisodeProps) {
         .flatMap((ep: any) =>
           ep.data?.sub?.map((sub: any) => ({
             lang: sub.lang,
-
             url: sub.file,
           }))
         )
@@ -114,7 +112,7 @@ export default function Episode(props: EpisodeProps) {
   }, [episodeId, id, provider, type, movieID, episodeNumber, seasonNumber]);
   if (isLoading) {
     return (
-      <Skeleton className="aspect-video w-full lg:w-[600px]  mx-auto my-4" />
+      <Skeleton className="aspect-video w-full lg:w-[640px]  mx-auto my-4" />
     );
   }
 
@@ -158,7 +156,7 @@ export default function Episode(props: EpisodeProps) {
     );
   }
   return (
-    <>
+    <div className="aspect-video w-full lg:w-[640px]  mx-auto my-4" >
       <Select
         defaultValue={provider}
         onValueChange={(value) => setProvider(value)}
@@ -195,6 +193,6 @@ export default function Episode(props: EpisodeProps) {
             type={type}
           />
         ))}
-    </>
+    </div>
   );
 }
