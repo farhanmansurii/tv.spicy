@@ -75,7 +75,6 @@ export default function OPlayer({
     const firstEnglishSubtitleIndex = subtitles.findIndex(subtitle =>
       subtitle?.lang?.toLowerCase().includes('english') || subtitle?.lang?.toLowerCase() === 'eng'
     );
-    console.log(`🚀 ~ subtitlesList ~ firstEnglishSubtitleIndex:`, firstEnglishSubtitleIndex)
     const subtitleTracks = includesEng
       ?.filter(subtitle =>
         subtitle.url &&
@@ -88,9 +87,6 @@ export default function OPlayer({
       })) || [];
     return subtitleTracks
   }, [subtitles]);
-
-  console.log(`🚀 ~ subtitlesList ~ subtitlesList:`, subtitlesList);
-
   const plugins = [
     OUI({
       fullscreen: true,

@@ -45,7 +45,6 @@ export default function Episode(props: EpisodeProps) {
         episodeNumber,
         (err: any, res: any) => {
           if (err) {
-            console.log(`err`, err);
             setProvider("consumet");
             fetchMovieLinks(episodeId, id, handleMovieLinksResponse);
           } else {
@@ -54,7 +53,6 @@ export default function Episode(props: EpisodeProps) {
         }
       );
     } catch (error) {
-      console.error("Error fetching episode data:", error);
       setIsLoading(false);
     }
   }
@@ -65,7 +63,7 @@ export default function Episode(props: EpisodeProps) {
   }
 
   function handleVidSrcResponse(res: any) {
-     const engSubtitles = res.flatMap((e: any) => {
+    const engSubtitles = res.flatMap((e: any) => {
       if (e.data && e.data.sub) {
         if (Array.isArray(e.data.sub)) {
           return e.data.sub.map((sub: any, index: number) => ({
@@ -77,7 +75,7 @@ export default function Episode(props: EpisodeProps) {
           for (const lang in e.data.sub) {
             if (Object.prototype.hasOwnProperty.call(e.data.sub, lang)) {
               const url = e.data.sub[lang as keyof typeof e.data.sub];
-              subtitles.push({ lang:lang?.split('-')[0] || lang, url });
+              subtitles.push({ lang: lang?.split("-")[0] || lang, url });
             }
           }
           return subtitles || [];
@@ -101,7 +99,8 @@ export default function Episode(props: EpisodeProps) {
 
   function handleMovieLinksResponse(err: any, res: any) {
     if (err) {
-      setError("Error playing episode");
+      // setError("Error playing episode");
+      setProvider('embedded')
     } else {
       const transformedData: EpisodeData = {
         sources: res.sources.map((source: any) => ({
@@ -121,7 +120,7 @@ export default function Episode(props: EpisodeProps) {
   useEffect(() => {
     if (provider === "vidsrc") {
       fetchVidSrcData();
-    } else {
+    } else if(provider==='consumet') {
       fetchMovieLinksData();
     }
   }, [episodeId, id, provider, type, movieID, episodeNumber, seasonNumber]);
@@ -131,54 +130,60 @@ export default function Episode(props: EpisodeProps) {
     );
   }
 
-  if (error) {
-    return (
-      <>
-        <div className="">
-          <Select
-            defaultValue={provider}
-            onValueChange={(value) => setProvider(value)}
-          >
-            <SelectTrigger className="   w-fit">
-              <SelectValue className="">
-                <div className="pr-10">
-                  Server {provider === "vidsrc" ? 1 : 2}{" "}
-                </div>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={"vidsrc"} key={"vidsrc"}>
-                <div className="mx-1 flex gap-2">Server 1</div>
-              </SelectItem>
-              <SelectItem value={"consumet"} key={"consumet"}>
-                <div className="mx-1 flex gap-2">Server 2</div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="aspect-video an gap-2 text-xl flex-col items-center flex justify-center bg-destructive rounded-lg w-full lg:w-[600px] mx-auto my-4">
-          <div> {error || "Something went wrong"} :/</div>
-          <Button
-            className="bg-primary text-sm gap-2"
-            onClick={() =>
-              provider === "vidsrc" ? fetchVidSrcData() : fetchMovieLinksData()
-            }
-          >
-            Retry <RotateCw className="w-4 h-4" />
-          </Button>
-        </div>
-      </>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <>
+  //       <div className="">
+  //         <Select
+  //           defaultValue={provider}
+  //           onValueChange={(value) => setProvider(value)}
+  //         >
+  //           <SelectTrigger className="   w-fit">
+  //             <SelectValue className="">
+  //               <div className="pr-10">
+  //                 Server {provider === "vidsrc" ? 1 : 2}{" "}
+  //               </div>
+  //             </SelectValue>
+  //           </SelectTrigger>
+  //           <SelectContent>
+  //             <SelectItem value={"vidsrc"} key={"vidsrc"}>
+  //               <div className="mx-1 flex gap-2">Server 1</div>
+  //             </SelectItem>
+  //             <SelectItem value={"consumet"} key={"consumet"}>
+  //               <div className="mx-1 flex gap-2">Server 2</div>
+  //             </SelectItem>
+  //             <SelectItem value={"embedded"} key={"embedded"}>
+  //               <div className="mx-1 flex gap-2">Server 3</div>
+  //             </SelectItem>
+  //           </SelectContent>
+  //         </Select>
+  //       </div>
+  //       <div className="aspect-video an gap-2 text-xl flex-col items-center flex justify-center bg-destructive rounded-lg w-full lg:w-[600px] mx-auto my-4">
+  //         <div> {error || "Something went wrong"} :/</div>
+  //         <Button
+  //           className="bg-primary text-sm gap-2"
+  //           onClick={() =>
+  //             provider === "vidsrc" ? fetchVidSrcData() : fetchMovieLinksData()
+  //           }
+  //         >
+  //           Retry <RotateCw className="w-4 h-4" />
+  //         </Button>
+  //       </div>
+  //     </>
+  //   );
+  // }
   return (
-    <div className="aspect-video w-full lg:w-[640px]  mx-auto my-4">
+    <div className="aspect-video w-full lg:w-[640px] mx-auto my-4">
       <Select
         defaultValue={provider}
         onValueChange={(value) => setProvider(value)}
       >
-        <SelectTrigger className="   w-fit">
+        <SelectTrigger className="w-fit">
           <SelectValue className="">
-            <div className="pr-10">Server {provider === "vidsrc" ? 1 : 2} </div>
+            <div className="pr-10">
+              Server{" "}
+              {provider === "vidsrc" ? 1 : provider === "consumet" ? 2 : 3}
+            </div>
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -188,26 +193,32 @@ export default function Episode(props: EpisodeProps) {
           <SelectItem value={"consumet"} key={"consumet"}>
             <div className="mx-1 flex gap-2">Server 2</div>
           </SelectItem>
+          <SelectItem value={"embedded"} key={"embedded"}>
+            <div className="mx-1 flex gap-2">Server 3</div>
+          </SelectItem>
         </SelectContent>
       </Select>
-      {episode &&
-        (provider === "vidsrc" ? (
-          <OPlayer
-            key={"vidsrc"}
-            provider={"vidsrc"}
-            sources={episode.sources}
-            subtitles={episode.subtitles}
-            type={type}
+
+      {episode && (provider === "vidsrc" || provider === "consumet") ? (
+        <OPlayer
+          key={provider}
+          provider={provider}
+          sources={episode.sources}
+          subtitles={episode.subtitles}
+          type={type}
+        />
+      ) : (
+        provider === "embedded" && (
+          <iframe
+            className="w-full h-full"
+            src={
+              type === "movie"
+                ? `https://vidsrc.pro/embed/${type}/${movieID}`
+                : `https://vidsrc.pro/embed/${type}/${id}/${seasonNumber}/${episodeNumber}`
+            }
           />
-        ) : (
-          <OPlayer
-            key={"consumet"}
-            provider={"consumet"}
-            sources={episode.sources}
-            subtitles={episode.subtitles}
-            type={type}
-          />
-        ))}
+        )
+      )}
     </div>
   );
 }
