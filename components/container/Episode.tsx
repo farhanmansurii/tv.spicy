@@ -214,7 +214,7 @@ export default function Episode(props: EpisodeProps) {
             className="w-full h-full aspect-video font-mono"
             src={
               type === "movie"
-                ? `https://vidsrc.pro/embed/${type}/${movieID}/color-15006D`
+                ? `https://vidsrc.pro/embed/${type}/${movieID}`
                 : `https://vidsrc.pro/embed/${type}/${id}/${seasonNumber}/${episodeNumber}/`
             }
           />
