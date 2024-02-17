@@ -65,26 +65,22 @@ export default function Episode(props: EpisodeProps) {
   }
 
   function handleVidSrcResponse(res: any) {
-    const engSubtitles = res.flatMap((e: any) => {
+     const engSubtitles = res.flatMap((e: any) => {
       if (e.data && e.data.sub) {
         if (Array.isArray(e.data.sub)) {
-          return e.data.sub
-            .filter(
-              (sub: any) =>
-                sub.lang &&
-                (sub.lang.toLowerCase() === "eng" ||
-                  sub.lang.toLowerCase() === "english")
-            )
-            .map((sub: any, index: number) => ({
-              lang: sub.lang,
-              url: sub.file,
-            }));
+          return e.data.sub.map((sub: any, index: number) => ({
+            lang: sub.lang,
+            url: sub.file,
+          }));
         } else if (typeof e.data.sub === "object") {
-          const lang = Object.keys(e.data.sub)[0];
-          const url = e.data.sub[lang];
-          if (lang && url) {
-            return [{ lang, url }];
+          const subtitles: { lang: string; url: string }[] = [];
+          for (const lang in e.data.sub) {
+            if (Object.prototype.hasOwnProperty.call(e.data.sub, lang)) {
+              const url = e.data.sub[lang as keyof typeof e.data.sub];
+              subtitles.push({ lang, url });
+            }
           }
+          return subtitles || [];
         }
       }
       return [];
