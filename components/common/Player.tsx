@@ -72,21 +72,24 @@ export default function OPlayer({
   });
   // const titleToDisplay = title !== "Full" ? `E${episode.number} ${title}` : "";
   const subtitlesList = useMemo(() => {
-    let defaultFound = false;
-    return subtitles
-        ?.filter(subtitle => subtitle.url && (subtitle.url.endsWith('.vtt') || subtitle.url.endsWith('.srt')))
-        .map((subtitle, index) => {
-            const isEnglish = ['eng', 'english'].includes(subtitle?.lang?.toLowerCase());
-            const defaultSubtitle = !defaultFound && isEnglish;
-            defaultFound = defaultFound || defaultSubtitle;
-            return {
-                src: subtitle.url,
-                default: defaultSubtitle,
-                name: subtitle?.lang?.toUpperCase(),
-            };
-        }) || [];
-}, [subtitles]);
+    const firstEnglishSubtitleIndex = subtitles.findIndex(subtitle =>
+      subtitle?.lang?.toLowerCase().includes('english') || subtitle?.lang?.toLowerCase() === 'eng'
+    );
+    console.log(`🚀 ~ subtitlesList ~ firstEnglishSubtitleIndex:`, firstEnglishSubtitleIndex)
+    const subtitleTracks = subtitles
+      ?.filter(subtitle =>
+        subtitle.url &&
+        (subtitle.url.endsWith('.vtt') || subtitle.url.endsWith('.srt'))
+      )
+      .map((subtitle, index) => ({
+        src: subtitle.url,
+        default: false,
+        name: subtitle.lang,
+      })) || [];
+    return subtitleTracks
+  }, [subtitles]);
 
+  console.log(`🚀 ~ subtitlesList ~ subtitlesList:`, subtitlesList);
 
   const plugins = [
     OUI({

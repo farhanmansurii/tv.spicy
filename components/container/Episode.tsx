@@ -77,7 +77,7 @@ export default function Episode(props: EpisodeProps) {
           for (const lang in e.data.sub) {
             if (Object.prototype.hasOwnProperty.call(e.data.sub, lang)) {
               const url = e.data.sub[lang as keyof typeof e.data.sub];
-              subtitles.push({ lang, url });
+              subtitles.push({ lang:lang?.split('-')[0] || lang, url });
             }
           }
           return subtitles || [];
