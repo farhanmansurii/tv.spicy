@@ -76,14 +76,14 @@ export default function OPlayer({
       subtitle?.lang?.toLowerCase().includes('english') || subtitle?.lang?.toLowerCase() === 'eng'
     );
     console.log(`🚀 ~ subtitlesList ~ firstEnglishSubtitleIndex:`, firstEnglishSubtitleIndex)
-    const subtitleTracks = subtitles
+    const subtitleTracks = includesEng
       ?.filter(subtitle =>
         subtitle.url &&
         (subtitle.url.endsWith('.vtt') || subtitle.url.endsWith('.srt'))
       )
       .map((subtitle, index) => ({
         src: subtitle.url,
-        default: false,
+        default: index===0,
         name: subtitle.lang,
       })) || [];
     return subtitleTracks
