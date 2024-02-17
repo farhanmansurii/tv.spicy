@@ -87,7 +87,6 @@ export default function OPlayer({
         }) || [];
 }, [subtitles]);
 
-  console.log(`🚀 ~ subtitlesList:`, subtitles);
 
   const plugins = [
     OUI({

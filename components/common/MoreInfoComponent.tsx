@@ -7,7 +7,6 @@ const MoreInfoComponent: React.FC<{ show: Show; type: string }> = ({
   show,
   type,
 }) => {
-  console.log(`🚀 ~ show:`, show);
   return (
     <div className="  w-full pb-2.5 flex gap-5 flex-col">
       {show.overview && (

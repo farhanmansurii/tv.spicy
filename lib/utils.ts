@@ -216,9 +216,7 @@ export async function fetchGenreById(
   id: string,
   page: number = 1
 ) {
-  console.log(
-    `https://api.themoviedb.org/3/discover/${type}/?include_adult=true&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc&with_genres=${id}`
-  );
+ 
   if (!apiKey) {
     throw new Error("TMDB API key is missing");
   }
