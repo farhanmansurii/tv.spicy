@@ -209,7 +209,7 @@ export default function Episode(props: EpisodeProps) {
         />
       ) : (
         provider === "embedded" && (
-          <div className="iframe-container">
+      
           <iframe
             className="w-full h-full aspect-video font-mono"
             src={
@@ -218,7 +218,7 @@ export default function Episode(props: EpisodeProps) {
                 : `https://vidsrc.pro/embed/${type}/${id}/${seasonNumber}/${episodeNumber}/`
             }
           />
-        </div>
+       
         
         )
       )}
