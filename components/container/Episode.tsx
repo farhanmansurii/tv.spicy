@@ -100,7 +100,7 @@ export default function Episode(props: EpisodeProps) {
   function handleMovieLinksResponse(err: any, res: any) {
     if (err) {
       // setError("Error playing episode");
-      setProvider('embedded')
+      setProvider("embedded");
     } else {
       const transformedData: EpisodeData = {
         sources: res.sources.map((source: any) => ({
@@ -120,7 +120,7 @@ export default function Episode(props: EpisodeProps) {
   useEffect(() => {
     if (provider === "vidsrc") {
       fetchVidSrcData();
-    } else if(provider==='consumet') {
+    } else if (provider === "consumet") {
       fetchMovieLinksData();
     }
   }, [episodeId, id, provider, type, movieID, episodeNumber, seasonNumber]);
@@ -209,8 +209,8 @@ export default function Episode(props: EpisodeProps) {
         />
       ) : (
         provider === "embedded" && (
-      
           <iframe
+            allowFullScreen
             className="w-full h-full aspect-video font-mono"
             src={
               type === "movie"
@@ -218,8 +218,6 @@ export default function Episode(props: EpisodeProps) {
                 : `https://vidsrc.pro/embed/${type}/${id}/${seasonNumber}/${episodeNumber}/`
             }
           />
-       
-        
         )
       )}
     </div>

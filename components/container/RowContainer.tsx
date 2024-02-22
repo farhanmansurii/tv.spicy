@@ -35,7 +35,6 @@ export default function RowContainer() {
       {trendingTVShows}
       {topRatedTVShows}
       {trendingMovies}
-
     </div>
   );
 }
