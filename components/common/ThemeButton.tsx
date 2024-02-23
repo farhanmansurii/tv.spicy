@@ -16,10 +16,9 @@ export default function ThemeButton() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
        
-        <Button className="rounded-full p-2">
-        <span className="sr-only">Toggle theme</span>
-                <Moon className="h-full w-full" />
-              </Button>
+      <Button size={"icon"} className="rounded-full aspect-square p-2">
+          <Moon className="h-full w-full" />
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme("light")}>

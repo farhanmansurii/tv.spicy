@@ -16,7 +16,7 @@ type MyPersist = (
 const useRecentSearchStore = create<SearchState>(
   (persist as MyPersist)(
     (set) => ({
-      searches: []?.slice(0, 4),
+      searches: [],
       addToSearchList: (show: any) =>
         set((state) => {
           if (state.searches.includes(show)) {

@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
-import { Show } from '@/lib/types';
-import Link from 'next/link';
-import React from 'react';
-import { Motiondiv } from './MotionDiv';
+import { Show } from "@/lib/types";
+import Link from "next/link";
+import React from "react";
+import { Motiondiv } from "./MotionDiv";
 
 export default function ShowCard(props: {
   index: number;
@@ -11,6 +11,7 @@ export default function ShowCard(props: {
   showRank?: Boolean;
   isVertical?: Boolean;
   type?: string;
+  onClick?: any;
 }) {
   const { index, show, showRank, isVertical, type } = props;
   const imagePath = `https://image.tmdb.org/t/p/w500/${show.backdrop_path}`;
@@ -28,13 +29,16 @@ export default function ShowCard(props: {
     return staggeredIndex;
   }
   return (
-    <Link href={`/${show.media_type || type}/${show.id}`}>
+    <Link
+      onClick={() => props.onClick && props.onClick(show)}
+      href={`/${show.media_type || type}/${show.id}`}
+    >
       <Motiondiv
         initial="hidden"
         animate="visible"
         transition={{
           delay: calculateDelay(index) * 0.1,
-          ease: 'easeInOut',
+          ease: "easeInOut",
           duration: 0.5,
         }}
         viewport={{ amount: 0 }}
@@ -45,7 +49,7 @@ export default function ShowCard(props: {
           <div key={show.id} className="relative group">
             <img
               alt=""
-              className="object-cover  border-transparent border group-hover:border-primary   duration-200  ease-in-out  h-full w-full "
+              className="object-center object-cover h-full w-full border-transparent border group-hover:border-primary duration-200 ease-in-out"
               src={imagePath}
             />
             <svg
@@ -65,28 +69,28 @@ export default function ShowCard(props: {
               )}
               <div
                 className={` text-sm  line-clamp-1 ${
-                  showRank && (index + 1 === 10 ? ` ml-24` : 'ml-12')
+                  showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
                 }`}
               >
                 {show.title || show.name}
               </div>
               <div
                 className={`text-[10px]  flex gap-1 capitalize opacity-75 ${
-                  showRank && (index + 1 === 10 ? ` ml-24` : 'ml-12')
+                  showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
                 }`}
               >
-                {(show.first_air_date || show.release_date)?.split('-')[0]}{' '}
+                {(show.first_air_date || show.release_date)?.split("-")[0]}{" "}
                 <p
                   className={`${
-                    (show.media_type || type)?.toLowerCase() === 'tv'
-                      ? 'uppercase'
-                      : 'capitalize'
+                    (show.media_type || type)?.toLowerCase() === "tv"
+                      ? "uppercase"
+                      : "capitalize"
                   }`}
                 >
                   • {type ? type : show.media_type}
                 </p>
                 <p className="flex gap-2 items-center">
-                  {' • ' + show.vote_average?.toFixed(2)}
+                  {" • " + show.vote_average?.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -94,14 +98,16 @@ export default function ShowCard(props: {
         ) : (
           <div
             key={show.id}
-            className="relative group hover:opacity-100 duration-300 border border-transparent hover:border-primary hover:shadow-2xl md:opacity-40"
-            style={{ position: 'relative', width: '100%', height: '100%' }}
+            className="relative group hover:opacity-100 durtion-300 border border-transparent hover:border-primary hover:shadow-2xl md:opacity-40"
+            style={{ display: "grid", placeItems: "center" }}
           >
-            <img
-              alt=""
-              className="object-cover w-full h-full"
-              src={posterPath}
-            />
+            <div className="   relative  flex items-center justify-center">
+              <img
+                alt=""
+                className="w-full  object-coverinset-0 h-full"
+                src={posterPath}
+              />
+            </div>
 
             <svg
               fill="currentColor"

@@ -52,10 +52,11 @@ export default function SearchBar() {
 
   return (
     <div>
-      <Button
-        onClick={() => toggle()} size={'icon'} className="rounded-full aspect-square p-2">
-            <Search className="h-full w-full" />
-          </Button>
+      <Link as={"/search"} href={"/search"}>
+        <Button size={"icon"} className="rounded-full aspect-square p-2">
+          <Search className="h-full w-full" />
+        </Button>
+      </Link>
       <CommandDialog open={open} onOpenChange={toggle}>
         <DebouncedInput
           setQuery={searchStore.setQuery}
@@ -113,7 +114,7 @@ export default function SearchBar() {
             <CommandEmpty>No results found.</CommandEmpty>
           )}
           {searches.length > 0 && (
-            <CommandGroup  heading="Recent Searches">
+            <CommandGroup heading="Recent Searches">
               {searches.map((result) => (
                 <Link
                   key={result.id}
@@ -152,7 +153,6 @@ export default function SearchBar() {
             </CommandGroup>
           )}
         </CommandList>
-        
       </CommandDialog>
     </div>
   );
