@@ -33,6 +33,7 @@ const Carousal = dynamic(() => import("../components/common/Carousal"), {
 });
 
 export default function Home() {
+  
   return (
     <div>
       <Navbar/>

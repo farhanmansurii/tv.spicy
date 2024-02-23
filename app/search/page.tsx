@@ -3,6 +3,8 @@ import SearchPageContainer from "@/components/common/SearchPageContainer";
 import React from "react";
 
 export default function SearchPage() {
+  
+ 
   return (
     <div>
       <head>

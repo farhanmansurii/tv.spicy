@@ -20,6 +20,29 @@ import RowLoader from "../loading/RowLoader";
 const Seperator = () => <div className="text-ring font-bold">|</div>;
 const Details = (props: any) => {
   const { data, type } = props;
+  if (typeof document !== 'undefined') {
+    document.addEventListener("gesturestart", function (e) {
+        e.preventDefault();
+        if (document.body) {
+          (document.body.style as any).zoom = "0.99";
+      }
+    });
+
+    document.addEventListener("gesturechange", function (e) {
+        e.preventDefault();
+        if (document.body) {
+          (document.body.style as any).zoom = "0.99";
+        }
+    });
+
+    document.addEventListener("gestureend", function (e) {
+        e.preventDefault();
+        if (document.body) {
+          (document.body.style as any).zoom = "1";
+        }
+    });
+}
+
   return (
     <>
       <div className="  lg:mx-auto">
