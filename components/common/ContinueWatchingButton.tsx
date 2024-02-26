@@ -57,7 +57,7 @@ export default function ContinueWatchingButton(
       return (
         <Button
           onClick={() => addToList(props.show)}
-          className="flex whitespace-nowrap  text-[13px]"
+          className="flex whitespace-nowrap w-full  text-[13px]"
         >
           {isAdded ? (
             <>
@@ -75,7 +75,7 @@ export default function ContinueWatchingButton(
 
     if (recentlyWatchedEpisode.episode !== activeEP?.episode) {
       return (
-        <div className="flex flex-col md:flex-row w-fit mx-auto items-center max-w-full gap-2">
+        <div className="flex flex-col md:flex-row w-full mx-auto items-center max-w-full gap-2">
           <Button
             onClick={() => addToList(props.show)}
             className="flex whitespace-nowrap w-full gap-2 "
@@ -106,7 +106,10 @@ export default function ContinueWatchingButton(
     }
 
     return (
-      <Button  className="flex w-full gap-2 whitespace-nowrap "  onClick={() => addToList(props.show)} >
+      <Button
+        className="flex w-full grow flex-auto gap-2 whitespace-nowrap "
+        onClick={() => addToList(props.show)}
+      >
         {isAdded ? (
           <>
             <Check className="w-7 h-7 p-1" />

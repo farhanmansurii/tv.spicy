@@ -7,7 +7,6 @@ import { ChevronRight, Play } from "lucide-react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 
-
 import {
   SelectTrigger,
   Select,
@@ -20,7 +19,7 @@ import { Toggle } from "../ui/toggle";
 import EpisodeCard from "../common/EpisodeCard";
 import { SeasonTabsProps } from "@/lib/types";
 const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
-  const [activeSeason, setActiveSeason] = useState<any>(seasons[0].season);
+  const [activeSeason, setActiveSeason] = useState<any>(seasons[0]?.season);
   const [isGridView, setIsGridView] = useState(false);
   return activeSeason ? (
     <div className="w-full  flex flex-col mx-auto">
@@ -61,8 +60,12 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
           (season: any) =>
             season.season === activeSeason && (
               <div key={season.season} className="flex h-full flex-col">
-                  <SeasonContent isGridView={isGridView}  id={id} tv_id={tv_id} season={season} />
-               
+                <SeasonContent
+                  isGridView={isGridView}
+                  id={id}
+                  tv_id={tv_id}
+                  season={season}
+                />
               </div>
             )
         )}
@@ -75,6 +78,5 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
     </div>
   );
 };
-
 
 export default SeasonTabs;

@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Show } from '@/lib/types';
+import { Button } from "@/components/ui/button";
+import { Show } from "@/lib/types";
 import {
   BookmarkIcon,
   LucidePlay,
@@ -7,8 +7,8 @@ import {
   PlayCircleIcon,
   PlaySquareIcon,
   Plus,
-} from 'lucide-react';
-import ContinueWatchingButton from './ContinueWatchingButton';
+} from "lucide-react";
+import ContinueWatchingButton from "./ContinueWatchingButton";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -46,12 +46,9 @@ export default function CarousalCard(props: CarousalCardProps) {
                     ).split("-")[0]}
                 </div>
 
-                <div className="flex flex-col my-2  gap-2">
+                <div className="flex flex-col my-2   border-white gap-2">
                   {!isDetailsPage && (
-                    <Button
-                      size="sm"
-                      className="flex rounded-sm w-[180px] text-[13px]"
-                    >
+                    <Button size="sm" className="flex rounded-sm  text-[13px]">
                       <svg
                         fill="currentColor"
                         viewBox="0 0 16 16"
@@ -62,12 +59,12 @@ export default function CarousalCard(props: CarousalCardProps) {
                       Go to Show
                     </Button>
                   )}
+                  <ContinueWatchingButton
+                    show={props.show}
+                    type={props.type ?? ""}
+                    id={props.show?.id}
+                  />
                 </div>
-                <ContinueWatchingButton
-                  show={props.show}
-                  type={props.type ?? ""}
-                  id={props.show?.id}
-                />
               </div>
             </div>
           </div>
@@ -103,7 +100,7 @@ export default function CarousalCard(props: CarousalCardProps) {
                     )}
                     <ContinueWatchingButton
                       show={props.show}
-                      type={type ??""}
+                      type={type ?? ""}
                       id={props.id ?? ""}
                     />
                   </div>

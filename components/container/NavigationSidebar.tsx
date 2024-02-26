@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 import { TabsContent, Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
-const NavigationSidebar = (props:{ tvGenre: any, movieGenre: any }) => {
- const {movieGenre, tvGenre} = props;
+const NavigationSidebar = (props: { tvGenre: any; movieGenre: any }) => {
+  const { movieGenre, tvGenre } = props;
   return (
     <div>
       <SheetContent className=" overflow-scroll py-10">
@@ -49,7 +49,7 @@ const NavigationSidebar = (props:{ tvGenre: any, movieGenre: any }) => {
 const renderButtons = (genres: any[], type: string) => {
   return (
     <>
-      <Link href={`/discover/trending?type=${type}&title=Trending`}>
+      {/* <Link href={`/discover/trending?type=${type}&title=Trending`}>
         <SheetTrigger className="w-full">
           <Button
             variant={"ghost"}
@@ -102,7 +102,7 @@ const renderButtons = (genres: any[], type: string) => {
             Top Rated
           </Button>
         </SheetTrigger>
-      </Link>
+      </Link> */}
       {genres?.map((genre: any, index: number) => (
         <Link
           key={index}
