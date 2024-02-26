@@ -53,11 +53,14 @@ export default function ContinueWatchingButton(
   );
 
   const renderWatchButton = () => {
-    if (!recentlyWatchedEpisode) {
-      return (
+    const isEpisodeActive =
+      recentlyWatchedEpisode?.episode === activeEP?.episode;
+
+    return (
+      <div className="flex gap-2">
         <Button
           onClick={() => addToList(props.show)}
-          className="flex whitespace-nowrap w-full  text-[13px]"
+          className="flex whitespace-nowrap w-full gap-2"
         >
           {isAdded ? (
             <>
@@ -66,64 +69,24 @@ export default function ContinueWatchingButton(
           ) : (
             <>
               <Plus className="w-7 h-7 p-1" />
-              Add to Up Next
+              {recentlyWatchedEpisode ? "Add to Up Next" : "Added"}
             </>
           )}
         </Button>
-      );
-    }
-
-    if (recentlyWatchedEpisode.episode !== activeEP?.episode) {
-      return (
-        <div className="flex flex-col md:flex-row w-full mx-auto items-center max-w-full gap-2">
+        {!isEpisodeActive && recentlyWatchedEpisode && (
           <Button
-            onClick={() => addToList(props.show)}
-            className="flex whitespace-nowrap w-full gap-2 "
-          >
-            {isAdded ? (
-              <>
-                <Check className="w-7 h-7 p-1" /> Added
-              </>
-            ) : (
-              <>
-                <Plus className="w-7 h-7 p-1" />
-                Add to Up Next
-              </>
-            )}
-          </Button>
-          <Button
-            className="flex gap-2  whitespace-nowrap w-full "
+            className="flex gap-2 whitespace-nowrap w-full"
             onClick={() => setActiveEP(recentlyWatchedEpisode)}
           >
             <svg viewBox="0 0 512 512" fill="currentColor" className="w-5 h-5">
               <path d="M133 440a35.37 35.37 0 01-17.5-4.67c-12-6.8-19.46-20-19.46-34.33V111c0-14.37 7.46-27.53 19.46-34.33a35.13 35.13 0 0135.77.45l247.85 148.36a36 36 0 010 61l-247.89 148.4A35.5 35.5 0 01133 440z" />
             </svg>
             Play S{recentlyWatchedEpisode.season} E
-            {recentlyWatchedEpisode?.episode}
+            {recentlyWatchedEpisode.episode}
           </Button>
-        </div>
-      );
-    }
-
-    return (
-      <Button
-        className="flex w-full grow flex-auto gap-2 whitespace-nowrap "
-        onClick={() => addToList(props.show)}
-      >
-        {isAdded ? (
-          <>
-            <Check className="w-7 h-7 p-1" />
-            Added
-          </>
-        ) : (
-          <>
-            <Plus className="w-7 h-7 p-1" />
-            Add to Up Next
-          </>
         )}
-      </Button>
+      </div>
     );
   };
-
   return <div className="flex gap-2">{renderWatchButton()}</div>;
 }
