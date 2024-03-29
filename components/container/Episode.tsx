@@ -215,7 +215,7 @@ export default function Episode(props: EpisodeProps) {
             src={
               type === "movie"
                 ? `https://vidsrc.pro/embed/${type}/${movieID}`
-                : `https://vidsrc.pro/embed/${type}/${id}/${seasonNumber}/${episodeNumber}/`
+                : `https://vidsrc.pro/embed/${type}/${id}/${seasonNumber}/${episodeNumber}`
             }
           />
         )
