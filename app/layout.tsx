@@ -28,14 +28,6 @@ export default function RootLayout({
           enableSystem
         >
           <div>{children}</div>
-          <Separator className="my-10" />
-          <div className=" mx-auto pb-10 flex gap-4 flex-col  w-[96%]">
-            <p className="">
-              This site does not store any files on our server, we only linked
-              to the media which is hosted on 3rd party services.
-            </p>
-            <p>Copyright ©SpicyTV 2024</p>
-          </div>
         </Providers>
       </body>
     </html>

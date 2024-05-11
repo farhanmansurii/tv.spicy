@@ -9,30 +9,30 @@ const MoreInfoComponent: React.FC<{ show: Show; type: string }> = ({
 }) => {
   return (
     <div className="  w-full pb-2.5 flex gap-5 flex-col">
-      {show.overview && (
+      {show?.overview && (
         <div className="font-bold">
-          Overview : <span className="font-normal">{show.overview}</span>
+          Overview : <span className="font-normal">{show?.overview}</span>
         </div>
       )}
-      {show.vote_average && (
+      {show?.vote_average && (
         <div className="font-bold">
           Rating :{" "}
-          <span className="font-normal">{show.vote_average.toFixed(2)}</span>
+          <span className="font-normal">{show?.vote_average.toFixed(2)}</span>
         </div>
       )}
-      {(show.release_date || show.first_air_date) && (
+      {(show?.release_date || show?.first_air_date) && (
         <div className="font-bold">
           Release Date :{" "}
           <span className="font-normal">
-            {show.release_date || show.first_air_date}
+            {show?.release_date || show?.first_air_date}
           </span>
         </div>
       )}
-      {show.spoken_languages && (
+      {show?.spoken_languages && (
         <div className="font-bold">
           Language :{" "}
           <span className="font-normal ">
-            {show.spoken_languages?.[0]?.english_name}
+            {show?.spoken_languages?.[0]?.english_name}
           </span>
         </div>
       )}
@@ -44,44 +44,45 @@ const MoreInfoComponent: React.FC<{ show: Show; type: string }> = ({
           </span>
         </div>
       )}
-      {type === "tv" && show.status && (
+      {type === "tv" && show?.status && (
         <div className="font-bold">
-          Status : <span className="font-normal">{show.status}</span>
+          Status : <span className="font-normal">{show?.status}</span>
         </div>
       )}
       {type === "tv" && show?.last_air_date && (
         <div className="font-bold">
           Last Air Date :{" "}
-          <span className="font-normal">{show.last_air_date}</span>
+          <span className="font-normal">{show?.last_air_date}</span>
         </div>
       )}
       {type === "tv" && show?.number_of_seasons && show?.number_of_episodes && (
         <div className="font-bold">
           Seasons / episodes :{" "}
           <span className="font-normal">
-            {show.number_of_seasons} seasons {show.number_of_episodes} episodes
+            {show?.number_of_seasons} seasons {show?.number_of_episodes}{" "}
+            episodes
           </span>
         </div>
       )}
-      {type === "movie" && show.runtime && (
+      {type === "movie" && show?.runtime && (
         <>
           <div className="font-bold">
             Runtime :{" "}
-            <span className="font-normal">{show.runtime} minutes</span>
+            <span className="font-normal">{show?.runtime} minutes</span>
           </div>
-          <MovieEstimateFinishTime runtime={show.runtime} />
+          <MovieEstimateFinishTime runtime={show?.runtime} />
         </>
       )}
-      {type === "movie" && show.budget ? (
+      {type === "movie" && show?.budget ? (
         <div className="font-bold">
-          Budget : <span className="font-normal">${show.budget}</span>
+          Budget : <span className="font-normal">${show?.budget}</span>
         </div>
       ) : (
         ""
       )}
-      {type === "movie" && show.revenue ? (
+      {type === "movie" && show?.revenue ? (
         <div className="font-bold">
-          Revenue : <span className="font-normal">${show.revenue}</span>
+          Revenue : <span className="font-normal">${show?.revenue}</span>
         </div>
       ) : (
         ""

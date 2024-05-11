@@ -83,7 +83,7 @@ export default function CarousalCard(props: CarousalCardProps) {
                     {(show.first_air_date || show.release_date).split("-")[0]})
                   </div>
                   <div className="text-xs opacity-50 normal-case line-clamp-2">
-                    {show.overview}
+                    {show?.overview}
                   </div>
                   <div className="flex my-2  gap-2">
                     {!isDetailsPage && (

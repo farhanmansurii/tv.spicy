@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import SafeVideoFrame from "./SafeIFrame";
 
 interface EpisodeProps {
   episodeId: string;
@@ -209,10 +210,8 @@ export default function Episode(props: EpisodeProps) {
         />
       ) : (
         provider === "embedded" && (
-          <iframe
-            allowFullScreen
-            className="w-full h-full aspect-video font-mono"
-            src={
+          <SafeVideoFrame
+            url={
               type === "movie"
                 ? `https://vidsrc.pro/embed/${type}/${movieID}`
                 : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`

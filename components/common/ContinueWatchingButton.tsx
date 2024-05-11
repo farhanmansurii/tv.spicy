@@ -55,7 +55,6 @@ export default function ContinueWatchingButton(
   const renderWatchButton = () => {
     const isEpisodeActive =
       recentlyWatchedEpisode?.episode === activeEP?.episode;
-
     return (
       <div className="flex gap-2">
         <Button
@@ -69,7 +68,7 @@ export default function ContinueWatchingButton(
           ) : (
             <>
               <Plus className="w-7 h-7 p-1" />
-              {recentlyWatchedEpisode ? "Add to Up Next" : "Added"}
+              Add to Up Next
             </>
           )}
         </Button>
