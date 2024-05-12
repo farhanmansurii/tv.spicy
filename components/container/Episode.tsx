@@ -101,7 +101,7 @@ export default function Episode(props: EpisodeProps) {
   function handleMovieLinksResponse(err: any, res: any) {
     if (err) {
       // setError("Error playing episode");
-      setProvider("embedded");
+      setProvider("alt");
     } else {
       const transformedData: EpisodeData = {
         sources: res.sources.map((source: any) => ({
@@ -182,20 +182,22 @@ export default function Episode(props: EpisodeProps) {
         <SelectTrigger className="w-fit">
           <SelectValue className="">
             <div className="pr-10">
-              Server{" "}
-              {provider === "vidsrc" ? 1 : provider === "consumet" ? 2 : 3}
+              Server {provider === "embedded" ? 2 : provider === "alt" && 1}
             </div>
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={"vidsrc"} key={"vidsrc"}>
+          {/* <SelectItem value={"vidsrc"} key={"vidsrc"}>
             <div className="mx-1 flex gap-2">Server 1</div>
           </SelectItem>
           <SelectItem value={"consumet"} key={"consumet"}>
             <div className="mx-1 flex gap-2">Server 2</div>
-          </SelectItem>
+          </SelectItem> */}
           <SelectItem value={"embedded"} key={"embedded"}>
-            <div className="mx-1 flex gap-2">Server 3</div>
+            <div className="mx-1 flex gap-2">Server 1</div>
+          </SelectItem>
+          <SelectItem value={"alt"} key={"alt"}>
+            <div className="mx-1 flex gap-2">Server 2</div>
           </SelectItem>
         </SelectContent>
       </Select>
@@ -208,16 +210,22 @@ export default function Episode(props: EpisodeProps) {
           subtitles={episode.subtitles}
           type={type}
         />
+      ) : provider === "alt" ? (
+        <SafeVideoFrame
+          url={
+            type === "movie"
+              ? `https://vidsrc.icu/embed/${type}/${movieID}`
+              : `https://vidsrc.icu/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
+          }
+        />
       ) : (
-        provider === "embedded" && (
-          <SafeVideoFrame
-            url={
-              type === "movie"
-                ? `https://vidsrc.pro/embed/${type}/${movieID}`
-                : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
-            }
-          />
-        )
+        <SafeVideoFrame
+          url={
+            type === "movie"
+              ? `https://vidsrc.pro/embed/${type}/${movieID}`
+              : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
+          }
+        />
       )}
     </div>
   );

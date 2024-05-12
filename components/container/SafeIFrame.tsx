@@ -39,6 +39,7 @@ const SafeVideoFrame: React.FC<SafeVideoFrameProps> = ({ url }) => {
     <iframe
       ref={iframeRef}
       allowFullScreen
+
       className="w-full h-full aspect-video font-mono"
       src={url}
     />
