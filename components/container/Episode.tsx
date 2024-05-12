@@ -193,10 +193,10 @@ export default function Episode(props: EpisodeProps) {
           <SelectItem value={"consumet"} key={"consumet"}>
             <div className="mx-1 flex gap-2">Server 2</div>
           </SelectItem> */}
-          <SelectItem value={"embedded"} key={"embedded"}>
+          <SelectItem value={"alt"} key={"alt"}>
             <div className="mx-1 flex gap-2">Server 1</div>
           </SelectItem>
-          <SelectItem value={"alt"} key={"alt"}>
+          <SelectItem value={"embedded"} key={"embedded"}>
             <div className="mx-1 flex gap-2">Server 2</div>
           </SelectItem>
         </SelectContent>
@@ -210,20 +210,22 @@ export default function Episode(props: EpisodeProps) {
           subtitles={episode.subtitles}
           type={type}
         />
-      ) : provider === "alt" ? (
-        <SafeVideoFrame
-          url={
-            type === "movie"
-              ? `https://vidsrc.icu/embed/${type}/${movieID}`
-              : `https://vidsrc.icu/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
-          }
-        />
-      ) : (
-        <SafeVideoFrame
-          url={
+      ) : provider === "embedded" ? (
+        <iframe
+          className="w-full h-full aspect-video font-mono"
+          src={
             type === "movie"
               ? `https://vidsrc.pro/embed/${type}/${movieID}`
               : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
+          }
+        />
+      ) : (
+        <iframe
+          className="w-full h-full aspect-video font-mono"
+          src={
+            type === "movie"
+              ? `https://vidsrc.icu/embed/${type}/${movieID}`
+              : `https://vidsrc.icu/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
           }
         />
       )}
