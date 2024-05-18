@@ -63,7 +63,7 @@ export default function MoreDetailsContainer(props: {
           />
         ))}
       </div>
-      {renderContent()}
+      <div className="w-[96%] mx-auto">{renderContent()}</div>
     </div>
   );
 }
