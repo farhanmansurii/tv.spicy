@@ -58,56 +58,41 @@ const renderButtons = (genres: any[], type: string) => {
     <div>
       <Link href={`/discover/trending?type=${type}&title=Trending`}>
         <SheetTrigger className="w-full">
-          <Button
-            variant={"ghost"}
-            className="flex w-full text-start justify-start"
-          >
+          <div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
             Trending
-          </Button>
+          </div>
         </SheetTrigger>
       </Link>
 
       <Link href={`/discover/airing-today?type=${type}&title=Airing Today`}>
         <SheetTrigger className="w-full">
-          <Button
-            variant={"ghost"}
-            className="flex w-full text-start justify-start"
-          >
+          <div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
             Airing Today
-          </Button>
+          </div>
         </SheetTrigger>
       </Link>
 
       <Link href={`/discover/on-the-air?type=${type}&title=On The Air`}>
         <SheetTrigger className="w-full">
-          <Button
-            variant={"ghost"}
-            className="flex w-full text-start justify-start"
-          >
+          <div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
             On The Air
-          </Button>
+          </div>
         </SheetTrigger>
       </Link>
 
       <Link href={`/discover/popular?type=${type}&title=Popular`}>
         <SheetTrigger className="w-full">
-          <Button
-            variant={"ghost"}
-            className="flex w-full text-start justify-start"
-          >
+          <div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
             Popular
-          </Button>
+          </div>
         </SheetTrigger>
       </Link>
 
       <Link href={`/discover/top-rated?type=${type}&title=Top Rated`}>
         <SheetTrigger className="w-full">
-          <Button
-            variant={"ghost"}
-            className="flex w-full text-start justify-start"
-          >
+          <div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
             Top Rated
-          </Button>
+          </div>
         </SheetTrigger>
       </Link>
       {genres?.map((genre: any, index: number) => (
