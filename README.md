@@ -1,6 +1,6 @@
-# Spicy TV
+# Watvh
 
-Spicy TV is a web application that allows users to explore and watch a vast collection of movies and TV shows. With a user-friendly interface and integration with the TMDb API, Spicy TV provides a delightful streaming experience. You can also save your favorite content to a watchlist and track previously watched content with time tracking features.
+Watvh is a web application that allows users to explore and watch a vast collection of movies and TV shows. With a user-friendly interface and integration with the TMDb API, Watvh provides a delightful streaming experience. You can also save your favorite content to a watchlist and track previously watched content with time tracking features.
 
 ## Features
 
