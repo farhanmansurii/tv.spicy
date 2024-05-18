@@ -2,6 +2,11 @@
 
 Watvh is a web application that allows users to explore and watch a vast collection of movies and TV shows. With a user-friendly interface and integration with the TMDb API, Watvh provides a delightful streaming experience. You can also save your favorite content to a watchlist and track previously watched content with time tracking features.
 
+## Screenshot 
+![CleanShot 2024-05-19 at 01 59 18@2x](https://github.com/farhanmansurii/tv.spicy/assets/74182335/193045be-dff2-4f24-b24f-27d4d63d21e6)
+![CleanShot 2024-05-19 at 01 59 43@2x](https://github.com/farhanmansurii/tv.spicy/assets/74182335/c4539edb-5348-421e-aa6a-448c2b0e5fe5)
+
+
 ## Features
 
 - Browse a vast library of movies and TV shows.
