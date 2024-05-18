@@ -9,6 +9,7 @@ import {
   Plus,
 } from "lucide-react";
 import ContinueWatchingButton from "./ContinueWatchingButton";
+import Link from "next/link";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -87,22 +88,26 @@ export default function CarousalCard(props: CarousalCardProps) {
                   </div>
                   <div className="flex my-2  gap-2">
                     {!isDetailsPage && (
-                      <Button className="flex  text-[13px]">
-                        <svg
-                          fill="currentColor"
-                          viewBox="0 0 16 16"
-                          className="w-7 h-7 p-1"
-                        >
-                          <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
-                        </svg>
-                        Go to Show
-                      </Button>
+                      <Link href={`/movie/${props.show?.id}`}>
+                        <Button className="flex text-[13px]">
+                          <svg
+                            fill="currentColor"
+                            viewBox="0 0 16 16"
+                            className="w-7 h-7 p-1"
+                          >
+                            <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
+                          </svg>
+                          Go to Show
+                        </Button>
+                      </Link>
                     )}
-                    <ContinueWatchingButton
-                      show={props.show}
-                      type={type ?? ""}
-                      id={props.id ?? ""}
-                    />
+                    {isDetailsPage && (
+                      <ContinueWatchingButton
+                        show={props.show}
+                        type={type ?? ""}
+                        id={props.id ?? ""}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

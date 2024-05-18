@@ -3,6 +3,8 @@ import { Show } from "@/lib/types";
 import Link from "next/link";
 import React from "react";
 import { Motiondiv } from "./MotionDiv";
+import { TextGlitch } from "../animated-common/TextFlip";
+import { Skeleton } from "../ui/skeleton";
 
 export default function ShowCard(props: {
   index: number;
@@ -47,11 +49,13 @@ export default function ShowCard(props: {
       >
         {!isVertical ? (
           <div key={show.id} className="relative group">
-            <img
-              alt=""
-              className="object-center object-cover h-full w-full border-transparent border group-hover:border-primary duration-200 ease-in-out"
-              src={imagePath}
-            />
+            <div className="aspect-video ">
+              <img
+                alt=""
+                className="object-center object-cover h-full w-full border-transparent border group-hover:border-primary duration-200 ease-in-out"
+                src={imagePath}
+              />
+            </div>
             <svg
               fill="currentColor"
               viewBox="0 0 16 16"
@@ -72,7 +76,7 @@ export default function ShowCard(props: {
                   showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
                 }`}
               >
-                {show.title || show.name}
+                <TextGlitch>{show.title || show.name}</TextGlitch>
               </div>
               <div
                 className={`text-[10px]  flex gap-1 capitalize opacity-75 ${

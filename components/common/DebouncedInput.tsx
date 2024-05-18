@@ -69,7 +69,7 @@ export function DebouncedInput<TData extends object>({
           className={
             "flex h-11 w-full border-0 ring-transparent focus:outline-none rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
           }
-          
+
           value={value}
           onChange={(e) => setValue(e.target.value)}
           {...props}

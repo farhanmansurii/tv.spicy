@@ -34,7 +34,7 @@ export default function Row(props: {
   return (
     <Carousel opts={{ dragFree: true }} className="w-[97%] mx-auto">
       {props.text && (
-        <div className="flex font-bold justify-between  mx-auto text-xl md:text-2xl items-center my-1 py-1 flex-row">
+        <div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
           <div className="mx-1 flex gap-2 items-center">
             {props.text}{" "}
             <div>
@@ -47,6 +47,7 @@ export default function Row(props: {
           </div>
         </div>
       )}
+
       <AnimatePresence>
         {!props.isVertical ? (
           <CarouselContent className="gap-0  ">

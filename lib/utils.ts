@@ -216,25 +216,38 @@ export async function fetchGenreById(
   id: string,
   page: number = 1
 ) {
- 
   if (!apiKey) {
     throw new Error("TMDB API key is missing");
   }
+
   const headers = {
     Authorization: `Bearer ${apiKey}`,
   };
-  const res = await fetch(
-    `https://api.themoviedb.org/3/discover/${type}?include_adult=true&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc&with_genres=${id}`,
-    { headers, next: { revalidate: 60 * 60 * 24 * 7 } }
-  );
 
-  if (!res.ok) {
-    throw new Error("Failed to find shows");
+  const queryParams = new URLSearchParams({
+    include_adult: "true",
+    include_video: "false",
+    language: "en-US",
+    page: page.toString(),
+    sort_by: "popularity.desc",
+  });
+
+  if (id) {
+    queryParams.set("with_genres", id);
   }
 
-  const genres = await res.json();
-  return genres.results;
+  const url = `https://api.themoviedb.org/3/discover/${type}?${queryParams.toString()}`;
+
+  const res = await fetch(url, { headers });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch shows");
+  }
+
+  const data = await res.json();
+  return data.results;
 }
+
 export async function fetchVidSrc(
   type: string,
   id: string,
@@ -250,7 +263,7 @@ export async function fetchVidSrc(
   try {
     const res = await fetch(baseURL);
     const data = await res.json();
-   
+
     callback(null, data);
   } catch (error) {
     console.log("error", error);

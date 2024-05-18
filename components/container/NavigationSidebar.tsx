@@ -11,6 +11,7 @@ import { fetchGenres } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TabsContent, Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
+import { TextGlitch } from "../animated-common/TextFlip";
 
 const NavigationSidebar = (props: { tvGenre: any; movieGenre: any }) => {
   const { movieGenre, tvGenre } = props;
@@ -18,7 +19,7 @@ const NavigationSidebar = (props: { tvGenre: any; movieGenre: any }) => {
     <div>
       <SheetContent className=" overflow-scroll py-10">
         <SheetHeader>
-          <SheetTitle className="">Explore</SheetTitle>
+          <SheetTitle className=" p-2 text-xl ">Explore</SheetTitle>
           <SheetDescription>
             <Tabs className=" w-full lg:max-w-[80%]">
               <TabsList
@@ -32,10 +33,16 @@ const NavigationSidebar = (props: { tvGenre: any; movieGenre: any }) => {
                   TV{" "}
                 </TabsTrigger>
               </TabsList>
-              <TabsContent className="  " value="tv">
+              <TabsContent
+                className="gap-2 flex flex-col overflow-auto  h-full"
+                value="tv"
+              >
                 {renderButtons(tvGenre, "tv")}
               </TabsContent>
-              <TabsContent className=" " value="movies">
+              <TabsContent
+                className="gap-2 flex flex-col overflow-auto  h-full"
+                value="movies"
+              >
                 {renderButtons(movieGenre, "movie")}
               </TabsContent>
             </Tabs>
@@ -48,8 +55,8 @@ const NavigationSidebar = (props: { tvGenre: any; movieGenre: any }) => {
 
 const renderButtons = (genres: any[], type: string) => {
   return (
-    <>
-      {/* <Link href={`/discover/trending?type=${type}&title=Trending`}>
+    <div>
+      <Link href={`/discover/trending?type=${type}&title=Trending`}>
         <SheetTrigger className="w-full">
           <Button
             variant={"ghost"}
@@ -102,25 +109,23 @@ const renderButtons = (genres: any[], type: string) => {
             Top Rated
           </Button>
         </SheetTrigger>
-      </Link> */}
+      </Link>
       {genres?.map((genre: any, index: number) => (
         <Link
           key={index}
+          className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 "
           href={`/discover/${genre.name.toLowerCase()}?type=${type}&id=${
             genre.id
           }&title=${encodeURIComponent(genre.name)}`}
         >
-          <SheetTrigger className="w-full">
-            <Button
-              variant={"ghost"}
-              className="flex w-full text-start justify-start"
-            >
-              {genre.name}
-            </Button>
+          <SheetTrigger className="text-left w-full">
+            <TextGlitch>
+              <div>{genre.name}</div>
+            </TextGlitch>
           </SheetTrigger>
         </Link>
       ))}
-    </>
+    </div>
   );
 };
 

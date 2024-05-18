@@ -11,10 +11,10 @@ export default function Loading() {
       <div className="relative h-[70vh] md:flex hidden mx-auto ">
         <Skeleton className="absolute inset-0" />
       </div>
-      <RowLoader />
-      <RowLoader />
-      <RowLoader />
-      <RowLoader />
+      <RowLoader withHeader />
+      <RowLoader withHeader />
+      <RowLoader withHeader />
+      <RowLoader withHeader />
     </div>
   );
 }

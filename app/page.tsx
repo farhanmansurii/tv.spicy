@@ -1,3 +1,5 @@
+import IconTabs from "@/components/common/DockMenu";
+import MinimalSocialsFooter from "@/components/common/Footer";
 import Navbar from "@/components/common/Navbar";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
 import WatchList from "@/components/common/WatchList";
@@ -7,15 +9,7 @@ import dynamic from "next/dynamic";
 const RowContainer = dynamic(
   () => import("@/components/container/RowContainer"),
   {
-    ssr: false,
-    loading: () => (
-      <>
-        <RowLoader />
-        <RowLoader />
-        <RowLoader />
-        <RowLoader />
-      </>
-    ),
+    ssr: true,
   }
 );
 const Carousal = dynamic(() => import("../components/common/Carousal"), {
@@ -33,14 +27,14 @@ const Carousal = dynamic(() => import("../components/common/Carousal"), {
 });
 
 export default function Home() {
-  
   return (
     <div>
-      <Navbar/>
+      <Navbar />
       <div className=" mx-auto flex justify-between"></div>
       <Carousal />
-      <RecentlyWatched/>
+      <RecentlyWatched />
       <RowContainer />
+      <MinimalSocialsFooter />
     </div>
   );
 }

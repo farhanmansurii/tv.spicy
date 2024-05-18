@@ -18,13 +18,13 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-512x512.png"></link>
         <meta name="theme-color" content="#e63946" />
-        <title>Spicy TV</title>
+        <title>watvh app</title>
       </head>
       <body>
         <Providers
           themes={["redDark", "redLight", "light", "dark"]}
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="redDark"
           enableSystem
         >
           <div>{children}</div>

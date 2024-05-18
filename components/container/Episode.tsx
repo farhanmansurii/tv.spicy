@@ -1,11 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import OPlayer from "../common/Player";
-import { fetchMovieLinks, fetchVidSrc, fetchsusflixLinks } from "@/lib/utils";
+import { fetchMovieLinks, fetchVidSrc } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
-import { Button } from "../ui/button";
-import { RotateCw } from "lucide-react";
-import { Toggle } from "../ui/toggle";
 import {
   Select,
   SelectContent,
@@ -13,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import SafeVideoFrame from "./SafeIFrame";
 
 interface EpisodeProps {
   episodeId: string;
