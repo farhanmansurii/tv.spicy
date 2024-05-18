@@ -1,12 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
+import { TextGlitch } from "@/components/animated-common/TextFlip";
+import { Motiondiv } from "@/components/common/MotionDiv";
 import { Show } from "@/lib/types";
 import Link from "next/link";
 import React from "react";
-import { Motiondiv } from "./MotionDiv";
-import { TextGlitch } from "../animated-common/TextFlip";
-import { Skeleton } from "../ui/skeleton";
 
-export default function ShowCard(props: {
+export default function AnimeShowCard(props: {
   index: number;
   variants?: any;
   show: Show;
@@ -16,8 +15,6 @@ export default function ShowCard(props: {
   onClick?: any;
 }) {
   const { index, show, showRank, isVertical, type } = props;
-  const imagePath = `https://image.tmdb.org/t/p/w500/${show.backdrop_path}`;
-  const posterPath = `https://image.tmdb.org/t/p/w500/${show.poster_path}`;
 
   const variants = {
     hidden: { opacity: 0, y: 30 },
@@ -31,10 +28,7 @@ export default function ShowCard(props: {
     return staggeredIndex;
   }
   return (
-    <Link
-      onClick={() => props.onClick && props.onClick(show)}
-      href={`/${show.media_type || type}/${show.id}`}
-    >
+    <Link onClick={() => props.onClick && props.onClick(show)} href={`/`}>
       <Motiondiv
         initial="hidden"
         animate="visible"
@@ -52,8 +46,8 @@ export default function ShowCard(props: {
             <div className="aspect-video ">
               <img
                 alt=""
-                className="object-center bg-muted object-cover h-full w-full border-transparent border group-hover:border-primary duration-200 ease-in-out"
-                src={imagePath}
+                className="object-center object-cover h-full w-full border-transparent border group-hover:border-primary duration-200 ease-in-out"
+                src={show.cover || show.image}
               />
             </div>
             <svg
@@ -76,14 +70,14 @@ export default function ShowCard(props: {
                   showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
                 }`}
               >
-                <TextGlitch>{show.title || show.name}</TextGlitch>
+                <TextGlitch>{show.title.english || ""}</TextGlitch>
               </div>
               <div
                 className={`text-[10px]  flex gap-1 capitalize opacity-75 ${
                   showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
                 }`}
               >
-                {(show.first_air_date || show.release_date)?.split("-")[0]}{" "}
+                {show.releaseDate}
                 <p
                   className={`${
                     (show.media_type || type)?.toLowerCase() === "tv"
@@ -91,10 +85,10 @@ export default function ShowCard(props: {
                       : "capitalize"
                   }`}
                 >
-                  • {type ? type : show.media_type}
+                  • {"Anime"}
                 </p>
                 <p className="flex gap-2 items-center">
-                  {" • " + show.vote_average?.toFixed(2)}
+                  {" • " + show.rating * 0.1}
                 </p>
               </div>
             </div>

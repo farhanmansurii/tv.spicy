@@ -47,18 +47,20 @@ export default function CarousalCard(props: CarousalCardProps) {
                     ).split("-")[0]}
                 </div>
 
-                <div className="flex flex-col my-2   border-white gap-2">
+                <div className="flex flex-col w-60 my-2     gap-2">
                   {!isDetailsPage && (
-                    <Button size="sm" className="flex rounded-sm  text-[13px]">
-                      <svg
-                        fill="currentColor"
-                        viewBox="0 0 16 16"
-                        className="w-7 h-7 p-1"
-                      >
-                        <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
-                      </svg>
-                      Go to Show
-                    </Button>
+                    <Link href={`/movie/${props.show?.id}`}>
+                      <Button className="rounded-sm w-full">
+                        <svg
+                          fill="currentColor"
+                          viewBox="0 0 16 16"
+                          className="w-7 h-7 p-1"
+                        >
+                          <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
+                        </svg>
+                        Go to Show
+                      </Button>
+                    </Link>
                   )}
                   <ContinueWatchingButton
                     show={props.show}
@@ -79,7 +81,7 @@ export default function CarousalCard(props: CarousalCardProps) {
               <div></div>
               <div className="w-[96%] mx-auto">
                 <div className=" flex gap-1 flex-col  uppercase w-[500px] text-pretty">
-                  <div className="text-3xl text-pretty  ">
+                  <div className="text-3xl text-pretty font-bold ">
                     {show.title || show.name} (
                     {(show.first_air_date || show.release_date).split("-")[0]})
                   </div>
@@ -89,7 +91,7 @@ export default function CarousalCard(props: CarousalCardProps) {
                   <div className="flex my-2  gap-2">
                     {!isDetailsPage && (
                       <Link href={`/movie/${props.show?.id}`}>
-                        <Button className="flex text-[13px]">
+                        <Button className="rounded-sm">
                           <svg
                             fill="currentColor"
                             viewBox="0 0 16 16"
@@ -101,13 +103,11 @@ export default function CarousalCard(props: CarousalCardProps) {
                         </Button>
                       </Link>
                     )}
-                    {isDetailsPage && (
-                      <ContinueWatchingButton
-                        show={props.show}
-                        type={type ?? ""}
-                        id={props.id ?? ""}
-                      />
-                    )}
+                    <ContinueWatchingButton
+                      show={props.show}
+                      type={props.type ?? ""}
+                      id={props.show?.id}
+                    />
                   </div>
                 </div>
               </div>

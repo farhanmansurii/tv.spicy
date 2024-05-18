@@ -1,6 +1,8 @@
 import React from "react";
 import FetchAndRenderRow from "./FetchAndRenderRow";
 import WatchList from "../common/WatchList";
+import AnimeRow from "./anime-container.tsx/anime-row-wrapper";
+import AnimeRowContainer from "./anime-container.tsx/anime-row-wrapper";
 
 export default function RowContainer() {
   return (
@@ -12,6 +14,10 @@ export default function RowContainer() {
         showRank={true}
         type="movie"
       />
+      {/* <AnimeRowContainer
+        text="Trending"
+        endpoint={`advanced-search?sort=["FAVOURITES_DESC"]`}
+      /> */}
       <FetchAndRenderRow
         apiEndpoint="trending/tv/week"
         text="Top TV Shows"

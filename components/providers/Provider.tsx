@@ -7,9 +7,7 @@ import LenisLayout from "../common/LenisLayout";
 export function Providers({ children, ...props }: ThemeProviderProps) {
   return (
     <NextThemesProvider {...props}>
-      <LenisLayout>
-        <QueryProvider>{children}</QueryProvider>
-      </LenisLayout>
+      <LenisLayout>{children}</LenisLayout>
     </NextThemesProvider>
   );
 }

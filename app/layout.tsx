@@ -2,6 +2,7 @@ import { Providers } from "@/components/providers/Provider";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Separator } from "@/components/ui/separator";
+import QueryProvider from "@/components/container/TanStackQueryProvider";
 
 export const metadata: Metadata = {
   title: "TV / Movies",
@@ -27,7 +28,10 @@ export default function RootLayout({
           defaultTheme="redDark"
           enableSystem
         >
-          <div>{children}</div>
+          {" "}
+          <QueryProvider>
+            <div>{children}</div>
+          </QueryProvider>
         </Providers>
       </body>
     </html>

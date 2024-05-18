@@ -1,6 +1,7 @@
 import Details from "@/components/common/Details";
 import MinimalSocialsFooter from "@/components/common/Footer";
 import { fetchDetails, fetchDetailsTMDB } from "@/lib/utils";
+import { notFound } from "next/navigation";
 import React from "react";
 
 export default async function TVDetails({
@@ -9,7 +10,7 @@ export default async function TVDetails({
   params: { tv: string };
 }) {
   const tmdb = await fetchDetailsTMDB(params.tv, "tv");
-
+  if (!tmdb) return notFound();
   return (
     <div>
       <head>

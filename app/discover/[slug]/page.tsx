@@ -8,7 +8,7 @@ export default function Page(params: any) {
     <>
       <Navbar text="genre" />
       <div className="flex pt-[6rem]  mb-4 w-[94%]   justify-between  mx-auto text-xl md:text-2xl items-center  py-1 flex-row">
-        <div className=" flex text-3xl capitalize px-2  md:text-4xl gap-2 items-center">
+        <div className=" flex text-3xl font-bold capitalize px-2  md:text-4xl gap-2 items-center">
           <TextGlitch>
             {params.searchParams.type.toLowerCase() === "movie"
               ? "Movies "

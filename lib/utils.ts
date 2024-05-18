@@ -50,6 +50,7 @@ export async function fetchDetailsTMDB(id: string, type: string) {
     const response = await fetch(url.toString(), { cache: "no-cache" });
     if (!response.ok) throw new Error("Failed to fetch data");
     const data = await response.json();
+    console.log(data)
     return data;
   } catch (error) {
     console.log(error);

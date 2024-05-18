@@ -7,6 +7,7 @@ import { fetchDetails, fetchMovieLinks } from "@/lib/utils";
 import { TVContainer } from "./TVContainer";
 import RowLoader from "../loading/RowLoader";
 import { useQuery } from "@tanstack/react-query";
+import { notFound } from "next/navigation";
 
 interface ShowContainerProps {
   type: string;
@@ -44,14 +45,13 @@ const ShowContainer: React.FC<ShowContainerProps> = ({ type, id }) => {
     },
     enabled: type === "movie",
   });
-  console.log({ streamingLinks, streamingLinksLoading, streamingLinksError });
-  if (showDataError) return <div>ShowData Error</div>;
+  if (showDataError) return notFound();
 
   return (
-    <div className="w-full flex mx-auto items-center gap-10 flex-col">
+    <div className="w-[96%] flex mx-auto items-center gap-10 flex-col">
       {type === "tv" ? (
         showDataLoading ? (
-          <RowLoader withHeader />
+          <Skeleton className="w-full lg:w-[640px] aspect-video" />
         ) : (
           <div className="w-full">
             <TVContainer tv={showData} tv_id={id} />
