@@ -49,7 +49,7 @@ export default function AnimeRow(props: {
       )}
 
       <AnimatePresence>
-        {!props.isVertical ? (
+        {/* {!props.isVertical ? (
           <CarouselContent className="gap-0  ">
             {props?.anime?.map((show: any[], index: number) => (
               <CarouselItem
@@ -64,11 +64,13 @@ export default function AnimeRow(props: {
           </CarouselContent>
         ) : (
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-1 ">
-            {props?.anime?.map((show: [], index: number) => (
-              <img src={show.image} />
+            {props?.anime?.map((show: any[], index: number) => (
+              <img key={index} alt="" src={show?.image} />
             ))}
           </div>
         )}
+        <div></div> */}
+        <div>hello</div>
       </AnimatePresence>
     </Carousel>
   );
