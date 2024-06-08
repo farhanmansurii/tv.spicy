@@ -34,6 +34,7 @@
     "embla-carousel-autoplay": "^8.0.0-rc22",
     "embla-carousel-react": "^8.0.0-rc22",
     "framer-motion": "^11.0.3",
+    "geist": "^1.3.0",
     "i": "^0.3.7",
     "idb": "^7.1.1",
     "lucide-react": "^0.279.0",

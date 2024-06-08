@@ -176,7 +176,7 @@
   }
 }
 body {
-  font-family: 'Neue Montreal';
+  /* font-family: 'Neue Montreal'; */
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }

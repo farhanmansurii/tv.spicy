@@ -49,10 +49,10 @@ export default function ShowCard(props: {
       >
         {!isVertical ? (
           <div key={show.id} className="relative group">
-            <div className="aspect-video ">
+            <div className="aspect-video p-0.5 ">
               <img
                 alt=""
-                className="object-center bg-muted object-cover h-full w-full border-transparent border group-hover:border-primary duration-200 ease-in-out"
+                className="object-center bg-muted object-cover h-full w-full border-background border group-hover:border-primary duration-200 ease-in-out"
                 src={imagePath}
               />
             </div>

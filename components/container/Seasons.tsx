@@ -25,7 +25,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
     <div className="w-full  flex flex-col mx-auto">
       <Carousel
         opts={{ dragFree: true }}
-        className=" w-[96%] justify-between mx-auto my-[3rem] "
+        className=" w-full justify-between mx-auto my-[3rem] "
       >
         <div className="flex font-bold justify-between  mb-4   text-xl md:text-2xl   py-1 flex-row">
           <Select

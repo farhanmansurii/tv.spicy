@@ -8,6 +8,7 @@ import { TVContainer } from "./TVContainer";
 import RowLoader from "../loading/RowLoader";
 import { useQuery } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
+import SeasonsTabLoader from "../container/SeasonsTabLoader";
 
 interface ShowContainerProps {
   type: string;
@@ -51,7 +52,7 @@ const ShowContainer: React.FC<ShowContainerProps> = ({ type, id }) => {
     <div className="w-[96%] flex mx-auto items-center gap-10 flex-col">
       {type === "tv" ? (
         showDataLoading ? (
-          <Skeleton className="w-full lg:w-[640px] aspect-video" />
+          <SeasonsTabLoader />
         ) : (
           <div className="w-full">
             <TVContainer tv={showData} tv_id={id} />

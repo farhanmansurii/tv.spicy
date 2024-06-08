@@ -3,6 +3,7 @@ import MinimalSocialsFooter from "@/components/common/Footer";
 import Navbar from "@/components/common/Navbar";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
 import WatchList from "@/components/common/WatchList";
+import SeasonsTabLoader from "@/components/container/SeasonsTabLoader";
 import RowLoader from "@/components/loading/RowLoader";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
