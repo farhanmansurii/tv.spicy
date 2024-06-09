@@ -12,7 +12,7 @@ import React from "react";
 export default function RowLoader({ withHeader }: { withHeader: boolean }) {
   return (
     <div>
-      <Carousel className="w-[96%] mx-auto">
+      <Carousel className="w-[99%] mx-auto">
         <div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
           <h1 className="text-2xl flex  text-transparent animate-pulse rounded-md bg-secondary/70 font-bold">
             Watch History

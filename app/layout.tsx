@@ -33,7 +33,7 @@ export default function RootLayout({
           {" "}
           <QueryProvider>
             <Header />
-            <div>{children}</div>
+            {children}
           </QueryProvider>
         </Providers>
       </body>

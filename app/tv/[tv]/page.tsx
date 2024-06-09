@@ -14,12 +14,6 @@ export default async function TVDetails({
   if (!tmdb) return notFound();
   return (
     <div>
-      <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-        />
-      </head>
       <Details data={tmdb} id={params.tv} type={"tv"} />
       <MinimalSocialsFooter />
     </div>

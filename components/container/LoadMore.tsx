@@ -6,6 +6,7 @@ import { fetchGenreById } from '@/lib/utils';
 import { Show } from '@/lib/types';
 import { Loader2, Loader2Icon } from "lucide-react";
 import Row from "./Row";
+import GridLoader from "../loading/GridLoader";
 
 let page = 1;
 
@@ -41,7 +42,7 @@ function LoadMore(props: { params: any }) {
   }, [inView, data, isLoading, params]);
 
   return (
-    <>
+    <div>
       <Row
         isVertical={true}
         showRank={false}
@@ -49,17 +50,8 @@ function LoadMore(props: { params: any }) {
         shows={data}
         type={params.searchParams.type}
       />
-      <section className="flex justify-center items-center w-full">
-        <div ref={ref}>
-          {inView && isLoading && (
-            <div className="w-full text-xl flex-col text-primary flex  aspect-square items-center text-center justify-center">
-              <Loader2Icon className="animate-spin  w-10 h-10 duration-1000 text-primary" />
-              <div>Loading</div>
-            </div>
-          )}
-        </div>
-      </section>
-    </>
+      <div ref={ref}>{inView && isLoading && <GridLoader />}</div>
+    </div>
   );
 }
 

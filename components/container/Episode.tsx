@@ -125,7 +125,10 @@ export default function Episode(props: EpisodeProps) {
   }, [episodeId, id, provider, type, movieID, episodeNumber, seasonNumber]);
   if (isLoading) {
     return (
-      <Skeleton className="aspect-video w-full lg:w-[640px]  mx-auto my-4" />
+      <div className="flex flex-col gap-2">
+        <Skeleton className=" h-12 mb-2 w-36"></Skeleton>
+        <Skeleton className="aspect-video w-full   mx-auto " />
+      </div>
     );
   }
 
@@ -177,10 +180,10 @@ export default function Episode(props: EpisodeProps) {
         defaultValue={provider}
         onValueChange={(value) => setProvider(value)}
       >
-        <SelectTrigger className="w-fit bg-primary mb-4">
+        <SelectTrigger className="w-fit h-12 mb-4">
           <Settings className="w-6 h-6 p-1 mr-2" />
           <SelectValue className=" ">
-            <div className="pr-10 bg-primary">
+            <div className="pr-10 ">
               Server {provider === "embedded" ? 2 : provider === "alt" && 1}
             </div>
           </SelectValue>

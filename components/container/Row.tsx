@@ -32,7 +32,7 @@ export default function Row(props: {
     }),
   };
   return (
-    <Carousel opts={{ dragFree: true }} className="w-[97%] mx-auto">
+    <Carousel opts={{ dragFree: true }} className=" w-[99%] mx-auto">
       {props.text && (
         <div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
           <h1 className="text-2xl flex  font-bold">{props.text}</h1>
@@ -67,7 +67,7 @@ export default function Row(props: {
             )}
           </CarouselContent>
         ) : (
-          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3  md:gap-y-10   ">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10   ">
             {props?.shows?.map(
               (show: Show, index: number) =>
                 show?.backdrop_path && (

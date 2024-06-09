@@ -1,6 +1,7 @@
 import { fetchRecommendations } from "@/lib/utils";
 import React from "react";
 import Row from "../container/Row";
+import GridLoader from "../loading/GridLoader";
 interface RecommendationsContainerProps {
   type: string;
   id: string;
@@ -17,6 +18,7 @@ export default async function RecommendationsContainer(
   const similar = await fetchRecommendations(id, type, "similar");
   return (
     <div className="w-full">
+      <GridLoader />
       {recommendations?.results?.length > 1 && (
         <Row
           text="Recommendations"

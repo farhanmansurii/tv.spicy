@@ -4,15 +4,17 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import MoreInfoComponent from "../common/MoreInfoComponent";
+import GridLoader from "../loading/GridLoader";
 
 const RelatedShowsComponent = dynamic(
   () => import("../container/RelatedShowContainer"),
   {
     ssr: false,
+    loading: () => <GridLoader />,
   }
 );
 
-const tabs = ["Info", "Related Shows", "Recommendations"];
+const tabs = ["Related Shows", "Recommendations"];
 
 interface TabProps {
   text: string;
@@ -28,8 +30,6 @@ export default function MoreDetailsContainer(props: {
 
   const renderContent = () => {
     switch (selected) {
-      case "Info":
-        return <MoreInfoComponent type={props.type} show={props.show} />;
       case "Related Shows":
         return (
           <RelatedShowsComponent
@@ -52,7 +52,7 @@ export default function MoreDetailsContainer(props: {
   };
 
   return (
-    <div className="mx-auto my-8 max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
+    <div className="mx-auto  max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
       <div className="mb-4  flex flex-wrap items-center gap-2">
         {tabs.map((tab, index) => (
           <Tab

@@ -40,7 +40,7 @@ const RecentlyWatched = () => {
   }
   return (
     recentlyWatched.length > 0 && (
-      <Carousel opts={{ dragFree: true }} className="w-[97%] my-[2rem] mx-auto">
+      <Carousel opts={{ dragFree: true }} className="w-[99%] mx-auto">
         <div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
           <div className="mx-1 flex gap-2 items-center">
             Watch History
@@ -49,11 +49,7 @@ const RecentlyWatched = () => {
             </div>
           </div>
           <div className="flex  gap-2">
-            <Button
-              variant={"outline"}
-              className="text-xs rounded-full"
-              onClick={clearRecentlyWatched}
-            >
+            <Button variant={"link"} onClick={clearRecentlyWatched}>
               Clear
               <span className="sr-only">Clear</span>
             </Button>

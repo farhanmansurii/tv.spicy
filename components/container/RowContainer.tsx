@@ -14,10 +14,7 @@ export default function RowContainer() {
         showRank={true}
         type="movie"
       />
-      {/* <AnimeRowContainer
-        text="Trending"
-        endpoint={`advanced-search?sort=["FAVOURITES_DESC"]`}
-      /> */}
+
       <FetchAndRenderRow
         apiEndpoint="trending/tv/week"
         text="Top TV Shows"

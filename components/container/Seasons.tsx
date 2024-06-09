@@ -22,12 +22,12 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
   const [activeSeason, setActiveSeason] = useState<any>(seasons[0]?.season);
   const [isGridView, setIsGridView] = useState(false);
   return activeSeason ? (
-    <div className="w-full  flex flex-col mx-auto">
+    <div className="w-full   flex flex-col mx-auto">
       <Carousel
         opts={{ dragFree: true }}
-        className=" w-full justify-between mx-auto my-[3rem] "
+        className=" w-full justify-between mx-auto  "
       >
-        <div className="flex font-bold justify-between  mb-4   text-xl md:text-2xl   py-1 flex-row">
+        <div className="flex font-bold justify-between    text-xl md:text-2xl   py-1 flex-row">
           <Select
             defaultValue={"1"}
             onValueChange={(value) => setActiveSeason(value)}

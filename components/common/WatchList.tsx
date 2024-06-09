@@ -23,27 +23,25 @@ export default function WatchList() {
     useWatchListStore();
 
   return (
-    <>
-      <div className="flex flex-col gap-[2rem]">
-        {watchlist?.length > 0 && (
-          <Row
-            isVertical={false}
-            text={"Watchlist"}
-            shows={watchlist}
-            type={"movie"}
-            showRank={false}
-          />
-        )}
-        {tvwatchlist?.length > 0 && (
-          <Row
-            isVertical={false}
-            text={"TV Watchlist"}
-            shows={tvwatchlist}
-            type={"tv"}
-            showRank={false}
-          />
-        )}
-      </div>
-    </>
+    <div className="space-y-12">
+      {watchlist?.length > 0 && (
+        <Row
+          isVertical={false}
+          text={"Watchlist"}
+          shows={watchlist}
+          type={"movie"}
+          showRank={false}
+        />
+      )}
+      {tvwatchlist?.length > 0 && (
+        <Row
+          isVertical={false}
+          text={"TV Watchlist"}
+          shows={tvwatchlist}
+          type={"tv"}
+          showRank={false}
+        />
+      )}
+    </div>
   );
 }

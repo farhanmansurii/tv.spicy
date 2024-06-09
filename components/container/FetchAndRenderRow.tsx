@@ -4,6 +4,7 @@ import Row from "./Row";
 import { useQuery } from "@tanstack/react-query";
 import RowLoader from "../loading/RowLoader";
 import { Loader2Icon } from "lucide-react";
+import GridLoader from "../loading/GridLoader";
 
 interface FetchAndRenderRowProps {
   apiEndpoint: string;
@@ -27,14 +28,7 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
   });
 
   if (isLoading) {
-    return isVertical ? (
-      <div className="w-full text-xl flex-col text-primary flex h-full aspect-video items-center text-center justify-center">
-        <Loader2Icon className="animate-spin  w-10 h-10 duration-1000 text-primary" />
-        <div>Loading</div>
-      </div>
-    ) : (
-      <RowLoader withHeader={true} />
-    );
+    return isVertical ? <GridLoader /> : <RowLoader withHeader={true} />;
   }
 
   return rowData && rowData.length > 0 ? (

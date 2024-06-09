@@ -9,23 +9,20 @@ import Navbar from "./Navbar";
 import RowLoader from "../loading/RowLoader";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDetails } from "@/lib/utils";
-import { TvSerieDetails } from "../container/tv-details.tsx/TVDetails";
 import DetailLoader from "../loading/DetailLoader";
+import dynamic from "next/dynamic";
+import ShowDetails from "../container/tv-details.tsx/TVDetails";
+
 const Details = (props: any) => {
   const { data, type, id } = props;
   return (
-    <>
-      <TvSerieDetails
-        id={data?.id}
-        tvSerie={data}
-        language={"en"}
-        type={type}
-      />
+    <div className="max-w-6xl w-full space-y-10  mx-auto">
+      <ShowDetails id={data?.id} show={data} language={"en"} type={type} />
       <Separator className="max-w-4xl w-full  mx-auto" />
       <ShowContainer id={data?.id} type={type} />
       <Separator className="max-w-4xl w-full  mx-auto" />
       <MoreDetailsContainer type={type} show={data} />
-    </>
+    </div>
   );
 };
 export default Details;

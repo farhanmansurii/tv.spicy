@@ -18,50 +18,48 @@ import ContinueWatchingButton from "@/components/common/ContinueWatchingButton";
 import Navbar from "@/components/common/Navbar";
 import { Header } from "@/components/common/header";
 
-type TvSerieDetailsProps = {
+type showDetailsProps = {
   id: number;
   language: any;
   embed?: boolean;
-  tvSerie: any;
+  show: any;
   type: "tv" | "movie";
 };
 
-export const TvSerieDetails = async ({
+export default function ShowDetails({
   id,
-  tvSerie,
+  show,
   language,
   embed = false,
   type,
-}: TvSerieDetailsProps) => {
+}: showDetailsProps) {
   return (
-    <div className={cn("mx-auto max-w-6xl md:pt-4", embed && "pt-0")}>
+    <div className={cn("mx-auto w-full  md:pt-0")}>
       <div className="hidden md:flex">
-        <Banner url={tmdbImage(tvSerie.backdrop_path)} />
+        <Banner url={tmdbImage(show.backdrop_path)} />
       </div>
       <div className="mx-auto mb-8 max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
         <main className="flex flex-col gap-4 md:flex-row">
           <aside className="w-10/12 mx-auto space-y-2 md:-mt-32 md:w-1/3">
-            <Poster url={tvSerie.poster_path} alt={tvSerie.name} />
+            <Poster url={show.poster_path} alt={show.name} />
           </aside>
 
           <article className="flex w-full mt-4 flex-col gap-2 md:w-2/3">
-            {tvSerie?.first_air_date && (
+            {show?.first_air_date && (
               <span className="text-xs text-muted-foreground">
-                {format(new Date(tvSerie.first_air_date), "PPP")}
+                {format(new Date(show.first_air_date), "PPP")}
               </span>
             )}
-            {tvSerie?.release_date && (
+            {show?.release_date && (
               <span className="text-xs text-muted-foreground">
-                {format(new Date(tvSerie.release_date), "PPP")}
+                {format(new Date(show.release_date), "PPP")}
               </span>
             )}
 
-            <h1 className="text-4xl font-bold">
-              {tvSerie.name || tvSerie.title}
-            </h1>
+            <h1 className="text-4xl font-bold">{show.name || show.title}</h1>
 
             <div className="flex flex-wrap items-center gap-1.5">
-              {tvSerie.genres.map((genre: any) => {
+              {show.genres.map((genre: any) => {
                 return (
                   <Badge
                     key={genre.id}
@@ -78,18 +76,18 @@ export const TvSerieDetails = async ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Badge>{tvSerie.vote_average.toFixed(1)}</Badge>
+                    <Badge>{show.vote_average.toFixed(1)}</Badge>
                   </TooltipTrigger>
 
                   <TooltipContent>
-                    <p>{tvSerie.vote_count} votes</p>
+                    <p>{show.vote_count} votes</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
 
             <p className="text-xs leading-5 line-clamp-3 text-muted-foreground md:text-sm md:leading-6">
-              {tvSerie.overview}
+              {show.overview}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button>Play S1 E1</Button>
@@ -100,4 +98,4 @@ export const TvSerieDetails = async ({
       </div>
     </div>
   );
-};
+}
