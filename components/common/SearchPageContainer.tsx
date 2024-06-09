@@ -33,7 +33,7 @@ export default function SearchPageContainer() {
     addToSearchList(ep);
   };
   return (
-    <div className="  mx-auto ">
+    <div className="  mx-auto min-h-screen w-full ">
       <div className=" border rounded mb-10 ">
         <DebouncedInput
           setQuery={searchStore.setQuery}
