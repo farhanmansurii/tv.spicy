@@ -89,7 +89,7 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
         {backdrop ? (
           <div className="  ">
             <img
-              className="object-cover backdrop-blur-sm   inset-0"
+              className="object-cover    inset-0"
               src={tmdbImage(backdrop, "w500")}
               alt={title}
             />
