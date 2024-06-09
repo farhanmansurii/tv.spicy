@@ -42,7 +42,7 @@ function LoadMore(props: { params: any }) {
   }, [inView, data, isLoading, params]);
 
   return (
-    <div>
+    <div className="spacy-y-10">
       <Row
         isVertical={true}
         showRank={false}

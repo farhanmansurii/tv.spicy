@@ -22,7 +22,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
   const [activeSeason, setActiveSeason] = useState<any>(seasons[0]?.season);
   const [isGridView, setIsGridView] = useState(false);
   return activeSeason ? (
-    <div className="w-full   flex flex-col mx-auto">
+    <div className="w-full px-4    flex flex-col mx-auto">
       <Carousel
         opts={{ dragFree: true }}
         className=" w-full justify-between mx-auto  "

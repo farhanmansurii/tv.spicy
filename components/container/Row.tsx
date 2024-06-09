@@ -67,7 +67,7 @@ export default function Row(props: {
             )}
           </CarouselContent>
         ) : (
-          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10   ">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:c   ">
             {props?.shows?.map(
               (show: Show, index: number) =>
                 show?.backdrop_path && (
