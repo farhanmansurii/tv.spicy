@@ -51,6 +51,7 @@ export default function ShowCard(props: {
         viewport={{ amount: 0 }}
         custom={props.index}
         variants={variants}
+        className="group group-hover:scale-95 duration-100"
       >
         {!isVertical ? (
           <Card movie={show} type={type} />
@@ -78,7 +79,7 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
 
   return (
     <div
-      className="w-full h-full group group-hover:scale-95 duration-100 aspect-video cursor-pointer space-y-2"
+      className="w-full h-full group group-hover:scale-95 duration-100 cursor-pointer space-y-2"
       data-testid="movie-card"
     >
       <div
@@ -86,9 +87,9 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
         className="relative h-full  flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-background/50 shadow"
       >
         {backdrop ? (
-          <div>
+          <div className="  z-30">
             <img
-              className="object-cover  inset-0"
+              className="object-cover backdrop-blur-sm   inset-0"
               src={tmdbImage(backdrop, "w500")}
               alt={title}
             />
@@ -97,7 +98,7 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
               viewBox="0 0 16 16"
               height="2em"
               width="2em"
-              className="absolute group-hover:opacity-100 opacity-0 scale-90 group-hover:scale-100 duration-200 ease-in-out bottom-0 right-0 m-4 text-white"
+              className="absolute z-40 group-hover:opacity-100 opacity-0 scale-90 group-hover:scale-100 duration-200 ease-in-out bottom-0 right-0 m-4 text-white"
             >
               <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
             </svg>
@@ -107,12 +108,14 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
             <ImageIcon className="text-muted" />
           </div>
         )}
+        <div className="bg-transparent hover:bg-gradient-to-b from-transparent via-black/30  to-black/80 absolute  inset-0 z-30">
+          sdsdsd
+        </div>
       </div>
 
       <div className="space-y-1.5">
         <div className="flex text-sm md:text-base items-start justify-between gap-1">
           <TextGlitch>{title || name}</TextGlitch>
-
           <Badge variant="secondary">
             {voteAverage ? voteAverage.toFixed(1) : "?"}
           </Badge>

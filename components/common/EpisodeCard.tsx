@@ -14,12 +14,14 @@ export default function EpisodeCard(props: any) {
   return (
     <CarouselItem
       onClick={() => toggle(episode)}
-      className={cn(`group basis-1/2 w-full md:basis-1/3 `)}
+      className={cn(
+        `group basis-1/2 w-full md:basis-1/3 group duration-100 hover:scale-95`
+      )}
     >
       <div key={episode.id} className="relative   ">
         <div
           style={{ aspectRatio: 16 / 9 }}
-          className="relative h-full  flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-background/50 shadow"
+          className="relative h-full   flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-background/50 shadow"
         >
           {episode.img?.mobile || episode.img?.hd ? (
             <div>
@@ -37,6 +39,9 @@ export default function EpisodeCard(props: any) {
               >
                 <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
               </svg>
+              <Badge className="absolute top-0 m-1 right-0">
+                EP {episode.episode}
+              </Badge>
             </div>
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-background">
@@ -45,7 +50,7 @@ export default function EpisodeCard(props: any) {
           )}
         </div>
 
-        <svg
+        {/* <svg
           fill="currentColor"
           viewBox="0 0 16 16"
           height="2em"
@@ -53,12 +58,9 @@ export default function EpisodeCard(props: any) {
           className="absolute group-hover:opacity-100 opacity-0  scale-90 group-hover:scale-100 duration-200  ease-in-out bottom-0 right-0 m-4 text-white"
         >
           <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zM6.79 5.093A.5.5 0 006 5.5v5a.5.5 0 00.79.407l3.5-2.5a.5.5 0 000-.814l-3.5-2.5z" />
-        </svg>
+        </svg> */}
       </div>
       <div className="w-full items-center space-x-2  flex flex-row">
-        <Button variant={"link"} className="h-full  p-4">
-          EP {episode.episode}
-        </Button>
         <div className="my-2">
           <div className="flex items-start text-sm md:text-base justify-between gap-1">
             <TextGlitch>{episode.title || episode.name}</TextGlitch>

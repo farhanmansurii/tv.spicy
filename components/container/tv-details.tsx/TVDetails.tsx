@@ -35,10 +35,12 @@ export const TvSerieDetails = async ({
 }: TvSerieDetailsProps) => {
   return (
     <div className={cn("mx-auto max-w-6xl md:pt-4", embed && "pt-0")}>
-      <Banner url={tmdbImage(tvSerie.backdrop_path)} />
-      <div className="mx-auto my-8 max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
+      <div className="hidden md:flex">
+        <Banner url={tmdbImage(tvSerie.backdrop_path)} />
+      </div>
+      <div className="mx-auto mb-8 max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
         <main className="flex flex-col gap-4 md:flex-row">
-          <aside className="-mt-24 w-10/12 mx-auto space-y-2 md:-mt-32 md:w-1/3">
+          <aside className="w-full  mx-auto space-y-2 md:-mt-32 md:w-1/3">
             <Poster url={tvSerie.poster_path} alt={tvSerie.name} />
           </aside>
 
@@ -46,6 +48,11 @@ export const TvSerieDetails = async ({
             {tvSerie.first_air_date && (
               <span className="text-xs text-muted-foreground">
                 {format(new Date(tvSerie.first_air_date), "PPP")}
+              </span>
+            )}
+            {tvSerie.release_date && (
+              <span className="text-xs text-muted-foreground">
+                {format(new Date(tvSerie.release_date), "PPP")}
               </span>
             )}
 

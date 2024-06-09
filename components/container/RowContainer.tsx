@@ -6,7 +6,7 @@ import AnimeRowContainer from "./anime-container.tsx/anime-row-wrapper";
 
 export default function RowContainer() {
   return (
-    <div className="flex flex-col gap-[2rem]">
+    <div className="flex flex-col space-y-12">
       <WatchList />
       <FetchAndRenderRow
         apiEndpoint="movie/top_rated"
