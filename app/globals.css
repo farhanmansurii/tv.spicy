@@ -68,81 +68,72 @@
 
 @layer base {
   :root {
+    --background: 163 61% 99%;
+      --foreground: 163 64% 2%;
+      --muted: 163 7% 87%;
+      --muted-foreground: 163 8% 37%;
+      --popover: 163 61% 99%;
+      --popover-foreground: 163 64% 2%;
+      --card: 163 61% 99%;
+      --card-foreground: 163 64% 2%;
+      --border: 163 5% 89%;
+      --input: 163 5% 89%;
+      --primary: 163 15% 61%;
+      --primary-foreground: 163 15% 1%;
+      --secondary: 163 19% 83%;
+      --secondary-foreground: 163 19% 23%;
+      --accent: 163 26% 77%;
+      --accent-foreground: 163 26% 17%;
+      --destructive: 8 80% 39%;
+      --destructive-foreground: 8 80% 99%;
+      --ring: 163 15% 61%;
+      --radius: 0.5rem;
+  }
+
+    .dark {
+      --background: 0 0% 15.69%;
+      --foreground: 0 0% 85%;
+      --muted: 0 0% 23.85%;
+      --muted-foreground: 0 0% 61.96%;
+      --popover: 0 0% 18.43%;
+      --popover-foreground: 0 0% 95%;
+      --card: 0 0% 15.69%;
+      --card-foreground: 0 0% 90%;
+      --border: 0 0% 21.57%;
+      --input: 0 0% 20%;
+      --primary: 0 0% 100%;
+      --primary-foreground: 0 0% 20%;
+      --secondary: 0 0% 25%;
+      --secondary-foreground: 0 0% 85%;
+      --accent: 0 0% 27%;
+      --accent-foreground: 0 0% 87%;
+      --destructive: 4 50% 50%;
+      --destructive-foreground: 0 0% 100%;
+      --ring: 0 0% 100%;
+    }
+
+
+  .redLight {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --primary: 346.8 77.2% 49.8%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.4rem;
-  }
-
-  .dark {
-    --background: 150.00 20.00% 1.96%;
---foreground: 156.00 12.82% 92.35%;
-
---primary: 154.05 14.74% 49.22%;
---primary-foreground: 0.00 0.00% 100.00%;
-
---card: 150.00 20.00% 1.96%;
---card-foreground: 156.00 12.82% 92.35%;
-
---popover: 150.00 20.00% 1.96%;
---popover-foreground: 156.00 12.82% 92.35%;
-
---secondary: 156.92 14.94% 17.06%;
---secondary-foreground: 0.00 0.00% 100.00%;
-
---muted: 150.00 3.33% 11.76%;
---muted-foreground: 120.00 0.40% 51.18%;
-
---accent: 156.92 14.94% 17.06%;
---accent-foreground: 156.00 12.82% 92.35%;
-
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 210 40% 98%;
-
---border: 0.00 0.00% 14.90%;
---input: 0.00 0.00% 14.90%;
---ring: 154.05 14.74% 49.22%;
-
---radius: 0.5rem;
-  }
-
-  .redLight {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 72.2% 50.6%;
-    --primary-foreground: 0 85.7% 97.3%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 72.2% 50.6%;
-    --radius: 0.3rem;
+    --ring: 346.8 77.2% 49.8%;
+    --radius: 0.5rem;
   }
   .redDark {
     --background: 0 0% 3.9%;
