@@ -46,7 +46,7 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
   };
 
   return isGridView ? (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 gap-y-6 md:gap-y-10">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
       {season.isReleased && releasedEpisodes?.length > 0 ? (
         releasedEpisodes?.map((episode) => (
           <EpisodeCard
@@ -66,7 +66,7 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
     </div>
   ) : (
     <>
-      <CarouselContent className="">
+      <CarouselContent className="space-x-2">
         {season?.episodes?.length ? (
           season.episodes.map((episode: any, index: number) => (
             <EpisodeCard

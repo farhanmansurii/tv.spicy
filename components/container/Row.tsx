@@ -50,13 +50,13 @@ export default function Row(props: {
 
       <AnimatePresence>
         {!props.isVertical ? (
-          <CarouselContent className="gap-0  ">
+          <CarouselContent className="gap-2 ">
             {props?.shows?.map(
               (show: Show, index: number) =>
                 show.backdrop_path && (
                   <CarouselItem
                     className={cn(
-                      `group basis-1/2 w-full  md:basis-1/3 lg:basis-1/4 xl:basis-1/5`
+                      `group basis-7/12 w-full  md:basis-1/3 lg:basis-3/12   `
                     )}
                     key={show.id}
                   >
@@ -72,10 +72,10 @@ export default function Row(props: {
             )}
           </CarouselContent>
         ) : (
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-1 ">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-4 md:gap-y-10   ">
             {props?.shows?.map(
               (show: Show, index: number) =>
-                show.backdrop_path && (
+                show?.backdrop_path && (
                   <ShowCard
                     key={index}
                     showRank={props.showRank}

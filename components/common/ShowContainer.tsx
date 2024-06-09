@@ -49,12 +49,12 @@ const ShowContainer: React.FC<ShowContainerProps> = ({ type, id }) => {
   if (showDataError) return notFound();
 
   return (
-    <div className="w-[96%] flex mx-auto items-center gap-10 flex-col">
+    <div className="w-full  max-w-6xl flex mx-auto items-center gap-10 flex-col">
       {type === "tv" ? (
         showDataLoading ? (
           <SeasonsTabLoader />
         ) : (
-          <div className="w-full">
+          <div className="mx-auto my-8 max-w-4xl w-full space-y-8 px-4 md:space-y-12 md:px-0 -full">
             <TVContainer tv={showData} tv_id={id} />
             <SeasonTabs
               seasons={showData.seasons}
@@ -64,7 +64,7 @@ const ShowContainer: React.FC<ShowContainerProps> = ({ type, id }) => {
           </div>
         )
       ) : (
-        <div className="w-[96%] aspect-video lg:w-[640px] mx-auto my-4">
+        <div className="mx-auto my-8 max-w-4xl w-full space-y-8 px-4 md:space-y-12 md:px-0">
           {showDataLoading ? (
             <Skeleton />
           ) : (

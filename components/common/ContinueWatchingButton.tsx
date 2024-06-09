@@ -53,10 +53,7 @@ export default function ContinueWatchingButton({
 
   return (
     <div className="flex w-full flex-col md:flex-row md:w-fit gap-2">
-      <Button
-        className="w-full rounded-sm whitespace-nowrap"
-        onClick={handleAddOrRemove}
-      >
+      <Button className=" whitespace-nowrap" onClick={handleAddOrRemove}>
         {isAdded ? (
           <>
             <Check className="w-7 h-7 p-1" /> Added
@@ -64,13 +61,14 @@ export default function ContinueWatchingButton({
         ) : (
           <>
             <Plus className="w-7 h-7 p-1" />
-            Add to Up Next
+            Add
           </>
         )}
       </Button>
       {!isEpisodeActive && recentlyWatchedEpisode && (
         <Button
-          className="rounded-sm whitespace-nowrap px-4 w-full"
+          variant={"secondary"}
+          className="whitespace-nowrap px-4 w-full"
           onClick={() => setActiveEP(recentlyWatchedEpisode)}
         >
           <svg fill="currentColor" viewBox="0 0 16 16" className="w-7 h-7 p-1">

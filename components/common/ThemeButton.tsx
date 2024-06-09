@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { Moon } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export default function ThemeButton() {
@@ -15,8 +15,8 @@ export default function ThemeButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size={"icon"} className="rounded-full aspect-square p-2">
-          <Moon className="h-full w-full" />
+        <Button variant={"ghost"}>
+          <Sun className="p-1" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

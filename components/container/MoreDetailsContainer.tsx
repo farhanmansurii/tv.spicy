@@ -52,8 +52,8 @@ export default function MoreDetailsContainer(props: {
   };
 
   return (
-    <div className="w-[96%] mx-auto">
-      <div className="mb-8 p-2 flex flex-wrap items-center gap-2">
+    <div className="mx-auto my-8 max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
+      <div className="mb-4  flex flex-wrap items-center gap-2">
         {tabs.map((tab, index) => (
           <Tab
             text={tab}
@@ -63,7 +63,7 @@ export default function MoreDetailsContainer(props: {
           />
         ))}
       </div>
-      <div className="w-[96%] min-h-[200px] mx-auto">{renderContent()}</div>
+      <div className="w-full min-h-[200px] mx-auto">{renderContent()}</div>
     </div>
   );
 }

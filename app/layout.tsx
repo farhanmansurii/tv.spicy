@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Separator } from "@/components/ui/separator";
 import QueryProvider from "@/components/container/TanStackQueryProvider";
 import { GeistSans } from "geist/font/sans";
+import { Header } from "@/components/common/header";
 
 export const metadata: Metadata = {
   title: "TV / Movies",
@@ -31,6 +32,7 @@ export default function RootLayout({
         >
           {" "}
           <QueryProvider>
+            <Header />
             <div>{children}</div>
           </QueryProvider>
         </Providers>

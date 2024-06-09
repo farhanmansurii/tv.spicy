@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { Button } from "../ui/button";
+import { Settings } from "lucide-react";
 
 interface EpisodeProps {
   episodeId: string;
@@ -170,14 +172,15 @@ export default function Episode(props: EpisodeProps) {
   //   );
   // }
   return (
-    <div className="aspect-video w-full lg:w-[640px] mx-auto my-4">
+    <div className="">
       <Select
         defaultValue={provider}
         onValueChange={(value) => setProvider(value)}
       >
-        <SelectTrigger className="w-fit">
-          <SelectValue className="">
-            <div className="pr-10">
+        <SelectTrigger className="w-fit bg-primary mb-4">
+          <Settings className="w-6 h-6 p-1 mr-2" />
+          <SelectValue className=" ">
+            <div className="pr-10 bg-primary">
               Server {provider === "embedded" ? 2 : provider === "alt" && 1}
             </div>
           </SelectValue>
@@ -208,6 +211,7 @@ export default function Episode(props: EpisodeProps) {
         />
       ) : provider === "embedded" ? (
         <iframe
+          allowFullScreen
           className="w-full h-full aspect-video font-mono"
           src={
             type === "movie"
@@ -217,6 +221,7 @@ export default function Episode(props: EpisodeProps) {
         />
       ) : (
         <iframe
+          allowFullScreen
           className="w-full h-full aspect-video font-mono"
           src={
             type === "movie"

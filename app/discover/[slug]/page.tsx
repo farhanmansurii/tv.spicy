@@ -1,25 +1,30 @@
 import { TextGlitch } from "@/components/animated-common/TextFlip";
 import Navbar from "@/components/common/Navbar";
+import { Header } from "@/components/common/header";
 import LoadMore from "@/components/container/LoadMore";
 import React from "react";
 
 export default function Page(params: any) {
   return (
-    <>
-      <Navbar text="genre" />
-      <div className="flex pt-[6rem]  mb-4 w-[94%]   justify-between  mx-auto text-xl md:text-2xl items-center  py-1 flex-row">
+    <div className="mx-auto max-w-6xl md:pt-4 space-y-8">
+      <Header />
+      <div className="flex   mb-4    justify-between  mx-auto text-xl md:text-2xl items-center  py-1 flex-row">
         <div className=" flex text-3xl font-bold capitalize px-2  md:text-4xl gap-2 items-center">
-          <TextGlitch>
-            {params.searchParams.type.toLowerCase() === "movie"
-              ? "Movies "
-              : "TV"}{" "}
-            : {params.searchParams.title}
-          </TextGlitch>
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h1 className="text-2xl font-bold">
+                {params.searchParams.title}
+                {params.searchParams.type.toLowerCase() === "movie"
+                  ? " Movies "
+                  : " TV"}{" "}
+              </h1>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="mb-[4rem] flex w-[95%] gap-[3rem] flex-col mx-auto">
+      <div className="mb-[4rem] flex  gap-[3rem] flex-col mx-auto">
         <LoadMore params={params} />
       </div>
-    </>
+    </div>
   );
 }

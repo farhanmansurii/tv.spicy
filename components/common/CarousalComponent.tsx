@@ -13,7 +13,7 @@ export default async function CarousalComponent() {
   if (!data) return <div>None Found</div>;
   return (
     <>
-      <Carousel className="mb-10">
+      <Carousel className="mb-10 ">
         <CarouselContent className="w-full mx-auto flex ">
           {data?.map((el: Show) => (
             <CarouselItem key={el.id}>

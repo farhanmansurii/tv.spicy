@@ -1,14 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { CaretLeftIcon, HamburgerMenuIcon } from "@radix-ui/react-icons";
-import { CommandIcon, Search, Share, Tv } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import SearchBar from "../SearchBar";
-import NavigationSidebar from "../container/NavigationSidebar";
-import ThemeButton from "./ThemeButton";
-import { fetchGenres } from "@/lib/utils";
+import { CommandIcon, Search, Tv, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -19,6 +12,14 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
+import React, { useEffect, useState } from "react";
+import { cn, fetchGenres } from "@/lib/utils";
+import SearchBar from "@/components/SearchBar";
+import { Command, CommandInput } from "@/components/ui/command";
+import ThemeButton from "../ThemeButton";
+import NavigationSidebar from "@/components/container/NavigationSidebar";
+import { HamburgerMenuIcon } from "@radix-ui/react-icons";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 const categories = [
   { title: "Trending", path: "trending" },
   { title: "Airing Today", path: "airing-today" },
@@ -26,7 +27,7 @@ const categories = [
   { title: "Popular", path: "popular" },
   { title: "Top Rated", path: "top-rated" },
 ];
-export default function Navbar(props: { text?: string }) {
+export const Header = () => {
   const [movieGenre, setMovieGenre] = useState(null);
   const [tvGenre, setTvGenre] = useState(null);
   useEffect(() => {
@@ -40,10 +41,9 @@ export default function Navbar(props: { text?: string }) {
     }
     fetchGenre();
   }, []);
-
   return (
-    <nav className="w-full  z-10">
-      <div className="flex text-xl w-[96%] mx-auto font-bold p-2 py-4 flex-row justify-between items-center ">
+    <div className="mx-auto max-w-6xl space-y-4 px-4 py-4 lg:px-0">
+      <header className=" w-full items-center  my-1 flex">
         <Link href={"/"}>
           <Button className="w-fit whitespace-nowrap" variant={"link"}>
             WATVH-TV
@@ -64,7 +64,7 @@ export default function Navbar(props: { text?: string }) {
                   </svg>
                   <p className="text-sm font-medium leading-none">Movies</p>
                 </NavigationMenuTrigger>
-                {/* <NavigationMenuContent>
+                <NavigationMenuContent>
                   <ul className="flex  flex-col  p-4 md:w-[250px]  lg:grid-cols-[.75fr_1fr]">
                     {categories.map((category: any, index: number) => (
                       <ListItem
@@ -78,7 +78,7 @@ export default function Navbar(props: { text?: string }) {
                       ></ListItem>
                     ))}
                   </ul>
-                </NavigationMenuContent> */}
+                </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="space-x-2">
@@ -86,7 +86,19 @@ export default function Navbar(props: { text?: string }) {
                   <Tv width={12} height={12} />
                   <p className="text-sm font-medium leading-none">TV</p>
                 </NavigationMenuTrigger>
-                <NavigationMenuContent></NavigationMenuContent>
+                <NavigationMenuContent>
+                  <ul className="flex  flex-col  p-4 md:w-[250px]  lg:grid-cols-[.75fr_1fr]">
+                    {categories.map((category: any, index: number) => (
+                      <ListItem
+                        key={index}
+                        href={`/discover/${
+                          category.path
+                        }?type=tv&title=${encodeURIComponent(category.title)}`}
+                        title={category.title}
+                      ></ListItem>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -103,20 +115,48 @@ export default function Navbar(props: { text?: string }) {
               </div>
             </Button>
           </Link>{" "}
-        </div>
-        <div className="flex gap-3">
+          <Link className="md:hidden" href={"/search"}>
+            <Button variant={"ghost"} className="w-fit">
+              <Search className="p-1" />
+            </Button>
+          </Link>
           <ThemeButton />
-          <SearchBar />
           <Sheet>
             <SheetTrigger asChild>
-              <Button size={"icon"} className="rounded-full aspect-square p-2">
-                <HamburgerMenuIcon className="h-full w-full" />
+              <Button variant={"ghost"}>
+                <HamburgerMenuIcon className="h-full w-full " />
               </Button>
             </SheetTrigger>
-            {/* <NavigationSidebar /> */}
+            <NavigationSidebar movieGenre={movieGenre} tvGenre={tvGenre} />
           </Sheet>
         </div>
-      </div>
-    </nav>
+      </header>
+    </div>
   );
-}
+};
+
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  );
+});
+ListItem.displayName = "ListItem";

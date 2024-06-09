@@ -5,6 +5,11 @@ import React from "react";
 import { Motiondiv } from "./MotionDiv";
 import { TextGlitch } from "../animated-common/TextFlip";
 import { Skeleton } from "../ui/skeleton";
+import { tmdbImage } from "@/lib/tmdb-image";
+import { ImageIcon, Play } from "lucide-react";
+import { TooltipContent, TooltipProvider } from "@radix-ui/react-tooltip";
+import { Tooltip, TooltipTrigger } from "../ui/tooltip";
+import { Badge } from "../ui/badge";
 
 export default function ShowCard(props: {
   index: number;
@@ -48,91 +53,87 @@ export default function ShowCard(props: {
         variants={variants}
       >
         {!isVertical ? (
-          <div key={show.id} className="relative group">
-            <div className="aspect-video p-0.5 ">
-              <img
-                alt=""
-                className="object-center bg-muted object-cover h-full w-full border-background border group-hover:border-primary duration-200 ease-in-out"
-                src={imagePath}
-              />
-            </div>
+          <Card movie={show} type={type} />
+        ) : (
+          <Card movie={show} type={type} />
+        )}
+      </Motiondiv>
+      {/* <Card movie={show} type={type} /> */}
+    </Link>
+  );
+}
+export const Card = ({ movie, language = "en-US", type }: any) => {
+  const {
+    title,
+    backdrop_path: backdrop,
+    overview,
+    first_air_date,
+    media_type,
+    id,
+    release_date,
+    vote_average: voteAverage,
+    vote_count: voteCount,
+    name,
+  } = movie;
+
+  return (
+    <div
+      className="w-full h-full group group-hover:scale-95 duration-100 aspect-video cursor-pointer space-y-2"
+      data-testid="movie-card"
+    >
+      <div
+        style={{ aspectRatio: 16 / 9 }}
+        className="relative h-full  flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-background/50 shadow"
+      >
+        {backdrop ? (
+          <div>
+            <img
+              className="object-cover  inset-0"
+              src={tmdbImage(backdrop, "w500")}
+              alt={title}
+            />
             <svg
               fill="currentColor"
               viewBox="0 0 16 16"
               height="2em"
               width="2em"
-              className="absolute mix-blend-difference group-hover:opacity-100 opacity-0 inset-0   scale-90 group-hover:scale-100 duration-200  ease-in-out bottom-0 right-0 m-4 text-white"
-            >
-              <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zM6.79 5.093A.5.5 0 006 5.5v5a.5.5 0 00.79.407l3.5-2.5a.5.5 0 000-.814l-3.5-2.5z" />
-            </svg>
-            <div className="p-1 relative flex  flex-col ">
-              {showRank && (
-                <div className="absolute -mt-[1.8rem] mix-blend-difference font-bold text-7xl ">
-                  {index + 1}
-                </div>
-              )}
-              <div
-                className={` text-sm  line-clamp-1 ${
-                  showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
-                }`}
-              >
-                <TextGlitch>{show.title || show.name}</TextGlitch>
-              </div>
-              <div
-                className={`text-[10px]  flex gap-1 capitalize opacity-75 ${
-                  showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
-                }`}
-              >
-                {(show.first_air_date || show.release_date)?.split("-")[0]}{" "}
-                <p
-                  className={`${
-                    (show.media_type || type)?.toLowerCase() === "tv"
-                      ? "uppercase"
-                      : "capitalize"
-                  }`}
-                >
-                  • {type ? type : show.media_type}
-                </p>
-                <p className="flex gap-2 items-center">
-                  {" • " + show.vote_average?.toFixed(2)}
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div
-            key={show.id}
-            className="relative group hover:opacity-100 durtion-300 border border-transparent hover:border-primary hover:shadow-2xl md:opacity-40"
-            style={{ display: "grid", placeItems: "center" }}
-          >
-            <div className="   relative  flex items-center justify-center">
-              <img
-                alt=""
-                className="w-full  object-coverinset-0 h-full"
-                src={posterPath}
-              />
-            </div>
-
-            <svg
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              height="2rem" // Adjust as needed
-              width="2rem" // Adjust as needed
               className="absolute group-hover:opacity-100 opacity-0 scale-90 group-hover:scale-100 duration-200 ease-in-out bottom-0 right-0 m-4 text-white"
             >
-              <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zM6.79 5.093A.5.5 0 006 5.5v5a.5.5 0 00.79.407l3.5-2.5a.5.5 0 000-.814l-3.5-2.5z" />
+              <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
             </svg>
-
-            <div className="relative flex flex-col">
-              {showRank && (
-                <div className="absolute -mt-10 font-bold text-7xl">
-                  {index + 1}
-                </div>
-              )}
-            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center w-full h-full bg-background">
+            <ImageIcon className="text-muted" />
           </div>
         )}
-      </Motiondiv>
-    </Link>
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex text-sm md:text-base items-start justify-between gap-1">
+          <TextGlitch>{title || name}</TextGlitch>
+
+          <Badge variant="secondary">
+            {voteAverage ? voteAverage.toFixed(1) : "?"}
+          </Badge>
+        </div>
+        <div className={`text-xs text-muted-foreground flex gap-1 capitalize `}>
+          {(first_air_date || release_date)?.split("-")[0]}{" "}
+          <p
+            className={`${
+              (media_type || type)?.toLowerCase() === "tv"
+                ? "uppercase"
+                : "capitalize"
+            }`}
+          >
+            • {type ? type : media_type}
+          </p>
+          <p className="flex gap-2 items-center">
+            {" • " + voteAverage?.toFixed(2)}
+          </p>
+        </div>
+        {/* <p className="line-clamp-3 text-xs text-muted-foreground">{overview}</p> */}
+      </div>
+    </div>
   );
-}
+};

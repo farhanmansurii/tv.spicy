@@ -1,8 +1,7 @@
-import IconTabs from "@/components/common/DockMenu";
 import MinimalSocialsFooter from "@/components/common/Footer";
-import Navbar from "@/components/common/Navbar";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
 import WatchList from "@/components/common/WatchList";
+import { Header } from "@/components/common/header";
 import SeasonsTabLoader from "@/components/container/SeasonsTabLoader";
 import RowLoader from "@/components/loading/RowLoader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,9 +28,7 @@ const Carousal = dynamic(() => import("../components/common/Carousal"), {
 
 export default function Home() {
   return (
-    <div>
-      <Navbar />
-      <div className=" mx-auto flex justify-between"></div>
+    <div className="mx-auto max-w-6xl space-y-4 px-4 py-4 lg:px-0">
       <Carousal />
       <RecentlyWatched />
       <RowContainer />

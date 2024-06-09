@@ -30,7 +30,7 @@ export default function CarousalCard(props: CarousalCardProps) {
           <div className="flex md:hidden   h-[70vh]   relative">
             <img
               alt=""
-              className="inset-0 object-cover  h-full w-full"
+              className="inset-0 object-cover rounded-t-xl   h-full w-full"
               src={`https://image.tmdb.org/t/p/original/${props.show.poster_path}`}
             />
             <div className="   border-white absolute flex justify-between bg-gradient-to-t from-background to-transparent bottom-0 top-1/2 w-full   flex-col    ">
@@ -74,7 +74,7 @@ export default function CarousalCard(props: CarousalCardProps) {
           <div className="relative h-[70vh] md:flex hidden w-full  mx-auto  ">
             <img
               alt=""
-              className=" h-full w-full object-center object-cover"
+              className=" h-full w-full rounded-t-xl object-center object-cover"
               src={`https://image.tmdb.org/t/p/original/${show.backdrop_path}`}
             />
             <div className="inset-0 bg-gradient-to-t from-background to-from-background/10  absolute justify-between flex flex-col">
