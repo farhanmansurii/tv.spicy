@@ -57,14 +57,16 @@ export default function ContinueWatchingButton({
   return (
     <div className="flex w-full flex-col md:flex-row md:w-fit gap-2">
       {!isDetailsPage && (
-        <Button
-          iconPlacement="right"
-          variant={"expandIcon"}
-          Icon={ArrowRight}
-          className="whitespace-nowrap  w-full"
-        >
-          <Link href={`/movie/${id}`}>Go To Show</Link>
-        </Button>
+        <Link href={`/movie/${id}`}>
+          <Button
+            iconPlacement="right"
+            variant={"expandIcon"}
+            Icon={ArrowRight}
+            className="whitespace-nowrap  w-full"
+          >
+            Go To Show
+          </Button>
+        </Link>
       )}
       {!isEpisodeActive && recentlyWatchedEpisode && (
         <Button
