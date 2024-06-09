@@ -218,8 +218,8 @@ export default function Episode(props: EpisodeProps) {
           className="w-full h-full aspect-video font-mono"
           src={
             type === "movie"
-              ? `https://vidsrc.pro/embed/${type}/${movieID}`
-              : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
+              ? `https://vidsrc.icu/embed/${type}/${movieID}`
+              : `https://vidsrc.icu/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
           }
         />
       ) : (
@@ -228,8 +228,8 @@ export default function Episode(props: EpisodeProps) {
           className="w-full h-full aspect-video font-mono"
           src={
             type === "movie"
-              ? `https://vidsrc.icu/embed/${type}/${movieID}`
-              : `https://vidsrc.icu/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
+              ? `https://vidsrc.pro/embed/${type}/${movieID}`
+              : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
           }
         />
       )}

@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className={GeistSans.className} lang="en" suppressHydrationWarning>
+    <html className={GeistSans.className} lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-512x512.png"></link>
@@ -34,7 +34,7 @@ export default function RootLayout({
         >
           {" "}
           <QueryProvider>
-            <BackgroundGrid />
+            {/* <BackgroundGrid /> */}
             <Header />
             {children}
             <MinimalSocialsFooter />

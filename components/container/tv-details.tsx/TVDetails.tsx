@@ -15,8 +15,7 @@ import { Banner } from "./Banner";
 import { Poster } from "./Poster";
 import { Button } from "@/components/ui/button";
 import ContinueWatchingButton from "@/components/common/ContinueWatchingButton";
-import Navbar from "@/components/common/Navbar";
-import { Header } from "@/components/common/header";
+import { easeInOut, motion } from "framer-motion";
 
 type showDetailsProps = {
   id: number;
@@ -26,6 +25,18 @@ type showDetailsProps = {
   type: "tv" | "movie";
 };
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.4,
+      easeInOut: "easeInOut",
+    },
+  }),
+};
 export default function ShowDetails({
   id,
   show,
@@ -44,32 +55,50 @@ export default function ShowDetails({
             <Poster url={show.poster_path} alt={show.name} />
           </aside>
 
-          <article className="flex w-full mt-4 flex-col gap-2 md:w-2/3">
+          <motion.article
+            initial="hidden"
+            animate="visible"
+            className="flex w-full mt-4 flex-col gap-2 md:w-2/3"
+          >
             {show?.first_air_date && (
-              <span className="text-xs text-muted-foreground">
+              <motion.span
+                variants={fadeUp}
+                custom={0}
+                className="text-xs text-muted-foreground"
+              >
                 {format(new Date(show.first_air_date), "PPP")}
-              </span>
+              </motion.span>
             )}
             {show?.release_date && (
-              <span className="text-xs text-muted-foreground">
+              <motion.span
+                variants={fadeUp}
+                custom={1}
+                className="text-xs text-muted-foreground"
+              >
                 {format(new Date(show.release_date), "PPP")}
-              </span>
+              </motion.span>
             )}
 
-            <h1 className="text-4xl font-bold">{show.name || show.title}</h1>
+            <motion.h1
+              variants={fadeUp}
+              custom={2}
+              className="text-4xl font-bold"
+            >
+              {show.name || show.title}
+            </motion.h1>
 
-            <div className="flex flex-wrap items-center gap-1.5">
-              {show.genres.map((genre: any) => {
-                return (
-                  <Badge
-                    key={genre.id}
-                    variant="outline"
-                    className="whitespace-nowrap"
-                  >
+            <motion.div
+              variants={fadeUp}
+              custom={3}
+              className="flex flex-wrap items-center gap-1.5"
+            >
+              {show.genres.map((genre: any, index: any) => (
+                <motion.div key={genre.id} variants={fadeUp}>
+                  <Badge variant="outline" className="whitespace-nowrap">
                     {genre.name}
                   </Badge>
-                );
-              })}
+                </motion.div>
+              ))}
 
               <Separator orientation="vertical" className="h-6" />
 
@@ -84,20 +113,29 @@ export default function ShowDetails({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </div>
+            </motion.div>
 
-            <p className="text-xs leading-5 line-clamp-3 text-muted-foreground md:text-sm md:leading-6">
+            <motion.p
+              variants={fadeUp}
+              custom={show.genres.length + 4}
+              className="text-xs leading-5 line-clamp-3 text-muted-foreground md:text-sm md:leading-6"
+            >
               {show.overview}
-            </p>
-            <div className="flex flex-wrap gap-2">
+            </motion.p>
+
+            <motion.div
+              variants={fadeUp}
+              custom={show.genres.length + 5}
+              className="flex flex-wrap gap-2"
+            >
               <ContinueWatchingButton
                 isDetailsPage={true}
                 id={show.id}
                 type={type}
                 show={show}
               />
-            </div>
-          </article>
+            </motion.div>
+          </motion.article>
         </main>
       </div>
     </div>

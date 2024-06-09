@@ -5,7 +5,6 @@ import React from "react";
 export default function SearchPage() {
   return (
     <div>
-
       <div className="mx-auto max-w-6xl space-y-4 px-4 py-4 lg:px-0">
         <div className="flex p-2 mb-4 font-bold justify-between mx-auto text-xl md:text-2xl items-center py-1 flex-row">
           <div className="mx-1 flex gap-2 items-center">Search</div>
