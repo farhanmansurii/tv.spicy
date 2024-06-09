@@ -40,17 +40,17 @@ export const TvSerieDetails = async ({
       </div>
       <div className="mx-auto mb-8 max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
         <main className="flex flex-col gap-4 md:flex-row">
-          <aside className="w-full  mx-auto space-y-2 md:-mt-32 md:w-1/3">
+          <aside className="w-10/12 mx-auto space-y-2 md:-mt-32 md:w-1/3">
             <Poster url={tvSerie.poster_path} alt={tvSerie.name} />
           </aside>
 
-          <article className="flex w-full flex-col gap-2 md:w-2/3">
-            {tvSerie.first_air_date && (
+          <article className="flex w-full mt-4 flex-col gap-2 md:w-2/3">
+            {tvSerie?.first_air_date && (
               <span className="text-xs text-muted-foreground">
                 {format(new Date(tvSerie.first_air_date), "PPP")}
               </span>
             )}
-            {tvSerie.release_date && (
+            {tvSerie?.release_date && (
               <span className="text-xs text-muted-foreground">
                 {format(new Date(tvSerie.release_date), "PPP")}
               </span>
@@ -92,12 +92,6 @@ export const TvSerieDetails = async ({
               {tvSerie.overview}
             </p>
             <div className="flex flex-wrap gap-2">
-              {/* <ContinueWatchingButton
-                key={id}
-                show={tvSerie}
-                id={id}
-                type={type}
-              /> */}
               <Button>Play S1 E1</Button>
               <Button variant={"secondary"}>Add</Button>
             </div>

@@ -30,6 +30,7 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 lg:px-0">
       <Carousal />
+      <RowLoader withHeader={false} />
       <RecentlyWatched />
       <RowContainer />
       <MinimalSocialsFooter />

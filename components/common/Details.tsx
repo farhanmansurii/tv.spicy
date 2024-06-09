@@ -10,6 +10,7 @@ import RowLoader from "../loading/RowLoader";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDetails } from "@/lib/utils";
 import { TvSerieDetails } from "../container/tv-details.tsx/TVDetails";
+import DetailLoader from "../loading/DetailLoader";
 const Details = (props: any) => {
   const { data, type, id } = props;
   return (

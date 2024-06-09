@@ -4,7 +4,7 @@ import React from "react";
 
 export default function Loading() {
   return (
-    <div>
+    <div className="mx-auto max-w-6xl space-y-4 px-4 lg:px-0">
       <div className="flex md:hidden h-[70vh] relative">
         <Skeleton className="absolute inset-0" />
       </div>

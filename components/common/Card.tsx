@@ -87,7 +87,7 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
         className="relative h-full  flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-background/50 shadow"
       >
         {backdrop ? (
-          <div className="  z-30">
+          <div className="  ">
             <img
               className="object-cover backdrop-blur-sm   inset-0"
               src={tmdbImage(backdrop, "w500")}
@@ -108,9 +108,6 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
             <ImageIcon className="text-muted" />
           </div>
         )}
-        <div className="bg-transparent hover:bg-gradient-to-b from-transparent via-black/30  to-black/80 absolute  inset-0 z-30">
-          sdsdsd
-        </div>
       </div>
 
       <div className="space-y-1.5">
@@ -130,9 +127,6 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
             }`}
           >
             • {type ? type : media_type}
-          </p>
-          <p className="flex gap-2 items-center">
-            {" • " + voteAverage?.toFixed(2)}
           </p>
         </div>
         {/* <p className="line-clamp-3 text-xs text-muted-foreground">{overview}</p> */}
