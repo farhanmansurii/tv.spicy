@@ -90,8 +90,12 @@ export default function ShowDetails({
               {show.overview}
             </p>
             <div className="flex flex-wrap gap-2">
-              <Button>Play S1 E1</Button>
-              <Button variant={"secondary"}>Add</Button>
+              <ContinueWatchingButton
+                isDetailsPage={true}
+                id={show.id}
+                type={type}
+                show={show}
+              />
             </div>
           </article>
         </main>

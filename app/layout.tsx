@@ -5,6 +5,8 @@ import { Separator } from "@/components/ui/separator";
 import QueryProvider from "@/components/container/TanStackQueryProvider";
 import { GeistSans } from "geist/font/sans";
 import { Header } from "@/components/common/header";
+import MinimalSocialsFooter from "@/components/common/Footer";
+import BackgroundGrid from "@/components/animated-common/GridBackground";
 
 export const metadata: Metadata = {
   title: "TV / Movies",
@@ -32,8 +34,10 @@ export default function RootLayout({
         >
           {" "}
           <QueryProvider>
+            <BackgroundGrid />
             <Header />
             {children}
+            <MinimalSocialsFooter />
           </QueryProvider>
         </Providers>
       </body>

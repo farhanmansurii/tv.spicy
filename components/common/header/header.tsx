@@ -107,7 +107,7 @@ export const Header = () => {
           <Link href={"/search"}>
             <Button
               variant="ghost"
-              className="md:flex hidden w-full min-w-[200px] flex-1 border-muted border font-normal justify-between gap-2 pr-2 text-sm text-muted-foreground"
+              className="md:flex hidden bg-background w-full min-w-[200px] flex-1 border-muted border font-normal justify-between gap-2 pr-2 text-sm text-muted-foreground"
             >
               Search Anything
               <div className="flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">

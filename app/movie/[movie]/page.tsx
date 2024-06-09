@@ -20,7 +20,6 @@ export default async function TVDetails({
         />
       </head>
       <Details data={data} type={"movie"} />
-      <MinimalSocialsFooter />
     </div>
   );
 }

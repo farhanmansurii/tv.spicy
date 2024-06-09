@@ -40,7 +40,7 @@ const RecentlyWatched = () => {
   }
   return (
     recentlyWatched.length > 0 && (
-      <Carousel opts={{ dragFree: true }} className="w-[99%] mx-auto">
+      <Carousel opts={{ dragFree: true }} className="w-[99%] py-10  mx-auto">
         <div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
           <div className="mx-1 flex gap-2 items-center">
             Watch History
