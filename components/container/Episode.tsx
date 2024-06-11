@@ -127,7 +127,7 @@ export default function Episode(props: EpisodeProps) {
     return (
       <div className="flex flex-col gap-2">
         <Skeleton className=" h-12 mb-2 w-36"></Skeleton>
-        <Skeleton className="aspect-video w-full   mx-auto " />
+        <Skeleton className="aspect-video w-full  mx-auto " />
       </div>
     );
   }
@@ -175,7 +175,7 @@ export default function Episode(props: EpisodeProps) {
   //   );
   // }
   return (
-    <div className="">
+    <div id="episode-player" className="">
       <Select
         defaultValue={provider}
         onValueChange={(value) => setProvider(value)}

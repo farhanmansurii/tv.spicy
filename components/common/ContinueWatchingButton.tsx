@@ -38,8 +38,8 @@ export default function ContinueWatchingButton({
 
   const isAdded =
     type === "movie"
-      ? watchlist.some((s) => s.id === id)
-      : tvwatchlist.some((s) => s.id === id);
+      ? watchlist.some((s) => s?.id === id)
+      : tvwatchlist.some((s) => s?.id === id);
 
   const handleAddOrRemove = () => {
     if (isAdded) {

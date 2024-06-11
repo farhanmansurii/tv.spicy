@@ -48,7 +48,7 @@ export default function Row(props: {
           <CarouselContent className="gap-2 ">
             {props?.shows?.map(
               (show: Show, index: number) =>
-                show.backdrop_path && (
+                show?.backdrop_path && (
                   <CarouselItem
                     className={cn(
                       `group basis-7/12 w-full  md:basis-1/3 lg:basis-3/12   `

@@ -3,7 +3,14 @@ import React, { useState } from "react"; // Import React if not already imported
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { SeasonContent } from "./SeasonContent";
 import { useEpisodeStore } from "@/store/episodeStore";
-import { ChevronRight, Play } from "lucide-react";
+import {
+  ChevronRight,
+  GalleryVerticalEnd,
+  Grid,
+  List,
+  Menu,
+  Play,
+} from "lucide-react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 
@@ -20,14 +27,14 @@ import EpisodeCard from "../common/EpisodeCard";
 import { SeasonTabsProps } from "@/lib/types";
 const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
   const [activeSeason, setActiveSeason] = useState<any>(seasons[0]?.season);
-  const [isGridView, setIsGridView] = useState(false);
+  const [view, setView] = useState<"grid" | "list" | "carousel">("carousel");
   return activeSeason ? (
-    <div className="w-full px-4    flex flex-col mx-auto">
+    <div className="w-full flex flex-col mx-auto">
       <Carousel
         opts={{ dragFree: true }}
         className=" w-full justify-between mx-auto  "
       >
-        <div className="flex font-bold justify-between    text-xl md:text-2xl   py-1 flex-row">
+        <div className="flex font-bold  justify-between  items-center    text-xl md:text-2xl   py-2 flex-row">
           <Select
             defaultValue={"1"}
             onValueChange={(value) => setActiveSeason(value)}
@@ -45,23 +52,43 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
               ))}
             </SelectContent>
           </Select>
-
-          <Toggle
-            size="sm"
-            className="text-xs"
-            onClick={() => setIsGridView((prev) => !prev)}
-            aria-label="Switch View"
-          >
-            Switch to {isGridView ? "List View" : "Grid View"}
-          </Toggle>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={view === "list" ? "default" : "secondary"}
+              className="text-xs"
+              onClick={() => setView("list")}
+              aria-label="Switch View"
+            >
+              <List className="p-1" />
+            </Button>
+            <Button
+              size="sm"
+              variant={view === "grid" ? "default" : "secondary"}
+              className="text-xs"
+              onClick={() => setView("grid")}
+              aria-label="Switch View"
+            >
+              <Grid className="p-1" />
+            </Button>{" "}
+            <Button
+              size="sm"
+              variant={view === "carousel" ? "default" : "secondary"}
+              className="text-xs"
+              onClick={() => setView("carousel")}
+              aria-label="Switch View"
+            >
+              <GalleryVerticalEnd className="p-1" />
+            </Button>
+          </div>
         </div>
 
         {seasons?.map(
           (season: any) =>
             season.season === activeSeason && (
-              <div key={season.season} className="flex h-full flex-col">
+              <div key={season.season} className="flex my-3 h-full flex-col">
                 <SeasonContent
-                  isGridView={isGridView}
+                  view={view}
                   id={id}
                   tv_id={tv_id}
                   season={season}
@@ -72,9 +99,24 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
       </Carousel>
     </div>
   ) : (
-    <div className="w-96 aspect-video flex mx-auto font-bold text-2xl justify-center items-center">
-      {" "}
-      No episodes
+    <div className="w-8/12 h-[200px] mx-auto aspect-video border rounded-lg bg-muted flex-col gap-3 border-3 text-lg items-center justify-center flex text-center ">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        className="lucide lucide-circle-x"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="m15 9-6 6" />
+        <path d="m9 9 6 6" />
+      </svg>
+      No released episodes for this season.
     </div>
   );
 };

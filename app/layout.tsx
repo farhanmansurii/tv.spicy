@@ -7,6 +7,7 @@ import { GeistSans } from "geist/font/sans";
 import { Header } from "@/components/common/header";
 import MinimalSocialsFooter from "@/components/common/Footer";
 import BackgroundGrid from "@/components/animated-common/GridBackground";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "TV / Movies",
@@ -38,6 +39,7 @@ export default function RootLayout({
             <Header />
             {children}
             <MinimalSocialsFooter />
+            <Toaster />
           </QueryProvider>
         </Providers>
       </body>

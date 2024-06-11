@@ -5,24 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 
 export default function SeasonsTabLoader() {
-  const numSeasons = 2;
   const numEpisodes = 10;
-
-  const generateSkeletons = (count: number) => {
-    const skeletons = [];
-    for (let i = 0; i < count; i++) {
-      skeletons.push(
-        <div key={i} className="w-full max-w-4xl flex flex-col gap-2 ">
-          <Skeleton className="h-full aspect-video drop drop-shadow-lg " />
-          <div className="flex gap-2 justify-center flex-col">
-            <Skeleton className="w-20 h-4" />
-            <Skeleton className="w-32 h-6" />
-          </div>
-        </div>
-      );
-    }
-    return skeletons;
-  };
 
   return (
     <div className="flex w-full max-w-4xl   mx-auto flex-col">

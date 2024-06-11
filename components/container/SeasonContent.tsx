@@ -12,21 +12,26 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import { Season } from "@/lib/types";
-import { Car } from "lucide-react";
+import { Episode, Season } from "@/lib/types";
+import { Car, Dot } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { format, formatDate } from "date-fns";
+import { cn } from "@/lib/utils";
+import { ToastAction } from "../ui/toast";
+import { toast } from "../ui/use-toast";
 
 interface SeasonContentProps {
   season: Season;
   id: string;
   tv_id: string;
-  isGridView: boolean;
+  view: "grid" | "list" | "carousel";
 }
 
 export const SeasonContent: React.FC<SeasonContentProps> = ({
   season,
   id,
   tv_id,
-  isGridView,
+  view,
 }) => {
   const today = new Date();
   const releasedEpisodes = season?.episodes?.filter(
@@ -35,59 +40,136 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
   const { activeEP, setActiveEP } = useEpisodeStore();
   const { addRecentlyWatched } = useTVShowStore();
 
-  const toggle = (episode: any) => {
+  const toggle = (episode: Episode) => {
+    const isReleased = new Date(episode.releaseDate) <= new Date();
+    if (!isReleased || !episode.id) {
+      toast({
+        title: "Episode Not Available Yet",
+        description:
+          "Stay tuned! This episode will be available soon. Check back later.",
+      });
+      return;
+    }
     setActiveEP(null);
-    setActiveEP({ tv_id: tv_id, time: 0, ...episode });
-    addRecentlyWatched({ tv_id: tv_id, time: 0, ...episode });
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    setActiveEP({ tv_id, time: 0, ...episode });
+    addRecentlyWatched({ tv_id, time: 0, ...episode });
   };
 
-  return isGridView ? (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
-      {season.isReleased && releasedEpisodes?.length > 0 ? (
-        releasedEpisodes?.map((episode) => (
-          <EpisodeCard
-            tv_id={tv_id}
-            id={id}
-            active={episode.id === activeEP?.id}
-            toggle={toggle}
-            episode={episode}
-            key={episode.id}
-          />
-        ))
-      ) : (
-        <div className="h-[130px] items-center justify-center flex text-center text-lg">
-          No released episodes for this season.
-        </div>
-      )}
+  const renderEpisodes = (episodes: Episode[]) => {
+    return episodes.map((episode) => (
+      <EpisodeCard
+        tv_id={tv_id}
+        id={id}
+        active={episode.id === activeEP?.id}
+        toggle={() => toggle(episode)}
+        episode={episode}
+        key={episode.id}
+      />
+    ));
+  };
+
+  const renderNoEpisodesMessage = () => (
+    <div className="h-[130px] items-center justify-center flex text-center text-lg">
+      No released episodes for this season.
     </div>
-  ) : (
+  );
+
+  const renderCarouselContent = () => (
     <>
       <CarouselContent className="space-x-2">
         {season?.episodes?.length ? (
-          season.episodes.map((episode: any, index: number) => (
-            <EpisodeCard
-              tv_id={tv_id}
-              id={id}
-              active={episode.id === activeEP?.id}
-              toggle={toggle}
-              episode={episode}
-              key={episode.id}
-            />
-          ))
+          renderEpisodes(season.episodes)
         ) : (
-          <div className=" text-xl font-bold w-full md:w-1/3 mx-auto  flex aspect-video text-center justify-center items-center">
-            No episodes found
+          <div className="w-8/12 h-[200px] mx-auto aspect-video border rounded-lg bg-muted flex-col gap-3 border-3 text-lg items-center justify-center flex text-center ">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="lucide lucide-circle-x"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="m15 9-6 6" />
+              <path d="m9 9 6 6" />
+            </svg>
+            No released episodes for this season.
           </div>
         )}
       </CarouselContent>
-      <div className="flex justify-end  mt-2 gap-2 w-full mx-auto">
+
+      <div className="flex justify-end mt-2 gap-2 w-full mx-auto">
         <CarouselPrevious />
         <CarouselNext />
       </div>
     </>
+  );
+
+  switch (view) {
+    case "grid":
+      return (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
+          {season.isReleased && releasedEpisodes?.length > 0
+            ? renderEpisodes(season?.episodes)
+            : renderNoEpisodesMessage()}
+        </div>
+      );
+
+    case "list":
+      return season.isReleased && releasedEpisodes?.length > 0
+        ? season?.episodes?.map((episode) => (
+            <EpisodeListItem
+              active={episode.id === activeEP?.id}
+              toggle={() => toggle(episode)}
+              episode={episode}
+              key={episode.id}
+            />
+          ))
+        : renderNoEpisodesMessage();
+
+    case "carousel":
+      return renderCarouselContent();
+
+    default:
+      return null;
+  }
+};
+
+const EpisodeListItem = ({
+  episode,
+  active,
+  toggle,
+}: {
+  episode: Episode;
+  active: Boolean;
+  toggle: any;
+}) => {
+  return (
+    <div
+      onClick={() => toggle(episode)}
+      className={cn(
+        "p-2 flex flex-col gap-2 border border-transparent rounded-xl hover:pl-2 duration-100 hover:scale-105",
+        active && "border-primary/40 p-3"
+      )}
+      key={episode.id}
+    >
+      <div className="flex line-clamp-1">
+        <Badge className="whitespace-nowrap">
+          {active && "Now Playing "}Episode {episode.episode}
+        </Badge>
+        <Dot />
+        <div className="line-clamp-1 font-bold">{episode.title}</div>
+      </div>
+      <div className="opacity-50 text-[10px] md:text-xs">
+        {format(new Date(episode.releaseDate), "PPP")}
+      </div>
+      <div className="text-sm text-secondary-foreground">
+        {episode.description}
+      </div>
+    </div>
   );
 };
