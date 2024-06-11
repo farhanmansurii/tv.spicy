@@ -153,7 +153,7 @@ const EpisodeListItem = ({
       onClick={() => toggle(episode)}
       className={cn(
         "p-2 flex flex-col gap-2 border border-transparent rounded-xl hover:pl-2 duration-100 hover:scale-105",
-        active && "border-primary/40 p-3"
+        active && episode?.id && "border-primary/40 p-3"
       )}
       key={episode.id}
     >
