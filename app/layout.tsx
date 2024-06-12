@@ -24,6 +24,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-512x512.png"></link>
         <meta name="theme-color" content="#e63946" />
+        <meta name="referrer" content="origin" />
         <title>watvh app</title>
       </head>
       <body>

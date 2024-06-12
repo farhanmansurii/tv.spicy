@@ -215,17 +215,17 @@ export default function Episode(props: EpisodeProps) {
       ) : provider === "embedded" ? (
         <iframe
           allowFullScreen
-          className="w-full h-full aspect-video font-mono"
+          className="w-full h-full border-primary border-4 rounded-lg aspect-video font-mono"
           src={
             type === "movie"
-              ? `https://vidsrc.icu/embed/${type}/${movieID}`
-              : `https://vidsrc.icu/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
+              ? `https://vidsrc.xyz/embed/${type}/${movieID}`
+              : `https://vidsrc.xyz/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
           }
         />
       ) : (
         <iframe
           allowFullScreen
-          className="w-full h-full aspect-video font-mono"
+          className="w-full h-full border-primary border-4 rounded-lg aspect-video font-mono"
           src={
             type === "movie"
               ? `https://vidsrc.pro/embed/${type}/${movieID}`
