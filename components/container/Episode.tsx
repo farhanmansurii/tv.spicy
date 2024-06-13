@@ -22,217 +22,69 @@ interface EpisodeProps {
   seasonNumber?: any;
 }
 
-interface EpisodeData {
-  sources: { src: string; name: string }[];
-  subtitles: { lang: string; url: string }[];
-}
+
 
 export default function Episode(props: EpisodeProps) {
   const { episodeId, id, movieID, type, seasonNumber, episodeNumber } = props;
-  const [episode, setEpisode] = useState<EpisodeData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [provider, setProvider] = useState("vidsrc");
 
-  async function fetchVidSrcData() {
-    setIsLoading(true);
-    try {
-      await fetchVidSrc(
-        type,
-        type === "movie" ? movieID : id,
-        seasonNumber,
-        episodeNumber,
-        (err: any, res: any) => {
-          if (err) {
-            setProvider("consumet");
-            fetchMovieLinks(episodeId, id, handleMovieLinksResponse);
-          } else {
-            handleVidSrcResponse(res);
-          }
-        }
-      );
-    } catch (error) {
-      setIsLoading(false);
-    }
-  }
+  const sourcesMap = [
+    {
+      name: "vidsrc.pro",
+      label: "Vidsrc Pro",
+      url:
+        type === "movie"
+          ? `https://vidsrc.pro/embed/${type}/${movieID}`
+          : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
+    },
+    {
+      name: "vidsrc.xyz",
+      label: "Vidsrc",
+      url:
+        type === "movie"
+          ? `https://vidsrc.to/embed/${type}/${movieID}`
+          : `https://vidsrc.to/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
+    },
 
-  function fetchMovieLinksData() {
-    setIsLoading(true);
-    fetchMovieLinks(episodeId, id, handleMovieLinksResponse);
-  }
-
-  function handleVidSrcResponse(res: any) {
-    const engSubtitles = res.flatMap((e: any) => {
-      if (e.data && e.data.sub) {
-        if (Array.isArray(e.data.sub)) {
-          return e.data.sub.map((sub: any, index: number) => ({
-            lang: sub.lang,
-            url: sub.file,
-          }));
-        } else if (typeof e.data.sub === "object") {
-          const subtitles: { lang: string; url: string }[] = [];
-          for (const lang in e.data.sub) {
-            if (Object.prototype.hasOwnProperty.call(e.data.sub, lang)) {
-              const url = e.data.sub[lang as keyof typeof e.data.sub];
-              subtitles.push({ lang: lang?.split("-")[0] || lang, url });
-            }
-          }
-          return subtitles || [];
-        }
-      }
-      return [];
-    });
-
-    const transformedData: EpisodeData = {
-      sources: res.map((ep: any) => ({
-        src: ep.data?.file,
-        name: ep.name || "", // Adjust as per your actual data structure
-      })),
-      subtitles: engSubtitles || [],
-    };
-    setEpisode(transformedData);
-
-    setError(null);
-    setIsLoading(false);
-  }
-
-  function handleMovieLinksResponse(err: any, res: any) {
-    if (err) {
-      // setError("Error playing episode");
-      setProvider("alt");
-    } else {
-      const transformedData: EpisodeData = {
-        sources: res.sources.map((source: any) => ({
-          src: source.url,
-          name: source.quality || "", // Adjust as per your actual data structure
-        })),
-        subtitles: res.subtitles
-          .map((sub: any) => ({ lang: sub.lang, url: sub.url }))
-          .filter(Boolean),
-      };
-      setEpisode(transformedData);
-      setError(null);
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    if (provider === "vidsrc") {
-      fetchVidSrcData();
-    } else if (provider === "consumet") {
-      fetchMovieLinksData();
-    }
-  }, [episodeId, id, provider, type, movieID, episodeNumber, seasonNumber]);
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-2">
-        <Skeleton className=" h-12 mb-2 w-36"></Skeleton>
-        <Skeleton className="aspect-video w-full  mx-auto " />
-      </div>
-    );
-  }
-
-  // if (error) {
-  //   return (
-  //     <>
-  //       <div className="">
-  //         <Select
-  //           defaultValue={provider}
-  //           onValueChange={(value) => setProvider(value)}
-  //         >
-  //           <SelectTrigger className="   w-fit">
-  //             <SelectValue className="">
-  //               <div className="pr-10">
-  //                 Server {provider === "vidsrc" ? 1 : 2}{" "}
-  //               </div>
-  //             </SelectValue>
-  //           </SelectTrigger>
-  //           <SelectContent>
-  //             <SelectItem value={"vidsrc"} key={"vidsrc"}>
-  //               <div className="mx-1 flex gap-2">Server 1</div>
-  //             </SelectItem>
-  //             <SelectItem value={"consumet"} key={"consumet"}>
-  //               <div className="mx-1 flex gap-2">Server 2</div>
-  //             </SelectItem>
-  //             <SelectItem value={"embedded"} key={"embedded"}>
-  //               <div className="mx-1 flex gap-2">Server 3</div>
-  //             </SelectItem>
-  //           </SelectContent>
-  //         </Select>
-  //       </div>
-  //       <div className="aspect-video an gap-2 text-xl flex-col items-center flex justify-center bg-destructive rounded-lg w-full lg:w-[600px] mx-auto my-4">
-  //         <div> {error || "Something went wrong"} :/</div>
-  //         <Button
-  //           className="bg-primary text-sm gap-2"
-  //           onClick={() =>
-  //             provider === "vidsrc" ? fetchVidSrcData() : fetchMovieLinksData()
-  //           }
-  //         >
-  //           Retry <RotateCw className="w-4 h-4" />
-  //         </Button>
-  //       </div>
-  //     </>
-  //   );
-  // }
+    // {
+    //   name: "smashystream",
+    //   label: "Smashy  stream",
+    //   url:
+    //     type === "movie"
+    //       ? `https://susflix.tv/api/embed/movie?id=${id}`
+    //       : `https://susflix.tv/api/embed/tv?id=${id}&s=${seasonNumber}&e=${episodeNumber}`,
+    // },
+  ];
+  const [provider, setProvider] = useState(sourcesMap[0]);
+  const handleSelectOnChange = (value: string) => {
+    const selectedProvider = sourcesMap.find((source) => source.name === value);
+    setProvider(selectedProvider || sourcesMap[0]);
+  };
   return (
     <div id="episode-player" className="">
       <Select
-        defaultValue={provider}
-        onValueChange={(value) => setProvider(value)}
+        defaultValue={provider.name || sourcesMap[0].name}
+        onValueChange={handleSelectOnChange}
       >
         <SelectTrigger className="w-fit h-12 mb-4">
           <Settings className="w-6 h-6 p-1 mr-2" />
-          <SelectValue className=" ">
-            <div className="pr-10 ">
-              Server {provider === "embedded" ? 2 : provider === "alt" && 1}
-            </div>
+          <SelectValue>
+            <div className="pr-10">{provider.label}</div>
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {/* <SelectItem value={"vidsrc"} key={"vidsrc"}>
-            <div className="mx-1 flex gap-2">Server 1</div>
-          </SelectItem>
-          <SelectItem value={"consumet"} key={"consumet"}>
-            <div className="mx-1 flex gap-2">Server 2</div>
-          </SelectItem> */}
-          <SelectItem value={"alt"} key={"alt"}>
-            <div className="mx-1 flex gap-2">Server 1</div>
-          </SelectItem>
-          <SelectItem value={"embedded"} key={"embedded"}>
-            <div className="mx-1 flex gap-2">Server 2</div>
-          </SelectItem>
+          {sourcesMap.map((source, index) => (
+            <SelectItem value={source.name} key={index}>
+              <div className="mx-1 flex gap-2">Server {source.label}</div>
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
-
-      {episode && (provider === "vidsrc" || provider === "consumet") ? (
-        <OPlayer
-          key={provider}
-          provider={provider}
-          sources={episode.sources}
-          subtitles={episode.subtitles}
-          type={type}
-        />
-      ) : provider === "embedded" ? (
-        <iframe
-          allowFullScreen
-          className="w-full h-full border-primary border-4 rounded-lg aspect-video font-mono"
-          src={
-            type === "movie"
-              ? `https://vidsrc.xyz/embed/${type}/${movieID}`
-              : `https://vidsrc.xyz/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
-          }
-        />
-      ) : (
-        <iframe
-          allowFullScreen
-          className="w-full h-full border-primary border-4 rounded-lg aspect-video font-mono"
-          src={
-            type === "movie"
-              ? `https://vidsrc.pro/embed/${type}/${movieID}`
-              : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`
-          }
-        />
-      )}
+      <iframe
+        allowFullScreen
+        referrerPolicy="origin"
+        className="w-full h-full border-primary border-4 rounded-lg aspect-video font-mono"
+        src={provider.url}
+      />
     </div>
   );
 }

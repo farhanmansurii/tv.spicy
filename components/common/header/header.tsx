@@ -1,6 +1,13 @@
 "use client";
 import Link from "next/link";
-import { CommandIcon, Search, Tv, User } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CommandIcon,
+  Search,
+  Tv,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -20,6 +27,7 @@ import ThemeButton from "../ThemeButton";
 import NavigationSidebar from "@/components/container/NavigationSidebar";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { useRouter } from "next/navigation";
 const categories = [
   { title: "Trending", path: "trending" },
   { title: "Airing Today", path: "airing-today" },
@@ -28,6 +36,7 @@ const categories = [
   { title: "Top Rated", path: "top-rated" },
 ];
 export const Header = () => {
+  const router = useRouter();
   const [movieGenre, setMovieGenre] = useState(null);
   const [tvGenre, setTvGenre] = useState(null);
   useEffect(() => {
@@ -41,9 +50,16 @@ export const Header = () => {
     }
     fetchGenre();
   }, []);
+
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 py-4 lg:px-0">
       <header className=" w-full items-center  my-1 flex">
+        <Button onClick={() => router.back()} size={"sm"} variant={"ghost"}>
+          <ChevronLeft />
+        </Button>
+        <Button onClick={() => router.forward()} size={"sm"} variant={"ghost"}>
+          <ChevronRight />
+        </Button>
         <Link href={"/"}>
           <Button className="w-fit whitespace-nowrap" variant={"link"}>
             WATVH-TV

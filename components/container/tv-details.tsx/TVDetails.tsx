@@ -16,6 +16,7 @@ import { Poster } from "./Poster";
 import { Button } from "@/components/ui/button";
 import ContinueWatchingButton from "@/components/common/ContinueWatchingButton";
 import { easeInOut, motion } from "framer-motion";
+import NextBreadcrumb from "@/components/breadcrumbs";
 
 type showDetailsProps = {
   id: number;

@@ -19,6 +19,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
+import { useRouter } from "next/router";
 const categories = [
   { title: "Trending", path: "trending" },
   { title: "Airing Today", path: "airing-today" },
@@ -40,10 +41,11 @@ export default function Navbar(props: { text?: string }) {
     }
     fetchGenre();
   }, []);
-
+  const router = useRouter();
   return (
     <nav className="w-full  z-10">
       <div className="flex text-xl w-[96%] mx-auto font-bold p-2 py-4 flex-row justify-between items-center ">
+        <Button> Back</Button>
         <Link href={"/"}>
           <Button className="w-fit whitespace-nowrap" variant={"link"}>
             WATVH-TV
