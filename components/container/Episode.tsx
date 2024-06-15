@@ -82,7 +82,7 @@ export default function Episode(props: EpisodeProps) {
       <iframe
         allowFullScreen
         referrerPolicy="origin"
-        className="w-full h-full border-primary border-4 rounded-lg aspect-video font-mono"
+        className="w-full h-full border-primary border rounded-lg aspect-video font-mono"
         src={provider.url}
       />
     </div>

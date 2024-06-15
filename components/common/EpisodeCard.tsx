@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { CarouselItem } from "@/components/ui/carousel";
 import { tmdbImage } from "@/lib/tmdb-image";
 import { cn } from "@/lib/utils";
@@ -8,6 +7,7 @@ import { TextGlitch } from "../animated-common/TextFlip";
 import { format } from "date-fns";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+
 export default function EpisodeCard(props: any) {
   const { episode, active, toggle } = props;
   return (
@@ -25,7 +25,7 @@ export default function EpisodeCard(props: any) {
           {episode.img?.mobile || episode.img?.hd ? (
             <div>
               <img
-                className={"object-cover  inset-0"}
+                className={"object-cover  inset-0 object-fit"}
                 src={tmdbImage(episode.img?.mobile || episode.img?.hd, "w500")}
                 alt={"title"}
               />
@@ -84,20 +84,7 @@ export default function EpisodeCard(props: any) {
             className={`text-xs text-muted-foreground flex gap-1 capitalize  ${""}`}
           >
             {format(new Date(episode.releaseDate), "PPP")}
-            {/* <p
-            className={`${
-              (media_type || type)?.toLowerCase() === "tv"
-                ? "uppercase"
-                : "capitalize"
-            }`}
-          >
-            • {type ? type : media_type}
-          </p>
-          <p className="flex gap-2 items-center">
-            {" • " + voteAverage?.toFixed(2)}
-          </p> */}
           </div>
-          {/* <p className="line-clamp-3 text-xs text-muted-foreground">{overview}</p> */}
         </div>
       </div>
     </CarouselItem>

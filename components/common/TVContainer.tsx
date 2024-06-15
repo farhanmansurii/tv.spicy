@@ -50,6 +50,7 @@ export const TVContainer: React.FC<T> = ({ tv, tv_id }: T) => {
           seasonNumber={activeEP.season}
           episodeId={activeEP?.id}
           id={tv_id}
+          key={activeEP.episode}
           type={"tv"}
         />
       ) : (

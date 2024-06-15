@@ -4,6 +4,9 @@ import {
   ChevronLeft,
   ChevronRight,
   CommandIcon,
+  Home,
+  HomeIcon,
+  LucideHome,
   Search,
   Tv,
   User,
@@ -54,17 +57,47 @@ export const Header = () => {
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 py-4 lg:px-0">
       <header className=" w-full items-center  my-1 flex">
-        <Button onClick={() => router.back()} size={"sm"} variant={"ghost"}>
-          <ChevronLeft />
-        </Button>
-        <Button onClick={() => router.forward()} size={"sm"} variant={"ghost"}>
-          <ChevronRight />
-        </Button>
-        <Link href={"/"}>
-          <Button className="w-fit whitespace-nowrap" variant={"link"}>
-            WATVH-TV
-          </Button>
-        </Link>
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="space-x-2">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  height="1em"
+                  width="1em"
+                >
+                  <path d="M12.74 2.32a1 1 0 00-1.48 0l-9 10A1 1 0 003 14h2v7a1 1 0 001 1h12a1 1 0 001-1v-7h2a1 1 0 001-1 1 1 0 00-.26-.68z" />
+                </svg>
+                <p className="text-sm font-medium leading-none">Home</p>
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="flex  flex-col  p-4 md:w-[300px]  lg:grid-cols-[.75fr_1fr]">
+                  <ListItem>
+                    <Link
+                      href={"/"}
+                      className="flex whitespace-nowrap items-center"
+                    >
+                      Home
+                    </Link>
+                  </ListItem>
+                  <ListItem onClick={() => router.back()}>
+                    <div className="flex whitespace-nowrap items-center">
+                      Go Back
+                      <ChevronLeft />
+                    </div>
+                  </ListItem>
+                  <ListItem onClick={() => router.forward()}>
+                    <div className="flex whitespace-nowrap items-center ">
+                      Go Forward
+                      <ChevronRight />
+                    </div>
+                  </ListItem>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
         <div className="hidden md:flex gap-2">
           <NavigationMenu>
             <NavigationMenuList>

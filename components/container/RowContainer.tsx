@@ -3,10 +3,12 @@ import FetchAndRenderRow from "./FetchAndRenderRow";
 import WatchList from "../common/WatchList";
 import AnimeRow from "./anime-container.tsx/anime-row-wrapper";
 import AnimeRowContainer from "./anime-container.tsx/anime-row-wrapper";
+import RecentlyWatched from "../common/RecentlyWatched";
 
 export default function RowContainer() {
   return (
     <div className="flex flex-col space-y-12">
+      <RecentlyWatched />
       <WatchList />
       <FetchAndRenderRow
         apiEndpoint="movie/top_rated"
