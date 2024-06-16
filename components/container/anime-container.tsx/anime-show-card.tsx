@@ -1,132 +1,63 @@
 /* eslint-disable @next/next/no-img-element */
 import { TextGlitch } from "@/components/animated-common/TextFlip";
 import { Motiondiv } from "@/components/common/MotionDiv";
-import { Show } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import { Anime, Show } from "@/lib/types";
+import { ImageIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-export default function AnimeShowCard(props: {
-  index: number;
-  variants?: any;
-  show: Show;
-  showRank?: Boolean;
-  isVertical?: Boolean;
-  type?: string;
-  onClick?: any;
-}) {
-  const { index, show, showRank, isVertical, type } = props;
+export const AnimeShowCard = ({ anime }: { anime: Anime }) => {
+  const { cover, image, title, rating, releaseDate } = anime;
 
-  const variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-    },
-  };
-  function calculateDelay(index: number) {
-    const staggeredIndex = index % 20 !== 0 ? index % 20 : 0;
-    return staggeredIndex;
-  }
   return (
-    <Link onClick={() => props.onClick && props.onClick(show)} href={`/`}>
-      <Motiondiv
-        initial="hidden"
-        animate="visible"
-        transition={{
-          delay: calculateDelay(index) * 0.1,
-          ease: "easeInOut",
-          duration: 0.5,
-        }}
-        viewport={{ amount: 0 }}
-        custom={props.index}
-        variants={variants}
-      >
-        {!isVertical ? (
-          <div key={show.id} className="relative group">
-            <div className="aspect-video ">
+    <Link href={`/anime/${anime.id}`}>
+      <div className="w-full h-full flex flex-col  group group-hover:scale-95 duration-100 cursor-pointer space-y-2">
+        <div className="relative h-full  flex aspect-poster w-full items-center justify-center overflow-hidden rounded-md border bg-background/50 shadow">
+          {cover || image ? (
+            <div className="aspect-poster  ">
               <img
-                alt=""
-                className="object-center object-cover h-full w-full border-transparent border group-hover:border-primary duration-200 ease-in-out"
-                src={show.cover || show.image}
+                src={image}
+                alt={title.english}
+                style={{
+                  objectFit: "cover",
+                  width: "100%",
+                  height: "100%",
+                }}
               />
-            </div>
-            <svg
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              height="2em"
-              width="2em"
-              className="absolute mix-blend-difference group-hover:opacity-100 opacity-0 inset-0   scale-90 group-hover:scale-100 duration-200  ease-in-out bottom-0 right-0 m-4 text-white"
-            >
-              <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zM6.79 5.093A.5.5 0 006 5.5v5a.5.5 0 00.79.407l3.5-2.5a.5.5 0 000-.814l-3.5-2.5z" />
-            </svg>
-            <div className="p-1 relative flex  flex-col ">
-              {showRank && (
-                <div className="absolute -mt-[1.8rem] mix-blend-difference font-bold text-7xl ">
-                  {index + 1}
-                </div>
-              )}
-              <div
-                className={` text-sm  line-clamp-1 ${
-                  showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
-                }`}
+              <svg
+                fill="currentColor"
+                viewBox="0 0 16 16"
+                height="2em"
+                width="2em"
+                className="absolute z-40 group-hover:opacity-100 opacity-0 scale-90 group-hover:scale-100 duration-200 ease-in-out bottom-0 right-0 m-4 text-white"
               >
-                <TextGlitch>{show.title.english || ""}</TextGlitch>
-              </div>
-              <div
-                className={`text-[10px]  flex gap-1 capitalize opacity-75 ${
-                  showRank && (index + 1 === 10 ? ` ml-24` : "ml-12")
-                }`}
-              >
-                {show.releaseDate}
-                <p
-                  className={`${
-                    (show.media_type || type)?.toLowerCase() === "tv"
-                      ? "uppercase"
-                      : "capitalize"
-                  }`}
-                >
-                  • {"Anime"}
-                </p>
-                <p className="flex gap-2 items-center">
-                  {" • " + show.rating * 0.1}
-                </p>
-              </div>
+                <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
+              </svg>
             </div>
+          ) : (
+            <div className="flex items-center justify-center w-full h-full bg-background">
+              <ImageIcon className="text-muted" />
+            </div>
+          )}
+        </div>
+        <div className="space-y-1.5 ">
+          <div className="flex text-sm md:text-base items-start justify-between gap-1">
+            <TextGlitch>
+              {title.english || title.userPreferred || "hi"}
+            </TextGlitch>
+            <Badge variant="secondary">
+              {rating ? (rating / 10).toFixed(1) : "?"}
+            </Badge>
           </div>
-        ) : (
           <div
-            key={show.id}
-            className="relative group hover:opacity-100 durtion-300 border border-transparent hover:border-primary hover:shadow-2xl md:opacity-40"
-            style={{ display: "grid", placeItems: "center" }}
+            className={`text-xs text-muted-foreground flex gap-1 capitalize `}
           >
-            <div className="   relative  flex items-center justify-center">
-              <img
-                alt=""
-                className="w-full  object-coverinset-0 h-full"
-                src={posterPath}
-              />
-            </div>
-
-            <svg
-              fill="currentColor"
-              viewBox="0 0 16 16"
-              height="2rem" // Adjust as needed
-              width="2rem" // Adjust as needed
-              className="absolute group-hover:opacity-100 opacity-0 scale-90 group-hover:scale-100 duration-200 ease-in-out bottom-0 right-0 m-4 text-white"
-            >
-              <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zM6.79 5.093A.5.5 0 006 5.5v5a.5.5 0 00.79.407l3.5-2.5a.5.5 0 000-.814l-3.5-2.5z" />
-            </svg>
-
-            <div className="relative flex flex-col">
-              {showRank && (
-                <div className="absolute -mt-10 font-bold text-7xl">
-                  {index + 1}
-                </div>
-              )}
-            </div>
+            {releaseDate}{" "}
           </div>
-        )}
-      </Motiondiv>
+          {/* <p className="line-clamp-3 text-xs text-muted-foreground">{overview}</p> */}
+        </div>
+      </div>
     </Link>
   );
-}
+};

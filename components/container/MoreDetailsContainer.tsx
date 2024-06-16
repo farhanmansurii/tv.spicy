@@ -1,5 +1,5 @@
 "use client";
-import { Show } from "@/lib/types";
+import { Anime, Show } from "@/lib/types";
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -23,34 +23,13 @@ interface TabProps {
 }
 
 export default function MoreDetailsContainer(props: {
-  show: Show;
+  show: Show | Anime;
   type: string;
+  renderContent: (selected: string) => JSX.Element;
 }) {
   const [selected, setSelected] = useState<string>(tabs[0]);
-
-  const renderContent = () => {
-    switch (selected) {
-      case "Related Shows":
-        return (
-          <RelatedShowsComponent
-            relation="similar"
-            type={props.type}
-            show={props.show}
-          />
-        );
-      case "Recommendations":
-        return (
-          <RelatedShowsComponent
-            relation="recommendations"
-            type={props.type}
-            show={props.show}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
+  const content =
+    props.renderContent && selected && props.renderContent(selected);
   return (
     <div className="mx-auto  max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
       <div className="mb-4  flex flex-wrap items-center gap-2">
@@ -63,7 +42,7 @@ export default function MoreDetailsContainer(props: {
           />
         ))}
       </div>
-      <div className="w-full min-h-[200px] mx-auto">{renderContent()}</div>
+      <div className="w-full min-h-[200px] mx-auto">{content}</div>
     </div>
   );
 }

@@ -20,7 +20,15 @@ export const Poster = ({ url, alt, className, ...props }: PosterProps) => {
       {...props}
     >
       {url ? (
-        <img className="object-fill " alt={alt} src={tmdbImage(url)} />
+        <img
+          style={{
+            objectFit: "cover",
+            width: "100%",
+            height: "100%",
+          }}
+          alt={alt}
+          src={url}
+        />
       ) : (
         <LucideImage className="z-20" size={24} />
       )}

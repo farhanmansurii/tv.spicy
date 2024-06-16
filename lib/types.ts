@@ -53,3 +53,48 @@ export   interface Show {
   id: string;
   tv_id: string;
 }
+
+export interface Anime {
+  id: string;
+  malId: number;
+  title: {
+    romaji: string;
+    english: string;
+    native: string;
+    userPreferred: string;
+  };
+  image: string;
+  imageHash: string;
+  trailer: {
+    id: string;
+    site: "youtube";
+    thumbnail: string;
+    thumbnailHash: string;
+  };
+  description: string;
+  status: "Ongoing" | "Completed";
+  cover: string;
+  coverHash: string;
+  rating: number;
+  releaseDate: number;
+  color: string;
+  genres: string[];
+  totalEpisodes: number;
+  duration: number;
+  type: "TV" | "Movie";
+  recommendations: Anime[];
+  relations: Anime[];
+}
+
+export interface AnimeEpisode {
+  id: string;
+  animeID?: string;
+  animeTitle?: string;
+  episode: number;
+  image: string;
+  title?: string;
+  number: number;
+  description?: string;
+  time: number;
+  type?: string;
+}

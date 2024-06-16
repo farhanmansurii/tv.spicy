@@ -26,7 +26,7 @@ type showDetailsProps = {
   type: "tv" | "movie";
 };
 
-const fadeUp = {
+export const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
@@ -53,7 +53,7 @@ export default function ShowDetails({
       <div className="mx-auto mb-8 max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
         <main className="flex flex-col gap-4 md:flex-row">
           <aside className="w-10/12 mx-auto space-y-2 md:-mt-32 md:w-1/3">
-            <Poster url={show.poster_path} alt={show.name} />
+            <Poster url={tmdbImage(show.poster_path)} alt={show.name} />
           </aside>
 
           <motion.article

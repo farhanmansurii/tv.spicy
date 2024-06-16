@@ -17,15 +17,12 @@ export default function AnimeRowContainer(props: AnimeListProps) {
     refetchInterval: 1000 * 60 * 100,
   });
   if (isLoading) return <RowLoader withHeader />;
-  console.log(animedata);
   return (
-    <div>
-      <AnimeRow
-        anime={animedata.results}
-        text={text}
-        isVertical={false}
-        type="tv"
-      />
-    </div>
+    <AnimeRow
+      anime={animedata.results}
+      text={text}
+      isVertical={false}
+      type="tv"
+    />
   );
 }

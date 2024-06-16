@@ -21,8 +21,6 @@ export default function ShowCard(props: {
   onClick?: any;
 }) {
   const { index, show, showRank, isVertical, type } = props;
-  const imagePath = `https://image.tmdb.org/t/p/w500/${show.backdrop_path}`;
-  const posterPath = `https://image.tmdb.org/t/p/w500/${show.poster_path}`;
 
   const variants = {
     hidden: { opacity: 0, y: 30 },
@@ -59,7 +57,6 @@ export default function ShowCard(props: {
           <Card movie={show} type={type} />
         )}
       </Motiondiv>
-      {/* <Card movie={show} type={type} /> */}
     </Link>
   );
 }
@@ -129,7 +126,6 @@ export const Card = ({ movie, language = "en-US", type }: any) => {
             • {type ? type : media_type}
           </p>
         </div>
-        {/* <p className="line-clamp-3 text-xs text-muted-foreground">{overview}</p> */}
       </div>
     </div>
   );

@@ -32,8 +32,8 @@ export async function fetchData(endpoint: string) {
   try {
     const url = new URL(endpoint, baseUrl);
 
-    const response = await axios.get(url.toString(),);
-
+    const response = await axios.get(url.toString());
+    console.log(url);
     if (!response.data) {
       throw new Error('Failed to fetch data');
     }

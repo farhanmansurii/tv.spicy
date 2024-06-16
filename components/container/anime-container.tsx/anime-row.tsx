@@ -7,16 +7,16 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Show } from "@/lib/types";
+import { Anime, Show } from "@/lib/types";
 import { CaretRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import AnimeShowCard from "./anime-show-card";
+import { AnimeShowCard } from "./anime-show-card";
 
 export default function AnimeRow(props: {
-  anime: any[];
+  anime: Anime[];
   text?: string;
   showRank?: boolean;
   type: string;
@@ -31,16 +31,33 @@ export default function AnimeRow(props: {
       transition: { duration: 0.3, delay: 0.05 },
     }),
   };
+  if (!props?.anime)
+    return (
+      <div className="w-full h-[200px] mx-auto aspect-video border rounded-lg bg-muted flex-col gap-3 border-3 text-lg items-center justify-center flex text-center ">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          className="lucide lucide-circle-x"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="m15 9-6 6" />
+          <path d="m9 9 6 6" />
+        </svg>
+        <h1 className="text-2xl font-bold">No Results</h1>
+      </div>
+    );
   return (
-    <Carousel opts={{ dragFree: true }} className="w-[97%] mx-auto">
+    <Carousel opts={{ dragFree: true }} className=" w-[99%] mx-auto">
       {props.text && (
         <div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
-          <div className="mx-1 flex gap-2 items-center">
-            {props.text}{" "}
-            <div>
-              <CaretRightIcon className="h-full " />
-            </div>
-          </div>
+          <h1 className="text-2xl flex  font-bold">{props.text}</h1>
           <div className="flex  gap-2">
             <CarouselPrevious variant={"secondary"} />
             <CarouselNext variant={"secondary"} />
@@ -49,28 +66,29 @@ export default function AnimeRow(props: {
       )}
 
       <AnimatePresence>
-        {/* {!props.isVertical ? (
-          <CarouselContent className="gap-0  ">
-            {props?.anime?.map((show: any[], index: number) => (
-              <CarouselItem
-                className={cn(
-                  `group basis-1/2 w-full  md:basis-1/3 lg:basis-1/4 xl:basis-1/5`
-                )}
-                key={index}
-              >
-                <AnimeShowCard index={index} show={show} isVertical={false} />
-              </CarouselItem>
-            ))}
+        {!props.isVertical ? (
+          <CarouselContent className="gap-2 ">
+            {props?.anime?.map(
+              (show: Anime, index: number) =>
+                show?.cover && (
+                  <CarouselItem
+                    className={cn(
+                      `group basis-[40%] w-full  md:basis-[32.8%]  lg:basis-[19.3%]  `
+                    )}
+                    key={show.id}
+                  >
+                    <AnimeShowCard anime={show} />
+                  </CarouselItem>
+                )
+            )}
           </CarouselContent>
         ) : (
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-1 ">
-            {props?.anime?.map((show: any[], index: number) => (
-              <img key={index} alt="" src={show?.image} />
+          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-4 md:c   ">
+            {props?.anime?.map((show: Anime, index: number) => (
+              <AnimeShowCard key={index} anime={show} />
             ))}
           </div>
         )}
-        <div></div> */}
-        <div>hello</div>
       </AnimatePresence>
     </Carousel>
   );

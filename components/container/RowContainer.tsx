@@ -16,7 +16,8 @@ export default function RowContainer() {
         showRank={true}
         type="movie"
       />
-
+      <AnimeRowContainer text="Trending Anime" endpoint="trending" />
+      <AnimeRowContainer text="Popular Anime" endpoint="popular" />
       <FetchAndRenderRow
         apiEndpoint="trending/tv/week"
         text="Top TV Shows"
