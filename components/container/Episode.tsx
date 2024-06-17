@@ -38,6 +38,14 @@ export default function Episode(props: EpisodeProps) {
     },
     {
       name: "vidsrc.xyz",
+      label: "Vidsrc ICU",
+      url:
+        type === "movie"
+          ? `https://vidsrc.icu/embed/${type}/${movieID}`
+          : `https://vidsrc.icu/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
+    },
+    {
+      name: "vidsrc.xyz",
       label: "Vidsrc",
       url:
         type === "movie"

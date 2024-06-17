@@ -41,15 +41,15 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
   const { addRecentlyWatched } = useTVShowStore();
 
   const toggle = (episode: Episode) => {
-    const isReleased = new Date(episode.releaseDate) <= new Date();
-    if (!isReleased || !episode.id) {
-      toast({
-        title: "Episode Not Available Yet",
-        description:
-          "Stay tuned! This episode will be available soon. Check back later.",
-      });
-      return;
-    }
+    // const isReleased = new Date(episode.releaseDate) <= new Date();
+    // if (!isReleased || !episode.id) {
+    //   toast({
+    //     title: "Episode Not Available Yet",
+    //     description:
+    //       "Stay tuned! This episode will be available soon. Check back later.",
+    //   });
+    //   return;
+    // }
     setActiveEP(null);
     setActiveEP({ tv_id, time: 0, ...episode });
     addRecentlyWatched({ tv_id, time: 0, ...episode });
