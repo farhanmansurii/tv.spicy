@@ -113,9 +113,7 @@ export default function HomeContainer() {
   return (
     <div className="flex min-h-screen flex-col max-w-6xl px-4 mx-auto  justify-center  items-center ">
       <div className=" min-h-[50vh] flex justify-end flex-col">
-        <h2 className="mb-10  text-4xl text-center sm:text-5xl text-white">
-          {title}
-        </h2>
+        <h2 className="mb-10  text-4xl text-center sm:text-5xl ">{title}</h2>
         <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
           <div className="flex w-full ">
             <PlaceholdersAndVanishInput
@@ -223,7 +221,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
 }) => {
   const itemClasses = `px-4 gap-2 text-sm md:text-md border-2 hover:scale-95 group  backdrop-blur-sm mx-auto flex justify-center items-center hover:bg-muted-foreground/20 duration-150 rounded-2xl text-center h-12 md:h-16 cursor-pointer ${
     active
-      ? " hover:bg-primary/70 bg-primary/70 "
+      ? " hover:bg-primary/70 text-background bg-primary/70 "
       : "border-foreground/20 bg-muted/40"
   }`;
 

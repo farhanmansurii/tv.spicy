@@ -36,6 +36,7 @@ export default function RootLayout({
         >
           {" "}
           <QueryProvider>
+            <Header />
             {children}
             <Toaster />
           </QueryProvider>
