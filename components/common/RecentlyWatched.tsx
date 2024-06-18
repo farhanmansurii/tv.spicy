@@ -43,7 +43,7 @@ const RecentlyWatched = () => {
       <Carousel opts={{ dragFree: true }} className="w-[99%]  mx-auto">
         <div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
           <div className="mx-1 flex gap-2 items-center">
-            Watch History
+            <h1 className="text-2xl flex  font-bold">Recently Watched</h1>
             <div>
               <CaretRightIcon className="h-full " />
             </div>

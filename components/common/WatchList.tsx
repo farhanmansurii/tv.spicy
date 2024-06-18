@@ -27,7 +27,7 @@ export default function WatchList() {
       {watchlist?.length > 0 && (
         <Row
           isVertical={false}
-          text={"Watchlist"}
+          text={"Movie Watchlist"}
           shows={watchlist}
           type={"movie"}
           showRank={false}
