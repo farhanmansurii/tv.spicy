@@ -223,17 +223,17 @@ const FilterItem: React.FC<FilterItemProps> = ({
   link,
   active,
 }) => {
-  const itemClasses = `px-4 gap-2 border-2 hover:scale-95 group  backdrop-blur-sm mx-auto flex justify-center items-center hover:bg-muted-foreground/20 duration-150 rounded-2xl text-center h-16 cursor-pointer ${
+  const itemClasses = `px-4 gap-2 text-sm md:text-md border-2 hover:scale-95 group  backdrop-blur-sm mx-auto flex justify-center items-center hover:bg-muted-foreground/20 duration-150 rounded-2xl text-center h-12 md:h-16 cursor-pointer ${
     active
       ? " hover:bg-primary/70 bg-primary/70 "
       : "border-foreground/20 bg-muted/40"
   }`;
 
   const content = (
-    <>
-      <img alt="" className="w-10 h-10" src={src} />
+    <div className="whitespace-nowrap flex items-center gap-2">
+      <img alt="" className="w-10 h-10 hidden md:block" src={src} />
       {label}
-    </>
+    </div>
   );
 
   return (
@@ -245,7 +245,9 @@ const FilterItem: React.FC<FilterItemProps> = ({
       ) : (
         content
       )}
-      {active && <X className="w-8 h-8  rounded-full bg-black/20 p-2" />}
+      {active && (
+        <X className=" w-6 h-6 p-1 md:p-2 md:w-8 md:h-8  rounded-full bg-black/20 " />
+      )}
       {link && (
         <ArrowTopRightIcon className="w-8 group-hover:rotate-0 rotate-45 duration-200 h-8  rounded-full bg-black/20 p-2" />
       )}
