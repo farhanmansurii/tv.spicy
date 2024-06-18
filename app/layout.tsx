@@ -25,6 +25,10 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-512x512.png"></link>
         <meta name="theme-color" content="#e63946" />
         <meta name="referrer" content="origin" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        />
         <title>watvh app</title>
       </head>
       <body>
