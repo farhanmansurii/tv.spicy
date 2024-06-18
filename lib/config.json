@@ -1,0 +1,162 @@
+{
+  "morning": {
+    "default": [
+      "What would you like to watch this morning?",
+      "Rise and shine What will you watch today?",
+      "Good morning Pick a show to start your day.",
+      "Kickstart your morning with a great show!",
+      "Morning delight: What will you watch?"
+    ],
+    "unique": [
+      "Brew a coffee and queue up a show!",
+      "Energize your day with a captivating watch.",
+      "Morning motivation: Choose your inspiration.",
+      "Breakfast and a binge-worthy series, anyone?",
+      "Start your day right with a must-see movie."
+    ]
+  },
+  "afternoon": {
+    "default": [
+      "What would you like to watch this afternoon?",
+      "Looking for something fun to watch today?",
+      "What's your pick for today's entertainment?",
+      "Afternoon viewing: Choose your show!",
+      "Take a break and watch something great!"
+    ],
+    "unique": [
+      "Midday movie magic: What's your pick?",
+      "Afternoon escape: Dive into a new world.",
+      "Lunchtime laughter: Choose a comedy!",
+      "Afternoon adventure: Pick an exciting film.",
+      "Siesta time: What will you watch?"
+    ]
+  },
+  "evening": {
+    "default": [
+      "What would you like to watch this evening?",
+      "Relax and choose something for tonight.",
+      "What's on your watchlist for this evening?",
+      "Evening escape: Pick a show!",
+      "Unwind with your evening entertainment!"
+    ],
+    "unique": [
+      "Cozy up and choose your evening delight.",
+      "Nightfall nourishment: What's your pick?",
+      "Sunset streaming: What will you watch?",
+      "Evening indulgence: Pick a captivating show.",
+      "Dusk till dawn: Choose your nighttime viewing."
+    ]
+  },
+  "night": {
+    "default": [
+      "What would you like to watch tonight?",
+      "End your day with a great movie!",
+      "Choose something relaxing for tonight.",
+      "Night-time viewing: What's your choice?",
+      "Settle in and watch something good tonight!"
+    ],
+    "unique": [
+      "Moonlight movies: What's your pick?",
+      "Starry-eyed streaming: Choose your show.",
+      "Nightcap entertainment: What will it be?",
+      "Midnight magic: Pick a mesmerizing film.",
+      "Nocturnal viewing: What's on your list?"
+    ]
+  },
+  "weekend": {
+    "default": [
+      "What would you like to watch this weekend?",
+      "Weekend vibes: Choose your entertainment!",
+      "What's your weekend watchlist?",
+      "Relax and enjoy your weekend with a show!",
+      "Weekend fun: What will you watch?"
+    ],
+    "unique": [
+      "Saturday splendor: What's your pick?",
+      "Sunday Funday: Choose your viewing delight.",
+      "Weekend wanderlust: Pick an adventure film.",
+      "Lazy weekend: What will you binge-watch?",
+      "Weekend warrior: Choose your cinematic thrill."
+    ]
+  },
+  "holiday": {
+    "default": [
+      "What would you like to watch this holiday?",
+      "Holiday special: What will you watch?",
+      "Celebrate with a holiday movie!",
+      "Holiday cheer: Pick a festive film!",
+      "Enjoy the holidays with a great show!"
+    ],
+    "unique": [
+      "Festive film frenzy: What's your pick?",
+      "Celebrate the season with a cinematic treat.",
+      "Holiday happiness: Choose a feel-good flick.",
+      "Jingle all the way to your next movie night.",
+      "Deck the halls with a holiday-themed show!"
+    ]
+  },
+  "420": {
+    "default": [
+      "What would you like to watch this 4/20?",
+      "It's 4/20 What's on your watchlist?",
+      "Happy 4/20 Choose something fun to watch.",
+      "4/20 vibes: Pick a stoner comedy!",
+      "Celebrate 4/20 with a great movie!"
+    ],
+    "unique": [
+      "Blaze up and binge: What's your 4/20 pick?",
+      "Elevated entertainment: Choose your 4/20 show.",
+      "High times and hilarious movies: What's it gonna be?",
+      "4/20 special: Indulge in a mind-bending masterpiece.",
+      "Chill out and choose your 4/20 cinematic delight."
+    ]
+  },
+  "late_night": {
+    "default": [
+      "What would you like to watch late at night?",
+      "Late-night viewing: What's your pick?",
+      "Up late? Choose something to watch!",
+      "Night owl special: What will you watch?",
+      "Late-night movie or show?"
+    ],
+    "unique": [
+      "Midnight movie marathon: What's on the list?",
+      "Insomnia-curing entertainment: Choose wisely.",
+      "Nighthawk's nest: Pick your late-night delight.",
+      "Burning the midnight oil? Find your next show.",
+      "Nocturnal viewing: What's keeping you up tonight?"
+    ]
+  },
+  "weekday": {
+    "default": [
+      "What would you like to watch on a weekday?",
+      "Weekday viewing: Choose your show!",
+      "Weekday watchlist: What's your choice?",
+      "Relax after work with a great show!",
+      "Weekday entertainment: Pick a movie or show!"
+    ],
+    "unique": [
+      "Hump day hype: What's your midweek pick?",
+      "Weekday wind-down: Choose your relaxation.",
+      "Workday watchlist: What's on your list?",
+      "Weekday wanderlust: Pick an adventure film.",
+      "Weekday wellness: Choose something inspiring."
+    ]
+  },
+  "lazy_day": {
+    "default": [
+      "What would you like to watch on a lazy day?",
+      "Lazy day vibes: Pick a show!",
+      "Perfect for a lazy day: What will you watch?",
+      "Chill out with a lazy day movie!",
+      "Relax and watch something on your lazy day!"
+    ],
+    "unique": [
+      "Lounge and luxuriate with a lazy day pick.",
+      "Indulge in a lazy day binge-worthy series.",
+      "Couch potato paradise: What's your movie?",
+      "Lazy day laughter: Choose a comedy classic.",
+      "Lazy day escape: Pick a captivating film."
+    ]
+  }
+}

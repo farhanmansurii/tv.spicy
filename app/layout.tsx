@@ -36,10 +36,7 @@ export default function RootLayout({
         >
           {" "}
           <QueryProvider>
-            {/* <BackgroundGrid /> */}
-            <Header />
             {children}
-            <MinimalSocialsFooter />
             <Toaster />
           </QueryProvider>
         </Providers>
