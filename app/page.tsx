@@ -1,4 +1,5 @@
 import MinimalSocialsFooter from "@/components/common/Footer";
+import Navbar from "@/components/common/Navbar";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
 import WatchList from "@/components/common/WatchList";
 import { Header } from "@/components/common/header";
@@ -28,9 +29,11 @@ const Carousal = dynamic(() => import("../components/common/Carousal"), {
 
 export default function Home() {
   return (
-    <div className="mx-auto max-w-6xl space-y-4 px-4 lg:px-0">
-      <Carousal />
-      <RowContainer />
-    </div>
+    <>
+      <div className="mx-auto max-w-6xl space-y-4 px-4 lg:px-0">
+        <Carousal />
+        <RowContainer />
+      </div>
+    </>
   );
 }
