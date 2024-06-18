@@ -111,100 +111,98 @@ export default function HomeContainer() {
     filters.visible && setFilters({ ...filters, type });
   };
   return (
-    <BackgroundGradientAnimation>
-      <div className="flex min-h-screen flex-col max-w-4xl px-10 mx-auto  justify-center  items-center ">
-        <div className=" min-h-[50vh] flex justify-end flex-col">
-          <h2 className="mb-10  text-4xl text-center sm:text-5xl text-white">
-            {title}
-          </h2>
-          <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
-            <div className="flex w-full ">
-              <PlaceholdersAndVanishInput
-                placeholders={
-                  filters.type === "tvshow"
-                    ? placeholders.tvshow
-                    : placeholders.anime
-                }
-                onChange={handleChange}
-                onSubmit={onSubmit}
-              />
+    <div className="flex min-h-screen flex-col max-w-6xl px-4 mx-auto  justify-center  items-center ">
+      <div className=" min-h-[50vh] flex justify-end flex-col">
+        <h2 className="mb-10  text-4xl text-center sm:text-5xl text-white">
+          {title}
+        </h2>
+        <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
+          <div className="flex w-full ">
+            <PlaceholdersAndVanishInput
+              placeholders={
+                filters.type === "tvshow"
+                  ? placeholders.tvshow
+                  : placeholders.anime
+              }
+              onChange={handleChange}
+              onSubmit={onSubmit}
+            />
+            <button
+              // onClick={handlefilters}
+              style={{ aspectRatio: "1/1" }}
+              className="  hover:scale-95  duration-150  z-30 rounded-full w-10 h-10  m-1 bg-muted "
+            >
+              <Settings2 className="p-2  w-full h-full" />
+            </button>
+            {searchResults && searchResults?.results?.length > 0 && (
               <button
-                // onClick={handlefilters}
-                style={{ aspectRatio: "1/1" }}
-                className="  hover:scale-95  duration-150  z-30 rounded-full w-10 h-10  m-1 bg-muted "
+                className="  hover:scale-95 duration-150  z-30 rounded-full w-10 h-10  m-1 bg-muted "
+                onClick={() => {
+                  setQuery(null);
+                  refetch();
+                }}
               >
-                <Settings2 className="p-2  w-full h-full" />
+                <X className="p-2 w-full h-full" />
               </button>
-              {searchResults && searchResults?.results?.length > 0 && (
-                <button
-                  className="  hover:scale-95 duration-150  z-30 rounded-full w-10 h-10  m-1 bg-muted "
-                  onClick={() => {
-                    setQuery(null);
-                    refetch();
-                  }}
-                >
-                  <X className="p-2 w-full h-full" />
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="flex h-16  w-full justify-center items-center">
-            <div className="flex gap-4 jus h-full w-full justify-center items-center">
-              <div>{!filters.visible ? "Discover" : "Search for "}</div>
-              <div className="flex gap-4">
-                <FilterItem
-                  label="TV Shows"
-                  link={!filters.visible && "/"}
-                  active={filters.visible && filters.type === "tvshow"}
-                  onClick={() => {
-                    handleSelectType("tvshow");
-                  }}
-                  src="https://purepng.com/public/uploads/large/purepng.com-trailers-iconsymbolsiconsapple-iosiosios-8-iconsios-8-721522596126vreit.png"
-                />
-                <FilterItem
-                  label="Anime"
-                  link={!filters.visible && "/anime"}
-                  active={filters.visible && filters.type === "anime"}
-                  onClick={() => {
-                    handleSelectType("anime");
-                  }}
-                  src="https://spicyanime.vercel.app/icon-192x192.png"
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
-        <div className="z-30  my-10 w-full   h-[50vh]  overflow-scroll max-w-4xl mx-auto -scroll    ">
-          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10">
-            {searchResults &&
-              searchResults.results.map((show: any, index: number) =>
-                filters.type === "tvshow" ? (
-                  show?.backdrop_path && (
-                    <ShowCard
-                      key={index}
-                      showRank={false}
-                      variants={""}
-                      show={show}
-                      type={show.media_type}
-                      index={index}
-                      isVertical={true}
-                    />
-                  )
-                ) : (
-                  <AnimeShowCard key={index} anime={show} />
-                )
-              )}
-          </div>
-          {searchResultsLoading && <GridLoader />}
-          {!query && !searchResults && (
-            <div className="space-y-10">
-              <RecentlyWatched />
-              <WatchList />
+        <div className="flex h-16  w-full justify-center items-center">
+          <div className="flex gap-4 jus h-full w-full justify-center items-center">
+            {/* <div>{!filters.visible ? "Discover" : "Search for "}</div> */}
+            <div className="flex gap-4">
+              <FilterItem
+                label="TV Shows"
+                link={!filters.visible && "/"}
+                active={filters.visible && filters.type === "tvshow"}
+                onClick={() => {
+                  handleSelectType("tvshow");
+                }}
+                src="https://purepng.com/public/uploads/large/purepng.com-trailers-iconsymbolsiconsapple-iosiosios-8-iconsios-8-721522596126vreit.png"
+              />
+              <FilterItem
+                label="Anime"
+                link={!filters.visible && "/anime"}
+                active={filters.visible && filters.type === "anime"}
+                onClick={() => {
+                  handleSelectType("anime");
+                }}
+                src="https://spicyanime.vercel.app/icon-192x192.png"
+              />
             </div>
-          )}
+          </div>
         </div>
       </div>
-    </BackgroundGradientAnimation>
+      <div className="z-30  my-10 w-full   h-[50vh]  overflow-scroll mx-auto -scroll    ">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10">
+          {searchResults &&
+            searchResults.results.map((show: any, index: number) =>
+              filters.type === "tvshow" ? (
+                show?.backdrop_path && (
+                  <ShowCard
+                    key={index}
+                    showRank={false}
+                    variants={""}
+                    show={show}
+                    type={show.media_type}
+                    index={index}
+                    isVertical={true}
+                  />
+                )
+              ) : (
+                <AnimeShowCard key={index} anime={show} />
+              )
+            )}
+        </div>
+        {searchResultsLoading && <GridLoader />}
+        {!query && !searchResults && (
+          <div className="space-y-10 ">
+            <RecentlyWatched />
+            <WatchList />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
