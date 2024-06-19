@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import useTVShowStore from "@/store/recentsStore";
@@ -26,7 +27,7 @@ import { tmdbImage } from "@/lib/tmdb-image";
 import { TextGlitch } from "../animated-common/TextFlip";
 import { Badge } from "../ui/badge";
 
-const RecentlyWatched = () => {
+const RecentlyWatchedTV = () => {
   const { recentlyWatched, loadEpisodes, deleteRecentlyWatched } =
     useTVShowStore();
 
@@ -138,4 +139,4 @@ const RecentlyWatched = () => {
   );
 };
 
-export default RecentlyWatched;
+export default RecentlyWatchedTV;

@@ -18,13 +18,13 @@ import Row from "../container/Row";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 
-export default function WatchList() {
+export default function WatchList({ type }: { type: string }) {
   const { watchlist, clearTVWatchlist, clearWatchlist, tvwatchlist } =
     useWatchListStore();
 
   return (
     <div className="space-y-12">
-      {watchlist?.length > 0 && (
+      {(type === "movie" || type === "all") && watchlist?.length > 0 && (
         <Row
           isVertical={false}
           text={"Movie Watchlist"}
@@ -33,7 +33,8 @@ export default function WatchList() {
           showRank={false}
         />
       )}
-      {tvwatchlist?.length > 0 && (
+
+      {(type === "tv" || type === "all") && tvwatchlist?.length > 0 && (
         <Row
           isVertical={false}
           text={"TV Watchlist"}

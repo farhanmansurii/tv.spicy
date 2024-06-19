@@ -172,10 +172,10 @@ export function formatRelativeTime(airDate: string): string {
   }
 }
 
-export async function fetchCarousalData(type: string) {
+export async function fetchCarousalData(category: string, type: string) {
   try {
     const url = new URL(
-      `https://api.themoviedb.org/3/${type}/movie?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1`
+      `https://api.themoviedb.org/3/${category}/${type}?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1`
     );
     const headers = {
       Authorization: `Bearer ${apiKey}`,
@@ -185,8 +185,9 @@ export async function fetchCarousalData(type: string) {
       next: { revalidate: 60 * 60 * 24 * 7 },
     });
     if (!response.ok) throw new Error("Failed to fetch data");
-    const data = await response.json();
-    return data.results;
+    const data = await fetchShowData("tv/top_rated");
+    console.log(data);
+    return data;
   } catch (error) {
     console.log(error);
   }

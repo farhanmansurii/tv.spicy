@@ -31,7 +31,7 @@ const SocialLink = ({
 
 const MinimalSocialsFooter = () => {
   return (
-    <div className="flex max-w-6xl w-full mx-auto flex-col bg-muted items-start justify-between gap-3 border-t py-10 px-5 mt-[4rem]">
+    <div className="flex max-w-6xl w-full mx-auto flex-col bg-muted items-start justify-between gap-3 rounded-xl py-10 px-5 my-[4rem]">
       <div>
         Disclaimer: This site does not store any files on its server. All
         contents are provided by non-affiliated third parties.

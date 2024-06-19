@@ -9,7 +9,7 @@ export default function RowContainer() {
   return (
     <div className="flex flex-col space-y-12">
       <RecentlyWatched />
-      <WatchList />
+      <WatchList type="all" />
       <FetchAndRenderRow
         apiEndpoint="movie/top_rated"
         text="Top Rated Movies"

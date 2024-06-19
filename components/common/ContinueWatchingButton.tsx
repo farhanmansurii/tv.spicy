@@ -57,7 +57,7 @@ export default function ContinueWatchingButton({
   return (
     <div className="flex w-full flex-col md:flex-row md:w-fit gap-2">
       {!isDetailsPage && (
-        <Link href={`/movie/${id}`}>
+        <Link href={`/${type}/${id}`}>
           <Button
             iconPlacement="right"
             variant={"expandIcon"}

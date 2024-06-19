@@ -21,6 +21,8 @@ import { AnimeShowCard } from "../anime-container.tsx/anime-show-card";
 import WatchList from "@/components/common/WatchList";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
 import { Input } from "@/components/ui/input";
+import { Toggle } from "@/components/ui/toggle";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 const placeholders = {
   tvshow: [
     "The Shawshank Redemption (1994)",
@@ -114,8 +116,10 @@ export default function HomeContainer() {
   return (
     title && (
       <div className="flex  flex-col  max-w-6xl w-full px-4 mx-auto  justify-center  items-center ">
-        <div className=" min-h-[50vh] flex justify-end flex-col">
-          <h2 className="mb-10  text-4xl text-center sm:text-5xl ">{title}</h2>
+        <div className=" min-h-[40vh] flex justify-end flex-col">
+          <h2 className="mb-10  text-4xl text-center sm:text-6xl font-bold  ">
+            {title}
+          </h2>
           <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
             <div className="flex w-full ">
               <PlaceholdersAndVanishInput
@@ -152,26 +156,36 @@ export default function HomeContainer() {
           <div className="flex h-16  w-full justify-center items-center">
             <div className="flex gap-4 jus h-full w-full justify-center items-center">
               {/* <div>{!filters.visible ? "Discover" : "Search for "}</div> */}
-              <div className="flex gap-4">
-                <FilterItem
-                  label="TV Shows"
-                  link={!filters.visible && "/"}
-                  active={filters.visible && filters.type === "tvshow"}
+              <div className="flex gap-4"></div>
+              <ToggleGroup value={filters.type} type="single">
+                <ToggleGroupItem
+                  disabled
+                  value="null"
                   onClick={() => {
                     handleSelectType("tvshow");
                   }}
-                  src="https://purepng.com/public/uploads/large/purepng.com-trailers-iconsymbolsiconsapple-iosiosios-8-iconsios-8-721522596126vreit.png"
-                />
-                <FilterItem
-                  label="Anime"
-                  link={!filters.visible && "/anime"}
-                  active={filters.visible && filters.type === "anime"}
+                >
+                  Search For
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  variant={"outline"}
+                  value="tvshow"
+                  onClick={() => {
+                    handleSelectType("tvshow");
+                  }}
+                >
+                  TV/Movies
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  variant={"outline"}
+                  value="anime"
                   onClick={() => {
                     handleSelectType("anime");
                   }}
-                  src="https://spicyanime.vercel.app/icon-192x192.png"
-                />
-              </div>
+                >
+                  Anime
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
           </div>
         </div>
@@ -201,7 +215,7 @@ export default function HomeContainer() {
           {!query && !searchResults && (
             <div className="space-y-10 ">
               <RecentlyWatched />
-              <WatchList />
+              <WatchList type="all" />
             </div>
           )}
         </div>
