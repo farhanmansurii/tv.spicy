@@ -112,7 +112,7 @@ export default function HomeContainer() {
     filters.visible && setFilters({ ...filters, type });
   };
   return (
-    <div className="flex min-h-screen flex-col w-screen max-w-6xl px-4 mx-auto  justify-center  items-center ">
+    <div className="flex  flex-col  max-w-6xl w-full px-4 mx-auto  justify-center  items-center ">
       <div className=" min-h-[50vh] flex justify-end flex-col">
         <h2 className="mb-10  text-4xl text-center sm:text-5xl ">{title}</h2>
         <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
@@ -174,7 +174,7 @@ export default function HomeContainer() {
           </div>
         </div>
       </div>
-      <div className="z-30  my-10 w-full   h-[50vh]  overflow-scroll mx-auto -scroll    ">
+      <div className="z-30  my-10 w-full    mx-auto   ">
         <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10">
           {searchResults &&
             searchResults.results.map((show: any, index: number) =>
