@@ -14,12 +14,13 @@ import { searchShows } from "@/lib/utils";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { set } from "date-fns";
-import { Filter, Settings, Settings2, X } from "lucide-react";
+import { ArrowRight, Filter, Settings, Settings2, X } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 import { AnimeShowCard } from "../anime-container.tsx/anime-show-card";
 import WatchList from "@/components/common/WatchList";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
+import { Input } from "@/components/ui/input";
 const placeholders = {
   tvshow: [
     "The Shawshank Redemption (1994)",
@@ -96,8 +97,8 @@ export default function HomeContainer() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   };
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+    if (e?.preventDefault) e.preventDefault();
     if (!query) return;
     await refetch();
     setQuery(null);
@@ -116,7 +117,7 @@ export default function HomeContainer() {
         <h2 className="mb-10  text-4xl text-center sm:text-5xl ">{title}</h2>
         <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
           <div className="flex w-full ">
-            <PlaceholdersAndVanishInput
+            {/* <PlaceholdersAndVanishInput
               placeholders={
                 filters.type === "tvshow"
                   ? placeholders.tvshow
@@ -124,24 +125,44 @@ export default function HomeContainer() {
               }
               onChange={handleChange}
               onSubmit={onSubmit}
-            />
-            <button
+            /> */}
+            <form
+              className="  w-full relative   mx-auto bg-zinc-800/20 border-zinc-800/50 border-2 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200"
+              onSubmit={onSubmit}
+            >
+              <Input
+                className="w-full relative text-sm sm:text-base z-50 border-none bg-black/20 text-white   h-full rounded-full focus:outline-none focus:ring-0 pl-4 sm:pl-8 pr-20"
+                onChange={handleChange}
+              />
+            </form>
+            <Button
+              size={"icon"}
+              className="  hover:scale-95 duration-150  z-30 rounded-full   m-1 bg-muted "
+              onClick={() => {
+                setQuery("");
+                onSubmit();
+              }}
+            >
+              <ArrowRight className="p-2 w-full h-full" />
+            </Button>
+            {/* <button
               // onClick={handlefilters}
               style={{ aspectRatio: "1/1" }}
               className="  hover:scale-95  duration-150  z-30 rounded-full w-10 h-10  m-1 bg-muted "
             >
               <Settings2 className="p-2  w-full h-full" />
-            </button>
+            </button> */}
             {searchResults && searchResults?.results?.length > 0 && (
-              <button
-                className="  hover:scale-95 duration-150  z-30 rounded-full w-10 h-10  m-1 bg-muted "
+              <Button
+                size={"icon"}
+                className="  hover:scale-95 duration-150  z-30 rounded-full   m-1 bg-muted "
                 onClick={() => {
                   setQuery(null);
                   refetch();
                 }}
               >
                 <X className="p-2 w-full h-full" />
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -192,6 +213,7 @@ export default function HomeContainer() {
               )
             )}
         </div>
+        {searchResults.length < 1 && <div>No results found</div>}
         {searchResultsLoading && <GridLoader />}
         {!query && !searchResults && (
           <div className="space-y-10 ">
@@ -221,7 +243,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
 }) => {
   const itemClasses = `px-4 gap-2 text-sm md:text-md border-2 hover:scale-95 group  backdrop-blur-sm mx-auto flex justify-center items-center hover:bg-muted-foreground/20 duration-150 rounded-2xl text-center h-12 md:h-16 cursor-pointer ${
     active
-      ? " hover:bg-primary/70 text-background bg-primary/70 "
+      ? " hover:bg-primary/70  bg-primary/70 "
       : "border-foreground/20 bg-muted/40"
   }`;
 

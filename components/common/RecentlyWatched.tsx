@@ -49,10 +49,10 @@ const RecentlyWatched = () => {
             </div>
           </div>
           <div className="flex  gap-2">
-            <Button variant={"link"} onClick={clearRecentlyWatched}>
+            {/* <Button variant={"link"} onClick={clearRecentlyWatched}>
               Clear
               <span className="sr-only">Clear</span>
-            </Button>
+            </Button> */}
             <CarouselPrevious variant={"secondary"} />
             <CarouselNext variant={"secondary"} />
           </div>
