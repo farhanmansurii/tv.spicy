@@ -112,99 +112,101 @@ export default function HomeContainer() {
     filters.visible && setFilters({ ...filters, type });
   };
   return (
-    <div className="flex  flex-col  max-w-6xl w-full px-4 mx-auto  justify-center  items-center ">
-      <div className=" min-h-[50vh] flex justify-end flex-col">
-        <h2 className="mb-10  text-4xl text-center sm:text-5xl ">{title}</h2>
-        <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
-          <div className="flex w-full ">
-            <PlaceholdersAndVanishInput
-              placeholders={
-                filters.type === "tvshow"
-                  ? placeholders.tvshow
-                  : placeholders.anime
-              }
-              onChange={handleChange}
-              onSubmit={onSubmit}
-            />
+    title && (
+      <div className="flex  flex-col  max-w-6xl w-full px-4 mx-auto  justify-center  items-center ">
+        <div className=" min-h-[50vh] flex justify-end flex-col">
+          <h2 className="mb-10  text-4xl text-center sm:text-5xl ">{title}</h2>
+          <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
+            <div className="flex w-full ">
+              <PlaceholdersAndVanishInput
+                placeholders={
+                  filters.type === "tvshow"
+                    ? placeholders.tvshow
+                    : placeholders.anime
+                }
+                onChange={handleChange}
+                onSubmit={onSubmit}
+              />
 
-            {/* <button
+              {/* <button
               // onClick={handlefilters}
               style={{ aspectRatio: "1/1" }}
               className="  hover:scale-95  duration-150  z-30 rounded-full w-10 h-10  m-1 bg-muted "
             >
               <Settings2 className="p-2  w-full h-full" />
             </button> */}
-            {searchResults && searchResults?.results?.length > 0 && (
-              <Button
-                size={"icon"}
-                className="  hover:scale-95 duration-150  z-30 rounded-full   m-1 bg-muted "
-                onClick={() => {
-                  setQuery(null);
-                  refetch();
-                }}
-              >
-                <X className="p-2 w-full h-full" />
-              </Button>
-            )}
+              {searchResults && searchResults?.results?.length > 0 && (
+                <Button
+                  size={"icon"}
+                  className="  hover:scale-95 duration-150  z-30 rounded-full   m-1 bg-muted "
+                  onClick={() => {
+                    setQuery(null);
+                    refetch();
+                  }}
+                >
+                  <X className="p-2 w-full h-full" />
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="flex h-16  w-full justify-center items-center">
-          <div className="flex gap-4 jus h-full w-full justify-center items-center">
-            {/* <div>{!filters.visible ? "Discover" : "Search for "}</div> */}
-            <div className="flex gap-4">
-              <FilterItem
-                label="TV Shows"
-                link={!filters.visible && "/"}
-                active={filters.visible && filters.type === "tvshow"}
-                onClick={() => {
-                  handleSelectType("tvshow");
-                }}
-                src="https://purepng.com/public/uploads/large/purepng.com-trailers-iconsymbolsiconsapple-iosiosios-8-iconsios-8-721522596126vreit.png"
-              />
-              <FilterItem
-                label="Anime"
-                link={!filters.visible && "/anime"}
-                active={filters.visible && filters.type === "anime"}
-                onClick={() => {
-                  handleSelectType("anime");
-                }}
-                src="https://spicyanime.vercel.app/icon-192x192.png"
-              />
+          <div className="flex h-16  w-full justify-center items-center">
+            <div className="flex gap-4 jus h-full w-full justify-center items-center">
+              {/* <div>{!filters.visible ? "Discover" : "Search for "}</div> */}
+              <div className="flex gap-4">
+                <FilterItem
+                  label="TV Shows"
+                  link={!filters.visible && "/"}
+                  active={filters.visible && filters.type === "tvshow"}
+                  onClick={() => {
+                    handleSelectType("tvshow");
+                  }}
+                  src="https://purepng.com/public/uploads/large/purepng.com-trailers-iconsymbolsiconsapple-iosiosios-8-iconsios-8-721522596126vreit.png"
+                />
+                <FilterItem
+                  label="Anime"
+                  link={!filters.visible && "/anime"}
+                  active={filters.visible && filters.type === "anime"}
+                  onClick={() => {
+                    handleSelectType("anime");
+                  }}
+                  src="https://spicyanime.vercel.app/icon-192x192.png"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="z-30  my-10 w-full    mx-auto   ">
-        <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10">
-          {searchResults &&
-            searchResults.results.map((show: any, index: number) =>
-              filters.type === "tvshow" ? (
-                show?.backdrop_path && (
-                  <ShowCard
-                    key={index}
-                    showRank={false}
-                    variants={""}
-                    show={show}
-                    type={show.media_type}
-                    index={index}
-                    isVertical={true}
-                  />
+        <div className="z-30  my-10 w-full    mx-auto   ">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10">
+            {searchResults &&
+              searchResults.results.map((show: any, index: number) =>
+                filters.type === "tvshow" ? (
+                  show?.backdrop_path && (
+                    <ShowCard
+                      key={index}
+                      showRank={false}
+                      variants={""}
+                      show={show}
+                      type={show.media_type}
+                      index={index}
+                      isVertical={true}
+                    />
+                  )
+                ) : (
+                  <AnimeShowCard key={index} anime={show} />
                 )
-              ) : (
-                <AnimeShowCard key={index} anime={show} />
-              )
-            )}
-        </div>
-        {searchResults?.length < 1 && <div>No results found</div>}
-        {searchResultsLoading && <GridLoader />}
-        {!query && !searchResults && (
-          <div className="space-y-10 ">
-            <RecentlyWatched />
-            <WatchList />
+              )}
           </div>
-        )}
+          {searchResults?.length < 1 && <div>No results found</div>}
+          {searchResultsLoading && <GridLoader />}
+          {!query && !searchResults && (
+            <div className="space-y-10 ">
+              <RecentlyWatched />
+              <WatchList />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    )
   );
 }
 
@@ -225,8 +227,8 @@ const FilterItem: React.FC<FilterItemProps> = ({
 }) => {
   const itemClasses = `px-4 gap-2 text-sm md:text-md border-2 hover:scale-95 group  backdrop-blur-sm mx-auto flex justify-center items-center hover:bg-muted-foreground/20 duration-150 rounded-2xl text-center h-12 md:h-16 cursor-pointer ${
     active
-      ? " hover:bg-primary/70  bg-primary/70 "
-      : "border-foreground/20 bg-muted/40"
+      ? " hover:bg-primary/70 text-background bg-primary "
+      : "border-foreground/20 bg-muted/40 text-primary-background"
   }`;
 
   const content = (
@@ -246,10 +248,10 @@ const FilterItem: React.FC<FilterItemProps> = ({
         content
       )}
       {active && (
-        <X className=" w-6 h-6 p-1 md:p-2 md:w-8 md:h-8  rounded-full bg-black/20 " />
+        <X className=" w-6 h-6 p-1  md:p-2 md:w-8 md:h-8  rounded-full bg-primary " />
       )}
       {link && (
-        <ArrowTopRightIcon className="w-8 group-hover:rotate-0 rotate-45 duration-200 h-8  rounded-full bg-black/20 p-2" />
+        <ArrowTopRightIcon className="w-8 group-hover:rotate-0 rotate-45 duration-200 h-8  rounded-full bg-primary p-2" />
       )}
     </div>
   );
