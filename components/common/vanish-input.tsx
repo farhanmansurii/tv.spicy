@@ -161,7 +161,7 @@ export function PlaceholdersAndVanishInput({
   return (
     <form
       className={cn(
-        "min-w-[400px] relative   mx-auto bg-zinc-800/20 border-zinc-800/50 border-2 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200",
+        "w-full relative   mx-auto bg-zinc-800/20 border-zinc-800/50 border-2 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200",
         value && "bg-zinc-70"
       )}
       onSubmit={handleSubmit}
@@ -250,7 +250,8 @@ export function PlaceholdersAndVanishInput({
               }}
               className="dark:text-zinc-500 text-sm sm:text-base font-normal text-neutral-500 pl-4 sm:pl-8 text-left w-[calc(100%-2rem)] truncate"
             >
-              Search For {placeholders[currentPlaceholder]}
+              Search For{" "}
+              {placeholders[currentPlaceholder] || "Naruto (2002-2007)"}
             </motion.p>
           )}
         </AnimatePresence>

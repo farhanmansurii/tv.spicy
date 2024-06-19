@@ -112,12 +112,12 @@ export default function HomeContainer() {
     filters.visible && setFilters({ ...filters, type });
   };
   return (
-    <div className="flex min-h-screen flex-col max-w-6xl px-4 mx-auto  justify-center  items-center ">
+    <div className="flex min-h-screen flex-col w-screen max-w-6xl px-4 mx-auto  justify-center  items-center ">
       <div className=" min-h-[50vh] flex justify-end flex-col">
         <h2 className="mb-10  text-4xl text-center sm:text-5xl ">{title}</h2>
         <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
           <div className="flex w-full ">
-            {/* <PlaceholdersAndVanishInput
+            <PlaceholdersAndVanishInput
               placeholders={
                 filters.type === "tvshow"
                   ? placeholders.tvshow
@@ -125,26 +125,8 @@ export default function HomeContainer() {
               }
               onChange={handleChange}
               onSubmit={onSubmit}
-            /> */}
-            <form
-              className="  w-full relative   mx-auto bg-zinc-800/20 border-zinc-800/50 border-2 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200"
-              onSubmit={onSubmit}
-            >
-              <Input
-                className="w-full relative text-sm sm:text-base z-50 border-none bg-black/20 text-white   h-full rounded-full focus:outline-none focus:ring-0 pl-4 sm:pl-8 pr-20"
-                onChange={handleChange}
-              />
-            </form>
-            <Button
-              size={"icon"}
-              className="  hover:scale-95 duration-150  z-30 rounded-full   m-1 bg-muted "
-              onClick={() => {
-                setQuery("");
-                onSubmit();
-              }}
-            >
-              <ArrowRight className="p-2 w-full h-full" />
-            </Button>
+            />
+
             {/* <button
               // onClick={handlefilters}
               style={{ aspectRatio: "1/1" }}
@@ -213,7 +195,7 @@ export default function HomeContainer() {
               )
             )}
         </div>
-        {searchResults.length < 1 && <div>No results found</div>}
+        {searchResults?.length < 1 && <div>No results found</div>}
         {searchResultsLoading && <GridLoader />}
         {!query && !searchResults && (
           <div className="space-y-10 ">
