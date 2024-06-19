@@ -168,7 +168,7 @@ export function PlaceholdersAndVanishInput({
     >
       <canvas
         className={cn(
-          "absolute pointer-events-none  text-base transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert-0 pr-10",
+          "absolute pointer-events-none   transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert-0 pr-10",
           !animating ? "opacity-0" : "opacity-100"
         )}
         ref={canvasRef}
@@ -185,7 +185,7 @@ export function PlaceholdersAndVanishInput({
         value={value}
         type="text"
         className={cn(
-          "w-full relative text-sm sm:text-base z-50 border-none bg-muted/10   h-full rounded-full focus:outline-none focus:ring-0 pl-4 sm:pl-8 pr-20",
+          "w-full relative  z-50 border-none bg-muted/10   h-full rounded-full focus:outline-none focus:ring-0 pl-4 sm:pl-8 pr-20",
           animating && "text-transparent"
         )}
       />
@@ -248,7 +248,7 @@ export function PlaceholdersAndVanishInput({
                 duration: 0.3,
                 ease: "linear",
               }}
-              className=" text-sm sm:text-base font-normal  pl-4 sm:pl-8 text-left  truncate"
+              className="  font-normal  pl-4 sm:pl-8 text-left  truncate"
             >
               Search For{" "}
               {placeholders[currentPlaceholder] || "Naruto (2002-2007)"}

@@ -9,7 +9,11 @@
   font-style: normal;
   font-display: swap;
 }
-
+input[type='text'],
+input[type='number'],
+input {
+  font-size: 16px;
+}
 @font-face {
   font-family: 'Neue Montreal';
   src: url('/fonts/NeueMontreal-Bold.ttf') format('truetype');
