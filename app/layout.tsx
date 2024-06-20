@@ -10,7 +10,8 @@ import BackgroundGrid from "@/components/animated-common/GridBackground";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: "TV / Movies",
+  title: "Watvh TV",
+  description: "Watch any TV / Movies / Anime with Watvh ",
 };
 
 export default function RootLayout({

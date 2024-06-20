@@ -5,8 +5,12 @@ import FetchAndRenderRow from "@/components/container/FetchAndRenderRow";
 import GenreGrid from "@/components/genre-card/genre-grid";
 import RowLoader from "@/components/loading/RowLoader";
 import { fetchGenres } from "@/lib/utils";
+import { Metadata } from "next";
 import React, { Suspense } from "react";
-
+export const metadata: Metadata = {
+  title: "Movies | Watvh TV",
+  description: "Watch any TV / Movies / Anime with Watvh ",
+};
 export default async function page() {
   const genres = await fetchGenres("movie");
   return (

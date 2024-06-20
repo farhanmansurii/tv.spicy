@@ -1,12 +1,11 @@
-"use client";
-import CarousalComponent from "@/components/common/CarousalComponent";
-import CarousalCardWrapper from "@/components/common/DetailsCard";
 import AnimeCarousal from "@/components/container/anime-container.tsx/anime-detail/anime-carousal";
 import AnimeRowContainer from "@/components/container/anime-container.tsx/anime-row-wrapper";
-import { fetchData } from "@/lib/anime-helpers";
-import { useQuery } from "@tanstack/react-query";
+import { Metadata } from "next";
 import React from "react";
-
+export const metadata: Metadata = {
+  title: "Anime | Watvh TV",
+  description: "Watch any TV / Movies / Anime with Watvh ",
+};
 export default function page() {
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 lg:px-0">

@@ -210,7 +210,7 @@ export default function HomeContainer() {
                 )
               )}
           </div>
-          {searchResults?.length < 1 && <div>No results found</div>}
+          {searchResults?.results.length < 1 && <div>No results found</div>}
           {searchResultsLoading && <GridLoader />}
           {!query && !searchResults && (
             <div className="space-y-10 ">
