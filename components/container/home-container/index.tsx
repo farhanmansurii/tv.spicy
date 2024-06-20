@@ -23,6 +23,7 @@ import RecentlyWatched from "@/components/common/RecentlyWatched";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { GlowingStarsBackgroundCard } from "@/components/ui/glowing-stars";
 const placeholders = {
   tvshow: [
     "The Shawshank Redemption (1994)",
@@ -116,79 +117,81 @@ export default function HomeContainer() {
   return (
     title && (
       <div className="flex  flex-col  max-w-6xl w-full px-4 mx-auto  justify-center  items-center ">
-        <div className=" h-[45vh] flex justify-end flex-col">
-          <h2 className="mb-10  text-2xl text-center sm:text-4xl font-bold  ">
-            {title}
-          </h2>
-          <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
-            <div className="flex w-full ">
-              <PlaceholdersAndVanishInput
-                placeholders={
-                  filters.type === "tvshow"
-                    ? placeholders.tvshow
-                    : placeholders.anime
-                }
-                onChange={handleChange}
-                onSubmit={onSubmit}
-              />
+        <GlowingStarsBackgroundCard>
+          <div className="  flex justify-end flex-col">
+            <h2 className="mb-10  text-2xl text-center sm:text-4xl font-bold  ">
+              {title}
+            </h2>
+            <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
+              <div className="flex w-full ">
+                <PlaceholdersAndVanishInput
+                  placeholders={
+                    filters.type === "tvshow"
+                      ? placeholders.tvshow
+                      : placeholders.anime
+                  }
+                  onChange={handleChange}
+                  onSubmit={onSubmit}
+                />
 
-              {/* <button
+                {/* <button
               // onClick={handlefilters}
               style={{ aspectRatio: "1/1" }}
               className="  hover:scale-95  duration-150  z-30 rounded-full w-10 h-10  m-1 bg-muted "
             >
               <Settings2 className="p-2  w-full h-full" />
             </button> */}
-              {searchResults && searchResults?.results?.length > 0 && (
-                <Button
-                  size={"icon"}
-                  className="  hover:scale-95 duration-150  z-30 rounded-full   m-1 bg-muted "
-                  onClick={() => {
-                    setQuery(null);
-                    refetch();
-                  }}
-                >
-                  <X className="p-2 w-full h-full" />
-                </Button>
-              )}
+                {searchResults && searchResults?.results?.length > 0 && (
+                  <Button
+                    size={"icon"}
+                    className="  hover:scale-95 duration-150  z-30 rounded-full   m-1 bg-muted "
+                    onClick={() => {
+                      setQuery(null);
+                      refetch();
+                    }}
+                  >
+                    <X className="p-2 w-full h-full" />
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="flex   w-full justify-center items-center">
+              <div className="flex gap-4 jus h-full w-full justify-center items-center">
+                {/* <div>{!filters.visible ? "Discover" : "Search for "}</div> */}
+                <div className="flex gap-4"></div>
+                <ToggleGroup value={filters.type} type="single">
+                  <ToggleGroupItem
+                    disabled
+                    value="null"
+                    onClick={() => {
+                      handleSelectType("tvshow");
+                    }}
+                  >
+                    Search For
+                  </ToggleGroupItem>
+                  <ToggleGroupItem
+                    variant={"outline"}
+                    value="tvshow"
+                    onClick={() => {
+                      handleSelectType("tvshow");
+                    }}
+                  >
+                    TV/Movies
+                  </ToggleGroupItem>
+                  <ToggleGroupItem
+                    variant={"outline"}
+                    value="anime"
+                    onClick={() => {
+                      handleSelectType("anime");
+                    }}
+                  >
+                    Anime
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
             </div>
           </div>
-          <div className="flex   w-full justify-center items-center">
-            <div className="flex gap-4 jus h-full w-full justify-center items-center">
-              {/* <div>{!filters.visible ? "Discover" : "Search for "}</div> */}
-              <div className="flex gap-4"></div>
-              <ToggleGroup value={filters.type} type="single">
-                <ToggleGroupItem
-                  disabled
-                  value="null"
-                  onClick={() => {
-                    handleSelectType("tvshow");
-                  }}
-                >
-                  Search For
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  variant={"outline"}
-                  value="tvshow"
-                  onClick={() => {
-                    handleSelectType("tvshow");
-                  }}
-                >
-                  TV/Movies
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  variant={"outline"}
-                  value="anime"
-                  onClick={() => {
-                    handleSelectType("anime");
-                  }}
-                >
-                  Anime
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
-          </div>
-        </div>
+        </GlowingStarsBackgroundCard>
         <div className="z-30  my-10 w-full    mx-auto   ">
           <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10">
             {searchResults &&

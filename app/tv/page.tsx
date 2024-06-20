@@ -49,9 +49,8 @@ export default async function page() {
               />
             </Suspense>
           ))}
-
-        {genres.length > 0 && <GenreGrid type="tv" genres={genres} />}
       </div>
+      {genres.length > 0 && <GenreGrid type="tv" genres={genres} />}
     </div>
   );
 }

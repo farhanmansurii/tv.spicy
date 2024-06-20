@@ -45,8 +45,8 @@ export default async function page() {
               />
             </Suspense>
           ))}
-        <GenreGrid genres={genres} type="movie" />
       </div>
+      <GenreGrid genres={genres} type="movie" />
     </div>
   );
 }
