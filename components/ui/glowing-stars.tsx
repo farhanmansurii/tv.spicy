@@ -73,7 +73,7 @@ export const Illustration = ({ mouseEnter }: { mouseEnter: boolean }) => {
         Math.floor(Math.random() * stars)
       );
       setGlowingStars([...highlightedStars.current]);
-    }, 2000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);
@@ -127,7 +127,7 @@ const Star = ({ isGlowing, delay }: { isGlowing: boolean; delay: number }) => {
         delay: delay,
       }}
       className={cn(
-        "h-[2px] w-[2px] rounded-full relative z-20",
+        "h-[1px] w-[1px] rounded-full relative z-0",
         isGlowing ? "bg-primary" : " bg-background"
       )}
     ></motion.div>
@@ -151,7 +151,7 @@ const Glow = ({ delay }: { delay: number }) => {
       exit={{
         opacity: 0,
       }}
-      className="absolute  left-1/2 -translate-x-1/2 z-10 h-[10px] w-[10px] rounded-full bg-primary blur-[1px] shadow-2xl shadow-primary"
+      className="absolute  z-20 left-1/2 -translate-x-1/2  h-[5px] w-[5px] rounded-full bg-primary blur-[1px] shadow-2xl shadow-primary"
     />
   );
 };
