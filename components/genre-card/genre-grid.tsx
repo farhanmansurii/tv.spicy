@@ -3,6 +3,8 @@ import { fetchGenres } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { BentoGrid, BentoGridItem } from "../ui/bento-grid";
+import { Skeleton } from "../ui/skeleton";
 
 interface ColorMapEntry {
   colSpan: number;
@@ -12,9 +14,9 @@ interface ColorMapEntry {
 }
 const Genre = ({ name }: { name: string }) => {
   return (
-    <div className="w-full gap-2  flex-wrap h-full uppercase p-2 text-3xl truncate rounded-lg flex items-center justify-center">
+    <div className="w-full gap-2  flex-col h-full uppercase p-2 text-3xl truncate rounded-lg flex items-center justify-center">
       {name?.split(" ")[0]}
-      <ArrowRight className="w-12 hidden group-hover:-rotate-45 group-hover:flex h-12 rounded" />
+      <ArrowRight className="w-12 h-12 rounded" />
     </div>
   );
 };
@@ -143,33 +145,45 @@ const GenreGrid = ({ genres, type }: { genres: any; type: string }) => {
     },
   };
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="text-7xl">Discover</div>
-      <div className="grid auto-rows-[192px] grid-cols-2 gap-2 lg:grid-cols-10">
-        {genres &&
-          genres.map((genre: { name: string; id: any }, i: number) => {
-            const { colSpan, bgColor, textColor, hoverColor } = colorMap[i] || {
-              colSpan: 1,
-              bgColor: "hover:text-gray-900",
-              hoverColor: "hover:bg-gray-200",
-              textColor: "bg-gray-200",
-            };
-            return (
-              <Link
-                href={`/discover/${genre.name.toLowerCase()}?type=${type}&id=${
-                  genre.id
-                }&title=${encodeURIComponent(genre.name)}`}
-                key={i}
-                className={`rounded-xl group border duration-150 flex-col hover:bg-2xl hover:text-2 text-background whitespace-pre-wrap hover:scale-95 ${bgColor} ${textColor} ${hoverColor} col-span-${colSpan}`}
-              >
-                <Genre name={genre.name} />
-              </Link>
-            );
-          })}
-      </div>
-    </div>
-  );
+  return <div></div>;
 };
 
 export default GenreGrid;
+const items = [
+  {
+    title: "The Dawn of Innovation",
+    description: "Explore the birth of groundbreaking ideas and inventions.",
+    header: <Skeleton />,
+  },
+  {
+    title: "The Digital Revolution",
+    description: "Dive into the transformative power of technology.",
+    header: <Skeleton />,
+  },
+  {
+    title: "The Art of Design",
+    description: "Discover the beauty of thoughtful and functional design.",
+    header: <Skeleton />,
+  },
+  {
+    title: "The Power of Communication",
+    description:
+      "Understand the impact of effective communication in our lives.",
+    header: <Skeleton />,
+  },
+  {
+    title: "The Pursuit of Knowledge",
+    description: "Join the quest for understanding and enlightenment.",
+    header: <Skeleton />,
+  },
+  {
+    title: "The Joy of Creation",
+    description: "Experience the thrill of bringing ideas to life.",
+    header: <Skeleton />,
+  },
+  {
+    title: "The Spirit of Adventure",
+    description: "Embark on exciting journeys and thrilling discoveries.",
+    header: <Skeleton />,
+  },
+];
