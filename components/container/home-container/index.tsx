@@ -153,7 +153,7 @@ export default function HomeContainer() {
               )}
             </div>
           </div>
-          <div className="flex h-16  w-full justify-center items-center">
+          <div className="flex   w-full justify-center items-center">
             <div className="flex gap-4 jus h-full w-full justify-center items-center">
               {/* <div>{!filters.visible ? "Discover" : "Search for "}</div> */}
               <div className="flex gap-4"></div>
@@ -210,7 +210,7 @@ export default function HomeContainer() {
                 )
               )}
           </div>
-          {searchResults?.results.length < 1 && <div>No results found</div>}
+          {searchResults?.results?.length < 1 && <div>No results found</div>}
           {searchResultsLoading && <GridLoader />}
           {!query && !searchResults && (
             <div className="space-y-10 ">
