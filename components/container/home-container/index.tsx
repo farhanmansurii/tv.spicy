@@ -116,8 +116,8 @@ export default function HomeContainer() {
   return (
     title && (
       <div className="flex  flex-col  max-w-6xl w-full px-4 mx-auto  justify-center  items-center ">
-        <div className=" min-h-[40vh] flex justify-end flex-col">
-          <h2 className="mb-10  text-4xl text-center sm:text-6xl font-bold  ">
+        <div className=" h-[45vh] flex justify-end flex-col">
+          <h2 className="mb-10  text-2xl text-center sm:text-4xl font-bold  ">
             {title}
           </h2>
           <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">

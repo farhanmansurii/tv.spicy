@@ -7,6 +7,7 @@ import AnimeRowContainer from "../anime-row-wrapper";
 import dynamic from "next/dynamic";
 import SeasonsTabLoader from "../../SeasonsTabLoader";
 import MoreDetailsContainer from "../../MoreDetailsContainer";
+import { Metadata } from "next";
 import AnimeRow from "../anime-row";
 const AnimeEpisodesContainer = dynamic(
   () => import("./anime-episodes-container"),
@@ -15,6 +16,13 @@ const AnimeEpisodesContainer = dynamic(
     loading: () => <SeasonsTabLoader />,
   }
 );
+
+export const generateMetadata = ({ anime }: { anime: Anime }): Metadata => {
+  return {
+    applicationName: anime.title.userPreferred || anime.title.english,
+    description: anime.description,
+  };
+};
 export default function AnimeDetailsWrapper({ anime }: { anime: Anime }) {
   const renderContent = (selected: string) => {
     switch (selected) {

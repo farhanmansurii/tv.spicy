@@ -22,14 +22,13 @@ export default function RootLayout({
     <html className={GeistSans.className} lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icon-512x512.png"></link>
+        <link rel="apple-touch-icon" href="/icon-192x192.png"></link>
         <meta name="theme-color" content="#e63946" />
         <meta name="referrer" content="origin" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
-        <title>watvh app</title>
       </head>
       <body>
         <Providers
@@ -38,7 +37,6 @@ export default function RootLayout({
           defaultTheme="redDark"
           enableSystem
         >
-          {" "}
           <QueryProvider>
             <Header />
             {children}

@@ -13,6 +13,8 @@ import DetailLoader from "../loading/DetailLoader";
 import dynamic from "next/dynamic";
 import ShowDetails from "../container/tv-details.tsx/TVDetails";
 import RelatedShowsComponent from "../container/RelatedShowContainer";
+import { Metadata } from "next";
+import { Show } from "@/lib/types";
 
 const Details = (props: any) => {
   const { data, type, id } = props;

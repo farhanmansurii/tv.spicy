@@ -250,7 +250,6 @@ export function PlaceholdersAndVanishInput({
               }}
               className="  font-normal  pl-4 sm:pl-8 text-left  truncate"
             >
-              Search For{" "}
               {placeholders[currentPlaceholder] || "Naruto (2002-2007)"}
             </motion.p>
           )}
