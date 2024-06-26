@@ -30,9 +30,9 @@ const useTitle = () => {
 
   useEffect(() => {
     if (titles[timeOfDay]) {
-      const randomIndex = Math.floor(
-        Math.random() * (titles[timeOfDay].default.length || 0)
-      );
+    const randomIndex = Math.floor(
+      Math.random() * (titles[timeOfDay].default.length || 0)
+    );
       setTitle(titles[timeOfDay].default[randomIndex] || "");
     }
   }, [timeOfDay]);

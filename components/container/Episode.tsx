@@ -37,6 +37,14 @@ export default function Episode(props: EpisodeProps) {
 
   const sourcesMap = [
     {
+      name: "vidsrc.vip",
+      label: "Vidsrc VIP",
+      url:
+        type === "movie"
+          ? `https://vidsrc.vip/embed/${type}/${movieID}`
+          : `https://vidsrc.vip/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
+    },
+    {
       name: "vidsrc.pro",
       label: "Vidsrc Pro",
       url:
@@ -44,14 +52,7 @@ export default function Episode(props: EpisodeProps) {
           ? `https://vidsrc.pro/embed/${type}/${movieID}`
           : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
     },
-    {
-      name: "vidsrc.vip",
-      label: "Vidsrc ICU",
-      url:
-        type === "movie"
-          ? `https://vidsrc.vip/embed/${type}/${movieID}`
-          : `https://vidsrc.vip/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
-    },
+
     {
       name: "vidsrc.icu",
       label: "Vidsrc ICU",
@@ -69,14 +70,14 @@ export default function Episode(props: EpisodeProps) {
           : `https://vidsrc.to/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
     },
 
-    // {
-    //   name: "smashystream",
-    //   label: "Smashy  stream",
-    //   url:
-    //     type === "movie"
-    //       ? `https://susflix.tv/api/embed/movie?id=${id}`
-    //       : `https://susflix.tv/api/embed/tv?id=${id}&s=${seasonNumber}&e=${episodeNumber}`,
-    // },
+    {
+      name: "smashystream",
+      label: "Smashy  stream",
+      url:
+        type === "movie"
+          ? `https://susflix.tv/api/embed/movie?id=${id}`
+          : `https://susflix.tv/api/embed/tv?id=${id}&s=${seasonNumber}&e=${episodeNumber}`,
+    },
   ];
   const [provider, setProvider] = useState(sourcesMap[0]);
   const handleSelectOnChange = (value: string) => {
