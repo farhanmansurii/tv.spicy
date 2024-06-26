@@ -37,15 +37,21 @@ export   interface Show {
 }
 
  export interface Episode {
+   [x: string]:
+     | string
+     | number
+     | boolean
+     | readonly string[]
+     | readonly number[]
+     | readonly boolean[]
+     | null
+     | undefined;
    episode: number;
-   releaseDate: string | number | Date;
+   releaseDate: any;
    id: string;
    title: string;
    description: string;
-   img: {
-     mobile: string;
-     hd: string;
-   };
+   img: any;
  }
 
  export interface SeasonTabsProps {

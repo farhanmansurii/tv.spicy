@@ -25,8 +25,14 @@ import { Carousel, CarouselContent } from "../ui/carousel";
 import { Toggle } from "../ui/toggle";
 import EpisodeCard from "../common/EpisodeCard";
 import { SeasonTabsProps } from "@/lib/types";
+import { useSearchParams } from "next/navigation";
 const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
-  const [activeSeason, setActiveSeason] = useState<any>(seasons[0]?.season);
+  const searchParams = useSearchParams();
+
+  const [activeSeason, setActiveSeason] = useState<number>(
+    parseInt(searchParams.get("season") || String(seasons[0]?.season))
+  );
+
   const [view, setView] = useState<"grid" | "list" | "carousel">("carousel");
   return activeSeason ? (
     <div className="w-full flex flex-col mx-auto">
@@ -37,7 +43,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, id, tv_id }) => {
         <div className="flex font-bold  justify-between  items-center    text-xl md:text-2xl   py-2 flex-row">
           <Select
             defaultValue={"1"}
-            onValueChange={(value) => setActiveSeason(value)}
+            onValueChange={(value) => setActiveSeason(Number(value))}
           >
             <SelectTrigger className="   w-fit">
               <SelectValue className="">

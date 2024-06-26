@@ -19,6 +19,13 @@ import { format, formatDate } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ToastAction } from "../ui/toast";
 import { toast } from "../ui/use-toast";
+import {
+  ReadonlyURLSearchParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import Link from "next/link";
 
 interface SeasonContentProps {
   season: Season;
@@ -34,6 +41,9 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
   view,
 }) => {
   const today = new Date();
+  const pathName = usePathname();
+  const searchParams = useSearchParams();
+  const { replace } = useRouter();
   const releasedEpisodes = season?.episodes?.filter(
     (episode) => new Date(episode?.releaseDate) <= today && episode.id
   );
@@ -41,15 +51,18 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
   const { addRecentlyWatched } = useTVShowStore();
 
   const toggle = (episode: Episode) => {
-    // const isReleased = new Date(episode.releaseDate) <= new Date();
-    // if (!isReleased || !episode.id) {
-    //   toast({
-    //     title: "Episode Not Available Yet",
-    //     description:
-    //       "Stay tuned! This episode will be available soon. Check back later.",
-    //   });
-    //   return;
-    // }
+    const isReleased = new Date(episode.releaseDate) <= new Date();
+
+    if (!isReleased || !episode.id) {
+      toast({
+        title: "Episode Not Available Yet",
+        description:
+          "Stay tuned! This episode will be available soon. Check back later.",
+      });
+      return;
+    }
+    const params = new URLSearchParams(searchParams);
+
     setActiveEP(null);
     setActiveEP({ tv_id, time: 0, ...episode });
     addRecentlyWatched({ tv_id, time: 0, ...episode });
@@ -149,7 +162,13 @@ const EpisodeListItem = ({
   toggle: any;
 }) => {
   return (
-    <div
+    <Link
+      href={{
+        query: {
+          season: episode.season,
+          episode: episode.episode,
+        },
+      }}
       onClick={() => toggle(episode)}
       className={cn(
         "p-2 flex flex-col gap-2 border border-transparent rounded-xl hover:pl-2 duration-100 hover:scale-105",
@@ -170,6 +189,6 @@ const EpisodeListItem = ({
       <div className="text-sm text-secondary-foreground">
         {episode.description}
       </div>
-    </div>
+    </Link>
   );
 };

@@ -67,7 +67,9 @@ const RecentlyWatchedTV = () => {
                 )}
                 key={show.id}
               >
-                <Link href={`/tv/${show.tv_id}`}>
+                <Link
+                  href={`/tv/${show.tv_id}?season=${show.season}&episode=${show.episode}`}
+                >
                   <Motiondiv
                     initial="hidden"
                     animate="visible"

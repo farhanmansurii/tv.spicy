@@ -52,7 +52,7 @@ export default async function page() {
             ))}
         </div>
       </div>
-      {genres.length > 0 && <GenreGrid genres={genres} />}
+      {genres.length > 0 && <GenreGrid type="tv" genres={genres} />}
     </>
   );
 }

@@ -12,6 +12,7 @@ import {
 } from "../ui/select";
 import { Button } from "../ui/button";
 import { Settings } from "lucide-react";
+import Link from "next/link";
 
 interface EpisodeProps {
   episodeId: string;
@@ -20,12 +21,19 @@ interface EpisodeProps {
   type: string;
   episodeNumber?: any;
   seasonNumber?: any;
+  getNextEp: () => void;
 }
 
-
-
 export default function Episode(props: EpisodeProps) {
-  const { episodeId, id, movieID, type, seasonNumber, episodeNumber } = props;
+  const {
+    episodeId,
+    id,
+    movieID,
+    type,
+    seasonNumber,
+    episodeNumber,
+    getNextEp,
+  } = props;
 
   const sourcesMap = [
     {
@@ -35,6 +43,14 @@ export default function Episode(props: EpisodeProps) {
         type === "movie"
           ? `https://vidsrc.pro/embed/${type}/${movieID}`
           : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
+    },
+    {
+      name: "vidsrc.vip",
+      label: "Vidsrc ICU",
+      url:
+        type === "movie"
+          ? `https://vidsrc.vip/embed/${type}/${movieID}`
+          : `https://vidsrc.vip/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
     },
     {
       name: "vidsrc.icu",
@@ -69,24 +85,27 @@ export default function Episode(props: EpisodeProps) {
   };
   return (
     <div id="episode-player" className="">
-      <Select
-        defaultValue={provider.name || sourcesMap[0].name}
-        onValueChange={handleSelectOnChange}
-      >
-        <SelectTrigger className="w-fit h-12 mb-4">
-          <Settings className="w-6 h-6 p-1 mr-2" />
-          <SelectValue>
-            <div className="pr-10">{provider.label}</div>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {sourcesMap.map((source, index) => (
-            <SelectItem value={source.name} key={index}>
-              <div className="mx-1 flex gap-2">Server {source.label}</div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex   items-center justify-between mb-2">
+        <Select
+          defaultValue={provider.name || sourcesMap[0].name}
+          onValueChange={handleSelectOnChange}
+        >
+          <SelectTrigger className="w-fit h-12 ">
+            <Settings className="w-6 h-6 p-1 mr-2" />
+            <SelectValue>
+              <div className="pr-10">{provider.label}</div>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {sourcesMap.map((source, index) => (
+              <SelectItem value={source.name} key={index}>
+                <div className="mx-1 flex gap-2">Server {source.label}</div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button onClick={() => getNextEp()}>Next Episode</Button>
+      </div>
       <iframe
         allowFullScreen
         referrerPolicy="origin"
