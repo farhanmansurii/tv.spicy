@@ -44,12 +44,11 @@ export default function EpisodeCard(props: any) {
                 />
 
                 {active ? (
-                  <div className="absolute flex-col text-xs lg:text-md flex items-center gap-1 duration-200 ease-in-out inset-0 justify-center bg-black/70  text-primary">
+                  <div className="absolute flex-col text-xs lg:text-md flex items-center  duration-200 ease-in-out inset-0 justify-center bg-black/70  text-primary">
                     <svg
                       fill="currentColor"
                       viewBox="0 0 16 16"
-                      height="4.5em"
-                      width="4.5em"
+                      className="w-10 h-10"
                     >
                       <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
                     </svg>
@@ -82,7 +81,7 @@ export default function EpisodeCard(props: any) {
             <div
               className={cn(
                 "flex items-start text-sm md:text-base justify-between gap-1",
-                active && "text-primary font-semibold"
+                active && "text-primary"
               )}
             >
               <TextGlitch>{episode.title || episode.name}</TextGlitch>
