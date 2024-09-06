@@ -127,7 +127,7 @@ const CarousalCardWrapper = (props: CarousalCardProps) => {
       <div className="relative h-[70vh] md:flex hidden w-full mx-auto">
         <CarousalCard.Image
           alt=""
-          className="h-full w-full rounded-t-2xl  object-center object-cover"
+          className="h-full w-full rounded-t-2xl  mt-4 object-center object-cover"
           src={`https://image.tmdb.org/t/p/original/${show.backdrop_path}`}
         />
         <div className="inset-0 bg-gradient-to-t from-background to-from-background/10 absolute justify-between flex flex-col">

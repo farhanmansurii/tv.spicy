@@ -168,7 +168,7 @@ export function PlaceholdersAndVanishInput({
     >
       <canvas
         className={cn(
-          "absolute pointer-events-none   transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert-0 pr-10",
+          "absolute pointer-events-none   transform scale-50 top-[20%] left-3 sm:left-2 origin-top-left filter invert-0 pr-10",
           !animating ? "opacity-0" : "opacity-100"
         )}
         ref={canvasRef}

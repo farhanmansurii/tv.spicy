@@ -1,55 +1,37 @@
 "use client";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import React from "react";
-import ThemeButton from "../ThemeButton";
+import { FloatingDock } from "@/components/ui/floating-dock";
+import { CatIcon, FilmIcon, SearchIcon, TvIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
-import path from "path";
-import { title } from "process";
 
 const categories = [
-  // { title: "Trending", path: "trending" },
-  // { title: "Airing Today", path: "airing-today" },
-  // { title: "On The Air", path: "on-the-air" },
-  // { title: "Popular", path: "popular" },
-  // { title: "Top Rated", path: "top-rated" },
+  {
+    title: 'Search',
+    icon: <SearchIcon />,
+    href: '/'
+  },
   {
     title: "Movies",
-    path: "movie",
+    href: "/movie",
+    icon: <FilmIcon />
   },
   {
     title: "TV",
-    path: "tv",
+    href: "/tv",
+    icon: <TvIcon />
   },
-  {
-    title: "Anime",
-    path: "anime",
-  },
+
 ];
 
 export const Header = () => {
-  const pathname = usePathname(); // Get the current pathname using your custom hook
-
+  const pathname = usePathname();
   return (
-    <div className="w-full sticky  top-2 z-40">
-      <div className="w-[98%] my-2 rounded-full backdrop-blur-lg bg-background/50 mx-auto flex-row p-2 border-green-200 justify-between flex h-full items-center max-w-6xl px-4">
-        <Link href="/" passHref>
-          <Button variant={pathname === "/" ? "link" : "ghost"}>Home</Button>
-        </Link>
-
-        <div className="flex gap-2 items-center">
-          {categories.map((category) => (
-            <Link key={category.path} href={`/${category.path}`} passHref>
-              <Button
-                variant={pathname.includes(category.path) ? "link" : "ghost"}
-              >
-                {category.title}
-              </Button>
-            </Link>
-          ))}
-          <ThemeButton />
-        </div>
-      </div>
+    <div className="fixed bottom-0 left-0 right-0 z-50">
+      <FloatingDock
+        desktopClassName="w-fit mx-auto mb-4"
+        items={categories}
+        activeItem={pathname}
+      />
     </div>
   );
 };

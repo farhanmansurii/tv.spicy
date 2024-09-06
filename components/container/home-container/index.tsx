@@ -1,79 +1,120 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { BackgroundGradientAnimation } from "@/components/animated-common/background-gradient-animation";
 import ShowCard from "@/components/common/Card";
 import { PlaceholdersAndVanishInput } from "@/components/common/vanish-input";
 import GridLoader from "@/components/loading/GridLoader";
-import RowLoader from "@/components/loading/RowLoader";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchData } from "@/lib/anime-helpers";
-import { Anime, Show } from "@/lib/types";
 import useTitle from "@/lib/use-title";
 import { searchShows } from "@/lib/utils";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { set } from "date-fns";
-import { ArrowRight, Filter, Settings, Settings2, X } from "lucide-react";
+import { X } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 import { AnimeShowCard } from "../anime-container.tsx/anime-show-card";
 import WatchList from "@/components/common/WatchList";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
-import { Input } from "@/components/ui/input";
-import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { GlowingStarsBackgroundCard } from "@/components/ui/glowing-stars";
+import FlickeringGrid, { GlowingStarsBackgroundCard } from "@/components/ui/glowing-stars";
 const placeholders = {
   tvshow: [
-    "The Shawshank Redemption (1994)",
-    "12 Angry Man (2000)",
-    "Titanic (1997)",
-    "The Dark Knight (2008)",
-    "Inception (2010)",
-    "Avengers: Endgame (2019)",
-    "The Lord of the Rings (2001)",
-    "Avatar (2009)",
-    "The Godfather (1972)",
-    "Forrest Gump (1994)",
-    "The Empire Strikes Back (1980)",
-    "Gladiator (2000)",
-    "Spirited Away (2001)",
-    "Mulholland Drive (2001)",
-    "In the Mood for Love (2000)",
-    "Brokeback Mountain (2005)",
-    "Kingdom of the Planet of the Apes (2024)",
-    "Hit Man (2007)",
-    "Bad Boys: Ride or Die (2024)",
-    "The Watchers (2020)",
-    "Godzilla Minus One (2024)",
-    "Furiosa: A Mad Max Saga (2024)",
-    "Under Paris (2024)",
-    "X-Men: The Animated Series (1992-1997)",
-    "BoJack Horseman (2014-2020)",
-    "The Flintstones (1960-1966)",
-    "Sacred Games (2018-2019)",
-    "Mirzapur (2018-2020)",
-    "Panchayat (2020-present)",
-    "Special Ops (2020)",
-    "Scam 1992: The Harshad Mehta Story (2020)",
+    "The Shawshank Redemption",
+    "12 Angry Man",
+    "Titanic",
+    "The Dark Knight",
+    "Inception",
+    "Avengers: Endgame",
+    "The Lord of the Rings",
+    "Avatar",
+    "The Godfather",
+    "Forrest Gump",
+    "The Empire Strikes Back",
+    "Gladiator",
+    "Spirited Away",
+    "Mulholland Drive",
+    "In the Mood for Love",
+    "Brokeback Mountain",
+    "Kingdom of the Planet of the Apes",
+    "Hit Man",
+    "Bad Boys: Ride or Die",
+    "The Watchers",
+    "Godzilla Minus One",
+    "Furiosa: A Mad Max Saga",
+    "Under Paris",
+    "X-Men: The Animated Series",
+    "BoJack Horseman",
+    "The Flintstones",
+    "Sacred Games",
+    "Mirzapur",
+    "Panchayat",
+    "Special Ops",
+    "Scam 1992: The Harshad Mehta Story",
+    "The Matrix",
+    "The Silence of the Lambs",
+    "The Shining",
+    "The Departed",
+    "The Green Mile",
+    "The Pianist",
+    "The Lives of Others",
+    "The Great Dictator",
+    "The Prestige",
+    "The Lion King",
   ],
   anime: [
-    "Naruto (2002-2007)",
-    "Attack on Titan (2013-2023)",
-    "Death Note (2006-2007)",
-    "Demon Slayer: Kimetsu no Yaiba (2019-present)",
-    "My Hero Academia (2016-present)",
-    "Fullmetal Alchemist: Brotherhood (2009-2010)",
-    "Attack on Titan: The Final Season (2020-2023)",
-    "Jujutsu Kaisen (2020-present)",
-    "Sword Art Online (2012-2017)",
-    "Black Clover (2017-present)",
-    "One Piece (1999-present)",
-    "Haikyuu!! (2014-2020)",
-    "Blue Exorcist (2011-2016)",
-    "Sword Art Online: Alicization (2018-2019)",
-    "The Rising of the Shield Hero (2019-present)",
+    "Naruto",
+    "Attack on Titan",
+    "Death Note",
+    "Demon Slayer: Kimetsu no Yaiba",
+    "My Hero Academia",
+    "Fullmetal Alchemist: Brotherhood",
+    "Attack on Titan: The Final Season",
+    "Jujutsu Kaisen",
+    "Sword Art Online",
+    "Black Clover",
+    "One Piece",
+    "Haikyuu!!",
+    "Blue Exorcist",
+    "Sword Art Online: Alicization",
+    "The Rising of the Shield Hero",
+    "Dragon Ball Z",
+    "One Punch Man",
+    "Tokyo Ghoul",
+    "Fairy Tail",
+    "Bleach",
+    "Hunter x Hunter",
+    "Soul Eater",
+    "Noragami",
+    "Parasyte",
+    "Magi: The Labyrinth of Magic",
+    "Seven Deadly Sins",
+    "D.Gray-man",
+    "Assassination Classroom",
+    "Akame ga Kill!",
+    "Nanatsu no Taizai",
+    "Boruto: Naruto Next Generations",
+    "Black Clover",
+    "One Piece",
+    "Haikyuu!!",
+    "Blue Exorcist",
+    "Sword Art Online: Alicization",
+    "The Rising of the Shield Hero",
+    "Dragon Ball Z",
+    "One Punch Man",
+    "Tokyo Ghoul",
+    "Fairy Tail",
+    "Bleach",
+    "Hunter x Hunter",
+    "Soul Eater",
+    "Noragami",
+    "Parasyte",
+    "Magi: The Labyrinth of Magic",
+    "Seven Deadly Sins",
+    "D.Gray-man",
+    "Assassination Classroom",
+    "Akame ga Kill!",
+    "Nanatsu no Taizai",
+    "Boruto: Naruto Next Generations",
   ],
 };
 export default function HomeContainer() {
@@ -116,14 +157,14 @@ export default function HomeContainer() {
   };
   return (
     title && (
-      <div className="flex  flex-col  max-w-6xl w-full px-4 mx-auto  justify-center  items-center ">
-        <GlowingStarsBackgroundCard>
-          <div className="  flex justify-end flex-col">
-            <h2 className="mb-10  text-2xl text-center sm:text-4xl font-bold  ">
+      <div className="flex  flex-col  max-w-3xl w-full px-4 mx-auto  justify-center  items-center ">
+    <GlowingStarsBackgroundCard>
+          <div className="  flex justify-end mt-10 flex-col">
+            <h2 className="mb-3  text-2xl text-center sm:text-4xl font-bold  ">
               {title}
             </h2>
-            <div className="w-full max-w-2xl items-center justify-center mb-4 flex mx-auto">
-              <div className="flex w-full ">
+            <div className="w-full max-w-3xl items-center justify-center  flex mx-auto">
+              <div className="flex w-[350px]    mx-auto my-4 ">
                 <PlaceholdersAndVanishInput
                   placeholders={
                     filters.type === "tvshow"
@@ -155,9 +196,9 @@ export default function HomeContainer() {
                 )}
               </div>
             </div>
-            <div className="flex   w-full justify-center items-center">
+            {/* <div className="flex   w-full justify-center items-center">
               <div className="flex gap-4 jus h-full w-full justify-center items-center">
-                {/* <div>{!filters.visible ? "Discover" : "Search for "}</div> */}
+
                 <div className="flex gap-4"></div>
                 <ToggleGroup value={filters.type} type="single">
                   <ToggleGroupItem
@@ -189,11 +230,11 @@ export default function HomeContainer() {
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
-            </div>
+            </div> */}
           </div>
-        </GlowingStarsBackgroundCard>
+</GlowingStarsBackgroundCard>
         <div className="z-30  my-10 w-full    mx-auto   ">
-          <div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:gap-y-10">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-4 md:grid-cols-3 md:gap-y-10">
             {searchResults &&
               searchResults.results.map((show: any, index: number) =>
                 filters.type === "tvshow" ? (
