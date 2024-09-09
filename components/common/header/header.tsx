@@ -20,6 +20,11 @@ const categories = [
     href: "/tv",
     icon: <TvIcon />
   },
+  {
+    title: "Anime",
+    href: "/anime",
+    icon: <CatIcon />
+  },
 
 ];
 
