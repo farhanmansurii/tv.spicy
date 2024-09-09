@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseUrl = 'https://api-spicy.vercel.app/meta/anilist/';
+const baseUrl = 'https://consumet-taupe-seven.vercel.app/meta/anilist/';
 
 export async function fetchAnimeByCategory(
   params: string,
