@@ -196,7 +196,7 @@ export default function HomeContainer() {
                 )}
               </div>
             </div>
-            {/* <div className="flex   w-full justify-center items-center">
+            <div className="flex   w-full justify-center items-center">
               <div className="flex gap-4 jus h-full w-full justify-center items-center">
 
                 <div className="flex gap-4"></div>
@@ -230,7 +230,7 @@ export default function HomeContainer() {
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
-            </div> */}
+            </div>
           </div>
 </GlowingStarsBackgroundCard>
         <div className="z-30  my-10 w-full    mx-auto   ">
