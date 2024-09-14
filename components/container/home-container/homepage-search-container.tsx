@@ -13,8 +13,8 @@ export default function HomeSearchContainer() {
     }
 
     return (
-        <div className="relative min-h-screen  text-white overflow-hidden">
 
+        <div className="relative  max-h-full text-white overflow-hidden">
             <ShootingStars />
             <StarsBackground />
             <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/70" />

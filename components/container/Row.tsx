@@ -51,7 +51,7 @@ export default function Row(props: {
                 show?.backdrop_path && (
                   <CarouselItem
                     className={cn(
-                      `group basis-7/12 w-full  md:basis-1/3 lg:basis-3/12   `
+                      `group basis-7/12 w-full  md:basis-1/3 lg:basis-[22%]   `
                     )}
                     key={show.id}
                   >

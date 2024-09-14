@@ -81,7 +81,7 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
     return (
       <div>
         Error loading content.
-        <button onClick={handleRefresh}>Retry</button>
+
       </div>
     );
   }

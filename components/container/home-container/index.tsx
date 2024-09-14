@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import ShowCard from "@/components/common/Card";
 import { PlaceholdersAndVanishInput } from "@/components/common/vanish-input";
 import GridLoader from "@/components/loading/GridLoader";
 import { Button } from "@/components/ui/button";
@@ -9,20 +8,16 @@ import useTitle from "@/lib/use-title";
 import { cn, searchShows } from "@/lib/utils";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 import { AnimeShowCard } from "../anime-container.tsx/anime-show-card";
 import WatchList from "@/components/common/WatchList";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import FlickeringGrid, { GlowingStarsBackgroundCard } from "@/components/ui/glowing-stars";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
 import { Motiondiv } from "@/components/common/MotionDiv";
-import { Input } from "@/components/ui/input";
-import { Show } from "@/lib/types";
-import { tmdbImage } from "@/lib/tmdb-image";
+import { Header } from "@/components/common/header";
 const placeholders = {
     tvshow: [
         "The Shawshank Redemption",
@@ -164,6 +159,7 @@ export default function HomeContainer() {
     return (
         title && (
             <div className="flex  flex-col max-w-3xl w-full px-4 mx-auto  justify-center  items-center ">
+              <Header />
                 <ShootingStars />
                 <StarsBackground />
                 <div className="relative z-10 flex flex-col   min-h-[500px]  md:h-screen  p-6">
@@ -211,7 +207,7 @@ export default function HomeContainer() {
                             )}
                         </Motiondiv>
 
-                        <div className={cn("z-30 overflow-scroll backdrop-blur-sm mt-2 w-full ease-in-out duration-200    max-w-2xl  mx-auto   ", searchResults?.results?.length > 0 ? 'h-[300px]' : 'h-0')}>
+                        <div className={cn("z-30 overflow-auto backdrop-blur-sm mt-2 w-full ease-in-out duration-200    max-w-2xl  mx-auto   ", searchResults?.results?.length > 0 ? 'h-[300px]' : 'h-0')}>
                             <div className="flex gap-2 mx-4 flex-col">
                                 {searchResults &&
                                     searchResults.results.map((show: any, index: number) =>
@@ -243,13 +239,6 @@ export default function HomeContainer() {
                         </div>
                         <div className="mt-4">
                             {searchResults?.results?.length < 1 && <div>No results found</div>}
-                            {searchResultsLoading && <GridLoader />}
-                            {!query && !searchResults && (
-                                <div className="space-y-10 ">
-                                    <RecentlyWatched />
-                                    <WatchList type="all" />
-                                </div>
-                            )}
 
                         </div>
                     </Motiondiv>
