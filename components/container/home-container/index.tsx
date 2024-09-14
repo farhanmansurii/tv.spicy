@@ -166,7 +166,7 @@ export default function HomeContainer() {
             <div className="flex  flex-col max-w-3xl w-full px-4 mx-auto  justify-center  items-center ">
                 <ShootingStars />
                 <StarsBackground />
-                <div className="relative z-10 flex flex-col   min-h-[500px] md:h-screen  p-6">
+                <div className="relative z-10 flex flex-col   min-h-[500px]  md:h-screen  p-6">
                     <Motiondiv
                         className="flex-grow flex flex-col items-center w-full justify-center"
                         initial={{ opacity: 0, y: 20 }}
@@ -211,34 +211,37 @@ export default function HomeContainer() {
                             )}
                         </Motiondiv>
 
-                        <div className={cn("z-30 overflow-scroll backdrop-blur-sm mt-2 w-full ease-in-out duration-200    max-w-xl  mx-auto   ", searchResults?.results?.length > 0 ? 'h-[300px]' : 'h-0')}>
+                        <div className={cn("z-30 overflow-scroll backdrop-blur-sm mt-2 w-full ease-in-out duration-200    max-w-2xl  mx-auto   ", searchResults?.results?.length > 0 ? 'h-[300px]' : 'h-0')}>
                             <div className="flex gap-2 mx-4 flex-col">
                                 {searchResults &&
                                     searchResults.results.map((show: any, index: number) =>
                                         filters.type === "tvshow" ? (
                                             show?.backdrop_path && (
-                                                <Link    href={`/${show.media_type || type}/${show.id}`}>
-                                                <div
+                                                <Link onClick={() => setQuery(null)} href={`/${show.media_type}/${show.id}`}>
+                                                    <div
+                                                        key={index} className="w-full text-xs md:text-sm lg:text-lg  rounded-xl hover:scale-[103%] hover:bg-white/5 duration-150   flex items-center gap-3 px-3 flex-row border py-3">
 
-                                                key={index} className="w-full text-xs md:text-sm lg:text-lg  rounded-xl hover:scale-[103%] hover:bg-white/5 duration-150   flex items-center gap-3 px-3 flex-row border py-3">
-
-                                                    <div className="flex-1">{show.title || show.name} </div>
-                                                    <div className="flex-0">{(show.first_air_date || show.release_date)?.split("-")[0]}{" "}
-                                                        <span
-                                                            className={`${(show.media_type)?.toLowerCase() === "tv"
+                                                        <div className="flex-1">{show.title || show.name} </div>
+                                                        <div className="flex-0">{(show.first_air_date || show.release_date)?.split("-")[0]}{" "}
+                                                            <span
+                                                                className={`${(show.media_type)?.toLowerCase() === "tv"
                                                                     ? "uppercase"
                                                                     : "capitalize"
-                                                                }`}
-                                                        >
-                                                         {show.media_type}
-                                                        </span></div>
-                                                </div></Link>
+                                                                    }`}
+                                                            >
+                                                                {show.media_type}
+                                                            </span></div>
+                                                    </div></Link>
                                             )
                                         ) : (
                                             <AnimeShowCard key={index} anime={show} />
                                         )
                                     )}
+
                             </div>
+
+                        </div>
+                        <div className="mt-4">
                             {searchResults?.results?.length < 1 && <div>No results found</div>}
                             {searchResultsLoading && <GridLoader />}
                             {!query && !searchResults && (
@@ -247,9 +250,10 @@ export default function HomeContainer() {
                                     <WatchList type="all" />
                                 </div>
                             )}
-                        </div>
 
+                        </div>
                     </Motiondiv>
+
                 </div>
 
             </div>
