@@ -1,13 +1,11 @@
 import { Providers } from "@/components/providers/Provider";
 import "./globals.css";
 import type { Metadata } from "next";
-import { Separator } from "@/components/ui/separator";
-import QueryProvider from "@/components/container/TanStackQueryProvider";
 import { GeistSans } from "geist/font/sans";
 import { Header } from "@/components/common/header";
 import MinimalSocialsFooter from "@/components/common/Footer";
-import BackgroundGrid from "@/components/animated-common/GridBackground";
 import { Toaster } from "@/components/ui/toaster";
+import TanstackQueryProvider from "@/components/providers/TanstackQueryProvider";
 
 export const metadata: Metadata = {
   title: "Watvh TV",
@@ -38,12 +36,11 @@ export default function RootLayout({
           defaultTheme="redDark"
           enableSystem
         >
-          <QueryProvider>
+          <TanstackQueryProvider>
             <Header />
             {children}
-            <MinimalSocialsFooter />
             <Toaster />
-          </QueryProvider>
+          </TanstackQueryProvider>
         </Providers>
       </body>
     </html>

@@ -32,9 +32,9 @@ export default function Row(props: {
     }),
   };
   return (
-    <Carousel opts={{ dragFree: true }} className=" w-[99%] mx-auto">
+    <Carousel opts={{ dragFree: true }} className="ease-in-out duration-100 w-[99%] mx-auto">
       {props.text && (
-        <div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
+        <div className="flex font-bold ease-in-out duration-100 justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
           <h1 className="text-2xl flex  font-bold">{props.text}</h1>
           <div className="flex  gap-2">
             <CarouselPrevious variant={"secondary"} />

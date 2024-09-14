@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export default function GridLoader() {
   return (
-    <div className="grid grid-cols-2 w-[99%] mx-auto  gap-x-2 gap-y-10 md:grid-cols-3  md:gap-y-10   ">
+    <div className="grid grid-cols-2 ease-in-out duration-100 w-[99%] mx-auto  gap-x-2 gap-y-10 md:grid-cols-3  md:gap-y-10   ">
       {Array.from({ length: 12 }).map((_, index) => (
         <div className={cn(`group  w-full space-y-2  `)} key={index}>
           <Skeleton className="aspect-video" key={index} />

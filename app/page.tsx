@@ -1,9 +1,8 @@
 import HomeContainer from "@/components/container/home-container";
+import HomeSearchContainer from "@/components/container/home-container/homepage-search-container";
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
-      <HomeContainer />
-    </div>
+    <HomeContainer/>
   );
 }

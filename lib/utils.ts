@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Show } from "./types";
+import { useQuery } from "@tanstack/react-query";
 const apiKey =
   "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlM2NhMGYyODNmMWFiOTAzZmQ1ZTIzMjRmYWFkZDg4ZSIsInN1YiI6IjYzMDAyNGYwN2Q0MWFhMDA3OWJkMjU3YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.w-Eb5kO6LneizQQA9A4VOr-0P6kqDsG4_ybU9Ym3tYo";
 
@@ -27,6 +28,14 @@ export async function fetchRowData(link: string) {
   } catch (error) {
     console.log(error);
   }
+}
+export function useRowData(link: string) {
+  return useQuery({
+    queryKey: ['rowData', link],
+    queryFn: () => fetchRowData(link),
+    staleTime: 1000 * 60 * 60 * 24,
+    gcTime: 1000 * 60 * 60 * 24,
+  });
 }
 
 export async function fetchDetails(id: string, type: string) {
