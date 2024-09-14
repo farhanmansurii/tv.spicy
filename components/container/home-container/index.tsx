@@ -217,7 +217,10 @@ export default function HomeContainer() {
                                     searchResults.results.map((show: any, index: number) =>
                                         filters.type === "tvshow" ? (
                                             show?.backdrop_path && (
-                                                <div key={index} className="w-full text-xs md:text-sm lg:text-lg  rounded-xl hover:scale-[103%] hover:bg-white/5 duration-150   flex items-center gap-3 px-3 flex-row border py-3">
+                                                <Link    href={`/${show.media_type || type}/${show.id}`}>
+                                                <div
+
+                                                key={index} className="w-full text-xs md:text-sm lg:text-lg  rounded-xl hover:scale-[103%] hover:bg-white/5 duration-150   flex items-center gap-3 px-3 flex-row border py-3">
 
                                                     <div className="flex-1">{show.title || show.name} </div>
                                                     <div className="flex-0">{(show.first_air_date || show.release_date)?.split("-")[0]}{" "}
@@ -229,7 +232,7 @@ export default function HomeContainer() {
                                                         >
                                                          {show.media_type}
                                                         </span></div>
-                                                </div>
+                                                </div></Link>
                                             )
                                         ) : (
                                             <AnimeShowCard key={index} anime={show} />
