@@ -5,6 +5,7 @@ import { CatIcon, FilmIcon, SearchIcon, TvIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import HomeSearchContainer from "@/components/container/home-container/homepage-search-container";
 
 const categories = [
     {

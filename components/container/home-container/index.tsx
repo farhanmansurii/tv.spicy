@@ -1,297 +1,221 @@
-/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import { PlaceholdersAndVanishInput } from "@/components/common/vanish-input";
-import GridLoader from "@/components/loading/GridLoader";
-import { Button } from "@/components/ui/button";
-import { fetchData } from "@/lib/anime-helpers";
-import useTitle from "@/lib/use-title";
-import { cn, searchShows } from "@/lib/utils";
-import { ArrowTopRightIcon } from "@radix-ui/react-icons";
+
+import React, { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
-import { AnimeShowCard } from "../anime-container.tsx/anime-show-card";
-import WatchList from "@/components/common/WatchList";
-import RecentlyWatched from "@/components/common/RecentlyWatched";
+import { AnimatePresence } from "framer-motion";
+import { Command, CommandDialog } from "cmdk";
+import { searchShows } from "@/lib/utils";
+import { fetchData } from "@/lib/anime-helpers";
+import { debounce } from "lodash";
+import { Anime, Show } from "@/lib/types";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Header } from "@/components/common/header";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
+import { Button } from "@/components/ui/button";
+import { Loader2, XIcon } from "lucide-react";
 import { Motiondiv } from "@/components/common/MotionDiv";
-import { Header } from "@/components/common/header";
-const placeholders = {
-    tvshow: [
-        "The Shawshank Redemption",
-        "12 Angry Man",
-        "Titanic",
-        "The Dark Knight",
-        "Inception",
-        "Avengers: Endgame",
-        "The Lord of the Rings",
-        "Avatar",
-        "The Godfather",
-        "Forrest Gump",
-        "The Empire Strikes Back",
-        "Gladiator",
-        "Spirited Away",
-        "Mulholland Drive",
-        "In the Mood for Love",
-        "Brokeback Mountain",
-        "Kingdom of the Planet of the Apes",
-        "Hit Man",
-        "Bad Boys: Ride or Die",
-        "The Watchers",
-        "Godzilla Minus One",
-        "Furiosa: A Mad Max Saga",
-        "Under Paris",
-        "X-Men: The Animated Series",
-        "BoJack Horseman",
-        "The Flintstones",
-        "Sacred Games",
-        "Mirzapur",
-        "Panchayat",
-        "Special Ops",
-        "Scam 1992: The Harshad Mehta Story",
-        "The Matrix",
-        "The Silence of the Lambs",
-        "The Shining",
-        "The Departed",
-        "The Green Mile",
-        "The Pianist",
-        "The Lives of Others",
-        "The Great Dictator",
-        "The Prestige",
-        "The Lion King",
-    ],
-    anime: [
-        "Naruto",
-        "Attack on Titan",
-        "Death Note",
-        "Demon Slayer: Kimetsu no Yaiba",
-        "My Hero Academia",
-        "Fullmetal Alchemist: Brotherhood",
-        "Attack on Titan: The Final Season",
-        "Jujutsu Kaisen",
-        "Sword Art Online",
-        "Black Clover",
-        "One Piece",
-        "Haikyuu!!",
-        "Blue Exorcist",
-        "Sword Art Online: Alicization",
-        "The Rising of the Shield Hero",
-        "Dragon Ball Z",
-        "One Punch Man",
-        "Tokyo Ghoul",
-        "Fairy Tail",
-        "Bleach",
-        "Hunter x Hunter",
-        "Soul Eater",
-        "Noragami",
-        "Parasyte",
-        "Magi: The Labyrinth of Magic",
-        "Seven Deadly Sins",
-        "D.Gray-man",
-        "Assassination Classroom",
-        "Akame ga Kill!",
-        "Nanatsu no Taizai",
-        "Boruto: Naruto Next Generations",
-        "Black Clover",
-        "One Piece",
-        "Haikyuu!!",
-        "Blue Exorcist",
-        "Sword Art Online: Alicization",
-        "The Rising of the Shield Hero",
-        "Dragon Ball Z",
-        "One Punch Man",
-        "Tokyo Ghoul",
-        "Fairy Tail",
-        "Bleach",
-        "Hunter x Hunter",
-        "Soul Eater",
-        "Noragami",
-        "Parasyte",
-        "Magi: The Labyrinth of Magic",
-        "Seven Deadly Sins",
-        "D.Gray-man",
-        "Assassination Classroom",
-        "Akame ga Kill!",
-        "Nanatsu no Taizai",
-        "Boruto: Naruto Next Generations",
-    ],
-};
+import useTitle from "@/lib/use-title";
+import RecentlyWatchedTV from "@/components/common/RecentlyWatched";
+import WatchList from "@/components/common/WatchList";
+import useRecentSearchStore from "@/store/recentsSearchStore";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+
+type SearchResult = Show | Anime;
+interface SearchState {
+    recentlySearched: (Show | Anime)[];
+    addToRecentlySearched: (show: Show | Anime) => void;
+}
+const useSearchStore = create(
+    persist<SearchState>(
+        (set) => ({
+            recentlySearched: [],
+            addToRecentlySearched: (show) => set((state) => ({
+                recentlySearched: [show, ...state.recentlySearched.filter(s => s.id !== show.id)].slice(0, 10)
+            })),
+        }),
+        {
+            name: 'watvhstorage',
+        }
+    )
+);
+
 export default function HomeContainer() {
     const { title } = useTitle();
-    const [query, setQuery] = useState<string | null>("");
-    const [filters, setFilters] = useState({
-        visible: true,
-        type: "tvshow",
+
+    const [query, setQuery] = useState("");
+    const [inputValue, setInputValue] = useState("");
+    const [searchType, setSearchType] = useState<"tvshow" | "anime">("tvshow");
+    const { recentlySearched, addToRecentlySearched } = useSearchStore()
+    console.log(`(logs) > recentlySearched: `, recentlySearched)
+    const { data: searchResults, isFetching, error } = useQuery({
+        queryKey: ["search", query, searchType],
+        queryFn: async () => {
+            if (searchType === "tvshow") {
+                const results = await searchShows(query);
+                return {
+                    ...results,
+                    results: results.results.filter((item: any) =>
+                        item.media_type === "tv" || item.media_type === "movie"
+                    )
+                };
+            } else {
+                return fetchData(`advanced-search?query=${query}`);
+            }
+        },
+        enabled: query.trim().length > 0,
     });
-    const {
-        data: searchResults,
-        isLoading: searchResultsLoading,
-        isError: searchResultsError,
-        refetch,
-    } = useQuery({
-        queryKey: ["search"],
-        queryFn: async () =>
-            query &&
-            (filters.type === "tvshow"
-                ? await searchShows(query as any)
-                : await fetchData(`advanced-search?query=${query}`)),
-        enabled: false,
-    });
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(e.target.value);
+
+    const debouncedSearch = useCallback(
+        debounce((value: string) => {
+            if (value.length >= 2) {
+                setQuery(value);
+            } else {
+                setQuery('');
+            }
+        }, 500),
+        []
+    );
+
+    const handleInputChange = (value: string) => {
+        setInputValue(value);
+        debouncedSearch(value);
     };
-    const onSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
-        if (e?.preventDefault) e.preventDefault();
-        if (!query) return;
-        await refetch();
-        setQuery(null);
+
+    const clearSearch = () => {
+        setInputValue("");
+        setQuery("");
     };
-    const handlefilters = () => {
-        setFilters({ ...filters, visible: !filters.visible });
+
+    useEffect(() => {
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [debouncedSearch]);
+
+
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+    const sortResults = (results: any[]) => {
+        return results.sort((a, b) => {
+            const dateA = new Date(a.first_air_date || a.release_date || a.releaseDate || 0);
+            const dateB = new Date(b.first_air_date || b.release_date || b.releaseDate || 0);
+            return sortOrder === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+        });
     };
-    const handleSelectType = (type: string) => {
-        setQuery(null);
-        refetch();
-        filters.visible && setFilters({ ...filters, type });
+    const handleSearchResults = (results: any[]) => {
+        const sortedResults = sortResults(results);
+        return searchType === "tvshow"
+            ? sortedResults.map((show: Show) => ({
+                id: show.id,
+                title: show.name || show.title,
+                type: show.media_type,
+                date: (show?.first_air_date || show?.release_date)?.split("-")[0] || null,
+                obj: show
+            }))
+            : sortedResults.map((anime: Anime) => ({
+                id: anime.id,
+                title: anime.title.userPreferred || anime.title.english,
+                date: anime.releaseDate,
+                type: 'anime',
+                obj: anime
+            }));
     };
     return (
-        title && (
-            <div className="flex  flex-col max-w-3xl w-full px-4 mx-auto  justify-center  items-center ">
-              <Header />
-                <ShootingStars />
-                <StarsBackground />
-                <div className="relative z-10 flex flex-col   min-h-[500px]  md:h-screen  p-6">
+        <div className="mx-auto max-w-6xl space-y-4 px-4 lg:px-0">
+            <Header />
+            <StarsBackground />
+            <ShootingStars />
+            <div className="pt-10  w-full">
+                <Motiondiv
+                    className="text-xl lg:text-3xl text-left px-2 w-full  text-pretty mb-3"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                >
+                    {title}
+                </Motiondiv>
+                <div>
                     <Motiondiv
-                        className="flex-grow flex flex-col items-center w-full justify-center"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <Motiondiv
-                            className="text-3xl lg:text-5xl text-center  text-pretty mb-6"
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2, duration: 0.6 }}
-                        >
-                            {title}
-                        </Motiondiv>
+                    className="text-xl lg:text-3xl text-left  w-full  text-pretty mb-3"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.4 }}
+                >
 
-                        <Motiondiv
-                            className="relative flex flex-row w-full max-w-xl "
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.6, duration: 0.6 }}
-                        >
-                            <PlaceholdersAndVanishInput
-                                placeholders={
-                                    filters.type === "tvshow"
-                                        ? placeholders.tvshow
-                                        : placeholders.anime
-                                }
-                                onChange={handleChange}
-                                onSubmit={onSubmit}
-                            />
-                            {searchResults && searchResults?.results?.length > 0 && (
-                                <Button
-                                    size={"icon"}
-                                    className="  hover:scale-95 duration-150  z-30 rounded-full   m-1 bg-muted "
-                                    onClick={() => {
-                                        setQuery(null);
-                                        refetch();
-                                    }}
-                                >
-                                    <X className="p-2 w-full h-full" />
-                                </Button>
-                            )}
-                        </Motiondiv>
 
-                        <div className={cn("z-30 overflow-auto backdrop-blur-sm mt-2 w-full ease-in-out duration-200    max-w-2xl  mx-auto   ", searchResults?.results?.length > 0 ? 'h-[300px]' : 'h-0')}>
-                            <div className="flex gap-2 mx-4 flex-col">
-                                {searchResults &&
-                                    searchResults.results.map((show: any, index: number) =>
-                                        filters.type === "tvshow" ? (
-                                            show?.backdrop_path && (
-                                                <Link onClick={() => setQuery(null)} href={`/${show.media_type}/${show.id}`}>
-                                                    <div
-                                                        key={index} className="w-full text-xs md:text-sm lg:text-lg  rounded-xl hover:scale-[103%] hover:bg-white/5 duration-150   flex items-center gap-3 px-3 flex-row border py-3">
-
-                                                        <div className="flex-1">{show.title || show.name} </div>
-                                                        <div className="flex-0">{(show.first_air_date || show.release_date)?.split("-")[0]}{" "}
-                                                            <span
-                                                                className={`${(show.media_type)?.toLowerCase() === "tv"
-                                                                    ? "uppercase"
-                                                                    : "capitalize"
-                                                                    }`}
-                                                            >
-                                                                {show.media_type}
-                                                            </span></div>
-                                                    </div></Link>
-                                            )
-                                        ) : (
-                                            <AnimeShowCard key={index} anime={show} />
-                                        )
-                                    )}
+                    <Command className="max-w-xl bg-background h-fit duration-150 border ease-in-out  rounded-lg">
+                    {/* <CommandDialog open> */}
+                        <div className="flex  lg:flex-row lg:items-center justify-between  flex-col pb-3 lg:pb-0 px-3">
+                            <div className=" w-full mr-2 flex flex-row items-center">
+                                <MagnifyingGlassIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                <Command.Input
+                                    value={inputValue}
+                                    placeholder="Search for TV shows or anime..."
+                                    className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                                    onValueChange={handleInputChange}
+                                />
 
                             </div>
-
+                            <div className="flex gap-1">
+                                <Select value={searchType} onValueChange={(value) => setSearchType(value as "tvshow" | "anime")}>
+                                    <SelectTrigger className=" w-full  lg:w-fit  ">
+                                        <SelectValue className="px-2" placeholder="Select a type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem value="tvshow">TV / Movie</SelectItem>
+                                            <SelectItem value="anime">Anime</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as "asc" | "desc")}>
+                                    <SelectTrigger className=" w-full lg:w-fit  ">
+                                        <SelectValue placeholder="Sort by date" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem value="desc">Newest First</SelectItem>
+                                            <SelectItem value="asc">Oldest First</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div className="mt-4">
-                            {searchResults?.results?.length < 1 && <div>No results found</div>}
-
-                        </div>
-                    </Motiondiv>
-
+                        <CommandList className="max-h-[300px]  overflow-y-auto overflow-x-hidden">
+                            <AnimatePresence>
+                                {isFetching ? (
+                                    <Command.Item className="w-full border-t text-center px-5 py-2 border-b flex flex-row items-center justify-center" >Loading <Loader2 className="w-4 h-4 animate-spin ml-1" /></Command.Item>
+                                ) : error ? (
+                                    <Command.Empty>Error: {(error as Error).message}</Command.Empty>
+                                ) : searchResults && searchResults.results.length > 0 ? (
+                                    handleSearchResults(searchResults.results).map((show) => (
+                                        <CommandItem  onClick={() => addToRecentlySearched(show.obj as Show)} key={show.id} className="w-full px-5 py-2 border-b" value={show.title}>
+                                            <Link href={`/${show.type}/${show?.id}`} className="flex justify-between flex-row w-full">
+                                            <span className="">{show.title} {show.date && `(${show.date})`}</span>
+                                                <span className={show.type.length > 2 ? "capitalize" : "uppercase"}>{show.type}</span>
+                                            </Link>
+                                        </CommandItem>
+                                    ))
+                                ) : query.trim().length > 0 ? (
+                                    <Command.Empty>No results found</Command.Empty>
+                                ) : null}
+                            </AnimatePresence>
+                        </CommandList>
+                    {/* </CommandDialog> */}
+                    </Command>
+                      </Motiondiv>
                 </div>
-
+                <div className="mt-10 space-y-4 w-full">
+                    <RecentlyWatchedTV />
+                    <WatchList type="movie" />
+                    <WatchList type="tv" />
+                </div>
             </div>
-        )
-    );
-}
-
-interface FilterItemProps {
-    src: string;
-    label: string;
-    onClick?: () => void;
-    link?: any;
-    active?: boolean;
-}
-
-const FilterItem: React.FC<FilterItemProps> = ({
-    src,
-    label,
-    onClick,
-    link,
-    active,
-}) => {
-    const itemClasses = `px-4 gap-2 text-sm md:text-md border-2 hover:scale-95 group  backdrop-blur-sm mx-auto flex justify-center items-center hover:bg-muted-foreground/20 duration-150 rounded-2xl text-center h-12 md:h-16 cursor-pointer ${active
-        ? " hover:bg-primary/70 text-background bg-primary "
-        : "border-foreground/20 bg-muted/40 text-primary-background"
-        }`;
-
-    const content = (
-        <div className="whitespace-nowrap flex items-center gap-2">
-            <img alt="" className="w-10 h-10 hidden md:block" src={src} />
-            {label}
         </div>
     );
-
-    return (
-        <div className={itemClasses} onClick={onClick}>
-            {link ? (
-                <Link href={link} className="flex justify-center items-center gap-2">
-                    {content}
-                </Link>
-            ) : (
-                content
-            )}
-            {active && (
-                <X className=" w-6 h-6 p-1  md:p-2 md:w-8 md:h-8  rounded-full bg-primary " />
-            )}
-            {link && (
-                <ArrowTopRightIcon className="w-8 group-hover:rotate-0 rotate-45 duration-200 h-8  rounded-full bg-primary p-2" />
-            )}
-        </div>
-    );
-};
+}
