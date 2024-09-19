@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { persist, createJSONStorage, StateCreator, PersistOptions } from "zustand/middleware";
+import { StateCreator, create } from "zustand";
+import { createJSONStorage, persist, PersistOptions } from "zustand/middleware";
 
 interface SearchState {
   searches: any[];
@@ -26,11 +26,12 @@ const useRecentSearchStore = create<SearchState>(
             searches: [show, ...state.searches].slice(0, 5),
           };
         }),
+
       removeFromSearchList: (id: number) =>
         set((state) => ({
           searches: state.searches.filter((show: any) => show.id !== id),
         })),
-      clearSearchList: () => set(() => ({ searches: [] })),
+      clearSearchList: () => set((state) => ({ searches: [] })),
     }),
     {
       name: "spicy-tv-searches",
