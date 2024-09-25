@@ -1,43 +1,25 @@
-import { StateCreator, create } from "zustand";
-import { createJSONStorage, persist, PersistOptions } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { Show, Anime } from '@/lib/types';
 
 interface SearchState {
-  searches: any[];
-  addToSearchList: (show: any) => void;
-  removeFromSearchList: (id: number) => void;
-  clearSearchList: () => void;
+  recentlySearched: (Show | Anime)[];
+  addToRecentlySearched: (show: Show | Anime) => void;
 }
 
-type MyPersist = (
-  config: StateCreator<SearchState>,
-  options: PersistOptions<SearchState>
-) => StateCreator<SearchState>;
-
-const useRecentSearchStore = create<SearchState>(
-  (persist as MyPersist)(
+const useSearchStore = create<SearchState>()(
+  persist(
     (set) => ({
-      searches: [],
-      addToSearchList: (show: any) =>
-        set((state) => {
-          if (state.searches.includes(show)) {
-            return state;
-          }
-          return {
-            searches: [show, ...state.searches].slice(0, 5),
-          };
-        }),
-
-      removeFromSearchList: (id: number) =>
+      recentlySearched: [],
+      addToRecentlySearched: (show) =>
         set((state) => ({
-          searches: state.searches.filter((show: any) => show.id !== id),
+          recentlySearched: [show, ...state.recentlySearched.filter((s) => s.id !== show.id)].slice(0, 10),
         })),
-      clearSearchList: () => set((state) => ({ searches: [] })),
     }),
     {
-      name: "spicy-tv-searches",
-      storage: createJSONStorage(() => localStorage),
+      name: 'search-storage',
     }
   )
 );
 
-export default useRecentSearchStore;
+export default useSearchStore;

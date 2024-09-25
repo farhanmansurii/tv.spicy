@@ -21,7 +21,7 @@ interface EpisodeProps {
   type: string;
   episodeNumber?: any;
   seasonNumber?: any;
-  getNextEp: () => void;
+  getNextEp?: () => void;
 }
 
 export default function Episode(props: EpisodeProps) {
@@ -38,45 +38,44 @@ export default function Episode(props: EpisodeProps) {
   const sourcesMap = [
     {
       name: "vidsrc.vip",
-      label: "Vidsrc VIP",
+      label: "Server 1 (No Ads)",
       url:
         type === "movie"
-          ? `https://vidsrc.vip/embed/${type}/${movieID}`
-          : `https://vidsrc.vip/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
+          ? `https://vidsrc.rip/embed/${type}/${movieID}`
+          : `https://vidsrc.rip/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
     },
-    {
-      name: "vidsrc.pro",
-      label: "Vidsrc Pro",
+     {
+      name: "viewvault",
+      label: "Server 2 (No Ads)",
       url:
         type === "movie"
-          ? `https://vidsrc.pro/embed/${type}/${movieID}`
-          : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
+          ? `https://watch.viewvault.org/embed/${movieID}`
+          : `https://watch.viewvault.org/embed/${id}/${seasonNumber}-${episodeNumber}`,
     },
-
     {
       name: "vidsrc.icu",
-      label: "Vidsrc ICU",
+      label: "Server 3",
       url:
         type === "movie"
           ? `https://vidsrc.icu/embed/${type}/${movieID}`
           : `https://vidsrc.icu/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
     },
+
+    {
+      name: "vidsrc.pro",
+      label: "Server 4",
+      url:
+        type === "movie"
+          ? `https://vidsrc.pro/embed/${type}/${movieID}`
+          : `https://vidsrc.pro/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
+    },
     {
       name: "vidsrc.xyz",
-      label: "Vidsrc",
+      label: "Server 5",
       url:
         type === "movie"
           ? `https://vidsrc.to/embed/${type}/${movieID}`
           : `https://vidsrc.to/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
-    },
-
-    {
-      name: "smashystream",
-      label: "Smashy  stream",
-      url:
-        type === "movie"
-          ? `https://susflix.tv/api/embed/movie?id=${id}`
-          : `https://susflix.tv/api/embed/tv?id=${id}&s=${seasonNumber}&e=${episodeNumber}`,
     },
   ];
   const [provider, setProvider] = useState(sourcesMap[0]);
@@ -100,12 +99,15 @@ export default function Episode(props: EpisodeProps) {
           <SelectContent>
             {sourcesMap.map((source, index) => (
               <SelectItem value={source.name} key={index}>
-                <div className="mx-1 flex gap-2">Server {source.label}</div>
+                <div className="mx-1 flex gap-2">{source.label}</div>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {
+            getNextEp &&
         <Button onClick={() => getNextEp()}>Next Episode</Button>
+        }
       </div>
       <iframe
         allowFullScreen
