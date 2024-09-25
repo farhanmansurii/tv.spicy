@@ -187,7 +187,7 @@ export default function HomeContainer() {
                                                                         <Link href={`/${show.type}/${show?.id}`} className="flex justify-between text-left flex-row w-full">
                                                                             <span className="">{show.title} {show.date && `(${show.date})`}</span>
                                                                             <span className={cn(
-                                                                                show.type.length > 2 ? "capitalize" : "uppercase",
+                                                                                show.type?.length > 2 ? "capitalize" : "uppercase",
                                                                                 "px-2 py-1 h-fit my-auto rounded",
                                                                                 {
                                                                                     "bg-primary/90": show.type === "tv",
