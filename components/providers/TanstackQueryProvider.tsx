@@ -7,6 +7,7 @@ import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { usePathname } from 'next/navigation';
 import { Header } from '../common/header';
+import MinimalSocialsFooter from '../common/Footer';
 
 const QueryProvider = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = useState(() => {
@@ -50,6 +51,7 @@ const QueryProvider = ({ children }: { children: React.ReactNode }) => {
         <QueryClientProvider client={queryClient}>
             {pathname !== '/' && <Header />}
             {children}
+            {pathname !== '/' && <MinimalSocialsFooter />}
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );

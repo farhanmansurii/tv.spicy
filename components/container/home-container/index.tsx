@@ -9,15 +9,16 @@ import WatchList from "@/components/common/WatchList";
 import { SearchCommandBox } from "./search-command-box";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import MinimalSocialsFooter from "@/components/common/Footer";
 
 
 export default function HomeContainer() {
     const { title } = useTitle();
-    return (
+    return title && (
         <div className="">
+            <Header />
             <div className="mx-auto  max-w-3xl space-y-4 px-4 lg:px-0">
-                <Header />
-                <div className="max-w-xl px-2 pt-10">
+                <div className="max-w-xl  px-2 pt-56">
                     <h1 className="text-3xl font-bold text-white sm:text-3xl md:text-4xl">
                         {title}
                     </h1>
@@ -44,6 +45,7 @@ export default function HomeContainer() {
                     </div>
                 </div>
             </div>
+             <MinimalSocialsFooter/>
         </div>
     );
 }

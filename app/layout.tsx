@@ -5,12 +5,41 @@ import { GeistSans } from "geist/font/sans";
 import { Toaster } from "@/components/ui/toaster";
 import TanstackQueryProvider from "@/components/providers/TanstackQueryProvider";
 import { BackgroundGradient } from "@/components/common/BackgroundGradient";
+import MinimalSocialsFooter from "@/components/common/Footer";
 
 export const metadata: Metadata = {
-  title: "Watvh TV",
-  description: "Watch any TV / Movies / Anime with Watvh ",
-};
+  title: "Watvh TV - Stream Movies, TV Shows, and Anime",
+  description: "Discover and stream your favorite movies, TV series, and anime on Watvh TV. Enjoy unlimited entertainment with our vast library of content.",
+  keywords: ["streaming", "movies", "TV shows", "anime", "entertainment", "Watvh TV"],
+  authors: [{ name: "Watvh TV Team" }],
+  creator: "Watvh TV",
+  publisher: "Watvh TV",
+  openGraph: {
+    title: "Watvh TV - Your Ultimate Streaming Destination",
+    description: "Stream the latest movies, binge-worthy TV shows, and popular anime series on Watvh TV. Start watching now!",
+    url: "https://www.watvh.vercel.app",
+    siteName: "Watvh TV",
 
+    locale: "en_US",
+    type: "website",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
 export default function RootLayout({
   children,
 }: {
