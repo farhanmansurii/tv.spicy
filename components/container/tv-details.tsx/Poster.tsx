@@ -18,7 +18,7 @@ export const Poster = ({ url, alt, className, ...props }: PosterProps) => {
                 "relative flex aspect-poster mx-auto bg-muted  w-full items-center justify-center overflow-hidden rounded-lg border text-muted shadow",
                 className
             )}
-            style={{ aspectRatio: '2/3', }}
+            style={{ aspectRatio: '2/2.8', }}
             {...props}
         >
             {url ? (

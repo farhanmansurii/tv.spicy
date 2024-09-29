@@ -92,7 +92,7 @@ export const TVContainer: React.FC<T> = ({ tv, tv_id }: T) => {
   };
 
   return (
-    <div className="mx-auto my-8 max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
+    <div className="mx-auto my-8 max-w-4xl space-y-8 px-2 md:space-y-12 md:px-0">
       {activeEP && activeEP.id ? (
         <Episode
           episodeNumber={activeEP.episode}
