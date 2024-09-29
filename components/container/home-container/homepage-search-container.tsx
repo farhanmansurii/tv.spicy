@@ -7,11 +7,6 @@ import { ShootingStars } from "@/components/ui/shooting-stars"
 import { StarsBackground } from "@/components/ui/stars-background"
 
 export default function HomeSearchContainer() {
-    const getRandomImageUrl = () => {
-        const randomId = Math.floor(Math.random() * 1000) + 1
-        return `https://picsum.photos/id/${randomId}/1920/1080`
-    }
-
     return (
 
         <div className="relative  max-h-full text-white overflow-hidden">

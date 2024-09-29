@@ -51,9 +51,9 @@ export default function AnimeDetailsWrapper({ anime }: { anime: Anime }) {
   return (
     <div className="max-w-6xl w-full space-y-10  mx-auto">
       <AnimeDetails id={anime?.id} anime={anime} />
-      <Separator className="max-w-4xl w-full  mx-auto" />
+      <Separator className="max-w-3xl w-full  mx-auto" />
       <AnimeEpisodesContainer id={anime.id} />
-      <Separator className="max-w-4xl w-full  mx-auto" />
+      <Separator className="max-w-3xl w-full  mx-auto" />
       <MoreDetailsContainer
         type={"anime"}
         show={anime}

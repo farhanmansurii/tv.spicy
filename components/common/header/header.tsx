@@ -6,13 +6,12 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import HomeSearchContainer from "@/components/container/home-container/homepage-search-container";
+import { SearchCommandBox } from "@/components/container/home-container/search-command-box";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
 
 const categories = [
-    {
-        title: 'Search',
-        icon: <SearchIcon />,
-        href: '/'
-    },
+
     {
         title: "Movies",
         href: "/movie",
@@ -32,38 +31,62 @@ const categories = [
 
 export const Header = () => {
     const pathname = usePathname();
-
-    const isActiveRoute = (href:string) => {
+    const isActiveRoute = (href: string) => {
         if (href === '/') {
             return pathname === '/';
         }
         return pathname.startsWith(href);
     };
     return (
-        <div className="mx-auto max-w-6xl px-4 lg:px-0">
-            <div className="flex gap-4 my-3 mx-auto justify-center z-30">
-                {categories.map((el) => (
-                    <Link key={el.href} className="cursor-pointer z-40 relative" href={el.href}>
-                        <motion.div
-                            className={`flex items-center gap-2 h-12 border-b-2  px-1 pt-2 ${
-                                isActiveRoute(el.href) ? 'text-primary' : ' border-transparent'
+        <div className="mx-auto max-w-3xl  px-4 lg:px-0">
+            <div className="flex gap-4 items-center justify-between flex-row my-3 z-30">
+                <Link key={'/'} className="cursor-pointer w-fit whitespace-nowrap z-40 relative" href={'/'}>
+                    <motion.div
+                        className={`flex items-center gap-2 h-12 border-b-2  px-1  ${isActiveRoute('/') ? 'text-primary' : ' border-transparent'
                             }`}
 
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        >
-                            <div className="scale-95 ">{el.icon}</div>
-                            <span className="hidden md:block">{el.title}</span>
-                            {isActiveRoute(el.href) && (
-                                <motion.div
-                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                                    layoutId="underline"
-                                    initial={false}
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                />
-                            )}
-                        </motion.div>
-                    </Link>
-                ))}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    >
+
+                        <span className="">{"Watvh TV"}</span>
+                        {isActiveRoute('/') && (
+                            <motion.div
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                                layoutId="underline"
+                                initial={false}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            />
+                        )}
+                    </motion.div>
+                </Link>
+                <div className="w-fit items-center  gap-4 flex">
+                    {categories.map((el) => (
+                        <Link key={el.href} className="cursor-pointer z-40 relative" href={el.href}>
+                            <motion.div
+                                className={`flex items-center gap-2 h-12 border-b-2  px-1  ${isActiveRoute(el.href) ? 'text-primary' : ' border-transparent'
+                                    }`}
+
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            >
+
+                                <span className="">{el.title}</span>
+                                {isActiveRoute(el.href) && (
+                                    <motion.div
+                                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                                        layoutId="underline"
+                                        initial={false}
+                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    />
+                                )}
+                            </motion.div>
+                        </Link>
+                    ))}
+                    <SearchCommandBox searchType={isActiveRoute('/anime') ? 'anime' : "tvshow"}>
+                        <div className="bg-primary p-2 rounded-full hover:scale-95 duration-150 hover:bg-primary/80">
+                            <MagnifyingGlassIcon className="w-5 h-5" />
+                        </div>
+                    </SearchCommandBox>
+                </div>
             </div>
         </div>
     );

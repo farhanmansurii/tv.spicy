@@ -2,10 +2,9 @@ import { Providers } from "@/components/providers/Provider";
 import "./globals.css";
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
-import { Header } from "@/components/common/header";
-import MinimalSocialsFooter from "@/components/common/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import TanstackQueryProvider from "@/components/providers/TanstackQueryProvider";
+import { BackgroundGradient } from "@/components/common/BackgroundGradient";
 
 export const metadata: Metadata = {
   title: "Watvh TV",
@@ -33,10 +32,11 @@ export default function RootLayout({
         <Providers
           themes={["redDark", "redLight", "light", "dark"]}
           attribute="class"
-          defaultTheme="redDark"
+          defaultTheme="dark"
           enableSystem
         >
           <TanstackQueryProvider>
+            <BackgroundGradient/>
             {children}
             <Toaster />
           </TanstackQueryProvider>

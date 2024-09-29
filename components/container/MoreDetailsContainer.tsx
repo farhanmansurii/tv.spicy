@@ -31,7 +31,7 @@ export default function MoreDetailsContainer(props: {
   const content =
     props.renderContent && selected && props.renderContent(selected);
   return (
-    <div className="mx-auto  max-w-4xl space-y-8 px-4 md:space-y-12 md:px-0">
+    <div className="mx-auto  max-w-3xl space-y-8 px-4 md:space-y-12 md:px-0">
       <div className="mb-4  flex flex-wrap items-center gap-2">
         {tabs.map((tab, index) => (
           <Tab

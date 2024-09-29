@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default async function page() {
   const genres = await fetchGenres("movie");
   return (
-    <div className="mx-auto max-w-6xl space-y-4 px-4 lg:px-0">
+    <div className="mx-auto max-w-3xl space-y-4 px-4 lg:px-0">
       <CarousalComponent type={"movie"} />
       <div className="flex flex-col space-y-12">
         <WatchList type="movie" />

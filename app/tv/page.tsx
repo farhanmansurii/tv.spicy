@@ -1,3 +1,4 @@
+import { BackgroundGradient } from "@/components/common/BackgroundGradient";
 import CarousalComponent from "@/components/common/CarousalComponent";
 import RecentlyWatchedTV from "@/components/common/RecentlyWatched";
 import RecentlyWatched from "@/components/common/RecentlyWatched";
@@ -18,7 +19,7 @@ export default async function page() {
   const genres = await fetchGenres("tv");
   return (
     <>
-      <div className="mx-auto max-w-6xl space-y-4 px-4 lg:px-0">
+  <BackgroundGradient/>   <div className="mx-auto max-w-3xl space-y-4 px-4 lg:px-0">
         <CarousalComponent type={"tv"} />{" "}
         <div className="flex flex-col space-y-12">
           <RecentlyWatchedTV />

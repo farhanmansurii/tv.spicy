@@ -5,7 +5,7 @@ import React from "react";
 
 export default function Loading() {
   return (
-    <div className="max-w-6xl w-full space-y-10  mx-auto">
+    <div className="max-w-4xl w-full space-y-10  mx-auto">
       <DetailLoader />
       <Separator className="max-w-4xl mx-auto" />
       <div className="flex max-w-4xl w-full flex-col mx-auto gap-2">

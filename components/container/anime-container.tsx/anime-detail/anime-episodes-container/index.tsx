@@ -194,7 +194,7 @@ export default function AnimeEpisodesContainer({ id }: { id: any }) {
     (episode: AnimeEpisode) => episode.id === activeEpisodeId
   );
   return (
-    <div className="mx-auto max-w-4xl space-y-10 flex flex-col w-full px-4 md:px-0 ">
+    <div className="mx-auto max-w-3xl space-y-10 flex flex-col w-full px-4 md:px-0 ">
       <AnimePlayer
         episode={selectedEpisode}
         key={activeEpisodeId}
@@ -265,11 +265,11 @@ export default function AnimeEpisodesContainer({ id }: { id: any }) {
 
         <div>{renderEpisodes()}</div>
         {view === "carousel" && (
-          <>
-            <Separator orientation="vertical" />
-            <CarouselPrevious className="h-10 w-10" />
-            <CarouselNext className="h-10 w-10" />
-          </>
+          <div className="flex gap-2">
+
+            <CarouselPrevious className="h-10 bg-primary text-background w-10" />
+            <CarouselNext className="h-10 bg-primary text-background w-10" />
+          </div>
         )}
       </Carousel>
     </div>

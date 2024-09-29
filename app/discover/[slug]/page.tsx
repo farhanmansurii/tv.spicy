@@ -1,8 +1,4 @@
-import { TextGlitch } from "@/components/animated-common/TextFlip";
-import Navbar from "@/components/common/Navbar";
-import { Header } from "@/components/common/header";
 import LoadMore from "@/components/container/LoadMore";
-import { Metadata } from "next";
 import Head from "next/head";
 import React from "react";
 

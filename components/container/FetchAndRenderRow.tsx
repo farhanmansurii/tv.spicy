@@ -81,7 +81,6 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
     return (
       <div>
         Error loading content.
-
       </div>
     );
   }

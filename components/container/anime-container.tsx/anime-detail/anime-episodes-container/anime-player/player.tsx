@@ -34,7 +34,7 @@ export default function OPlayer({
       screenshot: false,
       pictureInPicture: false,
       showControls: "always",
-      theme: { primaryColor: "#dc2626" },
+      theme: { primaryColor: "#00C02F" },
       speeds: ["2.0", "1.75", "1.25", "1.0", "0.75", "0.5"],
       slideToSeek: "none",
       controlBar: { back: "always" },
@@ -48,7 +48,7 @@ export default function OPlayer({
         {
           name: "Quality",
           key: "KEY",
-          type: "selector", // or 'switcher'
+          type: "selector",
 
           icon: ` <svg
             viewBox="0 0 24 24"
