@@ -17,7 +17,7 @@ import {
     CommandItem,
     CommandList,
 } from "@/components/ui/command"
-export const SearchCommandBox = ({ children, searchType='tvshow' }: { children: any, searchType: "tvshow" | "anime" }) => {
+export const SearchCommandBox = ({ children, searchType = 'tvshow' }: { children: any, searchType: "tvshow" | "anime" }) => {
     const [open, setOpen] = React.useState(false)
     const [inputValue, setInputValue] = useState("");
     const [query, setQuery] = useState("");
@@ -54,7 +54,15 @@ export const SearchCommandBox = ({ children, searchType='tvshow' }: { children: 
         setQuery('')
         setInputValue('')
     };
-
+    const getFormattedDate = (item: { releaseDate?: string; first_air_date?: string; release_date?: string; }) => {
+        const dateString = item.releaseDate || item.first_air_date || item.release_date;
+        if (!dateString) return null;
+        if (typeof dateString !== 'string') return null;
+        if (/^\d{4}$/.test(dateString)) return dateString;
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return null;
+        return date.getFullYear().toString();
+    };
     const renderSearchResults = () => {
         if (isFetching) return <Command.Item>Loading <Loader2 className="w-4 h-4 animate-spin ml-1" /></Command.Item>;
         if (error) return <Command.Empty>Error: {(error as Error).message}</Command.Empty>;
@@ -63,16 +71,16 @@ export const SearchCommandBox = ({ children, searchType='tvshow' }: { children: 
                 {searchResults?.results.map((item: any) => {
                     const show = {
                         id: item.id,
-                        title: item.name || item.title || item.title?.userPreferred || item.title?.english,
+                        title: typeof ( item.name || item.title ) === 'string' ?  item.name || item.title || '' : (item.title?.userPreferred || item.title?.english || item.title?.romaji || 'Unknown Title'),
                         type: item.media_type || 'anime',
-                        date: null,
+                        date: getFormattedDate(item),
                     };
 
                     return (
                         <CommandItem key={show.id} onSelect={() => handleSelectShow(item)} value={show.title} className="flex items-center justify-center">
                             <Link href={`/${show.type}/${show.id}`} className="flex justify-between w-full">
                                 <span>{show.title} {show.date && `(${show.date})`}</span>
-                                <span className={`px-2 text-xs py-1 h-fit rounded ${show.type === "tv" ? "bg-primary/90" : show.type === "movie" ? "bg-secondary" : "bg-red-500"}`}>
+                                <span className={`px-2 text-xs py-1 h-fit rounded ${show.type === "tv" ? "bg-blue-100 text-blue-900" : show.type === "movie" ? "bg-secondary" : "bg-red-100 text-red-900"}`}>
                                     {show.type}
                                 </span>
                             </Link>
@@ -83,16 +91,16 @@ export const SearchCommandBox = ({ children, searchType='tvshow' }: { children: 
                 {recentlySearched.map((item: any) => {
                     const show = {
                         id: item.id,
-                        title: item.name || item.title || item.title?.userPreferred || item.title?.english,
+                        title: typeof ( item.name || item.title ) === 'string' ?  item.name || item.title || '' : (item.title?.userPreferred || item.title?.english || item.title?.romaji || 'Unknown Title'),
                         type: item.media_type || 'anime',
-                        date: (item.first_air_date || item.release_date || item.releaseDate)?.split("-")[0] || null,
+                        date: getFormattedDate(item),
                     };
                     return (
                         <CommandItem key={show.id} onSelect={() => handleSelectShow(item)} value={show.title} className="flex items-center justify-center">
                             <Link href={`/${show.type}/${show.id}`} className="flex justify-between w-full">
                                 <span>{show.title} {show.date && `(${show.date})`}</span>
-                                <span className={`px-2 text-xs py-1 h-fit rounded ${show.type === "tv" ? "bg-primary/90" : show.type === "movie" ? "bg-secondary" : "bg-red-500"}`}>
-                                    {show.type === "tv" ? "TV" : show.type === "movie" ? "Movie" : "Anime"}
+                                 <span className={`px-2 text-xs py-1 h-fit rounded ${show.type === "tv" ? "bg-blue-100 text-blue-900" : show.type === "movie" ? "bg-secondary" : "bg-red-200 text-red-800"}`}>
+                                    {show.type}
                                 </span>
                             </Link>
                         </CommandItem>
@@ -115,7 +123,7 @@ export const SearchCommandBox = ({ children, searchType='tvshow' }: { children: 
         <>
             <Command>
                 <CommandDialog open={open} onOpenChange={setOpen}>
-                    <CommandInput onValueChange={handleInputChange} value={inputValue} placeholder={`Search For ${searchType==='anime'?"Anime":"Movies / TV show"}`} />
+                    <CommandInput onValueChange={handleInputChange} value={inputValue} placeholder={`Search For ${searchType === 'anime' ? "Anime" : "Movies / TV show"}`} />
                     <CommandList>
                         {renderSearchResults()}
                     </CommandList>

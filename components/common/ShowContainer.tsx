@@ -22,7 +22,14 @@ const ShowContainer: React.FC<ShowContainerProps> = ({ type, id }) => {
     isError: showDataError,
   } = useQuery({
     queryKey: ["showData", id, type],
-    queryFn: async () => await fetchDetails(id, type),
+    queryFn: async () => {
+      try {
+        return await fetchDetails(id, type);
+      } catch (error) {
+        console.error("Failed to fetch show data:", error);
+
+      }
+    },
   });
   const {
     data: streamingLinks,
@@ -40,13 +47,12 @@ const ShowContainer: React.FC<ShowContainerProps> = ({ type, id }) => {
         });
         return res;
       } catch (error) {
-        console.error(error);
+        console.log('log',error);
         throw error;
       }
     },
     enabled: type === "movie",
   });
-  if (showDataError) return notFound();
 
   return (
     <div className="mx-auto max-w-3xl w-full px-1 md:px-0 -full">
@@ -65,19 +71,19 @@ const ShowContainer: React.FC<ShowContainerProps> = ({ type, id }) => {
         )
       ) : (
         <div className="mx-auto my-8 max-w-3xl w-full space-y-8 px-3 md:space-y-12 md:px-0">
-          {showDataLoading ? (
+          {/* {showDataLoading ? (
             <div className="flex flex-col gap-2">
               <Skeleton className=" h-12 mb-2 w-36"></Skeleton>
               <Skeleton className="aspect-video w-full   mx-auto " />
             </div>
-          ) : (
+          ) : ( */}
             <Episode
-              episodeId={showData.episodeId}
-              id={showData.id}
+              episodeId={showData?.episodeId||''}
+              id={showData?.id ||id|| ''}
               movieID={id}
               type={type}
             />
-          )}
+          {/* )} */}
         </div>
       )}
     </div>
