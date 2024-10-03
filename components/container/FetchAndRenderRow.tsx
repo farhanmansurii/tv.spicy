@@ -34,12 +34,11 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
   const [isInitialRender, setIsInitialRender] = useState(true);
 
   const fetcher = useCallback(async () => {
-    console.log(`[${new Date().toISOString()}] Fetching data for ${text}`);
     if (isGenre) {
       return await fetchGenreById(apiEndpoint.type, apiEndpoint.id, 1);
     }
     return await fetchRowData(apiEndpoint);
-  }, [apiEndpoint, isGenre, text]);
+  }, [apiEndpoint, isGenre]);
 
   const queryKey = ['movies', apiEndpoint];
 
@@ -57,20 +56,12 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
     if (inView && !!apiEndpoint && !isInitialRender) {
       const cachedData = queryClient.getQueryData(queryKey);
       if (cachedData) {
-        console.log(`[${new Date().toISOString()}] Using cached data for ${text}`);
       } else {
-        console.log(`[${new Date().toISOString()}] No cached data for ${text}, fetching...`);
         refetch();
       }
     }
     setIsInitialRender(false);
-  }, [inView, apiEndpoint, queryClient, queryKey, text, refetch, isInitialRender]);
-
-  useEffect(() => {
-    if (rowData) {
-      console.log(`[${new Date().toISOString()}] Data loaded for ${text}`);
-    }
-  }, [rowData, text]);
+  }, [inView, apiEndpoint, queryClient, queryKey, refetch, isInitialRender]);
 
   if (isLoading || isFetching) {
     return isVertical ? <GridLoader /> : <RowLoader withHeader={true} />;

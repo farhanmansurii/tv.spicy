@@ -43,7 +43,7 @@ export default function Row(props: {
         </div>
       )}
 
-      <AnimatePresence>
+
         {!props.isVertical ? (
           <CarouselContent className="gap-2 ">
             {props?.shows?.map(
@@ -84,7 +84,6 @@ export default function Row(props: {
             )}
           </div>
         )}
-      </AnimatePresence>
     </Carousel>
   );
 }

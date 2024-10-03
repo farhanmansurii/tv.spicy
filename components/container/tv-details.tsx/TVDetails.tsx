@@ -1,5 +1,4 @@
 "use client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -13,10 +12,8 @@ import { cn } from "@/lib/utils";
 import { tmdbImage } from "@/lib/tmdb-image";
 import { Banner } from "./Banner";
 import { Poster } from "./Poster";
-import { Button } from "@/components/ui/button";
 import ContinueWatchingButton from "@/components/common/ContinueWatchingButton";
-import { easeInOut, motion } from "framer-motion";
-import NextBreadcrumb from "@/components/breadcrumbs";
+import { motion } from "framer-motion";
 
 type showDetailsProps = {
   id: number;
@@ -51,11 +48,10 @@ export default function ShowDetails({
         <Banner url={tmdbImage(show.backdrop_path)} />
       </div>
       <div className="mx-auto mb-8 max-w-3xl space-y-8 px-4 md:space-y-12 md:px-0">
-        <main className="flex flex-col gap-4 md:flex-row">
+        <main className="flex items-end flex-col gap-4 md:flex-row">
           <aside className="w-10/12 mx-auto space-y-2 md:-mt-32 md:w-1/3">
             <Poster url={tmdbImage(show.poster_path)} alt={show.name} />
           </aside>
-
           <motion.article
             initial="hidden"
             animate="visible"
@@ -127,7 +123,7 @@ export default function ShowDetails({
             <motion.div
               variants={fadeUp}
               custom={show.genres.length + 5}
-              className="flex flex-wrap gap-2"
+              className="flex flex-wrap mb-4 gap-2"
             >
               <ContinueWatchingButton
                 isDetailsPage={true}

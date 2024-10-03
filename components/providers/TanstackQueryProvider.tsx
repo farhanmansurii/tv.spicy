@@ -49,10 +49,10 @@ const QueryProvider = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
     return (
         <QueryClientProvider client={queryClient}>
-            {pathname !== '/' && <Header />}
-            {children}
-            {pathname !== '/' && <MinimalSocialsFooter />}
-            <ReactQueryDevtools initialIsOpen={false} />
+                {pathname !== '/' && <Header />}
+                {children}
+                {pathname !== '/' && <MinimalSocialsFooter />}
+                <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
 };
