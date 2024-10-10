@@ -66,7 +66,7 @@ export default function ContinueWatchingButton({
 					</Button>
 				</Link>
 			)}
-			{!isEpisodeActive && recentlyWatchedEpisode ? (
+			{!isEpisodeActive && recentlyWatchedEpisode && (
 				<Button
 					asChild
 					iconPlacement="right"
@@ -84,26 +84,6 @@ export default function ContinueWatchingButton({
 						}}
 					>
 						Play S{recentlyWatchedEpisode.season} E{recentlyWatchedEpisode.episode}
-					</Link>
-				</Button>
-			) : (
-				<Button
-					asChild
-					iconPlacement="right"
-					variant={'expandIcon'}
-					Icon={FaPlay}
-					className="whitespace-nowrap  w-full"
-					onClick={() => setActiveEP(recentlyWatchedEpisode || null)}
-				>
-					<Link
-						href={{
-							query: {
-								season: 1,
-								episode: 1,
-							},
-						}}
-					>
-						Play S1 E1
 					</Link>
 				</Button>
 			)}

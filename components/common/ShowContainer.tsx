@@ -54,7 +54,7 @@ const ShowContainer: React.FC<ShowContainerProps> = ({ type, id }) => {
 	});
 
 	return (
-		<div className="mx-auto max-w-3xl w-full px-1 md:px-0 -full">
+		<div className="mx-auto  max-w-3xl space-y-8 px-4 md:space-y-12 md:px-0">
 			{type === 'tv' ? (
 				showDataLoading ? (
 					<SeasonsTabLoader />
