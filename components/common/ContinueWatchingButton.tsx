@@ -53,26 +53,26 @@ export default function ContinueWatchingButton({
 	const isEpisodeActive = recentlyWatchedEpisode?.episode === activeEP?.episode;
 
 	return (
-		<div className="flex w-full flex-col md:flex-row md:w-fit gap-2">
+		<div className="flex w-full items-center justify-center flex-row md:w-fit gap-0">
 			{!isDetailsPage && (
 				<Link href={`/${type}/${id}`}>
 					<Button
 						iconPlacement="right"
 						variant={'expandIcon'}
 						Icon={ArrowRight}
-						className="whitespace-nowrap  w-full"
+						className="whitespace-nowrap rounded-none  w-full"
 					>
-						Go To Show
+						View {type === 'movie' ? 'Movie' : 'Show'}
 					</Button>
 				</Link>
 			)}
-			{!isEpisodeActive && recentlyWatchedEpisode && (
+			{!isEpisodeActive && recentlyWatchedEpisode && isDetailsPage && (
 				<Button
 					asChild
 					iconPlacement="right"
 					variant={'expandIcon'}
 					Icon={FaPlay}
-					className="whitespace-nowrap  w-full"
+					className="whitespace-nowrap rounded-none  w-full"
 					onClick={() => setActiveEP(recentlyWatchedEpisode)}
 				>
 					<Link
@@ -83,7 +83,7 @@ export default function ContinueWatchingButton({
 							},
 						}}
 					>
-						Play S{recentlyWatchedEpisode.season} E{recentlyWatchedEpisode.episode}
+						Play S{recentlyWatchedEpisode.season}E{recentlyWatchedEpisode.episode}
 					</Link>
 				</Button>
 			)}
@@ -91,10 +91,10 @@ export default function ContinueWatchingButton({
 				iconPlacement="right"
 				variant={'expandIcon'}
 				Icon={isAdded ? Check : Plus}
-				className=" bg-secondary text-secondary-foreground lg:w-fit hover:bg-secondary/80 whitespace-nowrap"
+				className=" bg-secondary text-secondary-foreground rounded-none lg:w-fit hover:bg-secondary/80 whitespace-nowrap"
 				onClick={handleAddOrRemove}
 			>
-				{isAdded ? 'Added' : ' Add to WatchList'}
+				{isAdded ? 'Added' : 'Add to List'}
 			</Button>
 		</div>
 	);
