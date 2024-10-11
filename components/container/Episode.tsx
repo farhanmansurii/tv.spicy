@@ -37,6 +37,15 @@ export default function Episode(props: EpisodeProps) {
 
 	const sourcesMap = [
 		{
+			name: 'vidlink',
+			label: 'VidLink',
+			ads: 'false',
+			url:
+				type === 'movie'
+					? `https://vidlink.pro/movie/${id}`
+					: `https://vidlink.pro/tv/${id}/${seasonNumber}/${episodeNumber}?title=true`,
+		},
+		{
 			name: 'embed.su',
 			label: 'Embedded SU',
 			ads: 'false',
@@ -56,15 +65,6 @@ export default function Episode(props: EpisodeProps) {
 			url:
 				type === 'movie'
 					? `https://player.smashy.stream/movie/${id}`
-					: `https://player.smashy.stream/tv/${id}?s=${seasonNumber}&e=${episodeNumber}`,
-		},
-		{
-			name: 'vidlink',
-			label: 'VidLink',
-			ads: 'false',
-			url:
-				type === 'movie'
-					? `https://vidlink.pro/movie/${id}`
 					: `https://player.smashy.stream/tv/${id}?s=${seasonNumber}&e=${episodeNumber}`,
 		},
 		{
