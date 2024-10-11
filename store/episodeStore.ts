@@ -1,11 +1,12 @@
-import { create } from "zustand";
+import { create } from 'zustand';
+import { Episode as TEpisode } from '@/lib/types';
 
-interface Episode {
-  activeEP: any;
-  setActiveEP: (activeEP: any) => void;
+interface EpisodeStore {
+	activeEP: TEpisode | null;
+	setActiveEP: (activeEP: TEpisode) => void;
 }
 
-export const useEpisodeStore = create<Episode>()((set) => ({
-  activeEP: [],
-  setActiveEP: (activeEP: any[]) => set(() => ({ activeEP })),
+export const useEpisodeStore = create<EpisodeStore>((set) => ({
+	activeEP: null,
+	setActiveEP: (activeEP: TEpisode) => set({ activeEP }),
 }));

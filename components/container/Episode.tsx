@@ -19,7 +19,7 @@ interface EpisodeProps {
 }
 
 export default function Episode(props: EpisodeProps) {
-	const { episodeId, id, movieID, type, seasonNumber, episodeNumber, getNextEp } = props;
+	const { id, type, seasonNumber, episodeNumber, getNextEp } = props;
 
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -114,10 +114,7 @@ export default function Episode(props: EpisodeProps) {
 			url: generateUrl('vidsrc.to', type, id, seasonNumber, episodeNumber),
 		},
 	];
-	console.log(`(logs) > sourcesMap: `, sourcesMap);
-
 	const [provider, setProvider] = useState(sourcesMap[0]);
-
 	const handleSelectOnChange = (value: string) => {
 		const selectedProvider = sourcesMap.find((source) => source.name === value);
 		setProvider(selectedProvider || sourcesMap[0]);
@@ -165,8 +162,12 @@ export default function Episode(props: EpisodeProps) {
 						))}
 					</SelectContent>
 				</Select>
-				{getNextEp && (
-					<Button className="flex gap-2" variant={'ghost'} onClick={() => getNextEp()}>
+				{getNextEp && type === 'tv' && (
+					<Button
+						className="flex gap-2"
+						variant={'ghost'}
+						onClick={() => getNextEp(seasonNumber, episodeNumber)}
+					>
 						Next{' '}
 						<svg
 							width="24"
