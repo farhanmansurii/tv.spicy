@@ -16,7 +16,7 @@ export const TVContainer: React.FC<TVContainerProps> = ({ showId, getNextEp }) =
 	const episode = searchParams.get('episode');
 
 	return (
-		<div className="w-full my-8">
+		<div className="w-full mb-8">
 			{season && episode ? (
 				<Episode
 					episodeNumber={episode}
