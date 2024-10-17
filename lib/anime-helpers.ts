@@ -1,78 +1,73 @@
 import axios from 'axios';
 
-const baseUrl = 'https://consumet-taupe-seven.vercel.app/meta/anilist/';
+const baseUrl = 'https://apispicy.vercel.app/meta/anilist/';
 
-export async function fetchAnimeByCategory(
-  params: string,
-  type: string,
-  page: number
-) {
-  try {
-    const url = new URL(
-      baseUrl +
-        'advanced-search' +
-        (type === 'season' ? `?${type}=${params}` : `?${type}=["${params}"]`) +
-        `&page=${page}`
-    );
+export async function fetchAnimeByCategory(params: string, type: string, page: number) {
+	try {
+		const url = new URL(
+			baseUrl +
+				'advanced-search' +
+				(type === 'season' ? `?${type}=${params}` : `?${type}=["${params}"]`) +
+				`&page=${page}`
+		);
 
-    const response = await axios.get(url.toString(),);
+		const response = await axios.get(url.toString());
 
-    if (!response.data) {
-      throw new Error('Failed to fetch data');
-    }
+		if (!response.data) {
+			throw new Error('Failed to fetch data');
+		}
 
-    return response.data.results;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+		return response.data.results;
+	} catch (error) {
+		console.error(error);
+		throw error;
+	}
 }
 
 export async function fetchData(endpoint: string) {
-  try {
-    const url = new URL(endpoint, baseUrl);
+	try {
+		const url = new URL(endpoint, baseUrl);
 
-    const response = await axios.get(url.toString());
-    if (!response.data) {
-      throw new Error('Failed to fetch data');
-    }
+		const response = await axios.get(url.toString());
+		if (!response.data) {
+			throw new Error('Failed to fetch data');
+		}
 
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+		return response.data;
+	} catch (error) {
+		console.error(error);
+		throw error;
+	}
 }
 
 export async function fetchSearchQuery(query: string) {
-  try {
-    const url = `https://spicy-anime-api.vercel.app/anime/gogoanime/${query}`;
+	try {
+		const url = `https://spicy-anime-api.vercel.app/anime/gogoanime/${query}`;
 
-    const response = await axios.get(url,);
+		const response = await axios.get(url);
 
-    if (!response.data) {
-      throw new Error('Failed to fetch data');
-    }
+		if (!response.data) {
+			throw new Error('Failed to fetch data');
+		}
 
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+		return response.data;
+	} catch (error) {
+		console.error(error);
+		throw error;
+	}
 }
 
 export async function fetchLinks(id: string) {
-  try {
-    const response = await axios.get(baseUrl + `watch/${id}`, {
-    });
+	try {
+		const response = await axios.get(baseUrl + `watch/${id}`, {});
 
-    if (!response.data) {
-      throw new Error('Failed to fetch data');
-    }
+		if (!response.data) {
+			throw new Error('Failed to fetch data');
+		}
 
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+		return response.data;
+	} catch (error) {
+		console.error(error);
+		throw error;
+	}
 }
