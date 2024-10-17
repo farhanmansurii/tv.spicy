@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const baseUrl = 'https://apispicy.vercel.app/meta/anilist/';
-
 export async function fetchAnimeByCategory(params: string, type: string, page: number) {
 	try {
 		const url = new URL(
