@@ -37,6 +37,24 @@ export default function Episode(props: EpisodeProps) {
 
 	const sourcesMap = [
 		{
+			name: '111movies',
+			label: '111Movies',
+			ads: 'false',
+			url:
+				type === 'movie'
+					? `https://111movies.com/movie/${id}`
+					: `https://111movies.com/tv/${id}/${seasonNumber}/${episodeNumber}?title=true`,
+		},
+		{
+			name: 'embedded.su',
+			label: 'Embeded SU',
+			ads: 'false',
+			url:
+				type === 'movie'
+					? `https://embed.su/embed/movie/${id}`
+					: `https://embed.su/embed/tv/${id}/${seasonNumber}/${episodeNumber}?title=true`,
+		},
+		{
 			name: 'vidlink',
 			label: 'VidLink',
 			ads: 'false',
