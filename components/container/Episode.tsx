@@ -180,7 +180,7 @@ export default function Episode(props: EpisodeProps) {
 							<div className="pr-10">{provider.label}</div>
 						</SelectValue>
 					</SelectTrigger>
-					<SelectContent>
+					<SelectContent className="h-96">
 						{sourcesMap.map((source, index) => (
 							<SelectItem value={source.name} key={index}>
 								<div className="mx-1 flex gap-2">{source.label}</div>

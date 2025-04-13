@@ -13,6 +13,7 @@ import MinimalSocialsFooter from '@/components/common/Footer';
 import { Title } from '@/components/animated-common/Title';
 import { title } from 'process';
 import GenresPage from '../Genre';
+import Link from 'next/link';
 
 export default function HomeContainer() {
 	const { title } = useTitle();
@@ -35,11 +36,11 @@ export default function HomeContainer() {
 								TV Show / Movies
 							</Button>
 						</SearchCommandBox>
-						<SearchCommandBox searchType="anime">
+						<Link href={'https://spicy-anime.vercel.app/'}>
 							<Button variant={'gooeyRight'} size={'sm'}>
 								Anime
 							</Button>
-						</SearchCommandBox>
+						</Link>
 					</div>
 					<Separator className="my-5" />
 					<div className=" w-full">
