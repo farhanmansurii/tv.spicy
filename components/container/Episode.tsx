@@ -46,13 +46,24 @@ export default function Episode(props: EpisodeProps) {
 					: `https://111movies.com/tv/${id}/${seasonNumber}/${episodeNumber}?title=true`,
 		},
 		{
-			name: 'embedded.su',
-			label: 'Embeded SU',
+			name: 'ythd',
+			label: 'YTHD.org',
 			ads: 'false',
 			url:
+				// https://ythd.org/embed/42009/1-2
 				type === 'movie'
-					? `https://embed.su/embed/movie/${id}`
-					: `https://embed.su/embed/tv/${id}/${seasonNumber}/${episodeNumber}?title=true`,
+					? ` https://ythd.org/embed/${id}`
+					: ` https://ythd.org/embed/${id}/${seasonNumber}-${episodeNumber}`,
+		},
+		{
+			name: 'VidEasy',
+			label: 'VidEasy',
+			ads: 'false',
+			url:
+				// https://ythd.org/embed/42009/1-2
+				type === 'movie'
+					? `https://player.videasy.net/movie/${id}`
+					: `https://player.videasy.net/tv/${id}/${seasonNumber}/${episodeNumber}`,
 		},
 		{
 			name: 'vidlink',
@@ -64,12 +75,26 @@ export default function Episode(props: EpisodeProps) {
 					: `https://vidlink.pro/tv/${id}/${seasonNumber}/${episodeNumber}?title=true`,
 		},
 		{
-			name: 'embed.su',
-			label: 'Embedded SU',
+			name: 'embedded.su',
+			label: 'Embeded SU',
 			ads: 'false',
-			url: generateUrl('embed.su', type, id, seasonNumber, episodeNumber),
+			url:
+				type === 'movie'
+					? `https://embed.su/embed/movie/${id}`
+					: `https://embed.su/embed/tv/${id}/${seasonNumber}/${episodeNumber}?title=true`,
 		},
-
+		{
+			name: 'vidsrc.su',
+			label: 'Vidsrc SU',
+			position: 4,
+			url: generateUrl('vidsrc.su', type, id, seasonNumber, episodeNumber),
+		},
+		{
+			name: 'vidsrc.vip',
+			label: 'Premium Stream',
+			position: 4,
+			url: generateUrl('vidsrc.vip', type, id, seasonNumber, episodeNumber),
+		},
 		{
 			name: 'vidsrc.cc/v3',
 			label: 'Vidsrc CC v3',
@@ -94,25 +119,7 @@ export default function Episode(props: EpisodeProps) {
 					? `https://player.autoembed.cc/embed/movie/${id}`
 					: `https://player.smashy.stream/tv/${id}?s=${seasonNumber}&e=${episodeNumber}`,
 		},
-		{
-			name: 'vidbinge',
-			label: 'Vidbinge 4K',
-			ads: 'false',
-			url: generateUrl('vidbinge.dev', type, id, seasonNumber, episodeNumber),
-		},
-		{
-			name: 'player.vidsrc.nl',
-			label: 'VidSrc NL Hindi',
-			ads: 'false',
-			url: generateUrl('player.vidsrc.nl', type, id, seasonNumber, episodeNumber),
-		},
 
-		{
-			name: 'vidsrc.vip',
-			label: 'Premium Stream',
-			position: 4,
-			url: generateUrl('vidsrc.vip', type, id, seasonNumber, episodeNumber),
-		},
 		{
 			name: 'vidsrc.icu',
 			label: 'Backup Stream',
@@ -132,6 +139,7 @@ export default function Episode(props: EpisodeProps) {
 			url: generateUrl('vidsrc.to', type, id, seasonNumber, episodeNumber),
 		},
 	];
+
 	const [provider, setProvider] = useState(sourcesMap[0]);
 	const handleSelectOnChange = (value: string) => {
 		const selectedProvider = sourcesMap.find((source) => source.name === value);
@@ -204,7 +212,7 @@ export default function Episode(props: EpisodeProps) {
 			<iframe
 				ref={iframeRef}
 				allowFullScreen
-				className="w-full h-full border-primary border rounded-lg aspect-video font-mono"
+				className="w-full h-full border-border/30 border  aspect-video font-mono"
 				src={provider.url}
 			/>
 		</div>

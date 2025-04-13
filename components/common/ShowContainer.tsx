@@ -22,11 +22,11 @@ interface ShowContainerProps {
 
 const ShowContainer: React.FC<ShowContainerProps> = ({ type, id, seasons }) => {
 	return (
-		<div className="mx-auto  max-w-3xl space-y-8 px-4 md:space-y-12 md:px-0">
+		<div className="mx-auto  max-w-3xl space-y-8  md:space-y-12 md:px-0">
 			{type === 'tv' ? (
 				<SeasonTabs seasons={seasons} showId={id} />
 			) : (
-				<div className="mx-auto my-8 max-w-3xl w-full space-y-8 px-3 md:space-y-12 md:px-0">
+				<div className="mx-auto my-8 max-w-3xl w-full space-y-8  md:space-y-12 md:px-0">
 					<Episode episodeId={''} id={id || ''} movieID={id} type={type} />
 				</div>
 			)}

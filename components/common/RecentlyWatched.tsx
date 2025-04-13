@@ -38,18 +38,22 @@ const RecentlyWatchedTV = () => {
 			<Carousel opts={{ dragFree: true }} className="w-[99%]  mx-auto">
 				<div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
 					<div className="mx-1 flex gap-2 items-center">
-						<h1 className="text-2xl flex  font-bold">Recently Watched</h1>
+						<h1 className="text-xl md:2x; flex  font-bold">Recently Watched</h1>
 						<div>
 							<CaretRightIcon className="h-full " />
 						</div>
 					</div>
 					<div className="flex  gap-2">
-						{/* <Button variant={"link"} onClick={clearRecentlyWatched}>
-              Clear
-              <span className="sr-only">Clear</span>
-            </Button> */}
-						<CarouselPrevious variant={'secondary'} />
-						<CarouselNext variant={'secondary'} />
+						<Button
+							variant={'link'}
+							size={'icon'}
+							className={cn('w-10 h-10 text-red-500')}
+							onClick={clearRecentlyWatched}
+						>
+							<X className="h-4 w-4" />
+						</Button>
+						<CarouselPrevious className="w-10 h-10" variant={'secondary'} />
+						<CarouselNext className="w-10 h-10" variant={'secondary'} />
 					</div>
 				</div>
 				<AnimatePresence>
