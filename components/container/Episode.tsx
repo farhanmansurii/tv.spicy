@@ -1,12 +1,12 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import OPlayer from '../common/Player';
 import { fetchMovieLinks, fetchVidSrc } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
 import { Forward, Settings } from 'lucide-react';
 import Link from 'next/link';
+import useProviderStore from '@/store/providerStore';
 
 interface EpisodeProps {
 	episodeId: string;
@@ -20,8 +20,10 @@ interface EpisodeProps {
 
 export default function Episode(props: EpisodeProps) {
 	const { id, type, seasonNumber, episodeNumber, getNextEp } = props;
-
 	const iframeRef = useRef<HTMLIFrameElement>(null);
+
+	// Use the Zustand store for persistent provider selection
+	const { selectedProvider, setProvider } = useProviderStore();
 
 	const generateUrl = (
 		domain: string,
@@ -50,7 +52,6 @@ export default function Episode(props: EpisodeProps) {
 			label: 'YTHD.org',
 			ads: 'false',
 			url:
-				// https://ythd.org/embed/42009/1-2
 				type === 'movie'
 					? ` https://ythd.org/embed/${id}`
 					: ` https://ythd.org/embed/${id}/${seasonNumber}-${episodeNumber}`,
@@ -60,7 +61,6 @@ export default function Episode(props: EpisodeProps) {
 			label: 'VidEasy',
 			ads: 'false',
 			url:
-				// https://ythd.org/embed/42009/1-2
 				type === 'movie'
 					? `https://player.videasy.net/movie/${id}`
 					: `https://player.videasy.net/tv/${id}/${seasonNumber}/${episodeNumber}`,
@@ -119,7 +119,6 @@ export default function Episode(props: EpisodeProps) {
 					? `https://player.autoembed.cc/embed/movie/${id}`
 					: `https://player.smashy.stream/tv/${id}?s=${seasonNumber}&e=${episodeNumber}`,
 		},
-
 		{
 			name: 'vidsrc.icu',
 			label: 'Backup Stream',
@@ -140,10 +139,8 @@ export default function Episode(props: EpisodeProps) {
 		},
 	];
 
-	const [provider, setProvider] = useState(sourcesMap[0]);
 	const handleSelectOnChange = (value: string) => {
-		const selectedProvider = sourcesMap.find((source) => source.name === value);
-		setProvider(selectedProvider || sourcesMap[0]);
+		setProvider(value); // Store the provider selection
 	};
 
 	useEffect(() => {
@@ -165,22 +162,24 @@ export default function Episode(props: EpisodeProps) {
 		if (iframeRef.current) {
 			iframeRef.current.addEventListener('load', handleIframeLoad);
 		}
-	}, [provider]);
+	}, [selectedProvider]);
 
 	return (
 		<div id="episode-player" className="">
 			<div className="flex items-center justify-between mb-2">
-				<Select
-					defaultValue={provider.name || sourcesMap[0].name}
-					onValueChange={handleSelectOnChange}
-				>
+				<Select defaultValue={selectedProvider} onValueChange={handleSelectOnChange}>
 					<SelectTrigger className="w-fit h-12 ">
 						<Settings className="w-6 h-6 p-1 mr-2" />
 						<SelectValue>
-							<div className="pr-10">{provider.label}</div>
+							<div className="pr-10">
+								{
+									sourcesMap.find((source) => source.name === selectedProvider)
+										?.label
+								}
+							</div>
 						</SelectValue>
 					</SelectTrigger>
-					<SelectContent className="h-96">
+					<SelectContent>
 						{sourcesMap.map((source, index) => (
 							<SelectItem value={source.name} key={index}>
 								<div className="mx-1 flex gap-2">{source.label}</div>
@@ -213,7 +212,7 @@ export default function Episode(props: EpisodeProps) {
 				ref={iframeRef}
 				allowFullScreen
 				className="w-full h-full border-border/30 border  aspect-video font-mono"
-				src={provider.url}
+				src={sourcesMap.find((source) => source.name === selectedProvider)?.url}
 			/>
 		</div>
 	);
