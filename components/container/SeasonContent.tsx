@@ -22,7 +22,8 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({ episodes, showId, 
 	const { activeEP, setActiveEP } = useEpisodeStore();
 	const { addRecentlyWatched } = useTVShowStore();
 
-	const toggle = (episode: Episode) => {
+	const toggle = (episode: Episode, event: React.MouseEvent<HTMLDivElement>) => {
+		event.preventDefault();
 		if (!episode.id) {
 			toast({
 				title: 'Invalid Episode',

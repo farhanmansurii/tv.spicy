@@ -21,12 +21,12 @@ interface EpisodeCardProps {
 export const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, active, toggle }) => {
 	return (
 		<CarouselItem
-			onClick={() => toggle(episode)}
 			className={cn(
 				`group basis-[48.75%] w-full md:basis-[32.75%] group duration-100 hover:scale-95`
 			)}
 		>
 			<Link
+				onClick={(ev) => toggle(episode, ev)}
 				href={{
 					query: {
 						season: episode.season_number,
