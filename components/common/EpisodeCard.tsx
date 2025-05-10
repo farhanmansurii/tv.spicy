@@ -17,11 +17,15 @@ interface EpisodeCardProps {
 }
 
 export const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, active, toggle, view }) => {
-	const handleClick = (ev: React.MouseEvent<HTMLDivElement>) => toggle(episode, ev);
 	if (view === 'list') {
 		return (
-			<div
-				onClick={handleClick}
+			<Link
+				href={{
+					query: {
+						season: episode.season_number,
+						episode: episode.episode_number,
+					},
+				}}
 				className={cn(
 					'p-3 rounded-md border transition cursor-pointer flex justify-between items-center',
 					active ? 'bg-primary/10 border-primary' : 'hover:bg-muted'
@@ -42,7 +46,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, active, toggl
 				<span className="text-xs text-muted-foreground whitespace-nowrap">
 					{episode.runtime} mins
 				</span>
-			</div>
+			</Link>
 		);
 	}
 	return (

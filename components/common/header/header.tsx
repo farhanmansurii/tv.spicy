@@ -7,7 +7,7 @@ import CommonContainer from '@/components/container/CommonContainer';
 const categories = [
 	{ title: 'Movies', href: '/movie' },
 	{ title: 'TV', href: '/tv' },
-	{ title: 'Anime', href: '/anime' },
+	{ title: 'Anime', href: 'https://spicyanime.com' },
 ];
 
 export const Header = () => {
