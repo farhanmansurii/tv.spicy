@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { Banner } from './Banner';
 import ContinueWatchingButton from '@/components/common/ContinueWatchingButton';
+import CommonTitle from '@/components/animated-common/CommonTitle';
 
 type showDetailsProps = {
 	id: number;
@@ -35,9 +36,11 @@ export default function ShowDetails({ id, show, language, embed = false, type }:
 							</p>
 						)}
 
-						<h1 className="text-5xl truncate md:text-7xl pb-3 tracking-tight normal-case text-foreground">
-							{show.name || show.title}
-						</h1>
+						<CommonTitle
+							shouldWrap
+							text={show.name || show.title}
+							className="line-clamp-2 mb-2"
+						/>
 
 						<div className="flex flex-wrap pb-3 items-center gap-2">
 							{show.genres.map((genre: any) => (

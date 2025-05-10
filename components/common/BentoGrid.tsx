@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { Show } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import CommonTitle from '../animated-common/CommonTitle';
 
 type Props = {
 	title: string;
@@ -105,7 +106,7 @@ export default function BentoGrid({ title, shows, type }: Props) {
 	) => (
 		<div
 			className={cn(
-				'grid gap-3',
+				'grid gap-1',
 				isMobile
 					? 'grid-cols-12 auto-rows-[60px] md:hidden'
 					: 'grid-cols-6 auto-rows-[200px] hidden md:grid'
@@ -132,7 +133,7 @@ export default function BentoGrid({ title, shows, type }: Props) {
 
 	return (
 		<section className="max-w-5xl mx-auto">
-			<h2 className="text-5xl md:text-6xl lowercase mb-4">{title}</h2>
+			<CommonTitle text={title} className="mb-4" />
 			{renderGrid(streamingLayoutTailwind.mobile, true)}
 			{renderGrid(streamingLayoutTailwind.desktop, false)}
 		</section>

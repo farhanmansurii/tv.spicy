@@ -22,6 +22,7 @@ import { TextGlitch } from '../animated-common/TextFlip';
 import { Badge } from '../ui/badge';
 import { Episode } from '@/lib/types';
 import BlurFade from '../ui/blur-fade';
+import CommonTitle from '../animated-common/CommonTitle';
 
 const RecentlyWatchedTV = () => {
 	const { recentlyWatched, loadEpisodes, deleteRecentlyWatched } = useTVShowStore();
@@ -39,9 +40,7 @@ const RecentlyWatchedTV = () => {
 			<Carousel opts={{ dragFree: true }} className="w-[99%]  mx-auto">
 				<div className="flex  justify-between  mx-auto text-xl md:text-3xl items-center my-1   gap-4 py-2  flex-row">
 					<div className="mx-1 flex gap-2 items-center">
-						<h1 className="text-5xl truncate md:text-6xl  tracking-tight lowercase text-foreground">
-							Recently Watched
-						</h1>
+						<CommonTitle shouldWrap text="Recently Watched" />
 					</div>
 					<div className="flex  gap-2">
 						<Button

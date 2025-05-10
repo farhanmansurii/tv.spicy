@@ -14,6 +14,7 @@ import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import ShowCard from '../common/Card';
+import CommonTitle from '../animated-common/CommonTitle';
 
 export default function Row(props: {
 	shows: Show[];
@@ -35,9 +36,7 @@ export default function Row(props: {
 		<Carousel opts={{ dragFree: true }} className="ease-in-out duration-100 w-[99%] mx-auto">
 			{props.text && (
 				<div className="flex items-center justify-between gap-4 py-2 md:py-4 mx-auto">
-					<h1 className="text-5xl truncate md:text-6xl  tracking-tight lowercase text-foreground">
-						{props.text}
-					</h1>
+					<CommonTitle shouldWrap={false} text={props.text} />
 
 					<div className="flex items-center gap-2">
 						<CarouselPrevious
