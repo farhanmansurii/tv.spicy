@@ -5,7 +5,7 @@ import WatchList from '@/components/common/WatchList';
 import RecentlyWatchedTV from '@/components/common/RecentlyWatched';
 import { fetchRowData } from '@/lib/utils';
 
-export const revalidate = 60 * 60 * 24 * 7;
+export const revalidate = 604800;
 
 export default async function HomePage() {
 	const [trendingTV, topRatedTV, trendingMovies, topRatedMovies] = await Promise.all([

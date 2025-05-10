@@ -44,6 +44,10 @@ interface SeasonContentProps {
 }
 
 export interface Episode {
+	img: any;
+	season: any;
+	episode: any;
+	title: any;
 	air_date: string;
 	episode_number: number;
 	id: number;

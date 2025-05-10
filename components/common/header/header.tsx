@@ -1,8 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import Link from 'next/link';
-import { SearchCommandBox } from '@/components/container/home-container/search-command-box';
-import ThemeButton from '../ThemeButton';
 import CommonContainer from '@/components/container/CommonContainer';
 
 const categories = [
