@@ -1,4 +1,5 @@
 'use client';
+
 import React from 'react';
 import { useEpisodeStore } from '@/store/episodeStore';
 import useTVShowStore from '@/store/recentsStore';
@@ -10,25 +11,21 @@ import { Episode } from '@/lib/types';
 import { EpisodeCard } from '../common/EpisodeCard';
 
 interface SeasonContentProps {
-	episodes: Episode[] | any[];
+	episodes: Episode[];
 	showId: string;
 	view: 'grid' | 'list' | 'carousel';
 }
 
 export const SeasonContent: React.FC<SeasonContentProps> = ({ episodes, showId, view }) => {
 	const today = new Date();
-	const searchParams = useSearchParams();
-	const releasedEpisodes = episodes;
 	const { activeEP, setActiveEP } = useEpisodeStore();
 	const { addRecentlyWatched } = useTVShowStore();
 
 	const toggle = (episode: Episode, event: React.MouseEvent<HTMLDivElement>) => {
 		event.preventDefault();
-		if (!episode.id) {
-			toast({
-				title: 'Invalid Episode',
-				description: 'This episode is not available.',
-			});
+
+		if (!episode?.id) {
+			toast({ title: 'Invalid Episode', description: 'This episode is not available.' });
 			return;
 		}
 
@@ -36,90 +33,79 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({ episodes, showId, 
 		if (!isReleased) {
 			toast({
 				title: 'Episode Not Available Yet',
-				description: 'Stay tuned! This episode will be available soon. Check back later.',
+				description: 'Stay tuned! This episode will be available soon.',
 			});
 			return;
 		}
 
-		setActiveEP(null);
-		setActiveEP({ tv_id: showId, time: 0, ...episode });
-		addRecentlyWatched({ tv_id: showId, time: 0, ...episode });
+		setActiveEP(episode);
+		addRecentlyWatched({ showId, time: 0, ...episode });
 	};
 
-	const renderEpisodes = (episodes: Episode[]) => {
-		return episodes.map((episode) => (
+	const hasEpisodes = episodes?.length > 0;
+
+	const renderEpisodes = () =>
+		episodes.map((ep) => (
 			<EpisodeCard
-				key={episode.id}
-				episode={episode}
-				active={activeEP?.id === episode.id}
+				key={ep.id}
+				episode={ep}
+				active={activeEP?.id === ep.id}
 				toggle={toggle}
+				view={view}
 			/>
 		));
-	};
 
-	const renderNoEpisodesMessage = () => (
-		<div className="h-[130px] items-center justify-center flex text-center text-lg">
-			No released episodes for this season
+	const renderEmpty = () => (
+		<div className="flex flex-col items-center justify-center text-center py-12 gap-3 rounded-md border border-dashed bg-muted/40 text-muted-foreground">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="32"
+				height="32"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className="text-muted-foreground"
+			>
+				<circle cx="12" cy="12" r="10" />
+				<path d="m15 9-6 6" />
+				<path d="m9 9 6 6" />
+			</svg>
+			<p className="text-sm md:text-base">No released episodes for this season</p>
 		</div>
 	);
 
-	const renderCarouselContent = () => (
+	const renderCarousel = () => (
 		<>
 			<CarouselContent className="space-x-2">
-				{releasedEpisodes.length ? (
-					renderEpisodes(releasedEpisodes)
-				) : (
-					<div className="w-8/12 h-[200px] mx-auto aspect-video border rounded-lg bg-muted flex-col gap-3 border-3 text-lg items-center justify-center flex text-center ">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="28"
-							height="28"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							className="lucide lucide-circle-x"
-						>
-							<circle cx="12" cy="12" r="10" />
-							<path d="m15 9-6 6" />
-							<path d="m9 9 6 6" />
-						</svg>
-						No released episodes for this season
-					</div>
-				)}
+				{hasEpisodes ? renderEpisodes() : renderEmpty()}
 			</CarouselContent>
-
-			<div className="flex justify-end mt-2 gap-2 w-full mx-auto">
+			<div className="flex justify-end mt-2 gap-2">
 				<CarouselPrevious />
 				<CarouselNext />
 			</div>
 		</>
 	);
 
+	const renderGrid = () => (
+		<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+			{hasEpisodes ? renderEpisodes() : renderEmpty()}
+		</div>
+	);
+
+	const renderList = () => (
+		<div className="flex flex-col gap-3">{hasEpisodes ? renderEpisodes() : renderEmpty()}</div>
+	);
+
 	switch (view) {
 		case 'grid':
-			return (
-				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
-					{releasedEpisodes.length
-						? renderEpisodes(releasedEpisodes)
-						: renderNoEpisodesMessage()}
-				</div>
-			);
-
+			return renderGrid();
 		case 'list':
-			return (
-				<div className="flex flex-col gap-2">
-					{releasedEpisodes.length
-						? renderEpisodes(releasedEpisodes)
-						: renderNoEpisodesMessage()}
-				</div>
-			);
-
+			return renderList();
 		case 'carousel':
-			return renderCarouselContent();
-
+			return renderCarousel();
 		default:
 			return null;
 	}

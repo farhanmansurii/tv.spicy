@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Banner } from '../../tv-details.tsx/Banner';
 import { Poster } from '../../tv-details.tsx/Poster';
 import { format } from 'date-fns';
-import { fadeUp } from '../../tv-details.tsx/TVDetails';
+
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,24 +28,16 @@ export default function AnimeDetails({ anime, id }: { anime: Anime; id: any }) {
 						className="flex w-full mt-4 flex-col gap-2 md:w-2/3"
 					>
 						{anime?.releaseDate && (
-							<motion.span
-								variants={fadeUp}
-								custom={0}
-								className="text-xs text-muted-foreground"
-							>
+							<motion.span custom={0} className="text-xs text-muted-foreground">
 								{anime.releaseDate}
 							</motion.span>
 						)}
 
-						<motion.h1 variants={fadeUp} custom={2} className="text-4xl font-bold">
+						<motion.h1 custom={2} className="text-4xl font-bold">
 							{anime.title.userPreferred || anime.title.english}
 						</motion.h1>
 
-						<motion.div
-							variants={fadeUp}
-							custom={3}
-							className="flex flex-wrap items-center gap-1.5"
-						>
+						<motion.div custom={3} className="flex flex-wrap items-center gap-1.5">
 							{anime.genres.map((genre: any, index: any) => (
 								<motion.div key={index} variants={fadeUp}>
 									<Badge variant="outline" className="whitespace-nowrap">
@@ -60,26 +52,9 @@ export default function AnimeDetails({ anime, id }: { anime: Anime; id: any }) {
 							</Badge>
 						</motion.div>
 
-						<motion.p
-							variants={fadeUp}
-							custom={anime.genres.length + 1}
-							className="text-xs leading-5 line-clamp-3 text-muted-foreground md:text-sm md:leading-6"
-						>
+						<motion.p className="text-xs leading-5 line-clamp-3 text-muted-foreground md:text-sm md:leading-6">
 							{anime.description}
 						</motion.p>
-
-						{/* <motion.div
-              variants={fadeUp}
-              custom={show.genres.length + 5}
-              className="flex flex-wrap gap-2"
-            >
-              <ContinueWatchingButton
-                isDetailsPage={true}
-                id={show.id}
-                type={type}
-                show={show}
-              />
-            </motion.div> */}
 					</motion.article>
 				</main>
 			</div>

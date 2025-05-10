@@ -1,12 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { Banner } from './Banner';
-import { Poster } from './Poster';
 import ContinueWatchingButton from '@/components/common/ContinueWatchingButton';
 
 type showDetailsProps = {
@@ -18,58 +18,63 @@ type showDetailsProps = {
 };
 
 export default function ShowDetails({ id, show, language, embed = false, type }: showDetailsProps) {
+	const [expanded, setExpanded] = useState(false);
+
 	return (
-		<div className={cn('mx-auto w-full md:pt-0')}>
-			<div className="hidden md:flex">
+		<div className="mx-auto w-full">
+			<div className="block md:block">
 				<Banner url={tmdbImage(show.backdrop_path)} />
 			</div>
-			<div className="mx-auto mb-8 max-w-7xl space-y-8 px-4 md:space-y-12 md:px-0">
-				<main className="flex items-end flex-col gap-4 md:flex-row">
-					<aside className="w-10/12 mx-auto space-y-2 md:-mt-32 md:w-1/3">
-						<Poster url={tmdbImage(show.poster_path)} alt={show.name} />
-					</aside>
-					<article className="flex w-full mt-4 flex-col gap-2 md:w-2/3">
+
+			<div className="mx-auto max-w-6xl px-4  pt-4">
+				<main className="flex flex-col md:flex-row gap-4">
+					<article className="flex flex-col w-full">
 						{show?.first_air_date && (
-							<span className="text-xs text-muted-foreground">
+							<p className="text-xs text-muted-foreground">
 								{format(new Date(show.first_air_date), 'PPP')}
-							</span>
-						)}
-						{show?.release_date && (
-							<span className="text-xs text-muted-foreground">
-								{format(new Date(show.release_date), 'PPP')}
-							</span>
+							</p>
 						)}
 
-						<h1 className="text-4xl font-bold">{show.name || show.title}</h1>
+						<h1 className="text-5xl truncate md:text-7xl pb-3 tracking-tight normal-case text-foreground">
+							{show.name || show.title}
+						</h1>
 
-						<div className="flex flex-wrap items-center gap-1.5">
+						<div className="flex flex-wrap pb-3 items-center gap-2">
 							{show.genres.map((genre: any) => (
-								<Badge
-									key={genre.id}
-									variant="outline"
-									className="whitespace-nowrap"
-								>
+								<Badge key={genre.id} className="text-xs">
 									{genre.name}
 								</Badge>
 							))}
 
-							<Separator orientation="vertical" className="h-6" />
-
-							<Badge>{show.vote_average.toFixed(1)}</Badge>
+							{show.vote_average && (
+								<>
+									<Separator orientation="vertical" className="h-4" />
+									<Badge className="text-xs">
+										{show.vote_average.toFixed(1)}
+									</Badge>
+								</>
+							)}
 						</div>
 
-						<p className="text-xs leading-5 line-clamp-3 text-muted-foreground md:text-sm md:leading-6">
-							{show.overview}
-						</p>
+						{show.overview && (
+							<div className="text-sm text-muted-foreground pb-4 max-w-2xl">
+								<p className={cn(!expanded && 'line-clamp-2')}>{show.overview}</p>
+								<button
+									onClick={() => setExpanded((prev) => !prev)}
+									className="mt-1 text-xs text-white/60 hover:underline underline hover:text-white transition"
+								>
+									{expanded ? 'Show less' : 'Read more'}
+								</button>
+								<Separator className="mt-4" />
+							</div>
+						)}
 
-						<div className="flex flex-wrap mb-4 gap-2">
-							<ContinueWatchingButton
-								isDetailsPage={true}
-								id={show.id}
-								type={type}
-								show={show}
-							/>
-						</div>
+						<ContinueWatchingButton
+							isDetailsPage
+							id={show.id}
+							type={type}
+							show={show}
+						/>
 					</article>
 				</main>
 			</div>

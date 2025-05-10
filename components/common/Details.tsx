@@ -5,6 +5,7 @@ import ShowContainer from './ShowContainer';
 import MoreDetailsContainer from '../container/MoreDetailsContainer';
 import ShowDetails from '../container/tv-details.tsx/TVDetails';
 import RelatedShowsComponent from '../container/RelatedShowContainer';
+import CommonContainer from '../container/CommonContainer';
 
 const Details = (props: any) => {
 	const { data, type, id } = props;
@@ -19,13 +20,12 @@ const Details = (props: any) => {
 		}
 	};
 	return (
-		<div className="max-w-6xl w-full space-y-10  mx-auto">
+		<CommonContainer className=" w-full space-y-5 ">
 			<ShowDetails id={data?.id} show={data} language={'en'} type={type} />
-			<Separator className="max-w-4xl w-full  mx-auto" />
 			<ShowContainer id={data?.id} type={type} seasons={data.seasons} />
 			<Separator className="max-w-4xl w-full  mx-auto" />
 			<MoreDetailsContainer renderContent={renderContent} type={type} show={data} />
-		</div>
+		</CommonContainer>
 	);
 };
 export default Details;

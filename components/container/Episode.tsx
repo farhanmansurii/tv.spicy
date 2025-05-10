@@ -188,11 +188,7 @@ export default function Episode(props: EpisodeProps) {
 					</SelectContent>
 				</Select>
 				{getNextEp && type === 'tv' && (
-					<Button
-						className="flex gap-2"
-						variant={'ghost'}
-						onClick={() => getNextEp(seasonNumber, episodeNumber)}
-					>
+					<Button className="flex gap-2" variant={'ghost'} onClick={() => getNextEp()}>
 						Next{' '}
 						<svg
 							width="24"

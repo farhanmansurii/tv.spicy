@@ -11,35 +11,36 @@ import React from 'react';
 
 export default function RowLoader({ withHeader }: { withHeader: boolean }) {
 	return (
-		<div>
-			<Carousel className="ease-in-out duration-100 w-[99%] mx-auto">
-				<div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
-					<h1 className="text-xl md:2x; flex  text-transparent animate-pulse rounded-md bg-secondary/70 font-bold">
-						Watch History
-					</h1>
-					<div className="flex  gap-2">
-						<CarouselPrevious variant={'secondary'} />
-						<CarouselNext variant={'secondary'} />
+		<Carousel className="ease-in-out duration-100 w-[99%] mx-auto">
+			{withHeader && (
+				<div className="flex items-center justify-between gap-4 py-2 md:py-4 mx-auto">
+					<h1 className="text-5xl truncate md:text-6xl tracking-tight lowercase text-transparent animate-pulse bg-secondary/60 rounded-md w-40 h-10" />
+
+					<div className="flex items-center gap-2">
+						<CarouselPrevious
+							variant="outline"
+							className="w-9 h-9 rounded-full border border-border text-muted-foreground"
+						/>
+						<CarouselNext
+							variant="outline"
+							className="w-9 h-9 rounded-full border border-border text-muted-foreground"
+						/>
 					</div>
 				</div>
-				<CarouselContent className="w-full flex mb-[3rem]  gap-1">
-					{Array.from({ length: 8 }).map((_, index) => (
-						<CarouselItem
-							className={cn(
-								`group basis-7/12 w-full  md:basis-1/3 lg:basis-3/12 space-y-2  `
-							)}
-							key={index}
-						>
-							<Skeleton className="aspect-video" key={index} />
-							<Skeleton className="h-4 w-32 " />
-							<div className="flex flex-row gap-1">
-								<Skeleton className="h-3 w-12 " />
-								<Skeleton className="h-3 w-12" />
-							</div>
-						</CarouselItem>
-					))}
-				</CarouselContent>
-			</Carousel>
-		</div>
+			)}
+
+			<CarouselContent className="gap-2 mb-12">
+				{Array.from({ length: 6 }).map((_, index) => (
+					<CarouselItem
+						key={index}
+						className={cn(
+							`group basis-9/12 w-full md:basis-1/3 lg:basis-[30%] space-y-2`
+						)}
+					>
+						<Skeleton className="aspect-video w-full rounded-sm" />
+					</CarouselItem>
+				))}
+			</CarouselContent>
+		</Carousel>
 	);
 }

@@ -58,6 +58,7 @@ export interface Episode {
 	vote_count: number;
 	crew: CrewMember[];
 	guest_stars: CastMember[];
+	tv_id: string;
 }
 
 interface CrewMember {

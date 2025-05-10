@@ -1,28 +1,28 @@
-import { cn } from "@/lib/utils";
-import { ComponentProps } from "react";
+import { cn } from '@/lib/utils';
+import { ComponentProps } from 'react';
 
 type BannerProps = {
-  url?: string;
-} & ComponentProps<"div">;
+	url?: string;
+} & ComponentProps<'div'>;
 
 export const Banner = ({ url, className, ...props }: BannerProps) => {
-  return (
-    <div
-      {...props}
-      className={cn(
-        "h-[20dvh] w-full overflow-hidden border bg-muted shadow md:rounded-lg lg:h-[30dvh]",
-        className
-      )}
-    >
-      <div
-        style={{
-          backgroundImage: `url('${url}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-        className="h-full w-full  brightness-50"
-        data-testid="banner"
-      />
-    </div>
-  );
+	return (
+		<div
+			{...props}
+			className={cn(
+				'w-full h-[28vh] lg:h-[38vh] xl:h-[42vh] bg-black overflow-hidden',
+				className
+			)}
+		>
+			<div
+				style={{
+					backgroundImage: `url('${url}')`,
+					backgroundSize: 'cover',
+					backgroundPosition: 'center',
+				}}
+				className="w-full h-full brightness-50"
+				data-testid="banner"
+			/>
+		</div>
+	);
 };

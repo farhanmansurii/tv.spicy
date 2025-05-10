@@ -23,7 +23,7 @@ import { useEpisodeStore } from '@/store/episodeStore';
 const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
 	const searchParams = useSearchParams();
 	const [activeSeason, setActiveSeason] = useState<number | null>(null);
-	const [view, setView] = useState<'grid' | 'list' | 'carousel'>('carousel');
+	const [view, setView] = useState<'grid' | 'list' | 'carousel'>('list');
 	const { activeEP, setActiveEP } = useEpisodeStore();
 
 	const {

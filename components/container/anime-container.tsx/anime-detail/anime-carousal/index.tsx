@@ -132,19 +132,9 @@ const ContinueWatchingButton = ({ id }: { id: string }) => {
 	return (
 		<div className="flex w-full items-center justify-center flex-row md:w-fit gap-0">
 			<Link href={`/anime/${id}`}>
-				<Button
-					iconPlacement="right"
-					variant={'expandIcon'}
-					Icon={ArrowRight}
-					className="whitespace-nowrap rounded-none  w-full"
-				>
-					Go To Show
-				</Button>
+				<Button className="whitespace-nowrap rounded-none  w-full">Go To Show</Button>
 			</Link>
 			<Button
-				iconPlacement="right"
-				variant={'expandIcon'}
-				Icon={Plus}
 				className=" bg-secondary text-secondary-foreground rounded-none lg:w-fit hover:bg-secondary/80 whitespace-nowrap"
 				//   onClick={handleAddOrRemove}
 			>

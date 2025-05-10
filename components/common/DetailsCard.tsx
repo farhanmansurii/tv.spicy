@@ -1,164 +1,71 @@
-/* eslint-disable react/display-name */
-import { Button } from '@/components/ui/button';
 import { Show } from '@/lib/types';
-import {
-	ArrowRight,
-	BookmarkIcon,
-	LucidePlay,
-	LucidePlayCircle,
-	PlayCircleIcon,
-	PlaySquareIcon,
-	Plus,
-} from 'lucide-react';
-import ContinueWatchingButton from './ContinueWatchingButton';
-import Link from 'next/link';
-import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-/* eslint-disable @next/next/no-img-element */
+import { Badge } from '../ui/badge';
+import ContinueWatchingButton from './ContinueWatchingButton';
 
 interface CarousalCardProps {
-	isDetailsPage?: boolean;
 	show: Show;
+	isDetailsPage?: boolean;
 	type?: string;
-	id?: string;
 }
 
-const CarousalCard = ({ children }: { children: React.ReactNode }) => {
-	return <div>{children}</div>;
-};
-
-CarousalCard.Image = ({ src, alt, className }: { src: string; alt: string; className: string }) => {
-	return <img alt={alt} className={className} src={src} />;
-};
-
-CarousalCard.Title = ({ title, className }: { title: string; className?: string }) => {
-	return (
-		<div
-			style={{
-				fontSize: '1.875rem', // equivalent to text-3xl
-				display: '-webkit-box',
-				WebkitBoxOrient: 'vertical',
-				WebkitLineClamp: 3,
-				overflow: 'hidden',
-				textOverflow: 'ellipsis',
-				width: '75%', // equivalent to w-9/12
-				textAlign: 'center',
-				alignItems: 'center',
-				justifyContent: 'center',
-				fontWeight: 'bold',
-			}}
-			className={className}
-		>
-			{title}
-		</div>
-	);
-};
-
-CarousalCard.Genres = ({ genres }: { genres: string }) => {
-	return <div className="opacity-50">{genres}</div>;
-};
-
-CarousalCard.Badge = ({ genres }: { genres: any[] }) => {
-	return (
-		<>
-			{genres?.map((genre) => (
-				<Badge key={genre.id} variant="outline" className="whitespace-nowrap">
-					{genre.name}
-				</Badge>
-			))}
-		</>
-	);
-};
-
-CarousalCard.ContinueWatchingButton = ({
-	isDetailsPage,
-	show,
-	type,
-	id,
-}: {
-	isDetailsPage: boolean;
-	show: Show;
-	type: string;
-	id: string;
-}) => {
-	return <ContinueWatchingButton isDetailsPage={isDetailsPage} show={show} type={type} id={id} />;
-};
-
-CarousalCard.Details = ({ overview }: { overview: string }) => {
-	return <div className="text-xs opacity-50 normal-case line-clamp-3">{overview}</div>;
-};
-
-const CarousalCardWrapper = (props: CarousalCardProps) => {
-	const { show, isDetailsPage, type } = props;
-
+const CarousalCardWrapper = ({ show }: CarousalCardProps) => {
 	if (!show) return null;
 
+	const title = show.title || show.name || 'Untitled';
+	const releaseDate = show.first_air_date || show.release_date || '';
+	const formattedDate = releaseDate ? format(new Date(releaseDate), 'PPP') : '';
+	const backdrop = show.backdrop_path || show.poster_path || '';
+
 	return (
-		<>
-			<div className="flex  md:hidden h-[70vh] relative">
-				<CarousalCard.Image
-					alt=""
-					className="inset-0  object-cover rounded-t-xl h-full w-full"
-					src={`https://image.tmdb.org/t/p/original/${props.show.poster_path}`}
-				/>
-				<div className="border-white absolute flex justify-between bg-gradient-to-t from-background to-transparent bottom-0 top-1/2 w-full flex-col">
-					<div></div>
-					<div className="flex items-center flex-col">
-						<CarousalCard.Title title={props.show.title || props.show.name} />
-						<CarousalCard.Genres
-							genres={props.show.genres?.name?.join(',') || 'Comedy'}
-						/>
-						<CarousalCard.Badge genres={props.show.genres} />
-						<div className="flex flex-col w-60 my-2 gap-2">
-							<CarousalCard.ContinueWatchingButton
-								isDetailsPage={isDetailsPage || false}
-								show={props.show}
-								type={props.type ?? ''}
-								id={props.show?.id as any}
-							/>
-						</div>
+		<section className="relative w-full h-[60vh] sm:h-[70vh] overflow-hidden isolate">
+			<img
+				src={`https://image.tmdb.org/t/p/original/${backdrop}`}
+				alt={title}
+				className="absolute inset-0 w-full h-full object-cover object-center scale-105 brightness-[0.45] sm:brightness-[0.35]"
+			/>
+
+			<div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent z-0" />
+
+			<div className="relative z-10 h-full flex flex-col justify-end p-6 sm:p-6 max-w-5xl text-white select-none">
+				{formattedDate && (
+					<p className="text-xs sm:text-sm text-white/70 mb-1">{formattedDate}</p>
+				)}
+
+				<h1 className="text-5xl truncate md:text-7xl pb-4 tracking-tight normal-case text-foreground">
+					{title}
+				</h1>
+
+				{show.overview && (
+					<p className="text-sm sm:text-base text-white/80 max-w-4xl line-clamp-3">
+						{show.overview}
+					</p>
+				)}
+
+				{Array.isArray(show.genres) && show.genres.length > 0 && (
+					<div className="mt-4 flex flex-wrap gap-2">
+						{show.genres.map((genre) => (
+							<Badge
+								key={genre.id}
+								variant="outline"
+								className="border-white/30 text-white text-xs px-3 py-1"
+							>
+								{genre.name}
+							</Badge>
+						))}
 					</div>
+				)}
+				<div className="mt-4">
+					<ContinueWatchingButton
+						id={show.id}
+						show={show}
+						type={'tv'}
+						isDetailsPage={true}
+					/>
 				</div>
 			</div>
-			<div className="relative h-[70vh] md:flex hidden w-full mx-auto">
-				<CarousalCard.Image
-					alt=""
-					className="h-full w-full rounded-t-2xl  mt-4 object-center object-cover"
-					src={`https://image.tmdb.org/t/p/original/${show.backdrop_path}`}
-				/>
-				<div className="inset-0 bg-gradient-to-t from-background to-from-background/10 absolute justify-between flex flex-col">
-					<div></div>
-					<div className="w-[96%] mx-auto">
-						<div className="flex gap-1 flex-col uppercase w-[500px] text-pretty">
-							<div className="text-sm normal-case opacity-50">
-								{format(new Date(show.first_air_date || show.release_date), 'PPP')}
-							</div>
-							<div className="text-3xl text-pretty font-bold">
-								{show.title || show.name}
-							</div>
-							<CarousalCard.Details overview={show.overview} />
-							<div className="flex my-2 gap-2">
-								<CarousalCard.ContinueWatchingButton
-									isDetailsPage={isDetailsPage || false}
-									show={props.show}
-									type={props.type ?? ''}
-									id={props.show?.id as any}
-								/>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</>
+		</section>
 	);
 };
-
-CarousalCardWrapper.Image = CarousalCard.Image;
-CarousalCardWrapper.Title = CarousalCard.Title;
-CarousalCardWrapper.Genres = CarousalCard.Genres;
-CarousalCardWrapper.Badge = CarousalCard.Badge;
-CarousalCardWrapper.ContinueWatchingButton = CarousalCard.ContinueWatchingButton;
-CarousalCardWrapper.Details = CarousalCard.Details;
 
 export default CarousalCardWrapper;

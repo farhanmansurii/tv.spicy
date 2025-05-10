@@ -56,58 +56,56 @@ const RecentlyWatchedTV = () => {
 						<CarouselNext className="w-10 h-10" variant={'secondary'} />
 					</div>
 				</div>
-				<AnimatePresence>
-					<CarouselContent className="gap-2 ">
-						{recentlyWatched.map((show: Episode, index: number) => (
-							<CarouselItem
-								className={cn(
-									`group basis-9/12 w-full  md:basis-1/3 lg:basis-[30%]   `
-								)}
-								key={show.id}
+				<CarouselContent className="gap-2 ">
+					{recentlyWatched.map((show: Episode, index: number) => (
+						<CarouselItem
+							className={cn(
+								`group basis-9/12 w-full  md:basis-1/3 lg:basis-[30%]   `
+							)}
+							key={show.id}
+						>
+							<Link
+								href={`/tv/${show.show_id}?season=${show.season_number}&episode=${show.episode_number}`}
 							>
-								<Link
-									href={`/tv/${show.show_id}?season=${show.season_number}&episode=${show.episode_number}`}
+								<div
+									className="group relative w-full h-full cursor-pointer  overflow-hidden aspect-video  bg-muted shadow"
+									data-testid="movie-card"
 								>
-									<div
-										className="group relative w-full h-full cursor-pointer  overflow-hidden aspect-video  bg-muted shadow"
-										data-testid="movie-card"
-									>
-										{show.still_path ? (
-											<BlurFade
-												key={show.still_path}
-												delay={0.05 + index * 0.04}
-												inView
-											>
-												<img
-													src={tmdbImage(show.still_path, 'w500')}
-													alt={show.name}
-													className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-												/>
-											</BlurFade>
-										) : (
-											<div className="flex items-center justify-center w-full h-full bg-muted">
-												<ImageIcon className="w-6 h-6 text-muted-foreground" />
-											</div>
-										)}
-										<div className="top-0 absolute text-[10px] md:text-sm flex flex-row right-0 ">
-											<div className="px-2 py-0.5 text-background bg-primary">
-												S{show.season_number} E{show.episode_number}
-											</div>
+									{show.still_path ? (
+										<BlurFade
+											key={show.still_path}
+											delay={0.05 + index * 0.04}
+											inView
+										>
+											<img
+												src={tmdbImage(show.still_path, 'w500')}
+												alt={show.name}
+												className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+											/>
+										</BlurFade>
+									) : (
+										<div className="flex items-center justify-center w-full h-full bg-muted">
+											<ImageIcon className="w-6 h-6 text-muted-foreground" />
 										</div>
-										<div className="absolute w-full pl-2 pb-1 bg-gradient-to-t from-background/80 via-background/70 to-background/10 inset-0 text-foreground flex align-bottom flex-col justify-end transition-all duration-300 ">
-											<p className="text-xs md:text-sm text-muted-foreground mt-1">
-												{show.runtime} mins
-											</p>
-											<div className="flex items-center justify-between text-sm md:text-xl">
-												<p className=" truncate ">{show.name}</p>
-											</div>
+									)}
+									<div className="top-0 absolute text-[10px] md:text-sm flex flex-row right-0 ">
+										<div className="px-2 py-0.5 text-background bg-primary">
+											S{show.season_number} E{show.episode_number}
 										</div>
 									</div>
-								</Link>
-							</CarouselItem>
-						))}
-					</CarouselContent>
-				</AnimatePresence>
+									<div className="absolute w-full pl-2 pb-1 bg-gradient-to-t from-background/80 via-background/70 to-background/10 inset-0 text-foreground flex align-bottom flex-col justify-end transition-all duration-300 ">
+										<p className="text-xs md:text-sm text-muted-foreground mt-1">
+											{show.runtime} mins
+										</p>
+										<div className="flex items-center justify-between text-sm md:text-xl">
+											<p className=" truncate ">{show.name}</p>
+										</div>
+									</div>
+								</div>
+							</Link>
+						</CarouselItem>
+					))}
+				</CarouselContent>
 			</Carousel>
 		)
 	);

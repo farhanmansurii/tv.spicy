@@ -1,13 +1,13 @@
 'use client';
+
 import React, { useEffect } from 'react';
 import { Button } from '../ui/button';
 import useTVShowStore from '@/store/recentsStore';
 import { useEpisodeStore } from '@/store/episodeStore';
-import { ArrowRight, Check, PlayIcon, Plus } from 'lucide-react';
 import { Episode, Show } from '@/lib/types';
 import useWatchListStore from '@/store/watchlistStore';
-import { FaPlay } from 'react-icons/fa';
 import Link from 'next/link';
+
 interface ContinueWatchingButtonProps {
 	id: any;
 	show: Show;
@@ -23,6 +23,7 @@ export default function ContinueWatchingButton({
 }: ContinueWatchingButtonProps) {
 	const { recentlyWatched, loadEpisodes } = useTVShowStore();
 	const { activeEP, setActiveEP } = useEpisodeStore();
+
 	const {
 		addToWatchlist,
 		removeFromWatchList,
@@ -49,52 +50,57 @@ export default function ContinueWatchingButton({
 		}
 	};
 
-	const recentlyWatchedEpisode = recentlyWatched.find((episode: any) => episode.tv_id === id);
-	const isEpisodeActive = recentlyWatchedEpisode?.episode === activeEP?.episode;
+	const recentlyWatchedEpisode = recentlyWatched.find((episode: Episode) => episode.tv_id === id);
+	const isEpisodeActive = recentlyWatchedEpisode?.episode_number === activeEP?.episode_number;
 
 	return (
-		<div className="flex w-full w-fit gap-0">
+		<div className="flex flex-col sm:flex-row gap-3 w-full max-w-3xl select-none">
 			{!isDetailsPage && (
-				<Link href={`/${type}/${id}`}>
+				<Link href={`/${type}/${id}`} className="w-full sm:w-auto">
 					<Button
-						iconPlacement="right"
-						variant={'expandIcon'}
-						Icon={ArrowRight}
-						className="whitespace-nowrap rounded-none  w-full"
+						variant="ghost"
+						className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-2 text-sm tracking-wide font-medium uppercase rounded-none"
 					>
 						View {type === 'movie' ? 'Movie' : 'Show'}
 					</Button>
 				</Link>
 			)}
-			{!isEpisodeActive && recentlyWatchedEpisode && isDetailsPage && (
+
+			{!isDetailsPage && (
 				<Button
-					asChild
-					iconPlacement="right"
-					variant={'expandIcon'}
-					Icon={FaPlay}
-					className="whitespace-nowrap rounded-none  w-full"
-					onClick={() => setActiveEP(recentlyWatchedEpisode)}
+					variant="ghost"
+					className="w-full sm:w-auto bg-white/5 hover:bg-white/15 text-white border border-white/20 px-6 py-2 text-sm tracking-wide font-medium  rounded-none"
 				>
-					<Link
-						href={{
-							query: {
-								season: recentlyWatchedEpisode.season,
-								episode: recentlyWatchedEpisode.episode,
-							},
-						}}
-					>
-						Play S{recentlyWatchedEpisode.season}E{recentlyWatchedEpisode.episode}
-					</Link>
+					Play
 				</Button>
 			)}
+			{!isEpisodeActive && recentlyWatchedEpisode && isDetailsPage && (
+				<Link
+					href={{
+						query: {
+							season: recentlyWatchedEpisode.season_number,
+							episode: recentlyWatchedEpisode.episode_number,
+						},
+					}}
+					className="w-full sm:w-auto"
+				>
+					<Button
+						variant="ghost"
+						className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-2 text-sm tracking-wide font-medium  rounded-none"
+						onClick={() => setActiveEP(recentlyWatchedEpisode)}
+					>
+						Play Season {recentlyWatchedEpisode.season_number} Episode{' '}
+						{recentlyWatchedEpisode.episode_number}
+					</Button>
+				</Link>
+			)}
+
 			<Button
-				iconPlacement="right"
-				variant={'expandIcon'}
-				Icon={isAdded ? Check : Plus}
-				className=" bg-secondary text-secondary-foreground rounded-none w-full lg:w-fit hover:bg-secondary/80 whitespace-nowrap"
+				variant="ghost"
+				className="w-full sm:w-auto bg-white/5 hover:bg-white/15 text-white border border-white/20 px-6 py-2 text-sm tracking-wide font-medium  rounded-none"
 				onClick={handleAddOrRemove}
 			>
-				{isAdded ? 'Added' : 'Add to List'}
+				{isAdded ? 'Added to List' : 'Add to List'}
 			</Button>
 		</div>
 	);

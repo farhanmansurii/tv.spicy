@@ -18,7 +18,7 @@ export default async function page() {
 	return (
 		<>
 			<CommonContainer>
-				<CarousalComponent type={'tv'} />{' '}
+				<CarousalComponent type={'tv'} />
 				<div className="flex flex-col space-y-12">
 					<RecentlyWatchedTV />
 					<WatchList type="tv" />
