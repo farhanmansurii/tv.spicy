@@ -34,11 +34,20 @@ export default function Row(props: {
 	return (
 		<Carousel opts={{ dragFree: true }} className="ease-in-out duration-100 w-[99%] mx-auto">
 			{props.text && (
-				<div className="flex font-bold ease-in-out duration-100 justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
-					<h1 className="text-xl md:2x; flex  font-bold">{props.text}</h1>
-					<div className="flex  gap-2">
-						<CarouselPrevious variant={'secondary'} />
-						<CarouselNext variant={'secondary'} />
+				<div className="flex items-center justify-between gap-4 py-2 md:py-4 mx-auto">
+					<h1 className="text-4xl truncate md:text-6xl  tracking-tight lowercase text-foreground">
+						{props.text}
+					</h1>
+
+					<div className="flex items-center gap-2">
+						<CarouselPrevious
+							variant="outline"
+							className="w-9 h-9 rounded-full border  border-border text-muted-foreground hover:text-foreground hover:border-foreground transition"
+						/>
+						<CarouselNext
+							variant="outline"
+							className="w-9 h-9 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground transition"
+						/>
 					</div>
 				</div>
 			)}
@@ -50,7 +59,7 @@ export default function Row(props: {
 							show?.backdrop_path && (
 								<CarouselItem
 									className={cn(
-										`group basis-7/12 w-full  md:basis-1/3 lg:basis-[22%]   `
+										`group basis-7/12 w-full  md:basis-1/3 lg:basis-[30%]   `
 									)}
 									key={show.id}
 								>
@@ -66,14 +75,13 @@ export default function Row(props: {
 					)}
 				</CarouselContent>
 			) : (
-				<div className="grid grid-cols-2 gap-x-2 gap-y-10 md:grid-cols-3 md:c   ">
+				<div className="grid grid-cols-2 gap-x-2 gap-y-2 md:grid-cols-3 md:c   ">
 					{props?.shows?.map(
 						(show: Show, index: number) =>
 							show?.backdrop_path && (
 								<ShowCard
 									key={index}
 									showRank={props.showRank}
-									variants={variants}
 									show={show}
 									type={props.type}
 									index={index}

@@ -1,13 +1,8 @@
 import { Providers } from '@/components/providers/Provider';
 import './globals.css';
 import type { Metadata } from 'next';
-import { GeistSans } from 'geist/font/sans';
 import { Toaster } from '@/components/ui/toaster';
-import { BackgroundGradient } from '@/components/common/BackgroundGradient';
-import MinimalSocialsFooter from '@/components/common/Footer';
-import { TransitionProviders } from '@/components/providers/TransitionProvider';
 import TanstackQueryProvider from '@/components/providers/TanstackQueryProvider';
-import { Suspense } from 'react';
 
 export const metadata: Metadata = {
 	title: 'Watvh TV - Stream Movies, TV Shows, and Anime',
@@ -65,9 +60,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					enableSystem
 				>
 					<TanstackQueryProvider>
-						<Suspense>
-							<BackgroundGradient />
-						</Suspense>
 						{children}
 						<Toaster />
 					</TanstackQueryProvider>

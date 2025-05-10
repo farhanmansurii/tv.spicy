@@ -14,6 +14,7 @@ import { Title } from '@/components/animated-common/Title';
 import { title } from 'process';
 import GenresPage from '../Genre';
 import Link from 'next/link';
+import CommonContainer from '../CommonContainer';
 
 export default function HomeContainer() {
 	const { title } = useTitle();
@@ -21,7 +22,7 @@ export default function HomeContainer() {
 		title && (
 			<div className="">
 				<Header />
-				<div className="mx-auto  max-w-3xl space-y-4 px-4 lg:px-0">
+				<CommonContainer>
 					<div className="px-2 pt-56">
 						<Title className="relative z-20 text-[2rem] font-normal leading-none">
 							<div className="overflow-hidden">
@@ -53,7 +54,7 @@ export default function HomeContainer() {
 					<Suspense>
 						<GenresPage />
 					</Suspense>
-				</div>
+				</CommonContainer>
 				<MinimalSocialsFooter />
 			</div>
 		)

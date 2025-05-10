@@ -30,7 +30,9 @@ export default function AnimePlayer({ id, episode }: { id: string; episode: Anim
 		return (
 			<div className="w-full h-[200px] mx-auto  border rounded-lg bg-muted flex-col gap-3 border-3 text-lg items-center justify-center flex text-center ">
 				<Cross2Icon className="w-14 h-14 p-1" />
-				<h1 className="text-xl md:2x; font-bold">There was a problem try again later</h1>
+				<h1 className="text-4xl truncate md:text-6xl  tracking-tight lowercase text-foreground">
+					There was a problem try again later
+				</h1>
 			</div>
 		);
 	}

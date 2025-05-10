@@ -1,135 +1,89 @@
 /* eslint-disable @next/next/no-img-element */
-import { Show } from "@/lib/types";
-import Link from "next/link";
-import React from "react";
-import { Motiondiv } from "./MotionDiv";
-import { TextGlitch } from "../animated-common/TextFlip";
-import { Skeleton } from "../ui/skeleton";
-import { tmdbImage } from "@/lib/tmdb-image";
-import { ImageIcon, Play } from "lucide-react";
-import { TooltipContent, TooltipProvider } from "@radix-ui/react-tooltip";
-import { Tooltip, TooltipTrigger } from "../ui/tooltip";
-import { Badge } from "../ui/badge";
-import BlurFade from "../ui/blur-fade";
+import React from 'react';
+import Link from 'next/link';
+import { Show } from '@/lib/types';
+import { tmdbImage } from '@/lib/tmdb-image';
+import { TextGlitch } from '../animated-common/TextFlip';
+import { ImageIcon } from 'lucide-react';
+import BlurFade from '../ui/blur-fade';
+import { Badge } from '../ui/badge';
 
-export default function ShowCard(props: {
-    index: number;
-    variants?: any;
-    show: Show;
-    showRank?: Boolean;
-    isVertical?: Boolean;
-    type?: string;
-    onClick?: any;
+export default function ShowCard({
+	index,
+	show,
+	showRank,
+	isVertical = false,
+	type,
+	onClick,
+}: {
+	index: number;
+	show: Show;
+	showRank?: boolean;
+	isVertical?: boolean;
+	type?: string;
+	onClick?: (show: Show) => void;
 }) {
-    const { index, show, showRank, isVertical, type } = props;
+	const href = `/${show.media_type || type}/${show.id}`;
 
-    const variants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: {
-            opacity: 1,
-            y: 0,
-        },
-    };
-    function calculateDelay(index: number) {
-        const staggeredIndex = index % 20 !== 0 ? index % 20 : 0;
-        return staggeredIndex;
-    }
-    return (
-        <Link
-            onClick={() => props.onClick && props.onClick(show)}
-            href={`/${show.media_type || type}/${show.id}`}
-        >
-            <Motiondiv
-                initial="hidden"
-                animate="visible"
-                transition={{
-                    delay: calculateDelay(index) * 0.1,
-                    ease: "easeInOut",
-                    duration: 0.5,
-                }}
-                viewport={{ amount: 0 }}
-                custom={props.index}
-                variants={variants}
-                className="group group-hover:scale-95 duration-100"
-            >
-                {!isVertical ? (
-                    <Card movie={show} index={index} type={type} />
-                ) : (
-                    <Card movie={show} index={index} type={type} />
-                )}
-            </Motiondiv>
-        </Link>
-    );
+	return (
+		<Link
+			href={href}
+			onClick={() => onClick?.(show)}
+			className="block transition-transform duration-150 ease-in-out "
+		>
+			<ShowCardContent show={show} index={index} type={type} isVertical={isVertical} />
+		</Link>
+	);
 }
-export const Card = ({ movie, language = "en-US", type, index }: any) => {
-    const {
-        title,
-        backdrop_path: backdrop,
-        poster_path: poster,
-        overview,
-        first_air_date,
-        media_type,
-        id,
-        release_date,
-        vote_average: voteAverage,
-        vote_count: voteCount,
-        name,
-    } = movie;
 
-    return (
-    <div
-        className="w-full h-full group hover:scale-95 duration-100 cursor-pointer space-y-2"
-        data-testid="movie-card"
-    >
-        <div
-        style={{aspectRatio:16/9}}
-            className="relative w-full  overflow-hidden rounded-md border bg-background/50 shadow"
-        >
-            {backdrop ? (
-                <>
-                    <BlurFade key={tmdbImage(backdrop, "w500")} delay={0.25 + index * 0.04} inView>
-                        <img
-                            className=" w-full h-full object-cover"
-                            src={tmdbImage(backdrop, "w500")}
-                            alt={title}
-                        />
-                    </BlurFade>
-                    <svg
-                        fill="currentColor"
-                        viewBox="0 0 16 16"
-                        height="2em"
-                        width="2em"
-                        className="absolute z-40 group-hover:opacity-100 opacity-0 scale-90 group-hover:scale-100 duration-200 ease-in-out bottom-0 right-0 m-4 text-white"
-                    >
-                        <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
-                    </svg>
-                </>
-            ) : (
-                <div className="absolute top-0 left-0 flex items-center justify-center w-full h-full bg-background">
-                    <ImageIcon className="text-muted" />
-                </div>
-            )}
-        </div>
+function ShowCardContent({
+	show,
+	index,
+	type,
+	isVertical,
+}: {
+	show: Show;
+	index: number;
+	type?: string;
+	isVertical?: boolean;
+}) {
+	const { title, name, backdrop_path, first_air_date, release_date, vote_average, media_type } =
+		show;
 
-        <div className="space-y-1.5">
-            <div className="flex text-sm md:text-base items-start justify-between gap-1">
-                <TextGlitch>{title || name}</TextGlitch>
-                <Badge variant="secondary">
-                    {voteAverage ? voteAverage.toFixed(1) : "?"}
-                </Badge>
-            </div>
-            <div className="text-xs text-muted-foreground flex gap-1 capitalize">
-                {(first_air_date || release_date)?.split("-")[0]}{" "}
-                <p
-                    className={`${(media_type || type)?.toLowerCase() === "tv"
-                            ? "uppercase"
-                            : "capitalize"
-                        }`}
-                >
-                    • {type ? type : media_type}
-                </p>
-            </div>
-        </div>
-    </div>
-);
-};
+	const imageUrl = backdrop_path ? tmdbImage(backdrop_path, 'w500') : null;
+	const displayTitle = title || name;
+	const year = (first_air_date || release_date)?.split('-')[0] || '—';
+	const contentType = (media_type || type || '').toLowerCase();
+
+	return (
+		<div
+			className="group relative w-full h-full cursor-pointer  overflow-hidden aspect-video  bg-muted shadow"
+			data-testid="movie-card"
+		>
+			{/* Background image */}
+			{imageUrl ? (
+				<BlurFade key={imageUrl} delay={0.05 + index * 0.04} inView>
+					<img
+						src={imageUrl}
+						alt={displayTitle}
+						className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+					/>
+				</BlurFade>
+			) : (
+				<div className="flex items-center justify-center w-full h-full bg-muted">
+					<ImageIcon className="w-6 h-6 text-muted-foreground" />
+				</div>
+			)}
+			<div className="top-0 absolute text-sm flex flex-row right-0 ">
+				<div className="px-2 py-0.5 text-background bg-yellow-500">{vote_average}</div>
+				<div className="px-2 py-0.5 text-background bg-primary">{contentType}</div>
+			</div>
+			<div className="absolute w-full px-2 py-3 bg-gradient-to-t from-background/80 via-background/70 to-background/10 inset-0 text-foreground flex align-bottom flex-col justify-end transition-all duration-300 ">
+				<p className="text-xs md:text-sm text-muted-foreground mt-1">{year}</p>
+				<div className="flex items-center justify-between text-sm md:text-base">
+					<p className=" truncate ">{displayTitle}</p>
+				</div>
+			</div>
+		</div>
+	);
+}

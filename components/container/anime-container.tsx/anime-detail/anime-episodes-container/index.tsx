@@ -188,7 +188,7 @@ export default function AnimeEpisodesContainer({ id }: { id: any }) {
 		(episode: AnimeEpisode) => episode.id === activeEpisodeId
 	);
 	return (
-		<div className="mx-auto max-w-3xl space-y-10 flex flex-col w-full px-4 md:px-0 ">
+		<div className="mx-auto max-w-7xl space-y-10 flex flex-col w-full px-4 md:px-0 ">
 			<AnimePlayer episode={selectedEpisode} key={activeEpisodeId} id={activeEpisodeId} />
 			<Carousel>
 				<div className="flex font-bold justify-between items-center text-xl md:text-2xl py-2 px-4 flex-row">
