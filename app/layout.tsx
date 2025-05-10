@@ -1,10 +1,9 @@
-import { Providers } from '@/components/providers/Provider';
 import './globals.css';
-import type { Metadata } from 'next';
-import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/components/providers/Provider';
 import TanstackQueryProvider from '@/components/providers/TanstackQueryProvider';
+import type { Metadata, Viewport } from 'next';
 
-export const metadata: Metadata = {
+export const generateMetadata = (): Metadata => ({
 	title: 'Watvh TV - Stream Movies, TV Shows, and Anime',
 	description:
 		'Discover and stream your favorite movies, TV series, and anime on Watvh TV. Enjoy unlimited entertainment with our vast library of content.',
@@ -18,14 +17,8 @@ export const metadata: Metadata = {
 			'Stream the latest movies, binge-worthy TV shows, and popular anime series on Watvh TV. Start watching now!',
 		url: 'https://www.watvh.vercel.app',
 		siteName: 'Watvh TV',
-
 		locale: 'en_US',
 		type: 'website',
-	},
-	viewport: {
-		width: 'device-width',
-		initialScale: 1,
-		maximumScale: 1,
 	},
 	robots: {
 		index: true,
@@ -38,32 +31,26 @@ export const metadata: Metadata = {
 			'max-snippet': -1,
 		},
 	},
-};
+});
+
+export const generateViewport = (): Viewport => ({
+	width: 'device-width',
+	initialScale: 1,
+	maximumScale: 1,
+});
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
-			<head>
-				<link rel="manifest" href="/manifest.json" />
-				<link rel="apple-touch-icon" href="/icon512_maskable.png"></link>
-				<meta name="theme-color" content="#e63946" />
-				<meta name="referrer" content="origin" />
-				<meta
-					name="viewport"
-					content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-				/>
-			</head>
+		<html lang="en" suppressHydrationWarning>
 			<body>
-				<Providers
-					themes={['redDark', 'redLight', 'light', 'dark']}
+				<ThemeProvider
 					attribute="class"
 					defaultTheme="dark"
 					enableSystem
+					disableTransitionOnChange
 				>
-					<TanstackQueryProvider>
-						{children}
-						<Toaster />
-					</TanstackQueryProvider>
-				</Providers>
+					<TanstackQueryProvider>{children}</TanstackQueryProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

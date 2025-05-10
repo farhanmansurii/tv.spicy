@@ -1,6 +1,6 @@
 'use client';
 import { Anime, Show } from '@/lib/types';
-import React, { useState } from 'react';
+import React, { useState, type JSX } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import MoreInfoComponent from '../common/MoreInfoComponent';

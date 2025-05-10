@@ -3,9 +3,13 @@ import { fetchData } from "@/lib/anime-helpers";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import React from "react";
-export const generateMetadata = async ({
-  params: { anime },
-}: any): Promise<Metadata> => {
+export const generateMetadata = async (props: any): Promise<Metadata> => {
+  const params = await props.params;
+
+  const {
+    anime
+  } = params;
+
   try {
     const data = await fetchData(`data/${anime}`);
     return {
@@ -19,11 +23,12 @@ export const generateMetadata = async ({
     };
   }
 };
-export default async function AnimePage({
-  params,
-}: {
-  params: { anime: string };
-}) {
+export default async function AnimePage(
+  props: {
+    params: Promise<{ anime: string }>;
+  }
+) {
+  const params = await props.params;
   const anime = await fetchData(`data/${params.anime}`);
   if (!anime) return notFound();
   return <AnimeDetailsWrapper anime={anime} key={params.anime} />;

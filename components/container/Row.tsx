@@ -35,7 +35,7 @@ export default function Row(props: {
 		<Carousel opts={{ dragFree: true }} className="ease-in-out duration-100 w-[99%] mx-auto">
 			{props.text && (
 				<div className="flex items-center justify-between gap-4 py-2 md:py-4 mx-auto">
-					<h1 className="text-4xl truncate md:text-6xl  tracking-tight lowercase text-foreground">
+					<h1 className="text-5xl truncate md:text-6xl  tracking-tight lowercase text-foreground">
 						{props.text}
 					</h1>
 
@@ -59,7 +59,7 @@ export default function Row(props: {
 							show?.backdrop_path && (
 								<CarouselItem
 									className={cn(
-										`group basis-7/12 w-full  md:basis-1/3 lg:basis-[30%]   `
+										`group basis-9/12 w-full  md:basis-1/3 lg:basis-[30%]   `
 									)}
 									key={show.id}
 								>

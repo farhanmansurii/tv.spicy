@@ -23,7 +23,7 @@ export default function OPlayer({
   malId: string;
   handleNextEpisode: any;
 }) {
-  const playerRef = useRef<Player<Ctx>>();
+  const playerRef = useRef<Player<Ctx>>(undefined);
 
   const plugins = [
     OUI({

@@ -4,9 +4,13 @@ import { fetchDetails, fetchDetailsTMDB } from "@/lib/utils";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import React from "react";
-export const generateMetadata = async ({
-  params: { movie },
-}: any): Promise<Metadata> => {
+export const generateMetadata = async (props: any): Promise<Metadata> => {
+  const params = await props.params;
+
+  const {
+    movie
+  } = params;
+
   try {
     const data = await fetchDetailsTMDB(movie, "movie");
     return {
@@ -20,11 +24,12 @@ export const generateMetadata = async ({
     };
   }
 };
-export default async function TVDetails({
-  params,
-}: {
-  params: { movie: string };
-}) {
+export default async function TVDetails(
+  props: {
+    params: Promise<{ movie: string }>;
+  }
+) {
+  const params = await props.params;
   const { movie } = params;
   const data = await fetchDetailsTMDB(movie, "movie");
   if (!data) return notFound();

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Separator } from '../ui/separator';
+import CommonContainer from '../container/CommonContainer';
 
 const GitHubIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => {
 	return (
@@ -32,7 +33,7 @@ const SocialLink = ({
 
 const MinimalSocialsFooter = () => {
 	return (
-		<div className="flex max-w-7xl   text-[12px] w-full mx-auto flex-col items-start justify-between gap-3 rounded-xl py-10   mt-[4rem]">
+		<CommonContainer className="flex  text-base w-full mx-auto flex-col items-start justify-between gap-3 rounded-xl py-10   mt-[4rem]">
 			<Separator />
 			<div className="px-3">
 				Disclaimer! This site does not store any files on our server, we only linked to the
@@ -43,7 +44,7 @@ const MinimalSocialsFooter = () => {
 				<p className="text-md ">Copyright © {new Date().getFullYear()} Watvh</p>
 				{/* x */}
 			</div>
-		</div>
+		</CommonContainer>
 	);
 };
 

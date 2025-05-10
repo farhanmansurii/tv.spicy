@@ -8,6 +8,6 @@ export default function CommonContainer({
 	className?: string;
 }) {
 	return (
-		<div className={cn('mx-auto  max-w-7xl space-y-4 px-2 lg:px-0', className)}>{children}</div>
+		<div className={cn('mx-auto  max-w-5xl space-y-4 px-2 lg:px-0', className)}>{children}</div>
 	);
 }

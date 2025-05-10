@@ -53,7 +53,7 @@ export default function OPlayer({
     return autoQualityVideos[0]?.src || videoUrls[0]?.src;
   }
 
-  const playerRef = useRef<Player<Ctx>>();
+  const playerRef = useRef<Player<Ctx>>(undefined);
   let image: string = "",
     title: string = "";
   if (type === "tv") {

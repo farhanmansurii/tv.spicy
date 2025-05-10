@@ -21,6 +21,7 @@ import { tmdbImage } from '@/lib/tmdb-image';
 import { TextGlitch } from '../animated-common/TextFlip';
 import { Badge } from '../ui/badge';
 import { Episode } from '@/lib/types';
+import BlurFade from '../ui/blur-fade';
 
 const RecentlyWatchedTV = () => {
 	const { recentlyWatched, loadEpisodes, deleteRecentlyWatched } = useTVShowStore();
@@ -36,12 +37,11 @@ const RecentlyWatchedTV = () => {
 	return (
 		recentlyWatched.length > 0 && (
 			<Carousel opts={{ dragFree: true }} className="w-[99%]  mx-auto">
-				<div className="flex font-bold justify-between  mx-auto text-xl md:text-3xl items-center my-1 py-1 flex-row">
+				<div className="flex  justify-between  mx-auto text-xl md:text-3xl items-center my-1   gap-4 py-2  flex-row">
 					<div className="mx-1 flex gap-2 items-center">
-						<h1 className="text-xl md:2x; flex  font-bold">Recently Watched</h1>
-						<div>
-							<CaretRightIcon className="h-full " />
-						</div>
+						<h1 className="text-5xl truncate md:text-6xl  tracking-tight lowercase text-foreground">
+							Recently Watched
+						</h1>
 					</div>
 					<div className="flex  gap-2">
 						<Button
@@ -61,74 +61,48 @@ const RecentlyWatchedTV = () => {
 						{recentlyWatched.map((show: Episode, index: number) => (
 							<CarouselItem
 								className={cn(
-									`group basis-7/12 w-full  md:basis-1/3 lg:basis-3/12   `
+									`group basis-9/12 w-full  md:basis-1/3 lg:basis-[30%]   `
 								)}
 								key={show.id}
 							>
 								<Link
 									href={`/tv/${show.show_id}?season=${show.season_number}&episode=${show.episode_number}`}
 								>
-									<Motiondiv
-										initial="hidden"
-										animate="visible"
-										transition={{
-											delay: index * 0.1,
-											ease: 'easeInOut',
-											duration: 0.5,
-										}}
-										viewport={{ amount: 0 }}
-										custom={index}
+									<div
+										className="group relative w-full h-full cursor-pointer  overflow-hidden aspect-video  bg-muted shadow"
+										data-testid="movie-card"
 									>
-										<div
-											className="w-full h-full group group-hover:scale-95 duration-100 cursor-pointer space-y-2"
-											data-testid="movie-card"
-										>
-											<div
-												style={{ aspectRatio: 16 / 9 }}
-												className="relative h-full  flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-background/50 shadow"
+										{show.still_path ? (
+											<BlurFade
+												key={show.still_path}
+												delay={0.05 + index * 0.04}
+												inView
 											>
-												{show.still_path ? (
-													<div>
-														<img
-															className="object-cover  inset-0"
-															src={tmdbImage(show.still_path, 'w500')}
-															alt={show.name}
-														/>
-														<svg
-															fill="currentColor"
-															viewBox="0 0 16 16"
-															height="2em"
-															width="2em"
-															className="absolute group-hover:opacity-100 opacity-0 scale-90 group-hover:scale-100 duration-200 ease-in-out bottom-0 right-0 m-4 text-white"
-														>
-															<path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z" />
-														</svg>
-													</div>
-												) : (
-													<div className="flex items-center justify-center w-full h-full bg-background">
-														<ImageIcon className="text-muted" />
-													</div>
-												)}
+												<img
+													src={tmdbImage(show.still_path, 'w500')}
+													alt={show.name}
+													className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+												/>
+											</BlurFade>
+										) : (
+											<div className="flex items-center justify-center w-full h-full bg-muted">
+												<ImageIcon className="w-6 h-6 text-muted-foreground" />
 											</div>
-
-											<div className="space-y-1.5">
-												<div className="flex text-sm md:text-base items-start justify-between gap-1">
-													<TextGlitch>{show.name}</TextGlitch>
-												</div>
-												<div
-													className={`text-xs  flex gap-1 capitalize opacity-75 `}
-												>
-													Season {show.season_number}
-													<p
-														className={` capitalize
-                          `}
-													>
-														• Episode {show.episode_number}
-													</p>
-												</div>
+										)}
+										<div className="top-0 absolute text-[10px] md:text-sm flex flex-row right-0 ">
+											<div className="px-2 py-0.5 text-background bg-primary">
+												S{show.season_number} E{show.episode_number}
 											</div>
 										</div>
-									</Motiondiv>
+										<div className="absolute w-full pl-2 pb-1 bg-gradient-to-t from-background/80 via-background/70 to-background/10 inset-0 text-foreground flex align-bottom flex-col justify-end transition-all duration-300 ">
+											<p className="text-xs md:text-sm text-muted-foreground mt-1">
+												{show.runtime} mins
+											</p>
+											<div className="flex items-center justify-between text-sm md:text-xl">
+												<p className=" truncate ">{show.name}</p>
+											</div>
+										</div>
+									</div>
 								</Link>
 							</CarouselItem>
 						))}
