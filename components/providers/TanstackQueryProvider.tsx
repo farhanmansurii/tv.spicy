@@ -1,11 +1,9 @@
-// TanstackQueryProvider.tsx
 'use client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState, useEffect } from 'react';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-import { usePathname } from 'next/navigation';
 import { Header } from '../common/header';
 import MinimalSocialsFooter from '../common/Footer';
 import NavigationProvider from './SidebarProvider';

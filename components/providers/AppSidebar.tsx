@@ -134,41 +134,39 @@ export function AppSidebar() {
 				<SidebarGroup>
 					<SidebarGroupLabel>Categories</SidebarGroupLabel>
 					<SidebarMenu>
-						{['movie', 'tv'].map((type) =>
-							genres[type]?.length > 0 ? (
-								<SidebarMenuItem key={type}>
-									<Collapsible
-										open={openSection === type}
-										onOpenChange={() =>
-											setOpenSection(openSection === type ? null : type)
-										}
-									>
-										<div className="flex items-center justify-between">
-											<SidebarMenuButton asChild>
-												<Link
-													href={`/${type}`}
-													onClick={handleLinkClick}
-													className={clsx(
-														'flex items-center',
-														isActive(`/${type}`) &&
-															'text-primary font-semibold'
-													)}
-												>
-													{type === 'movie' ? (
-														<Clapperboard className="mr-2 h-4 w-4" />
-													) : (
-														<MonitorPlay className="mr-2 h-4 w-4" />
-													)}
-													<span>
-														{type === 'movie' ? 'Movies' : 'TV Shows'}
-													</span>
-												</Link>
-											</SidebarMenuButton>
-										</div>
-									</Collapsible>
-								</SidebarMenuItem>
-							) : null
-						)}
+						{['movie', 'tv'].map((type) => (
+							<SidebarMenuItem key={type}>
+								<Collapsible
+									open={openSection === type}
+									onOpenChange={() =>
+										setOpenSection(openSection === type ? null : type)
+									}
+								>
+									<div className="flex items-center justify-between">
+										<SidebarMenuButton asChild>
+											<Link
+												href={`/${type}`}
+												onClick={handleLinkClick}
+												className={clsx(
+													'flex items-center',
+													isActive(`/${type}`) &&
+														'text-primary font-semibold'
+												)}
+											>
+												{type === 'movie' ? (
+													<Clapperboard className="mr-2 h-4 w-4" />
+												) : (
+													<MonitorPlay className="mr-2 h-4 w-4" />
+												)}
+												<span>
+													{type === 'movie' ? 'Movies' : 'TV Shows'}
+												</span>
+											</Link>
+										</SidebarMenuButton>
+									</div>
+								</Collapsible>
+							</SidebarMenuItem>
+						))}
 					</SidebarMenu>
 				</SidebarGroup>
 			</SidebarContent>
