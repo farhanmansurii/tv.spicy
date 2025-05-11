@@ -1,11 +1,8 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
-import { fetchMovieLinks, fetchVidSrc } from '@/lib/utils';
-import { Skeleton } from '../ui/skeleton';
+import React, { useEffect, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
-import { Forward, Settings } from 'lucide-react';
-import Link from 'next/link';
+import { Settings } from 'lucide-react';
 import useProviderStore from '@/store/providerStore';
 
 interface EpisodeProps {

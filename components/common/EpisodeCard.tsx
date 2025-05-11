@@ -20,11 +20,13 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, active, toggl
 	if (view === 'list') {
 		return (
 			<Link
+				scroll={true}
 				href={{
 					query: {
 						season: episode.season_number,
 						episode: episode.episode_number,
 					},
+					hash: 'episode-player',
 				}}
 				className={cn(
 					'p-3 rounded-md border transition cursor-pointer flex justify-between items-center',

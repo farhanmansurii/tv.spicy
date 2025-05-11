@@ -14,12 +14,21 @@ interface SeasonContentProps {
 	episodes: Episode[];
 	showId: string;
 	view: 'grid' | 'list' | 'carousel';
+	onEpisodeSelectScroll: () => void;
 }
 
-export const SeasonContent: React.FC<SeasonContentProps> = ({ episodes, showId, view }) => {
+export const SeasonContent: React.FC<SeasonContentProps> = ({
+	episodes,
+	showId,
+	view,
+	onEpisodeSelectScroll,
+}) => {
 	const today = new Date();
 	const { activeEP, setActiveEP } = useEpisodeStore();
 	const { addRecentlyWatched } = useTVShowStore();
+	const searchParams = useSearchParams();
+	const activeSeason = searchParams.get('season');
+	const activeEpisode = searchParams.get('episode');
 
 	const toggle = (episode: Episode, event: React.MouseEvent<HTMLDivElement>) => {
 		event.preventDefault();
@@ -40,6 +49,8 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({ episodes, showId, 
 
 		setActiveEP(episode);
 		addRecentlyWatched({ showId, time: 0, ...episode });
+
+		onEpisodeSelectScroll();
 	};
 
 	const hasEpisodes = episodes?.length > 0;
@@ -49,7 +60,11 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({ episodes, showId, 
 			<EpisodeCard
 				key={ep.id}
 				episode={ep}
-				active={activeEP?.id === ep.id}
+				active={
+					activeEP?.id === ep.id ||
+					(String(ep.season_number) === activeSeason &&
+						String(ep.episode_number) === activeEpisode)
+				}
 				toggle={toggle}
 				view={view}
 			/>

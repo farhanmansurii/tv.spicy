@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GalleryVerticalEnd, Grid, List, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
@@ -25,7 +25,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
 	const [activeSeason, setActiveSeason] = useState<number | null>(null);
 	const [view, setView] = useState<'grid' | 'list' | 'carousel'>('list');
 	const { activeEP, setActiveEP } = useEpisodeStore();
-
+	const episodePlayerRef = useRef<HTMLDivElement>(null);
 	const {
 		data: episodes,
 		isLoading,
@@ -124,6 +124,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
 				key={`${activeEP?.season_number}-${activeEP?.episode_number}`}
 				showId={showId}
 				getNextEp={handleNextEpisode}
+				ref={episodePlayerRef}
 			/>
 			<Carousel opts={{ dragFree: true }} className="w-full justify-between mx-auto ">
 				<div className="flex font-bold justify-between items-center text-xl md:text-2xl py-2 flex-row">
@@ -187,7 +188,19 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
 						</Button>
 					</div>
 				) : (
-					episodes && <SeasonContent view={view} showId={showId} episodes={episodes} />
+					episodes && (
+						<SeasonContent
+							view={view}
+							showId={showId}
+							episodes={episodes}
+							onEpisodeSelectScroll={() =>
+								episodePlayerRef.current?.scrollIntoView({
+									behavior: 'smooth',
+									block: 'start',
+								})
+							}
+						/>
+					)
 				)}
 			</Carousel>
 		</div>
