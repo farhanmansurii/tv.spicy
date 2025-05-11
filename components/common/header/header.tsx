@@ -2,6 +2,7 @@ import Link from 'next/link';
 import CommonContainer from '@/components/container/CommonContainer';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Menu } from 'lucide-react';
+import ThemeButton from '../ThemeButton';
 
 export const Header = () => {
 	return (

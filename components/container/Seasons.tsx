@@ -17,8 +17,9 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchSeasonEpisodes } from '@/lib/tmdb-fetch-helper';
 import { Card, CardContent } from '../ui/card';
 import { SeasonContent } from './SeasonContent';
-import { TVContainer } from '../common/TVContainer';
+
 import { useEpisodeStore } from '@/store/episodeStore';
+import { TVContainer } from '../common/TVContainer';
 
 const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
 	const searchParams = useSearchParams();
@@ -124,7 +125,6 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
 				key={`${activeEP?.season_number}-${activeEP?.episode_number}`}
 				showId={showId}
 				getNextEp={handleNextEpisode}
-				ref={episodePlayerRef}
 			/>
 			<Carousel opts={{ dragFree: true }} className="w-full justify-between mx-auto ">
 				<div className="flex font-bold justify-between items-center text-xl md:text-2xl py-2 flex-row">

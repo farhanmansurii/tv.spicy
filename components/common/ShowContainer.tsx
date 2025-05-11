@@ -2,7 +2,6 @@
 import React from 'react';
 import Episode from '../container/Episode';
 import SeasonTabs from '../container/Seasons';
-import { TVContainer } from './TVContainer';
 
 interface TMDBSeason {
 	air_date: string;

@@ -14,15 +14,11 @@ export const metadata: Metadata = {
 export const revalidate = 604800;
 
 const CarousalComponent = dynamic(() => import('@/components/common/CarousalComponent'), {
-	ssr: false,
 	loading: () => <div className="h-48 bg-neutral-800 animate-pulse rounded-md" />,
 });
-const RecentlyWatchedTV = dynamic(() => import('@/components/common/RecentlyWatched'), {
-	ssr: false,
-});
-const WatchList = dynamic(() => import('@/components/common/WatchList'), { ssr: false });
+const RecentlyWatchedTV = dynamic(() => import('@/components/common/RecentlyWatched'));
+const WatchList = dynamic(() => import('@/components/common/WatchList'));
 const GenreGrid = dynamic(() => import('@/components/genre-card/genre-grid'), {
-	ssr: false,
 	loading: () => <div className="h-96 bg-neutral-800 animate-pulse rounded-md" />,
 });
 

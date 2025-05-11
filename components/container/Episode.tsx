@@ -162,7 +162,7 @@ export default function Episode(props: EpisodeProps) {
 	}, [selectedProvider]);
 
 	return (
-		<div id="episode-player" className="">
+		<div id="episode-player">
 			<div className="flex items-center justify-between mb-2">
 				<Select defaultValue={selectedProvider} onValueChange={handleSelectOnChange}>
 					<SelectTrigger className="w-fit h-12 ">
