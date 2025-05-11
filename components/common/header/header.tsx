@@ -1,18 +1,10 @@
-/* eslint-disable @next/next/no-img-element */
-'use client';
-
 import Link from 'next/link';
 import CommonContainer from '@/components/container/CommonContainer';
-
-const categories = [
-	{ title: 'Movies', href: '/movie' },
-	{ title: 'TV', href: '/tv' },
-	{ title: 'Anime', href: 'https://spicyanime.com' },
-];
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const Header = () => {
-	const isActive = (href: string) => false; // implement your active route logic
-
 	return (
 		<CommonContainer>
 			<nav
@@ -20,8 +12,7 @@ export const Header = () => {
 				role="navigation"
 				aria-label="Main navigation"
 			>
-				{/* Left section: logo + nav */}
-				<div className="flex items-center gap-8">
+				<div className="flex items-center gap-4">
 					<Link href="/" className="flex items-center h-10">
 						<img
 							src="/logo.webp"
@@ -32,32 +23,10 @@ export const Header = () => {
 						/>
 					</Link>
 				</div>
-
-				{/* Right section: search + theme toggle */}
-				<div className="flex items-center gap-3">
-					<ul className="flex gap-5 text-sm font-medium text-muted-foreground">
-						{categories.map(({ title, href }) => {
-							const active = isActive(href);
-							return (
-								<li key={href}>
-									<Link
-										href={href}
-										className={`transition-colors hover:text-foreground ${
-											active ? 'text-foreground font-semibold' : ''
-										}`}
-									>
-										{title}
-									</Link>
-								</li>
-							);
-						})}
-					</ul>
-					<Link
-						href="/search"
-						className="text-sm px-3 py-1 border border-border hover:border-foreground transition-colors"
-					>
-						Search
-					</Link>
+				<div className="flex items-center gap-2">
+					<SidebarTrigger>
+						<Menu className="w-5 h-5" />
+					</SidebarTrigger>
 				</div>
 			</nav>
 		</CommonContainer>

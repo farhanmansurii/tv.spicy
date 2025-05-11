@@ -27,7 +27,7 @@ export default function ShowDetails({ id, show, language, embed = false, type }:
 				<Banner url={tmdbImage(show.backdrop_path)} />
 			</div>
 
-			<div className="mx-auto max-w-6xl px-4  pt-4">
+			<div className="  pt-4">
 				<main className="flex flex-col md:flex-row gap-4">
 					<article className="flex flex-col w-full">
 						{show?.first_air_date && (

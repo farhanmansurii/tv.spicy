@@ -8,8 +8,9 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 import { usePathname } from 'next/navigation';
 import { Header } from '../common/header';
 import MinimalSocialsFooter from '../common/Footer';
+import NavigationProvider from './SidebarProvider';
 
-const QueryProvider = ({ children }: { children: React.ReactNode }) => {
+const QueryProvider = ({ children, genres }: { children: React.ReactNode; genres: any }) => {
 	const [queryClient] = useState(() => {
 		const client = new QueryClient({
 			defaultOptions: {
@@ -29,19 +30,20 @@ const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 		persistQueryClient({
 			queryClient: client,
 			persister: localStoragePersistor,
-			maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+			maxAge: 1000 * 60 * 60 * 24 * 7,
 		});
 
 		return client;
 	});
 
-	const pathname = usePathname();
 	return (
 		<QueryClientProvider client={queryClient}>
-			{pathname !== '/' && <Header />}
-			{children}
-			{pathname !== '/' && <MinimalSocialsFooter />}
-			<ReactQueryDevtools initialIsOpen={false} />
+			<NavigationProvider genres={genres}>
+				<Header />
+				{children}
+				<MinimalSocialsFooter />
+				<ReactQueryDevtools initialIsOpen={false} />
+			</NavigationProvider>
 		</QueryClientProvider>
 	);
 };

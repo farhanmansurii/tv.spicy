@@ -1,9 +1,9 @@
 'use client';
+
 import { Anime, Show } from '@/lib/types';
-import React, { useState, type JSX } from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import MoreInfoComponent from '../common/MoreInfoComponent';
 import GridLoader from '../loading/GridLoader';
 
 const RelatedShowsComponent = dynamic(() => import('../container/RelatedShowContainer'), {
@@ -19,17 +19,24 @@ interface TabProps {
 	setSelected: (text: string) => void;
 }
 
-export default function MoreDetailsContainer(props: {
-	show: Show | Anime;
-	type: string;
-	renderContent: (selected: string) => JSX.Element;
-}) {
+export default function MoreDetailsContainer({ show, type }: { show: Show | Anime; type: string }) {
 	const [selected, setSelected] = useState<string>(tabs[0]);
-	const content = props.renderContent && selected && props.renderContent(selected);
+
+	const renderContent = () => {
+		switch (selected) {
+			case 'Recommendations':
+				return <RelatedShowsComponent relation="recommendations" type={type} show={show} />;
+			case 'Related Shows':
+				return <RelatedShowsComponent relation="similar" type={type} show={show} />;
+			default:
+				return <div>No Content</div>;
+		}
+	};
+
 	return (
-		<div className="mx-auto  max-w-7xl space-y-8 px-4 md:space-y-12 md:px-0">
-			<div className="mb-4  flex flex-wrap items-center gap-2">
-				{tabs.map((tab, index) => (
+		<div className="mx-auto max-w-7xl space-y-8 px-4 md:space-y-12 md:px-0">
+			<div className="mb-4 flex flex-wrap items-center gap-2">
+				{tabs.map((tab) => (
 					<Tab
 						text={tab}
 						selected={selected === tab}
@@ -38,7 +45,7 @@ export default function MoreDetailsContainer(props: {
 					/>
 				))}
 			</div>
-			<div className="w-full min-h-[200px] mx-auto">{content}</div>
+			<div className="w-full min-h-[200px] mx-auto">{renderContent()}</div>
 		</div>
 	);
 }
@@ -58,8 +65,14 @@ const Tab = ({ text, selected, setSelected }: TabProps) => {
 				<motion.span
 					layoutId="tab"
 					transition={{ type: 'spring', duration: 0.4 }}
-					className="absolute inset-0 z-0 rounded bg-primary"
-				></motion.span>
+					style={{
+						position: 'absolute',
+						inset: 0,
+						zIndex: 0,
+						borderRadius: '9999px',
+						backgroundColor: 'var(--primary)',
+					}}
+				/>
 			)}
 		</button>
 	);

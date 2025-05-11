@@ -63,6 +63,7 @@ export default function Row(props: {
 									key={show.id}
 								>
 									<ShowCard
+										key={show.id}
 										type={props.type}
 										showRank={props.showRank}
 										show={show}
