@@ -2,7 +2,6 @@ import Link from 'next/link';
 import CommonContainer from '@/components/container/CommonContainer';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 export const Header = () => {
 	return (

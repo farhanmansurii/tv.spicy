@@ -284,3 +284,8 @@ export const fetchSeasonEpisodes = async (
 		throw error;
 	}
 };
+import * as Icons from 'lucide-react';
+
+export function getLucideIcon(iconName: string) {
+	return Icons[iconName as keyof typeof Icons] || Icons.Circle;
+}

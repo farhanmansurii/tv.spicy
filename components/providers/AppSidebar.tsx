@@ -12,20 +12,18 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarMenuSub,
-	SidebarMenuSubButton,
 	SidebarGroup,
 	SidebarGroupLabel,
 	useSidebar,
 } from '@/components/ui/sidebar';
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible } from '@/components/ui/collapsible';
 
 import { Input } from '@/components/ui/input';
-import { LayoutDashboard, Search, Clapperboard, MonitorPlay, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Search, Clapperboard, MonitorPlay } from 'lucide-react';
 import { Button } from '../ui/button';
 
-export function AppSidebar({ genres }: { genres: any }) {
+export function AppSidebar() {
 	const { setOpen, toggleSidebar } = useSidebar();
 	const [openSection, setOpenSection] = React.useState<string | null>(null);
 	const pathname = usePathname();
@@ -166,36 +164,7 @@ export function AppSidebar({ genres }: { genres: any }) {
 													</span>
 												</Link>
 											</SidebarMenuButton>
-											<CollapsibleTrigger asChild>
-												<Button size={'icon'} variant={'outline'}>
-													<ChevronRight
-														className={clsx(
-															'transition-transform',
-															openSection === type && 'rotate-90'
-														)}
-													/>
-												</Button>
-											</CollapsibleTrigger>
 										</div>
-										<CollapsibleContent>
-											<SidebarMenuSub>
-												{genres[type].map((genre: any) => (
-													<SidebarMenuSubButton key={genre.id} asChild>
-														<Link
-															href={`/discover/${genre.id}?type=${type}&id=${genre.id}&title=${genre.name}`}
-															onClick={handleLinkClick}
-															className={clsx(
-																isActive(
-																	`/discover/${genre.id}?type=${type}&id=${genre.id}&title=${genre.name}`
-																) && 'text-primary font-semibold'
-															)}
-														>
-															{genre.name}
-														</Link>
-													</SidebarMenuSubButton>
-												))}
-											</SidebarMenuSub>
-										</CollapsibleContent>
 									</Collapsible>
 								</SidebarMenuItem>
 							) : null

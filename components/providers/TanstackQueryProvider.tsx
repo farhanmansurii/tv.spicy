@@ -10,7 +10,7 @@ import { Header } from '../common/header';
 import MinimalSocialsFooter from '../common/Footer';
 import NavigationProvider from './SidebarProvider';
 
-const QueryProvider = ({ children, genres }: { children: React.ReactNode; genres: any }) => {
+const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 	const [queryClient] = useState(() => {
 		const client = new QueryClient({
 			defaultOptions: {
@@ -38,7 +38,7 @@ const QueryProvider = ({ children, genres }: { children: React.ReactNode; genres
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<NavigationProvider genres={genres}>
+			<NavigationProvider>
 				<Header />
 				{children}
 				<MinimalSocialsFooter />

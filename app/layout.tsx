@@ -3,7 +3,6 @@ import { ThemeProvider } from '@/components/providers/Provider';
 import TanstackQueryProvider from '@/components/providers/TanstackQueryProvider';
 import NavigationProvider from '@/components/providers/SidebarProvider';
 import type { Metadata, Viewport } from 'next';
-import { genreData } from '@/lib/readGenres';
 
 export const generateMetadata = (): Metadata => ({
 	title: 'Watvh TV - Stream Movies, TV Shows, and Anime',
@@ -51,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					enableSystem
 					disableTransitionOnChange
 				>
-					<TanstackQueryProvider genres={genreData}>{children}</TanstackQueryProvider>
+					<TanstackQueryProvider>{children}</TanstackQueryProvider>
 				</ThemeProvider>
 			</body>
 		</html>
