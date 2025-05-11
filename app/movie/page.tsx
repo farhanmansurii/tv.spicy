@@ -1,9 +1,6 @@
-import CarousalComponent from '@/components/common/CarousalComponent';
-import RecentlyWatched from '@/components/common/RecentlyWatched';
-import WatchList from '@/components/common/WatchList';
+import dynamic from 'next/dynamic';
 import CommonContainer from '@/components/container/CommonContainer';
 import FetchAndRenderRow from '@/components/container/FetchAndRenderRow';
-import GenreGrid from '@/components/genre-card/genre-grid';
 import RowLoader from '@/components/loading/RowLoader';
 import { fetchGenres } from '@/lib/utils';
 import { Metadata } from 'next';
@@ -15,39 +12,65 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 604800;
-export default async function page() {
+
+const CarousalComponent = dynamic(() => import('@/components/common/CarousalComponent'), {
+	ssr: false,
+	loading: () => <div className="h-48 bg-neutral-800 animate-pulse rounded-md" />,
+});
+const WatchList = dynamic(() => import('@/components/common/WatchList'), { ssr: false });
+const GenreGrid = dynamic(() => import('@/components/genre-card/genre-grid'), {
+	ssr: false,
+	loading: () => <div className="h-96 bg-neutral-800 animate-pulse rounded-md" />,
+});
+
+export default async function Page() {
 	const genres = await fetchGenres('movie');
+
 	return (
 		<CommonContainer>
-			<CarousalComponent type={'movie'} />
+			<Suspense fallback={<div className="h-48 bg-neutral-800 animate-pulse rounded-md" />}>
+				<CarousalComponent type="movie" />
+			</Suspense>
+
 			<div className="flex flex-col space-y-12">
-				<WatchList type="movie" />
+				<Suspense fallback={null}>
+					<WatchList type="movie" />
+				</Suspense>
+
 				<FetchAndRenderRow
 					apiEndpoint="trending/movie/week"
 					text="Top Movies"
 					showRank={false}
 					type="movie"
 				/>
+
 				<FetchAndRenderRow
 					apiEndpoint="movie/top_rated"
 					text="Top Rated Movies"
 					showRank={true}
 					type="movie"
 				/>
-				{genres &&
-					genres.map((genre: any) => (
-						<Suspense key={genre.id} fallback={<RowLoader withHeader key={genre.id} />}>
-							<FetchAndRenderRow
-								showRank={false}
-								type="movie"
-								apiEndpoint={{ id: genre.id, type: 'movie' }}
-								text={genre.name}
-								isGenre={true}
-							/>
-						</Suspense>
-					))}
+
+				{genres?.map((genre: any) => (
+					<Suspense key={genre.id} fallback={<RowLoader withHeader key={genre.id} />}>
+						<FetchAndRenderRow
+							showRank={false}
+							type="movie"
+							apiEndpoint={{ id: genre.id, type: 'movie' }}
+							text={genre.name}
+							isGenre={true}
+						/>
+					</Suspense>
+				))}
 			</div>
-			<GenreGrid genres={genres} type="movie" />
+
+			{genres.length > 0 && (
+				<Suspense
+					fallback={<div className="h-96 bg-neutral-800 animate-pulse rounded-md" />}
+				>
+					<GenreGrid genres={genres} type="movie" />
+				</Suspense>
+			)}
 		</CommonContainer>
 	);
 }

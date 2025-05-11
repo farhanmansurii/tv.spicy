@@ -125,7 +125,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
 				showId={showId}
 				getNextEp={handleNextEpisode}
 			/>
-			<Carousel opts={{ dragFree: true }} className="w-full justify-between mx-auto px-3">
+			<Carousel opts={{ dragFree: true }} className="w-full justify-between mx-auto ">
 				<div className="flex font-bold justify-between items-center text-xl md:text-2xl py-2 flex-row">
 					<Select defaultValue={String(activeSeason)} onValueChange={handleSeasonChange}>
 						<SelectTrigger className="w-fit">

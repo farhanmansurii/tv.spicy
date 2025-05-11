@@ -34,7 +34,7 @@ export default function MoreDetailsContainer({ show, type }: { show: Show | Anim
 	};
 
 	return (
-		<div className="mx-auto max-w-7xl space-y-8 px-4 md:space-y-12 md:px-0">
+		<div className="mx-auto max-w-7xl space-y-8  md:space-y-12 md:px-0">
 			<div className="mb-4 flex flex-wrap items-center gap-2">
 				{tabs.map((tab) => (
 					<Tab
@@ -58,7 +58,7 @@ const Tab = ({ text, selected, setSelected }: TabProps) => {
 				selected
 					? 'text-secondary'
 					: 'text-secondary-foreground hover:text-secondary-foreground/40'
-			} relative rounded-full px-4 py-2 text-sm font-medium transition-colors`}
+			} relative  px-4 py-2 text-sm font-medium transition-colors`}
 		>
 			<span className="relative z-10">{text}</span>
 			{selected && (
@@ -69,7 +69,7 @@ const Tab = ({ text, selected, setSelected }: TabProps) => {
 						position: 'absolute',
 						inset: 0,
 						zIndex: 0,
-						borderRadius: '9999px',
+						borderRadius: '4px',
 						backgroundColor: 'var(--primary)',
 					}}
 				/>
