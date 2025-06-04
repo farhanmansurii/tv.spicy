@@ -4,17 +4,21 @@ interface Episode {
 }
 
 const DB_NAME = "TVShowDB";
+const DB_VERSION = 2;
 const STORE_NAME = "recentlyWatchedEpisodes";
 const SEARCH_STORE_NAME = "recentlySearchedEpisodes";
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: "tv_id" });
+      }
+      if (!db.objectStoreNames.contains(SEARCH_STORE_NAME)) {
+        db.createObjectStore(SEARCH_STORE_NAME, { keyPath: "id", autoIncrement: true });
       }
     };
 
@@ -113,7 +117,7 @@ export async function saveRecentlySearchedToDB(recentlySearchedItems: any[]): Pr
   const store = transaction.objectStore(SEARCH_STORE_NAME);
 
   for (const item of recentlySearchedItems) {
-    store.add(item);
+    store.put(item);
   }
 
   return new Promise<void>((resolve, reject) => {
