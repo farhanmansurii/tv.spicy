@@ -14,7 +14,7 @@ export default function CommonTitle({
 	return (
 		<h1
 			className={cn(
-				'text-5xl  md:text-6xl  tracking-tight text-foreground',
+				'text-3xl  md:text-4xl  tracking-tight text-foreground',
 				shouldWrap ? 'whitespace-pre-wrap ' : '',
 				avoidLowerCase ? 'normal-case' : 'lowercase',
 				className

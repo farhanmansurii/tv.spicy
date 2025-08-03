@@ -2,6 +2,7 @@
 import React from 'react';
 import Episode from '../container/Episode';
 import SeasonTabs from '../container/Seasons';
+import { Show } from '@/lib/types';
 
 interface TMDBSeason {
 	air_date: string;
@@ -17,13 +18,14 @@ interface ShowContainerProps {
 	type: string;
 	id: string;
 	seasons: TMDBSeason[];
+	showData: Show;
 }
 
-const ShowContainer: React.FC<ShowContainerProps> = ({ type, id, seasons }) => {
+const ShowContainer: React.FC<ShowContainerProps> = ({ type, id, seasons, showData }) => {
 	return (
 		<div className="mx-auto  max-w-7xl space-y-8  md:space-y-12 md:px-0">
 			{type === 'tv' ? (
-				<SeasonTabs seasons={seasons} showId={id} />
+				<SeasonTabs seasons={seasons} showId={id} showData={showData} />
 			) : (
 				<div className="mx-auto my-8 max-w-7xl w-full space-y-8  md:space-y-12 md:px-0">
 					<Episode episodeId={''} id={id || ''} movieID={id} type={type} />

@@ -17,6 +17,7 @@ import {
 	CommandItem,
 	CommandList,
 } from '@/components/ui/command';
+
 export const SearchCommandBox = ({
 	children,
 	searchType = 'tvshow',

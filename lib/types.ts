@@ -44,6 +44,7 @@ interface SeasonContentProps {
 }
 
 export interface Episode {
+	show_name: string;
 	img: any;
 	season: any;
 	episode: any;
@@ -86,6 +87,7 @@ interface CastMember {
 export interface SeasonTabsProps {
 	seasons: any[];
 	showId: string;
+	showData: Show;
 }
 
 export interface Anime {

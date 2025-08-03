@@ -28,6 +28,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, active, toggl
 					},
 					hash: 'episode-player',
 				}}
+				onClick={(ev: any) => toggle(episode, ev)}
 				className={cn(
 					'p-3 rounded-md border transition cursor-pointer flex justify-between items-center',
 					active ? 'bg-primary/10 border-primary' : 'hover:bg-muted'
@@ -51,6 +52,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, active, toggl
 			</Link>
 		);
 	}
+
 	return (
 		<CarouselItem
 			onClick={(ev) => toggle(episode, ev)}

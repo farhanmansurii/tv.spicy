@@ -23,7 +23,7 @@ export async function fetchAnimeByCategory(params: string, type: string, page: n
 	}
 }
 
-export async function fetchData(endpoint: string) {
+export async function fetchData(endpoint: string, sortByDate = false) {
 	try {
 		const url = new URL(endpoint, baseUrl);
 
@@ -32,7 +32,16 @@ export async function fetchData(endpoint: string) {
 			throw new Error('Failed to fetch data');
 		}
 
-		return response.data;
+		return sortByDate
+			? response.data.sort((a: any, b: any) => {
+					const aDate = a.release_date || a.first_air_date;
+					const bDate = b.release_date || b.first_air_date;
+					if (!aDate && !bDate) return 0;
+					if (!aDate) return 1;
+					if (!bDate) return -1;
+					return new Date(bDate).getTime() - new Date(aDate).getTime();
+				})
+			: response.data;
 	} catch (error) {
 		console.error(error);
 		throw error;

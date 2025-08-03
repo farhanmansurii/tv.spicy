@@ -36,12 +36,10 @@ const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<NavigationProvider>
-				<Header />
-				{children}
-				<MinimalSocialsFooter />
-				<ReactQueryDevtools initialIsOpen={false} />
-			</NavigationProvider>
+			<Header />
+			{children}
+			<MinimalSocialsFooter />
+			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	);
 };

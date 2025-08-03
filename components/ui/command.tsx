@@ -12,7 +12,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
 	return (
@@ -31,10 +30,14 @@ function CommandDialog({
 	title = 'Command Palette',
 	description = 'Search for a command to run...',
 	children,
+	className,
+	showCloseButton = true,
 	...props
 }: React.ComponentProps<typeof Dialog> & {
 	title?: string;
 	description?: string;
+	className?: string;
+	showCloseButton?: boolean;
 }) {
 	return (
 		<Dialog {...props}>
@@ -42,8 +45,11 @@ function CommandDialog({
 				<DialogTitle>{title}</DialogTitle>
 				<DialogDescription>{description}</DialogDescription>
 			</DialogHeader>
-			<DialogContent className="overflow-hidden p-0">
-				<Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+			<DialogContent
+				className={cn('overflow-hidden p-0', className)}
+				showCloseButton={showCloseButton}
+			>
+				<Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
 					{children}
 				</Command>
 			</DialogContent>
@@ -60,10 +66,11 @@ function CommandInput({
 			data-slot="command-input-wrapper"
 			className="flex h-9 items-center gap-2 border-b px-3"
 		>
-			<MagnifyingGlassIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+			<SearchIcon className="size-4 shrink-0 opacity-50" />
 			<CommandPrimitive.Input
+				data-slot="command-input"
 				className={cn(
-					'flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+					'placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
 					className
 				)}
 				{...props}
@@ -76,7 +83,7 @@ function CommandList({ className, ...props }: React.ComponentProps<typeof Comman
 	return (
 		<CommandPrimitive.List
 			data-slot="command-list"
-			className={cn('max-h-[300px] overflow-y-auto overflow-x-hidden', className)}
+			className={cn('max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto', className)}
 			{...props}
 		/>
 	);
@@ -100,7 +107,7 @@ function CommandGroup({
 		<CommandPrimitive.Group
 			data-slot="command-group"
 			className={cn(
-				'overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground',
+				'text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium',
 				className
 			)}
 			{...props}

@@ -21,7 +21,7 @@ import { SeasonContent } from './SeasonContent';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { TVContainer } from '../common/TVContainer';
 
-const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
+const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId, showData }) => {
 	const searchParams = useSearchParams();
 	const [activeSeason, setActiveSeason] = useState<number | null>(null);
 	const [view, setView] = useState<'grid' | 'list' | 'carousel'>('list');
@@ -199,6 +199,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId }) => {
 									block: 'start',
 								})
 							}
+							showData={showData}
 						/>
 					)
 				)}

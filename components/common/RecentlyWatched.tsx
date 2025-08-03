@@ -26,6 +26,7 @@ import CommonTitle from '../animated-common/CommonTitle';
 
 const RecentlyWatchedTV = () => {
 	const { recentlyWatched, loadEpisodes, deleteRecentlyWatched } = useTVShowStore();
+	console.log(`[log] : RecentlyWatched.tsx:29 : recentlyWatched →`, recentlyWatched);
 
 	useEffect(() => {
 		loadEpisodes();
@@ -64,7 +65,7 @@ const RecentlyWatchedTV = () => {
 							key={show.id}
 						>
 							<Link
-								href={`/tv/${show.show_id}?season=${show.season_number}&episode=${show.episode_number}`}
+								href={`/tv/${show.tv_id}?season=${show.season_number}&episode=${show.episode_number}`}
 							>
 								<div
 									className="group relative w-full h-full cursor-pointer  overflow-hidden aspect-video  bg-muted shadow"
@@ -96,6 +97,10 @@ const RecentlyWatchedTV = () => {
 										<p className="text-xs md:text-sm text-muted-foreground mt-1">
 											{show.runtime} mins
 										</p>
+										<p className="text-xs md:text-sm text-muted-foreground ">
+											{show.show_name && `${show.show_name}`}
+										</p>
+
 										<div className="flex items-center justify-between text-sm md:text-xl">
 											<p className=" truncate ">{show.name}</p>
 										</div>

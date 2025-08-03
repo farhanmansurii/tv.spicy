@@ -27,7 +27,7 @@ const CarousalCardWrapper = ({ show }: CarousalCardProps) => {
 
 			<div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent z-0" />
 
-			<div className="relative z-10 h-full flex flex-col justify-end p-6 sm:p-6 max-w-5xl text-white select-none">
+			<div className="relative z-10 h-full flex flex-col justify-end p-6 sm:p-6 max-w-6xl text-white select-none">
 				{formattedDate && (
 					<p className="text-xs sm:text-sm text-white/70 mb-1">{formattedDate}</p>
 				)}

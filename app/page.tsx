@@ -4,6 +4,7 @@ import { Header } from '@/components/common/header';
 import WatchList from '@/components/common/WatchList';
 import RecentlyWatchedTV from '@/components/common/RecentlyWatched';
 import { fetchRowData } from '@/lib/utils';
+import CommonContainer from '@/components/container/CommonContainer';
 
 export const revalidate = 604800;
 
@@ -16,8 +17,8 @@ export default async function HomePage() {
 	]);
 
 	return (
-		<main className="container mx-auto px-2 space-y-14 pb-20">
-			<div className="max-w-5xl space-y-10 mx-auto">
+		<CommonContainer className="space-y-14 pb-20">
+			<div className="space-y-10">
 				<RecentlyWatchedTV />
 				<WatchList type="movie" />
 				<WatchList type="tv" />
@@ -26,6 +27,6 @@ export default async function HomePage() {
 			<BentoGrid title="Top Rated TV" shows={topRatedTV} type="tv" />
 			<BentoGrid title="Trending Movies" shows={trendingMovies} type="movie" />
 			<BentoGrid title="Top Rated Movies" shows={topRatedMovies} type="movie" />
-		</main>
+		</CommonContainer>
 	);
 }

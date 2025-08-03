@@ -7,7 +7,7 @@ import { CarouselContent, CarouselNext, CarouselPrevious } from '../ui/carousel'
 import { isBefore } from 'date-fns';
 import { toast } from '../ui/use-toast';
 import { useSearchParams } from 'next/navigation';
-import { Episode } from '@/lib/types';
+import { Episode, Show } from '@/lib/types';
 import { EpisodeCard } from '../common/EpisodeCard';
 
 interface SeasonContentProps {
@@ -15,6 +15,7 @@ interface SeasonContentProps {
 	showId: string;
 	view: 'grid' | 'list' | 'carousel';
 	onEpisodeSelectScroll: () => void;
+	showData: Show;
 }
 
 export const SeasonContent: React.FC<SeasonContentProps> = ({
@@ -22,6 +23,7 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
 	showId,
 	view,
 	onEpisodeSelectScroll,
+	showData,
 }) => {
 	const today = new Date();
 	const { activeEP, setActiveEP } = useEpisodeStore();
@@ -39,6 +41,7 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
 		}
 
 		const isReleased = isBefore(new Date(episode.air_date), today);
+
 		if (!isReleased) {
 			toast({
 				title: 'Episode Not Available Yet',
@@ -47,8 +50,40 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
 			return;
 		}
 
-		setActiveEP(episode);
-		addRecentlyWatched({ showId, time: 0, ...episode });
+		// Check if this episode is already active
+		const isCurrentlyActive =
+			(String(episode.season_number) === activeSeason &&
+				String(episode.episode_number) === activeEpisode) ||
+			activeEP?.id === episode.id;
+
+		// Only proceed if the episode is actually changing
+		if (!isCurrentlyActive) {
+			// Update both store and URL parameters
+			setActiveEP(episode);
+
+			// Update URL parameters
+			const params = new URLSearchParams(window.location.search);
+			params.set('season', String(episode.season_number));
+			params.set('episode', String(episode.episode_number));
+			window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+
+			const episodeWithHistory = {
+				...episode,
+				tv_id: showId,
+				time: 0,
+				id: episode.id,
+				name: episode.name,
+				episode_number: episode.episode_number,
+				season_number: episode.season_number,
+				air_date: episode.air_date,
+				overview: episode.overview,
+				runtime: episode.runtime,
+				still_path: episode.still_path || showData.backdrop_path,
+				show_name: showData?.title,
+			};
+
+			addRecentlyWatched(episodeWithHistory);
+		}
 
 		onEpisodeSelectScroll();
 	};
@@ -61,9 +96,12 @@ export const SeasonContent: React.FC<SeasonContentProps> = ({
 				key={ep.id}
 				episode={ep}
 				active={
-					activeEP?.id === ep.id ||
+					// Check if URL parameters match1234
+
 					(String(ep.season_number) === activeSeason &&
-						String(ep.episode_number) === activeEpisode)
+						String(ep.episode_number) === activeEpisode) ||
+					// OR if store state matches (for cases without URL params)
+					activeEP?.id === ep.id
 				}
 				toggle={toggle}
 				view={view}

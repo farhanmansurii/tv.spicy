@@ -179,7 +179,10 @@ export default function OPlayer({
 			.catch((err) => console.log(err));
 
 		const ep = recentlyWatched.find(
-			(epi: any) => epi?.tv_id === activeEP?.tv_id && epi?.id === activeEP?.id
+			(epi: any) =>
+				epi?.tv_id === activeEP?.tv_id &&
+				epi?.season_number === activeEP?.season_number &&
+				epi?.episode_number === activeEP?.episode_number
 		);
 		if (type === 'tv' && ep && ep.time) {
 			oplayer.on('loadedmetadata', () => {

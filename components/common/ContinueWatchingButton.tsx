@@ -50,7 +50,16 @@ export default function ContinueWatchingButton({
 		}
 	};
 
-	const recentlyWatchedEpisode = recentlyWatched.find((episode: Episode) => episode.tv_id === id);
+	// Find the most recently watched episode for this show
+	const recentlyWatchedEpisode = recentlyWatched
+		.filter((episode: Episode) => episode.tv_id === id)
+		.sort((a: Episode, b: Episode) => {
+			// Sort by season and episode number to get the latest episode
+			if (a.season_number !== b.season_number) {
+				return b.season_number - a.season_number;
+			}
+			return b.episode_number - a.episode_number;
+		})[0];
 	const isEpisodeActive = recentlyWatchedEpisode?.episode_number === activeEP?.episode_number;
 
 	return (
