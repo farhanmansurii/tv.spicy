@@ -27,7 +27,6 @@ function openDB(): Promise<IDBDatabase> {
 		const request = indexedDB.open(DB_NAME, 3);
 
 		request.onupgradeneeded = (event) => {
-			console.log('Upgrading IndexedDB to version 3');
 			const db = request.result;
 
 			// Delete old stores if they exist
@@ -64,7 +63,6 @@ function openDB(): Promise<IDBDatabase> {
 
 export async function saveEpisodesToDB(episodes: Episode[]): Promise<void> {
 	try {
-		console.log('Saving episodes to DB:', episodes);
 		const db = await openDB();
 		const transaction = db.transaction(STORE_NAME, 'readwrite');
 		const store = transaction.objectStore(STORE_NAME);
@@ -73,7 +71,6 @@ export async function saveEpisodesToDB(episodes: Episode[]): Promise<void> {
 		await new Promise<void>((resolve, reject) => {
 			const clearRequest = store.clear();
 			clearRequest.onsuccess = () => {
-				console.log('Store cleared successfully');
 				resolve();
 			};
 			clearRequest.onerror = () => {
@@ -84,7 +81,6 @@ export async function saveEpisodesToDB(episodes: Episode[]): Promise<void> {
 
 		// Add new episodes
 		for (const episode of episodes) {
-			console.log('Adding episode:', episode);
 			const addRequest = store.add(episode);
 			addRequest.onerror = () => {
 				console.error('Failed to add episode:', episode, 'Error:', addRequest.error);
@@ -93,7 +89,6 @@ export async function saveEpisodesToDB(episodes: Episode[]): Promise<void> {
 
 		return new Promise<void>((resolve, reject) => {
 			transaction.oncomplete = () => {
-				console.log('Transaction completed successfully');
 				db.close();
 				resolve();
 			};
@@ -112,7 +107,6 @@ export async function saveEpisodesToDB(episodes: Episode[]): Promise<void> {
 
 export async function loadEpisodesFromDB(): Promise<Episode[]> {
 	try {
-		console.log('Loading episodes from DB');
 		const db = await openDB();
 		const transaction = db.transaction(STORE_NAME, 'readonly');
 		const store = transaction.objectStore(STORE_NAME);
@@ -128,7 +122,6 @@ export async function loadEpisodesFromDB(): Promise<Episode[]> {
 					episodes.push(cursor.value);
 					cursor.continue();
 				} else {
-					console.log('Loaded episodes from DB:', episodes);
 					resolve(episodes);
 				}
 			};

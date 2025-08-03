@@ -15,24 +15,15 @@ const useTVShowStore = create<TVShowStore>((set) => ({
 	recentlyWatched: [],
 	addRecentlyWatched: (episode) => {
 		set((state) => {
-			console.log('Adding episode:', episode);
-			console.log('Current recently watched:', state.recentlyWatched);
-
 			// Remove any existing episodes from the same show
 			const filteredEpisodes = state.recentlyWatched.filter((existingEpisode: any) => {
 				const shouldKeep = existingEpisode.tv_id !== episode.tv_id;
-				console.log(
-					`Episode ${existingEpisode.name} (tv_id: ${existingEpisode.tv_id}) vs new episode (tv_id: ${episode.tv_id}) - keeping: ${shouldKeep}`
-				);
+
 				return shouldKeep;
 			});
 
-			console.log('Filtered episodes:', filteredEpisodes);
-
 			// Add the new episode at the beginning
 			const updatedRecentlyWatched = [episode, ...filteredEpisodes];
-
-			console.log('Updated recently watched:', updatedRecentlyWatched);
 
 			saveEpisodesToDB(updatedRecentlyWatched);
 			return { recentlyWatched: updatedRecentlyWatched };

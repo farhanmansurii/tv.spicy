@@ -26,7 +26,6 @@ import CommonTitle from '../animated-common/CommonTitle';
 
 const RecentlyWatchedTV = () => {
 	const { recentlyWatched, loadEpisodes, deleteRecentlyWatched } = useTVShowStore();
-	console.log(`[log] : RecentlyWatched.tsx:29 : recentlyWatched →`, recentlyWatched);
 
 	useEffect(() => {
 		loadEpisodes();
