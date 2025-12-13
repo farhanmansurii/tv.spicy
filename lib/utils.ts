@@ -48,7 +48,9 @@ export async function fetchDetails(id: string, type: string) {
 		const url = new URL(
 			`https://consumet-taupe-seven.vercel.app/meta/tmdb/info/${id}?type=${type}`
 		);
-		const response = await fetch(url.toString(), { cache: 'no-cache' });
+		const response = await fetch(url.toString(), {
+			next: { revalidate: 3600 }, // Revalidate every hour
+		});
 		if (!response.ok) throw new Error('Failed to fetch data');
 		const data = await response.json();
 		return data;
@@ -71,7 +73,6 @@ export async function fetchDetailsTMDB(id: string, type: string) {
 			`https://api.themoviedb.org/3/${type}/${id}?api_key=${process.env.TMDB_API_KEY}&append_to_response=${appendToResponse}&include_image_language=en,null`
 		);
 		const response = await fetch(url.toString(), {
-			cache: 'no-cache',
 			next: { revalidate: 3600 }, // Revalidate every hour
 		});
 		if (!response.ok) throw new Error('Failed to fetch data');
