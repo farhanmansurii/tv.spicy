@@ -1,4 +1,4 @@
-import Details from '@/components/common/Details';
+import MediaDetails from '@/components/features/media/details/media-details';
 
 import { fetchDetails, fetchDetailsTMDB } from '@/lib/utils';
 import { Metadata } from 'next';
@@ -26,5 +26,5 @@ export default async function TVDetails(props: { params: Promise<{ tv: string }>
 	const params = await props.params;
 	const tmdb = await fetchDetailsTMDB(params.tv, 'tv');
 	if (!tmdb) return notFound();
-	return <Details data={tmdb} id={params.tv} type={'tv'} />;
+	return <MediaDetails data={tmdb} id={params.tv} type={'tv'} />;
 }

@@ -1,7 +1,7 @@
 import './globals.css';
-import { ThemeProvider } from '@/components/providers/Provider';
-import TanstackQueryProvider from '@/components/providers/TanstackQueryProvider';
-import NavigationProvider from '@/components/providers/SidebarProvider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import TanstackQueryProvider from '@/components/providers/tanstack-query-provider';
+import SidebarProvider from '@/components/providers/sidebar-provider';
 import type { Metadata, Viewport } from 'next';
 
 export const generateMetadata = (): Metadata => ({
@@ -32,6 +32,10 @@ export const generateMetadata = (): Metadata => ({
 			'max-snippet': -1,
 		},
 	},
+	other: {
+		'google-fonts':
+			'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+	},
 });
 
 export const generateViewport = (): Viewport => ({
@@ -43,7 +47,15 @@ export const generateViewport = (): Viewport => ({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body>
+			<head>
+				<link rel="preconnect" href="https://fonts.googleapis.com" />
+				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+				<link
+					rel="stylesheet"
+					href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+				/>
+			</head>
+			<body className="pt-20">
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="dark"

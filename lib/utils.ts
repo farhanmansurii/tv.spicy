@@ -13,7 +13,7 @@ export function cn(...inputs: ClassValue[]) {
 export async function fetchRowData(link: string) {
 	try {
 		const url = new URL(
-			`https://api.themoviedb.org/3/${link}?language=en-USinclude_adult=false&include_video=false`
+			`https://api.themoviedb.org/3/${link}?language=en-US&include_adult=false&include_video=false`
 		);
 		const headers = {
 			Authorization: `Bearer ${apiKey}`,
@@ -22,12 +22,16 @@ export async function fetchRowData(link: string) {
 			headers,
 			next: { revalidate: 60 * 60 * 24 * 7 },
 		});
-		if (!response.ok) throw new Error('Failed to fetch data');
+		if (!response.ok) {
+			console.error(`API Error for ${link}: ${response.status} ${response.statusText}`);
+			return [];
+		}
 		const data = await response.json();
 
-		return data.results;
+		return data.results || [];
 	} catch (error) {
-		console.log(error);
+		console.error(`Error fetching ${link}:`, error);
+		return [];
 	}
 }
 export function useRowData(link: string) {
@@ -54,15 +58,58 @@ export async function fetchDetails(id: string, type: string) {
 }
 export async function fetchDetailsTMDB(id: string, type: string) {
 	try {
+		// Include images, videos, and watch providers using append_to_response
+		const appendToResponse = [
+			'images', // Logos, posters, backdrops
+			'videos', // Trailers, teasers, clips
+			'watch/providers', // Streaming availability
+			'keywords', // Keywords for better SEO
+			'external_ids', // IMDb, Facebook, Instagram, Twitter IDs
+		].join(',');
+
 		const url = new URL(
-			`https://api.themoviedb.org/3/${type}/${id}?api_key=${process.env.TMDB_API_KEY}`
+			`https://api.themoviedb.org/3/${type}/${id}?api_key=${process.env.TMDB_API_KEY}&append_to_response=${appendToResponse}&include_image_language=en,null`
 		);
-		const response = await fetch(url.toString(), { cache: 'no-cache' });
+		const response = await fetch(url.toString(), {
+			cache: 'no-cache',
+			next: { revalidate: 3600 }, // Revalidate every hour
+		});
 		if (!response.ok) throw new Error('Failed to fetch data');
 		const data = await response.json();
 		return data;
 	} catch (error) {
 		console.log(error);
+	}
+}
+
+// Fetch full details for hero items (with logos and images)
+export async function fetchHeroItemsWithDetails(
+	shows: any[],
+	type: 'tv' | 'movie',
+	maxItems: number = 10
+) {
+	try {
+		// Fetch full details for top items only (to get logos)
+		const topShows = shows.slice(0, maxItems);
+		const detailsPromises = topShows.map(
+			(show) => fetchDetailsTMDB(show.id.toString(), type).catch(() => show) // Fallback to original if fetch fails
+		);
+
+		const detailsResults = await Promise.allSettled(detailsPromises);
+		const enhancedShows = detailsResults.map((result, index) => {
+			if (result.status === 'fulfilled' && result.value) {
+				// Merge the full details with the original show data
+				return { ...topShows[index], ...result.value };
+			}
+			// Fallback to original show if fetch failed
+			return topShows[index];
+		});
+
+		// Return enhanced shows + remaining shows without details
+		return [...enhancedShows, ...shows.slice(maxItems)];
+	} catch (error) {
+		console.error('Error fetching hero item details:', error);
+		return shows; // Return original shows if all fails
 	}
 }
 export async function fetchRecommendations(id: string, showType: string, type: string) {
@@ -76,6 +123,74 @@ export async function fetchRecommendations(id: string, showType: string, type: s
 		return data;
 	} catch (error) {
 		console.log(error);
+	}
+}
+
+// Server-side version (uses process.env)
+export async function fetchCredits(id: string, type: string) {
+	try {
+		const url = new URL(
+			`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${process.env.TMDB_API_KEY}`
+		);
+		const response = await fetch(url.toString(), {
+			next: { revalidate: 60 * 60 * 24 * 7 }, // Cache for 7 days
+		});
+		if (!response.ok) throw new Error('Failed to fetch credits');
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.log(error);
+		return null;
+	}
+}
+
+// Client-side version (for TanStack Query)
+export async function fetchCreditsClient(id: string, type: string) {
+	try {
+		const API_KEY = 'e3ca0f283f1ab903fd5e2324faadd88e';
+		const response = await fetch(
+			`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}&language=en-US`
+		);
+		if (!response.ok) throw new Error('Failed to fetch credits');
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.log(error);
+		return null;
+	}
+}
+
+// Server-side version (uses process.env)
+export async function fetchVideos(id: string, type: string) {
+	try {
+		const url = new URL(
+			`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${process.env.TMDB_API_KEY}`
+		);
+		const response = await fetch(url.toString(), {
+			next: { revalidate: 60 * 60 * 24 * 7 }, // Cache for 7 days
+		});
+		if (!response.ok) throw new Error('Failed to fetch videos');
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.log(error);
+		return null;
+	}
+}
+
+// Client-side version (for TanStack Query)
+export async function fetchVideosClient(id: string, type: string) {
+	try {
+		const API_KEY = 'e3ca0f283f1ab903fd5e2324faadd88e';
+		const response = await fetch(
+			`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}&language=en-US`
+		);
+		if (!response.ok) throw new Error('Failed to fetch videos');
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.log(error);
+		return null;
 	}
 }
 export async function fetchMovieLinks(movie: string, longID: string, callback: any) {

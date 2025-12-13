@@ -1,10 +1,11 @@
 import dynamic from 'next/dynamic';
-import CommonContainer from '@/components/container/CommonContainer';
-import FetchAndRenderRow from '@/components/container/FetchAndRenderRow';
-import RowLoader from '@/components/loading/RowLoader';
-import { fetchGenres } from '@/lib/utils';
+import Container from '@/components/shared/containers/container';
+import FetchAndRenderRow from '@/components/features/media/row/fetch-and-render-row';
+import RowLoader from '@/components/shared/loaders/row-loader';
+import { fetchGenres, fetchRowData, fetchHeroItemsWithDetails } from '@/lib/utils';
 import { Metadata } from 'next';
 import React, { Suspense } from 'react';
+import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
 
 export const metadata: Metadata = {
 	title: 'Movies | Watvh TV',
@@ -13,62 +14,62 @@ export const metadata: Metadata = {
 
 export const revalidate = 604800;
 
-const CarousalComponent = dynamic(() => import('@/components/common/CarousalComponent'), {
-	loading: () => <div className="h-48 bg-neutral-800 animate-pulse rounded-md" />,
-});
-const WatchList = dynamic(() => import('@/components/common/WatchList'));
-const GenreGrid = dynamic(() => import('@/components/genre-card/genre-grid'), {
-	loading: () => <div className="h-96 bg-neutral-800 animate-pulse rounded-md" />,
+const WatchList = dynamic(() => import('@/components/features/watchlist/watch-list'));
+const GenreGrid = dynamic(() => import('@/components/features/media/genre/genre-grid'), {
+	loading: () => <div className="h-96 bg-muted animate-pulse rounded-md" />,
 });
 
 export default async function Page() {
 	const genres = await fetchGenres('movie');
+	const topRatedMovies = await fetchRowData('movie/top_rated');
+
+	// Fetch full details (with logos) for hero items
+	const heroShows = await fetchHeroItemsWithDetails(topRatedMovies, 'movie', 10);
 
 	return (
-		<CommonContainer>
-			<Suspense fallback={<div className="h-48 bg-neutral-800 animate-pulse rounded-md" />}>
-				<CarousalComponent type="movie" />
-			</Suspense>
-
-			<div className="flex flex-col space-y-12">
-				<Suspense fallback={null}>
-					<WatchList type="movie" />
-				</Suspense>
-
-				<FetchAndRenderRow
-					apiEndpoint="trending/movie/week"
-					text="Top Movies"
-					showRank={false}
-					type="movie"
-				/>
-
-				<FetchAndRenderRow
-					apiEndpoint="movie/top_rated"
-					text="Top Rated Movies"
-					showRank={true}
-					type="movie"
-				/>
-
-				{genres?.map((genre: any) => (
-					<Suspense key={genre.id} fallback={<RowLoader withHeader key={genre.id} />}>
-						<FetchAndRenderRow
-							showRank={false}
-							type="movie"
-							apiEndpoint={{ id: genre.id, type: 'movie' }}
-							text={genre.name}
-							isGenre={true}
-						/>
+		<>
+			<Container className="w-full py-4 md:py-10">
+				<HeroCarousel shows={heroShows} type="movie" />
+			</Container>
+			<Container>
+				<div className="flex flex-col space-y-12">
+					<Suspense fallback={null}>
+						<WatchList type="movie" />
 					</Suspense>
-				))}
-			</div>
 
-			{genres.length > 0 && (
-				<Suspense
-					fallback={<div className="h-96 bg-neutral-800 animate-pulse rounded-md" />}
-				>
-					<GenreGrid genres={genres} type="movie" />
-				</Suspense>
-			)}
-		</CommonContainer>
+					<FetchAndRenderRow
+						apiEndpoint="trending/movie/week"
+						text="Top Movies"
+						showRank={false}
+						type="movie"
+					/>
+
+					<FetchAndRenderRow
+						apiEndpoint="movie/top_rated"
+						text="Top Rated Movies"
+						showRank={true}
+						type="movie"
+					/>
+
+					{genres?.map((genre: any) => (
+						<Suspense key={genre.id} fallback={<RowLoader withHeader key={genre.id} />}>
+							<FetchAndRenderRow
+								showRank={false}
+								type="movie"
+								apiEndpoint={{ id: genre.id, type: 'movie' }}
+								text={genre.name}
+								isGenre={true}
+							/>
+						</Suspense>
+					))}
+				</div>
+
+				{genres.length > 0 && (
+					<Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-md" />}>
+						<GenreGrid genres={genres} type="movie" />
+					</Suspense>
+				)}
+			</Container>
+		</>
 	);
 }

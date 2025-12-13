@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface ProviderStore {
 	selectedProvider: string;
@@ -14,7 +14,7 @@ const useProviderStore = create<ProviderStore>()(
 		}),
 		{
 			name: 'watvg-provider-storage',
-			getStorage: () => localStorage,
+			storage: createJSONStorage(() => localStorage),
 		}
 	)
 );

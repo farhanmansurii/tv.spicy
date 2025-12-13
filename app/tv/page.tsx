@@ -1,10 +1,11 @@
 import dynamic from 'next/dynamic';
-import CommonContainer from '@/components/container/CommonContainer';
-import FetchAndRenderRow from '@/components/container/FetchAndRenderRow';
-import RowLoader from '@/components/loading/RowLoader';
-import { fetchGenres } from '@/lib/utils';
+import Container from '@/components/shared/containers/container';
+import FetchAndRenderRow from '@/components/features/media/row/fetch-and-render-row';
+import RowLoader from '@/components/shared/loaders/row-loader';
+import { fetchGenres, fetchRowData, fetchHeroItemsWithDetails } from '@/lib/utils';
 import { Metadata } from 'next';
 import React, { Suspense } from 'react';
+import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
 
 export const metadata: Metadata = {
 	title: 'Watvh TV',
@@ -13,30 +14,28 @@ export const metadata: Metadata = {
 
 export const revalidate = 604800;
 
-const CarousalComponent = dynamic(() => import('@/components/common/CarousalComponent'), {
-	loading: () => <div className="h-48 bg-neutral-800 animate-pulse rounded-md" />,
-});
-const RecentlyWatchedTV = dynamic(() => import('@/components/common/RecentlyWatched'));
-const WatchList = dynamic(() => import('@/components/common/WatchList'));
-const GenreGrid = dynamic(() => import('@/components/genre-card/genre-grid'), {
-	loading: () => <div className="h-96 bg-neutral-800 animate-pulse rounded-md" />,
+const RecentlyWatched = dynamic(() => import('@/components/features/watchlist/recently-watched'));
+const WatchList = dynamic(() => import('@/components/features/watchlist/watch-list'));
+const GenreGrid = dynamic(() => import('@/components/features/media/genre/genre-grid'), {
+	loading: () => <div className="h-96 bg-muted animate-pulse rounded-md" />,
 });
 
 export default async function Page() {
 	const genres = await fetchGenres('tv');
+	const topRatedTV = await fetchRowData('tv/top_rated');
+
+	// Fetch full details (with logos) for hero items
+	const heroShows = await fetchHeroItemsWithDetails(topRatedTV, 'tv', 10);
 
 	return (
 		<>
-			<CommonContainer>
-				<Suspense
-					fallback={<div className="h-48 bg-neutral-800 animate-pulse rounded-md" />}
-				>
-					<CarousalComponent type="tv" />
-				</Suspense>
-
+			<Container className="w-full py-4 md:py-10">
+				<HeroCarousel shows={heroShows} type="tv" />
+			</Container>
+			<Container>
 				<div className="flex flex-col space-y-12">
 					<Suspense fallback={null}>
-						<RecentlyWatchedTV />
+						<RecentlyWatched />
 					</Suspense>
 
 					<Suspense fallback={null}>
@@ -69,12 +68,10 @@ export default async function Page() {
 						</Suspense>
 					))}
 				</div>
-			</CommonContainer>
+			</Container>
 
 			{genres.length > 0 && (
-				<Suspense
-					fallback={<div className="h-96 bg-neutral-800 animate-pulse rounded-md" />}
-				>
+				<Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-md" />}>
 					<GenreGrid type="tv" genres={genres} />
 				</Suspense>
 			)}

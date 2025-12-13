@@ -14,11 +14,9 @@ export async function fetchGenres(type: 'movie' | 'tv') {
 	return data.genres;
 }
 
-export async function searchTMDB(query: string, type?: 'movie' | 'tv') {
+export async function searchTMDB(query: string, page: number = 1) {
 	const res = await fetch(
-		`https://api.themoviedb.org/3/search/multi?api_key=e3ca0f283f1ab903fd5e2324faadd88e&query=${encodeURIComponent(
-			query
-		)}`
+		`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`
 	);
 
 	if (!res.ok) {
@@ -28,11 +26,68 @@ export async function searchTMDB(query: string, type?: 'movie' | 'tv') {
 	const data = await res.json();
 	return {
 		...data,
-
 		results: data.results.filter(
-			(item: any) =>
-				(type ? item.media_type === type : true) &&
-				(item.media_type === 'movie' || item.media_type === 'tv')
+			(item: any) => item.media_type === 'movie' || item.media_type === 'tv'
 		),
 	};
+}
+
+interface DiscoverOptions {
+	type?: 'movie' | 'tv';
+	genres?: number[];
+	year?: string;
+	minRating?: number;
+	language?: string;
+	sortBy?: string;
+	page?: number;
+}
+
+export async function discoverMedia(options: DiscoverOptions = {}) {
+	const {
+		type = 'movie',
+		genres = [],
+		year,
+		minRating = 0,
+		language,
+		sortBy = 'popularity.desc',
+		page = 1,
+	} = options;
+
+	const params = new URLSearchParams({
+		api_key: API_KEY,
+		language: 'en-US',
+		sort_by: sortBy,
+		page: page.toString(),
+		include_adult: 'false',
+	});
+
+	if (genres.length > 0) {
+		params.append('with_genres', genres.join(','));
+	}
+
+	if (year) {
+		if (type === 'movie') {
+			params.append('primary_release_year', year);
+		} else {
+			params.append('first_air_date_year', year);
+		}
+	}
+
+	if (minRating > 0) {
+		params.append('vote_average.gte', minRating.toString());
+		params.append('vote_count.gte', '50'); // Ensure minimum votes for quality
+	}
+
+	if (language) {
+		params.append('with_original_language', language);
+	}
+
+	const endpoint = type === 'tv' ? '/discover/tv' : '/discover/movie';
+	const res = await fetch(`${BASE_URL}${endpoint}?${params.toString()}`);
+
+	if (!res.ok) {
+		throw new Error('Failed to discover media');
+	}
+
+	return res.json();
 }
