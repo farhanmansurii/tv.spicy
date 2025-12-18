@@ -1,131 +1,114 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React from 'react';
-import { Episode } from '@/lib/types';
+import { Play, ImageOff, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
-import { Play } from 'lucide-react';
-import CommonTitle from '@/components/shared/animated/common-title';
 
-interface EpisodeCardProps {
-  episode: Episode;
-  active: boolean;
-  toggle: (episode: Episode, event: React.MouseEvent<HTMLDivElement>) => void;
-  view: 'grid' | 'list' | 'carousel';
-}
-
-export const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, active, toggle, view }) => {
+export const EpisodeCard = ({ episode, active, toggle }: any) => {
   if (!episode) return null;
-  const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w500') : null;
-  const isList = view === 'list';
-  const isGrid = view === 'grid';
-  const isCarousel = view === 'carousel';
+
+  // Logic for unreleased or missing data
+  const isReleased = episode.air_date ? new Date(episode.air_date) <= new Date() : true;
+  const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'original') : null;
 
   return (
     <div
-      onClick={(e) => toggle(episode, e)}
+      onClick={(e) => isReleased && toggle(episode, e)}
       className={cn(
-        'group relative flex cursor-pointer transition-all duration-300 border',
-        'rounded-episode md:rounded-episode-md overflow-hidden shadow-lg',
-        'hover:shadow-xl hover:scale-[1.02]',
+        'group relative cursor-pointer overflow-hidden transition-all duration-500 ease-out',
+        'rounded-[24px] border bg-[#1a1a1a] shadow-2xl',
+        'aspect-[1.62/1] w-full select-none',
         active
-          ? 'bg-white/10 border-white/30 ring-1 ring-white/20 shadow-2xl'
-          : 'bg-zinc-900/40 border-white/5 hover:border-white/20 hover:bg-zinc-800/60',
-        isList
-          ? 'flex-row items-center h-[90px] sm:h-[100px] md:h-[120px] p-2 sm:p-3 gap-3 sm:gap-4'
-          : 'flex-col'
+          ? 'border-white/40 ring-1 ring-white/20 scale-[0.98] z-10 shadow-white/5'
+          : 'border-white/[0.08] hover:border-white/20',
+        !isReleased && 'opacity-50 cursor-not-allowed'
       )}
     >
-      {/* Cinematic Background Glow */}
-      {active && stillUrl && (
-        <div
-          className="absolute inset-0 z-0 scale-150 blur-[60px] opacity-30 saturate-200 pointer-events-none transition-opacity duration-500"
-          style={{ backgroundImage: `url(${stillUrl})`, backgroundSize: 'cover' }}
-        />
-      )}
-
-      {/* Image Container */}
-      <div className={cn(
-        "relative z-10 shrink-0 overflow-hidden bg-zinc-800",
-        "rounded-episode-image md:rounded-episode-image-md",
-        isList
-          ? "h-full aspect-video w-[120px] sm:w-[140px] md:w-[180px]"
-          : "w-full aspect-video"
-      )}>
-        {stillUrl ? (
-          <img
-            src={stillUrl}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-            alt={episode.name}
-            loading="lazy"
-          />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center bg-zinc-900">
-            <Play className="h-6 w-6 sm:h-8 sm:w-8 text-white/20 fill-current" />
-          </div>
-        )}
-
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="bg-white text-black p-2 sm:p-2.5 rounded-full transform scale-75 group-hover:scale-100 transition-transform duration-300">
-            <Play className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
-          </div>
-        </div>
-
-        {episode.runtime && (
-          <div className="absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-ui bg-black/70 backdrop-blur-md text-[9px] sm:text-[10px] font-black text-white border border-white/10">
-            {episode.runtime}M
-          </div>
-        )}
-      </div>
-
-      {/* Content Section */}
-      <div className={cn(
-        "relative z-10 flex flex-col justify-center min-w-0 flex-1",
-        isList
-          ? "pr-2 sm:pr-3 md:pr-4"
-          : "p-3 sm:p-4 md:p-5"
-      )}>
-        <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
-          <span className={cn(
-            "text-[10px] sm:text-[11px] font-black uppercase",
-            "tracking-extra",
-            active ? "text-white" : "text-zinc-500"
-          )}>
-            EP {episode.episode_number}
-          </span>
-          {active && (
-            <span className="flex h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-          )}
-        </div>
-
-        <CommonTitle
-          text={episode.name}
-          variant="small"
-          as="h3"
+      {stillUrl ? (
+        <img
+          src={stillUrl}
           className={cn(
-            "mb-1 sm:mb-1.5 transition-colors line-clamp-1 truncate",
-            active ? "text-white" : "text-zinc-200 group-hover:text-white"
+            "absolute inset-0 z-0 h-full w-full object-cover transition-all duration-1000",
+            active ? "scale-105 saturate-[1.1]" : "group-hover:scale-105 opacity-80"
           )}
+          alt={episode.name}
         />
-
-        <p className={cn(
-          "text-xs sm:text-sm leading-relaxed line-clamp-2 font-medium",
-          "opacity-60 transition-opacity group-hover:opacity-80",
-          active ? "text-zinc-200" : "text-zinc-400"
-        )}>
-          {episode.overview || "No description available."}
-        </p>
-      </div>
-
-      {/* Active Indicator Line */}
-      {active && (
-        <div className={cn(
-          "absolute bg-white z-20 transition-all",
-          isList
-            ? "left-0 top-0 bottom-0 w-0.5 sm:w-1"
-            : "bottom-0 left-0 right-0 h-0.5 sm:h-1"
-        )} />
+      ) : (
+        <div className="absolute inset-0 z-0 h-full w-full flex flex-col items-center justify-center gap-3 text-white/20 bg-[#1a1a1a]">
+          <ImageOff className="w-12 h-12 md:w-16 md:h-16" />
+        </div>
       )}
+      <div
+        className={cn(
+            "absolute inset-0 z-10 transition-opacity duration-500",
+            active ? "backdrop-blur-none opacity-0" : "backdrop-blur-[5px] opacity-100"
+        )}
+        style={{
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%, black 100%)',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%, black 100%)',
+        }}
+      />
+
+      <div className={cn(
+        "absolute inset-0 z-20 transition-opacity duration-500",
+        active
+            ? "bg-gradient-to-t from-black/95 via-black/40 to-transparent"
+            : "bg-gradient-to-t from-black/95 via-black/40 to-transparent"
+      )} />
+
+      <div className="relative z-30 h-full w-full flex flex-col justify-end px-5 md:px-6 pb-5">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2.5">
+            <span className={cn(
+              "text-[10px] md:text-[11px] font-bold uppercase tracking-[0.18em] transition-colors duration-300",
+              active ? "text-white" : "text-white/50"
+            )}>
+              Episode {episode.episode_number}
+            </span>
+            {!isReleased && (
+              <span className="text-[9px] font-black bg-white/10 px-2 py-0.5 rounded text-white/60 uppercase">
+                Unreleased
+              </span>
+            )}
+          </div>
+
+          <h3 className={cn(
+            "text-lg md:text-[23px] font-bold tracking-tight leading-tight transition-colors duration-300",
+            active ? "text-white" : "text-white/90"
+          )}>
+            {episode.name}
+          </h3>
+
+          <p className={cn(
+            "text-[12.5px] md:text-[14.5px] line-clamp-2 leading-[1.5] font-medium max-w-[98%] mt-1 transition-colors duration-300",
+            active ? "text-white/90" : "text-white/60"
+          )}>
+            {episode.overview || "No description available for this episode."}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between mt-4">
+          <div className={cn(
+            "flex items-center gap-2.5 transition-colors duration-300",
+            active ? "text-white" : "text-white/80"
+          )}>
+            <span className="text-[14px] font-bold tabular-nums tracking-tight">
+              {episode.runtime ? `${episode.runtime}m` : '56m'}
+            </span>
+          </div>
+
+          {active && (
+            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-in fade-in slide-in-from-right-4 duration-500">
+              <Play className="w-3 h-3 fill-black text-black" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-black">
+                Now Playing
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

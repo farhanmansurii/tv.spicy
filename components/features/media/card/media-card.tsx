@@ -31,7 +31,7 @@ export default function MediaCard({
     <Link
       href={href}
       onClick={() => onClick?.(show)}
-      className="group block w-full outline-none perspective-1000"
+      className="group block w-full outline-none perspective-1000 select-none"
     >
       <ShowCardContent
         show={show}

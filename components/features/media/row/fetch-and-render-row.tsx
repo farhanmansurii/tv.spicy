@@ -9,20 +9,22 @@ import { useQuery } from '@tanstack/react-query';
 
 interface FetchAndRenderRowProps {
 	apiEndpoint?: any;
-	text: string;
+	text?: string;
 	showRank: boolean;
 	type: string;
 	isVertical?: boolean;
 	isGenre?: boolean;
+	hideHeader?: boolean;
 }
 
 const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
 	apiEndpoint,
-	text,
+	text = '',
 	showRank,
 	type,
 	isGenre = false,
 	isVertical = false,
+	hideHeader = false,
 }) => {
 	const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
 
@@ -59,6 +61,7 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
 					shows={showRank ? data.slice(0, 10) : data}
 					type={type}
 					showRank={showRank}
+					hideHeader={hideHeader}
 				/>
 			) : isVertical ? (
 				<GridLoader />

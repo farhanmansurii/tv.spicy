@@ -55,9 +55,9 @@ export default function ContinueWatchingButton({ id, show, type, isDetailsPage }
 
     return (
         <div className={cn(
-            "flex items-center w-fit h-[48px] md:h-[56px] transition-all duration-300",
-            "bg-black/60 backdrop-blur-3xl rounded-full border border-white/20 shadow-2xl p-1 md:p-1.5",
-            "ring-1 ring-white/10"
+            "flex items-center w-fit h-[45px] md:h-[54px] transition-all duration-300",
+            "bg-white/5 backdrop-blur-3xl rounded-full border border-white/10 shadow-md p-1 md:p-1.5",
+            "ring-1 ring-white/5"
         )}>
 
             <button
@@ -65,7 +65,7 @@ export default function ContinueWatchingButton({ id, show, type, isDetailsPage }
                 className={cn(
                     "h-full flex items-center justify-center gap-2 md:gap-3 bg-white text-black rounded-full transition-all active:scale-95 shadow-xl",
                     "px-5 md:px-8",
-                    "hover:bg-zinc-200"
+                    "hover:bg-white/10"
                 )}
             >
                 <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />
@@ -78,7 +78,6 @@ export default function ContinueWatchingButton({ id, show, type, isDetailsPage }
                 onClick={handleAddOrRemove}
                 className="h-full px-4 flex items-center justify-center text-white/70 hover:text-white transition-all active:scale-90 relative"
             >
-                <div className="absolute left-0 h-1/2 w-px bg-white/20" />
                 {isAdded ? (
                     <Check className="w-5 h-5 stroke-[3] text-green-500" />
                 ) : (
@@ -88,7 +87,7 @@ export default function ContinueWatchingButton({ id, show, type, isDetailsPage }
 
             {nextEpisode && (
                 <div className={cn(
-                    "items-center gap-3 border-l border-white/20 ml-1 pl-4 pr-6 min-w-0 hidden sm:flex animate-in slide-in-from-left-4 duration-500",
+                    "items-center gap-3  ml-1 pl-4 pr-6 min-w-0 hidden sm:flex animate-in slide-in-from-left-4 duration-500",
                 )}>
                     <MonitorPlay className="w-4 h-4 md:w-5 md:h-5 text-yellow-500/80 shrink-0" />
                     <div className="flex flex-col justify-center min-w-0">

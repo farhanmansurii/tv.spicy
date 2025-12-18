@@ -24,6 +24,7 @@ export default function MediaRow(props: {
   isVertical?: boolean;
   viewAllLink?: string;
   headerAction?: React.ReactNode;
+  hideHeader?: boolean;
 }) {
   const isMobile = useMediaQuery();
   const useGrid = props.isVertical === true;
@@ -40,7 +41,7 @@ export default function MediaRow(props: {
 
   return (
     <section className="w-full py-2 md:py-4 space-y-2 overflow-visible relative">
-      <div className="flex items-end justify-between px-1 mb-1">
+     {!props.hideHeader && <div className="flex items-end justify-between px-1 mb-1">
         {props.text && <CommonTitle text={props.text} variant="section" as="h2" />}
         {props.viewAllLink && (
           <Link
@@ -50,7 +51,7 @@ export default function MediaRow(props: {
             See All
           </Link>
         )}
-      </div>
+      </div>}
 
       {useGrid ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6">

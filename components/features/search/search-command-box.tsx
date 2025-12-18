@@ -158,7 +158,7 @@ export function SearchCommandBox() {
 				key={`${isRecent ? 'recent' : 'search'}-${show.type}-${show.id}`}
 				onSelect={() => handleSelectShow(item)}
 				value={show.title}
-				className="group relative flex items-start gap-4 rounded-card md:rounded-card-md p-2 cursor-pointer transition-all duration-300 aria-selected:bg-white/10 aria-selected:shadow-2xl aria-selected:scale-[1.01] border border-transparent aria-selected:border-white/5 my-1"
+				className="group relative flex items-start gap-4 rounded-card md:rounded-card-md p-2 cursor-pointer transition-all duration-300 aria-selected:bg-white/10 aria-selected:shadow-2xl aria-selected:scale-[1.01] border border-transparent aria-selected:border-white/5 my-1 select-none"
 			>
 				<Link
 					href={`/${show.type}/${show.id}`}

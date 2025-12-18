@@ -10,9 +10,9 @@ export default function RelatedShowsContainer(props: {
 		<FetchAndRenderRow
 			apiEndpoint={`${props.type}/${props.show.id}/${props.relation}`}
 			showRank={false}
-			text="Related Shows"
 			type={props.type}
 			isVertical={true}
+			hideHeader={true}
 		/>
 	);
 }
