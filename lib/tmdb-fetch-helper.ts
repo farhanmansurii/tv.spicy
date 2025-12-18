@@ -94,11 +94,22 @@ export const fetchGenreById = async (type: string, id: string, page: number = 1)
 export const fetchSeasonEpisodes = async (
 	showId: string,
 	seasonNumber: number
-): Promise<Episode[]> => {
+): Promise<any> => {
 	const data = await fetchData(`/tv/${showId}/season/${seasonNumber}`, { language: 'en-US' });
-	if (data.episodes) {
-		return data.episodes;
-	} else {
-		throw new Error('No episodes data found in the response');
-	}
+	return data;
+};
+
+export const fetchEpisodeDetails = async (
+	showId: string,
+	seasonNumber: number,
+	episodeNumber: number
+) => {
+	const data = await fetchData(
+		`/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}`,
+		{
+			language: 'en-US',
+			append_to_response: 'credits,images',
+		}
+	);
+	return data;
 };

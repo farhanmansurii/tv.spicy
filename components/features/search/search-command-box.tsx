@@ -158,7 +158,7 @@ export function SearchCommandBox() {
 				key={`${isRecent ? 'recent' : 'search'}-${show.type}-${show.id}`}
 				onSelect={() => handleSelectShow(item)}
 				value={show.title}
-				className="group relative flex items-start gap-4 rounded-xl p-2 cursor-pointer transition-all duration-300 aria-selected:bg-white/10 aria-selected:shadow-2xl aria-selected:scale-[1.01] border border-transparent aria-selected:border-white/5 my-1"
+				className="group relative flex items-start gap-4 rounded-card md:rounded-card-md p-2 cursor-pointer transition-all duration-300 aria-selected:bg-white/10 aria-selected:shadow-2xl aria-selected:scale-[1.01] border border-transparent aria-selected:border-white/5 my-1"
 			>
 				<Link
 					href={`/${show.type}/${show.id}`}
@@ -172,7 +172,7 @@ export function SearchCommandBox() {
 					}}
 				>
 					{/* Glass Poster Container - Aspect Ratio 2:3 */}
-					<div className="relative aspect-[2/3] w-12 shrink-0 overflow-hidden rounded-md bg-white/5 shadow-inner ring-1 ring-white/10 group-aria-selected:ring-white/30 transition-all">
+					<div className="relative aspect-[2/3] w-12 shrink-0 overflow-hidden rounded-ui bg-white/5 shadow-inner ring-1 ring-white/10 group-aria-selected:ring-white/30 transition-all">
 						{show.image ? (
 							<img
 								src={tmdbImage(show.image, 'w92')}
@@ -246,7 +246,7 @@ export function SearchCommandBox() {
 						// Mobile: Icon only
 						'h-10 w-10 rounded-full border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all',
 						// Desktop: Full search box
-						'lg:relative lg:h-10 lg:w-64 lg:justify-start lg:gap-2 lg:rounded-xl lg:px-4 lg:font-normal lg:shadow-sm lg:backdrop-blur-md'
+						'lg:relative lg:h-10 lg:w-64 lg:justify-start lg:gap-2 lg:rounded-card md:lg:rounded-card-md lg:px-4 lg:font-normal lg:shadow-sm lg:backdrop-blur-md'
 					)}
 				>
 					<svg
@@ -277,7 +277,7 @@ export function SearchCommandBox() {
 				</DialogHeader>
 
 				<Command
-					className="w-full bg-black/60 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-2xl overflow-hidden ring-1 ring-white/5"
+					className="w-full bg-black/60 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-dialog md:rounded-dialog-md overflow-hidden ring-1 ring-white/5"
 					shouldFilter={false}
 				>
 					<CommandInput
@@ -286,13 +286,13 @@ export function SearchCommandBox() {
 						autoFocus={false}
 					/>
 					<div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-white/[0.02]">
-						<div className="flex items-center p-0.5 bg-black/20 rounded-lg border border-white/5">
+						<div className="flex items-center p-0.5 bg-black/20 rounded-ui md:rounded-ui-md border border-white/5">
 							{(['all', 'movie', 'tv'] as FilterType[]).map((tab) => (
 								<button
 									key={tab}
 									onClick={() => setActiveFilter(tab)}
 									className={cn(
-										'relative px-3 py-1 text-[10px] font-medium transition-colors rounded-md min-w-[50px] z-10',
+										'relative px-3 py-1 text-[10px] font-medium transition-colors rounded-ui min-w-[50px] z-10',
 										activeFilter === tab
 											? 'text-white'
 											: 'text-white/40 hover:text-white/70'
@@ -324,7 +324,7 @@ export function SearchCommandBox() {
 									onClick={() => setActiveSort(sort.id as SortType)}
 									title={sort.label}
 									className={cn(
-										'p-1.5 rounded-md transition-all',
+										'p-1.5 rounded-ui transition-all',
 										activeSort === sort.id
 											? 'bg-white/10 text-white shadow-sm'
 											: 'text-white/20 hover:text-white/60'
@@ -359,7 +359,7 @@ export function SearchCommandBox() {
 									{/* Empty State: Initial */}
 									{!query && recentlySearched.length === 0 && (
 										<div className="py-20 flex flex-col items-center justify-center text-center opacity-100">
-											<div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-white/10 to-transparent border border-white/5 flex items-center justify-center mb-4 shadow-2xl shadow-indigo-500/10">
+											<div className="h-16 w-16 rounded-card md:rounded-card-md bg-gradient-to-tr from-white/10 to-transparent border border-white/5 flex items-center justify-center mb-4 shadow-2xl shadow-indigo-500/10">
 												<MonitorPlay className="w-8 h-8 text-white/30" />
 											</div>
 											<h3 className="text-base font-medium text-white/90">

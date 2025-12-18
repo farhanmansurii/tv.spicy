@@ -56,14 +56,13 @@ export default function MediaPlayer({
 		title = '';
 		image = episode?.image || '';
 	}
-	const includesEng = subtitles.filter((subtitle) => {
-		return (
-			subtitle.lang.toLowerCase().includes('english') ||
-			subtitle.lang.toLowerCase().includes('eng')
-		);
-	});
-
 	const subtitlesList = useMemo(() => {
+		const includesEng = subtitles.filter((subtitle) => {
+			return (
+				subtitle.lang.toLowerCase().includes('english') ||
+				subtitle.lang.toLowerCase().includes('eng')
+			);
+		});
 		const firstEnglishSubtitleIndex = subtitles.findIndex(
 			(subtitle) =>
 				subtitle?.lang?.toLowerCase().includes('english') ||
@@ -163,6 +162,7 @@ export default function MediaPlayer({
 		return () => {
 			playerRef.current?.destroy();
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
@@ -198,7 +198,7 @@ export default function MediaPlayer({
 				}
 			});
 		}
-	}, [sources, subtitles]);
+	}, [sources, subtitles, activeEP?.episode_number, activeEP?.season_number, activeEP?.tv_id, image, recentlyWatched, subtitlesList, title, type]);
 	const watchTimeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	useEffect(() => {
 		const handleTimeUpdate = () => {
@@ -223,7 +223,7 @@ export default function MediaPlayer({
 				clearTimeout(watchTimeTimeoutRef.current);
 			}
 		};
-	}, [playerRef]);
+	}, [activeEP?.tv_id, updateTimeWatched]);
 
 	return <div id="oplayer" className="mx-auto mb-10  aspect-video  w-full " />;
 }

@@ -42,6 +42,45 @@
 
 	--radius: 0.6rem; /* Modern rounded corners */
 
+	/* Design System: Border Radius */
+	--radius-hero: 1.5rem; /* 24px - Hero banners */
+	--radius-hero-md: 1.875rem; /* 30px - Hero banners on medium screens */
+	--radius-card: 1rem; /* 16px - Media cards */
+	--radius-card-md: 1.25rem; /* 20px - Media cards on medium screens */
+	--radius-episode: 1.5rem; /* 24px - Episode cards */
+	--radius-episode-md: 1.875rem; /* 30px - Episode cards on medium screens */
+	--radius-episode-image: 0.75rem; /* 12px - Episode card images */
+	--radius-episode-image-md: 1rem; /* 16px - Episode card images on medium screens */
+	--radius-ui: 0.5rem; /* 8px - UI elements (buttons, inputs, badges) */
+	--radius-ui-md: 0.625rem; /* 10px - UI elements on medium screens */
+	--radius-dialog: 1rem; /* 16px - Dialogs and modals */
+	--radius-dialog-md: 1.25rem; /* 20px - Dialogs on medium screens */
+	--radius-small: 0.375rem; /* 6px - Small elements */
+	--radius-medium: 0.75rem; /* 12px - Medium elements */
+	--radius-large: 1.5rem; /* 24px - Large elements */
+
+	/* Design System: Typography Scale */
+	--text-xs: 0.625rem; /* 10px */
+	--text-sm: 0.75rem; /* 12px */
+	--text-base: 0.875rem; /* 14px */
+	--text-md: 1rem; /* 16px */
+	--text-lg: 1.125rem; /* 18px */
+	--text-xl: 1.25rem; /* 20px */
+	--text-2xl: 1.5rem; /* 24px */
+	--text-3xl: 1.875rem; /* 30px */
+	--text-4xl: 2.25rem; /* 36px */
+	--text-5xl: 3rem; /* 48px */
+	--text-6xl: 3.75rem; /* 60px */
+	--text-7xl: 4.5rem; /* 72px */
+
+	/* Design System: Letter Spacing */
+	--tracking-tight: -0.025em;
+	--tracking-normal: 0em;
+	--tracking-wide: 0.025em;
+	--tracking-wider: 0.05em;
+	--tracking-widest: 0.1em;
+	--tracking-extra: 0.2em; /* For uppercase labels */
+
 	/* Chart colors */
 	--chart-1: #e11d48;
 	--chart-2: #2563eb;
@@ -125,6 +164,23 @@
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
+
+	/* Design System: Border Radius (for Tailwind) */
+	--radius-hero: 1.5rem;
+	--radius-hero-md: 1.875rem;
+	--radius-card: 1rem;
+	--radius-card-md: 1.25rem;
+	--radius-episode: 1.5rem;
+	--radius-episode-md: 1.875rem;
+	--radius-episode-image: 0.75rem;
+	--radius-episode-image-md: 1rem;
+	--radius-ui: 0.5rem;
+	--radius-ui-md: 0.625rem;
+	--radius-dialog: 1rem;
+	--radius-dialog-md: 1.25rem;
+	--radius-small: 0.375rem;
+	--radius-medium: 0.75rem;
+	--radius-large: 1.5rem;
 
 	--shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
 	--shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);

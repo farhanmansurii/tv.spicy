@@ -83,6 +83,24 @@ export async function fetchDetailsTMDB(id: string, type: string) {
 	}
 }
 
+
+export async function fetchTMDBImages(id: string, type: string) {
+	try {
+		const url = new URL(
+			`https://api.themoviedb.org/3/${type}/${id}/images?api_key=${process.env.TMDB_API_KEY}&include_image_language=en,null`
+		);
+		const response = await fetch(url.toString(), {
+			next: { revalidate: 3600 },
+		});
+		if (!response.ok) throw new Error('Failed to fetch images');
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.error('Error fetching TMDB images:', error);
+		return null;
+	}
+}
+
 // Fetch full details for hero items (with logos and images)
 export async function fetchHeroItemsWithDetails(
 	shows: any[],

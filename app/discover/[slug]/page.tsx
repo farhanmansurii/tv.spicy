@@ -2,43 +2,66 @@ import Container from '@/components/shared/containers/container';
 import LoadMore from '@/components/features/media/load-more';
 import { Metadata } from 'next';
 import React from 'react';
+import CommonTitle from '@/components/shared/animated/common-title';
 
-export async function generateMetadata(params: any): Promise<Metadata> {
-	const searchParams = await params.searchParams;
-	const title = searchParams?.title || 'Discover';
-	const type = searchParams?.type?.toLowerCase() === 'movie' ? 'Movies' : 'TV Shows';
-
-	return {
-		title: `${title} ${type}`,
-		description: `Browse ${title} ${type}`,
-	};
+interface MetadataProps {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ type?: string; id?: string; title?: string }>;
 }
 
-export default async function Page(params: any) {
-	const searchParams = await params.searchParams;
-	const title = searchParams?.title;
-	const type = searchParams?.type?.toLowerCase() === 'movie' ? 'Movies' : 'TV Shows';
+export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+    const searchParams = await props.searchParams;
+    const title = searchParams?.title || 'Discover';
+    const type = searchParams?.type?.toLowerCase() === 'movie' ? 'Movies' : 'TV Shows';
 
-	if (!title) {
-		return null;
-	}
+    return {
+        title: `${title} ${type} | SpicyTV`,
+        description: `Explore our curated collection of ${title} ${type.toLowerCase()}.`,
+    };
+}
 
-	return (
-		<div className="min-h-screen bg-background text-foreground">
-			<Container className="w-full space-y-8 md:space-y-12 py-6 md:py-8">
-				<div className="space-y-2">
-					<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
-						{title} {type}
-					</h1>
-					<p className="text-white/60 text-lg">
-						Discover the best {title.toLowerCase()} {type.toLowerCase()}
-					</p>
-				</div>
+interface PageProps {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ type?: string; id?: string; title?: string }>;
+}
 
-				<div className="w-full">
-					<LoadMore params={params} />
-				</div>
-			</Container>
-		</div>
-	);
+export default async function Page(props: PageProps) {
+    const searchParams = await props.searchParams;
+    const title = searchParams?.title;
+    const type = searchParams?.type?.toLowerCase() === 'movie' ? 'Movie' : 'TV Series';
+
+    if (!title || !searchParams?.type || !searchParams?.id) {
+        return null;
+    }
+
+    return (
+        <div className="min-h-screen bg-background text-foreground">
+            <Container className="w-full space-y-8 md:space-y-12 py-8 md:py-12">
+                <div className="space-y-4 max-w-4xl">
+                    <div className="flex items-center gap-3">
+                        <div className="h-8 w-1 bg-primary rounded-full" />
+                        <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                            Browse {type}
+                        </span>
+                    </div>
+
+                    <div className="space-y-3">
+                        <CommonTitle
+                            text={title}
+                            variant="xl"
+                            as="h1"
+                            className="tracking-tighter"
+                        />
+                        <p className="text-lg md:text-xl text-muted-foreground font-light max-w-2xl">
+                            A curated selection of the most immersive {title.toLowerCase()} {type.toLowerCase()} available.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="w-full animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                    <LoadMore params={props} />
+                </div>
+            </Container>
+        </div>
+    );
 }

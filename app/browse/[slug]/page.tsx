@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import React from 'react';
 import MediaRow from '@/components/features/media/row/media-row';
 import { Show } from '@/lib/types';
+import CommonTitle from '@/components/shared/animated/common-title';
 
 interface PageProps {
 	params: Promise<{ slug: string }>;
@@ -99,8 +100,8 @@ export default async function BrowsePage({ params }: PageProps) {
 			return (
 				<div className="min-h-screen bg-background text-foreground">
 					<Container className="w-full py-6 md:py-8">
-						<div className="text-center py-12">
-							<h1 className="text-2xl font-bold mb-4">No content found</h1>
+					<div className="text-center py-12">
+						<CommonTitle text="No content found" variant="default" as="h1" className="mb-4" />
 							<p className="text-muted-foreground">
 								We couldn&apos;t find any content for this category.
 							</p>
@@ -115,9 +116,11 @@ export default async function BrowsePage({ params }: PageProps) {
 				<Container className="w-full py-6 md:py-8">
 					<div className="space-y-6">
 						<div className="space-y-2">
-							<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-								{category.title}
-							</h1>
+							<CommonTitle
+								text={category.title}
+								variant="large"
+								as="h1"
+							/>
 							<p className="text-muted-foreground text-lg">{category.description}</p>
 						</div>
 
@@ -138,7 +141,7 @@ export default async function BrowsePage({ params }: PageProps) {
 			<div className="min-h-screen bg-background text-foreground">
 				<Container className="w-full py-6 md:py-8">
 					<div className="text-center py-12">
-						<h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
+						<CommonTitle text="Something went wrong" variant="default" as="h1" className="mb-4" />
 						<p className="text-muted-foreground">Please try refreshing the page.</p>
 					</div>
 				</Container>

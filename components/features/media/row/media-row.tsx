@@ -1,110 +1,117 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 import {
-	Carousel,
-	CarouselContent,
-	CarouselItem,
-	CarouselNext,
-	CarouselPrevious,
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Show } from '@/lib/types';
 import React from 'react';
 import MediaCard from '@/components/features/media/card/media-card';
-import CommonTitle from '@/components/shared/animated/common-title';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/lib/use-media-hook';
+import CommonTitle from '@/components/shared/animated/common-title';
 
 export default function MediaRow(props: {
-	shows: Show[];
-	text?: string;
-	showRank?: boolean;
-	type: string;
-	action?: () => void;
-	isVertical?: boolean;
-	viewAllLink?: string;
-	headerAction?: React.ReactNode;
+  shows: Show[];
+  text?: string;
+  showRank?: boolean;
+  type: string;
+  isVertical?: boolean;
+  viewAllLink?: string;
+  headerAction?: React.ReactNode;
 }) {
-	return (
-		<section className="w-full py-6 space-y-4">
-			<div className="mb-4 flex items-center justify-between group/title">
-				{props.text && <CommonTitle text={props.text} />}
-				{props.viewAllLink && (
-					<Link
-						href={props.viewAllLink}
-						className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-					>
-						See All
-					</Link>
-				)}
-				{props.headerAction}
-			</div>
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const effectiveIsVertical = isMobile || props.isVertical;
+  const useGrid = props.isVertical; // Use grid when explicitly vertical (not just mobile)
 
-			<Carousel
-				opts={{
-					align: 'start',
-					dragFree: true,
-					loop: false,
-				}}
-				className="w-full group/row relative"
-			>
-				{/* FIX: Changed top-1/2 to top-[35%]
-           This moves the buttons up to align with the image center,
-           ignoring the text/metadata below the image.
-        */}
-				{!props.isVertical && (
-					<>
-						<CarouselPrevious
-							className="hidden lg:flex absolute left-4 top-[40%] -translate-y-1/2 z-40 h-12 w-12 border-0 bg-black/50 text-white hover:bg-black/70 hover:text-white opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
-							icon={<ChevronLeft className="h-8 w-8" />}
-						/>
-						<CarouselNext
-							className="hidden lg:flex absolute right-4 top-[40%] -translate-y-1/2 z-40 h-12 w-12 border-0 bg-black/50 text-white hover:bg-black/70 hover:text-white opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
-							icon={<ChevronRight className="h-8 w-8" />}
-						/>
-					</>
-				)}
+  const validShows = props?.shows?.filter((show: Show) => {
+    const hasImage = effectiveIsVertical ? show.poster_path : show.backdrop_path;
+    return hasImage;
+  }) || [];
 
-				<div className="">
-					{!props.isVertical ? (
-						// Added items-start to ensure cards hang from the top
-						<CarouselContent className="-ml-4 items-start">
-							{props?.shows?.map((show: Show, index: number) =>
-								show?.backdrop_path ? (
-									<CarouselItem
-										key={show.id}
-										className="pl-4 basis-[45%] md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
-									>
-										<div className="h-full w-full">
-											<MediaCard
-												type={props.type}
-												showRank={props.showRank}
-												show={show}
-												index={index}
-												isVertical={props.isVertical}
-											/>
-										</div>
-									</CarouselItem>
-								) : null
-							)}
-						</CarouselContent>
-					) : (
-						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-							{props?.shows?.map((show: Show, index: number) =>
-								show?.backdrop_path ? (
-									<MediaCard
-										key={index}
-										showRank={props.showRank}
-										show={show}
-										type={props.type}
-										index={index}
-										isVertical={props.isVertical}
-									/>
-								) : null
-							)}
-						</div>
-					)}
-				</div>
-			</Carousel>
-		</section>
-	);
+  return (
+    <section className="w-full py-4 space-y-2 overflow-visible relative">
+      {/* Header Section */}
+      <div className="flex items-end justify-between px-1 mb-1">
+        {props.text && (
+          <CommonTitle
+            text={props.text}
+            variant="section"
+            as="h2"
+          />
+        )}
+        {props.viewAllLink && (
+          <Link
+            href={props.viewAllLink}
+            className="text-xs font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-[0.15em]"
+          >
+            See All
+          </Link>
+        )}
+      </div>
+
+      {useGrid ? (
+        /* Grid Layout for Vertical Cards */
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+          {validShows.map((show: Show, index: number) => (
+            <MediaCard
+              key={show.id}
+              type={props.type}
+              show={show}
+              index={index}
+              isVertical={true}
+            />
+          ))}
+        </div>
+      ) : (
+        /* Carousel Layout for Horizontal Cards */
+        <Carousel
+          opts={{
+            align: 'start',
+            dragFree: true,
+            containScroll: 'trimSnaps',
+          }}
+          className="w-full group/row relative px-0"
+        >
+          {/* Carousel Navigation Buttons - Top Right */}
+          <div className="hidden lg:flex absolute -top-12 right-0 z-50 items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300">
+            <CarouselPrevious
+              className="static translate-y-0 h-8 w-8 border-none bg-zinc-900/80 backdrop-blur-md text-white hover:bg-white hover:text-black rounded-ui"
+              icon={<ChevronLeft className="h-4 w-4" />}
+            />
+            <CarouselNext
+              className="static translate-y-0 h-8 w-8 border-none bg-zinc-900/80 backdrop-blur-md text-white hover:bg-white hover:text-black rounded-ui"
+              icon={<ChevronRight className="h-4 w-4" />}
+            />
+          </div>
+
+          <CarouselContent className="-ml-3 overflow-visible">
+            {validShows.map((show: Show, index: number) => (
+              <CarouselItem
+                key={show.id}
+                className={cn(
+                  "pl-3 transition-all duration-500",
+                  "basis-[75%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
+                )}
+              >
+                <div className="py-3">
+                  <MediaCard
+                    type={props.type}
+                    show={show}
+                    index={index}
+                    isVertical={false}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      )}
+    </section>
+  );
 }

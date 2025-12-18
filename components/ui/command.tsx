@@ -19,7 +19,7 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        'flex h-full w-full flex-col overflow-hidden rounded-xl bg-transparent text-white',
+        'flex h-full w-full flex-col overflow-hidden rounded-card md:rounded-card-md bg-transparent text-white',
         className
       )}
       {...props}
@@ -50,7 +50,7 @@ function CommandDialog({
       <DialogContent
         className={cn(
           // Liquid Glass Base Styles
-          'overflow-hidden p-0 shadow-2xl bg-black/60 backdrop-blur-3xl border border-white/10 sm:rounded-2xl',
+          'overflow-hidden p-0 shadow-2xl bg-black/60 backdrop-blur-3xl border border-white/10 sm:rounded-dialog md:sm:rounded-dialog-md',
           className
         )}
         showCloseButton={showCloseButton}
@@ -79,7 +79,7 @@ function CommandInput({
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          'flex h-full w-full rounded-md bg-transparent py-3 text-base outline-none placeholder:text-white/30 text-white disabled:cursor-not-allowed disabled:opacity-50',
+          'flex h-full w-full rounded-ui bg-transparent py-3 text-base outline-none placeholder:text-white/30 text-white disabled:cursor-not-allowed disabled:opacity-50',
           className
         )}
         {...props}

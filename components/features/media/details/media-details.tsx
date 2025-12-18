@@ -15,11 +15,8 @@ const MediaDetails = (props: any) => {
 		<Container className="w-full space-y-8 md:space-y-12 py-6 md:py-8">
 			<ShowDetails id={data?.id} show={data} type={type} />
 			<ShowContainer showData={data} id={data?.id} type={type} seasons={data.seasons} />
-
-			{/* Lazy load credits and videos with TanStack Query */}
 			{mediaId && <CastCrewSection id={mediaId} type={type} />}
 			{mediaId && <VideoSection id={mediaId} type={type} />}
-
 			<MoreDetailsContainer type={type} show={data} />
 		</Container>
 	);

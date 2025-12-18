@@ -73,14 +73,14 @@ function CastCrewContent({ cast, crew }: { cast: CastMember[]; crew: CrewMember[
 							icon={<ChevronRight className="h-8 w-8" />}
 						/>
 						<CarouselContent className="-ml-4 items-start">
-							{topCast.map((actor) => (
+							{topCast.map((actor, index) => (
 								<CarouselItem
-									key={actor.id}
+									key={`cast-${actor.id}-${index}`}
 									className="pl-4 basis-[28%] md:basis-1/5 lg:basis-1/6 xl:basis-1/7"
 								>
 									<div className="flex flex-col gap-2 w-full group">
 										{/* Actor Photo */}
-										<div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg md:rounded-xl bg-black/40 shadow-lg ring-1 ring-white/10 transition-all duration-300 group-hover:shadow-2xl group-hover:scale-[1.03] group-hover:ring-white/20">
+										<div className="relative aspect-[2/3] w-full overflow-hidden rounded-card md:rounded-card-md bg-black/40 shadow-lg ring-1 ring-white/10 transition-all duration-300 group-hover:shadow-2xl group-hover:scale-[1.03] group-hover:ring-white/20">
 											{actor.profile_path ? (
 												<img
 													src={tmdbImage(actor.profile_path, 'w500')}
@@ -95,7 +95,7 @@ function CastCrewContent({ cast, crew }: { cast: CastMember[]; crew: CrewMember[
 													</span>
 												</div>
 											)}
-											<div className="absolute inset-0 rounded-lg md:rounded-xl ring-1 ring-inset ring-white/10 pointer-events-none" />
+											<div className="absolute inset-0 rounded-card md:rounded-card-md ring-1 ring-inset ring-white/10 pointer-events-none" />
 										</div>
 
 										{/* Actor Info */}
@@ -124,14 +124,14 @@ function CastCrewContent({ cast, crew }: { cast: CastMember[]; crew: CrewMember[
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						{/* Directors */}
 						{directors.length > 0 && (
-							<div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5">
+							<div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-card md:rounded-card-md p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5">
 								<h4 className="text-xs font-bold text-white/60 uppercase tracking-widest">
 									Directors
 								</h4>
 								<div className="flex flex-wrap gap-2">
-									{directors.slice(0, 5).map((director) => (
+									{directors.slice(0, 5).map((director, index) => (
 										<span
-											key={director.id}
+											key={`director-${director.id}-${index}`}
 											className="text-sm font-medium text-white/90 hover:text-white transition-colors"
 										>
 											{director.name}
@@ -143,14 +143,14 @@ function CastCrewContent({ cast, crew }: { cast: CastMember[]; crew: CrewMember[
 
 						{/* Writers */}
 						{writers.length > 0 && (
-							<div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5">
+							<div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-card md:rounded-card-md p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5">
 								<h4 className="text-xs font-bold text-white/60 uppercase tracking-widest">
 									Writers
 								</h4>
 								<div className="flex flex-wrap gap-2">
-									{writers.slice(0, 5).map((writer) => (
+									{writers.slice(0, 5).map((writer, index) => (
 										<span
-											key={writer.id}
+											key={`writer-${writer.id}-${index}`}
 											className="text-sm font-medium text-white/90 hover:text-white transition-colors"
 										>
 											{writer.name}
@@ -162,14 +162,14 @@ function CastCrewContent({ cast, crew }: { cast: CastMember[]; crew: CrewMember[
 
 						{/* Producers */}
 						{producers.length > 0 && (
-							<div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5">
+							<div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-card md:rounded-card-md p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5">
 								<h4 className="text-xs font-bold text-white/60 uppercase tracking-widest">
 									Producers
 								</h4>
 								<div className="flex flex-wrap gap-2">
-									{producers.slice(0, 5).map((producer) => (
+									{producers.slice(0, 5).map((producer, index) => (
 										<span
-											key={producer.id}
+											key={`producer-${producer.id}-${index}`}
 											className="text-sm font-medium text-white/90 hover:text-white transition-colors"
 										>
 											{producer.name}

@@ -6,110 +6,111 @@ import { tmdbImage } from '@/lib/tmdb-image';
 import { Star } from 'lucide-react';
 import BlurFade from '@/components/ui/blur-fade';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/lib/use-media-hook';
 
 export default function MediaCard({
-	index,
-	show,
-	showRank,
-	isVertical = false,
-	type,
-	onClick,
+  index,
+  show,
+  isVertical = false,
+  type,
+  onClick,
 }: {
-	index: number;
-	show: Show;
-	showRank?: boolean;
-	isVertical?: boolean;
-	type?: string;
-	onClick?: (show: Show) => void;
+  index: number;
+  show: Show;
+  isVertical?: boolean;
+  type?: string;
+  onClick?: (show: Show) => void;
 }) {
-	const mediaType = show.media_type || type;
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const mediaType = show.media_type || type;
 
-	if (!mediaType) return <div className="bg-muted/20 animate-pulse rounded-lg aspect-video" />;
+  if (!mediaType) return <div className="bg-muted/20 animate-pulse rounded-card md:rounded-card-md aspect-video" />;
 
-	const href = `/${mediaType}/${show.id}`;
+  const href = `/${mediaType}/${show.id}`;
 
-	return (
-		<Link
-			href={href}
-			onClick={() => onClick?.(show)}
-			className="group block w-full outline-none"
-		>
-			<ShowCardContent show={show} index={index} isVertical={isVertical} />
-		</Link>
-	);
+  // Force vertical (poster) on mobile, otherwise use the prop
+  const effectiveIsVertical = isMobile || isVertical;
+
+  return (
+    <Link
+      href={href}
+      onClick={() => onClick?.(show)}
+      className="group block w-full outline-none perspective-1000"
+    >
+      <ShowCardContent
+        show={show}
+        index={index}
+        isVertical={effectiveIsVertical}
+      />
+    </Link>
+  );
 }
 
 function ShowCardContent({
-	show,
-	index,
-	isVertical,
+  show,
+  index,
+  isVertical,
 }: {
-	show: Show;
-	index: number;
-	isVertical?: boolean;
+  show: Show;
+  index: number;
+  isVertical: boolean;
 }) {
-	const { title, name, backdrop_path, poster_path, first_air_date, release_date, vote_average } =
-		show;
+  const { title, name, backdrop_path, poster_path, first_air_date, release_date, vote_average } = show;
 
-	const imagePath = isVertical ? poster_path : backdrop_path;
-	const imageUrl = imagePath ? tmdbImage(imagePath, 'w500') : null;
+  // Logic: Use poster if vertical, backdrop if horizontal
+  const imagePath = isVertical ? poster_path : backdrop_path;
+  const imageUrl = imagePath ? tmdbImage(imagePath, 'w500') : null;
 
-	const displayTitle = title || name || 'Untitled';
-	const year = (first_air_date || release_date)?.split('-')[0] || '';
+  const displayTitle = title || name || 'Untitled';
+  const year = (first_air_date || release_date)?.split('-')[0] || '';
 
-	const aspectRatioClass = isVertical ? 'aspect-[2/3]' : 'aspect-video';
+  return (
+    <div className="flex flex-col gap-3 w-full transition-transform duration-500 ease-out">
+      <div
+        className={cn(
+          'relative w-full overflow-hidden bg-zinc-800 shadow-md transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]',
+          'group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] group-hover:scale-[1.05] group-hover:-translate-y-1',
+          'group-focus-visible:ring-4 group-focus-visible:ring-white/40',
+          'rounded-card md:rounded-card-md',
+          isVertical ? 'aspect-[2/3]' : 'aspect-video'
+        )}
+      >
+        {imageUrl ? (
+          <BlurFade key={imageUrl} delay={0.02 * index} inView className="h-full w-full">
+            <img
+              src={imageUrl}
+              alt={displayTitle}
+              loading="lazy"
+              className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 rounded-card md:rounded-card-md ring-1 ring-inset ring-white/20 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          </BlurFade>
+        ) : (
+          <div className="flex items-center justify-center w-full h-full bg-zinc-900 text-zinc-500">
+            <span className="text-xs font-medium uppercase tracking-wider">No Preview</span>
+          </div>
+        )}
+      </div>
 
-	return (
-		<div className="flex flex-col gap-2 w-full">
-			<div
-				className={cn(
-					'relative w-full overflow-hidden rounded-md md:rounded-lg bg-zinc-900 shadow-sm transition-all duration-300',
-					'group-hover:shadow-xl group-hover:scale-[1.03] group-focus-visible:ring-2 group-focus-visible:ring-primary',
-					aspectRatioClass
-				)}
-			>
-				{imageUrl ? (
-					<BlurFade key={imageUrl} delay={0.04 * index} inView className="h-full w-full">
-						<img
-							src={imageUrl}
-							alt={displayTitle}
-							loading="lazy"
-							className="w-full h-full object-cover"
-						/>
-						<div className="absolute inset-0 rounded-md md:rounded-lg ring-1 ring-inset ring-white/10 pointer-events-none" />
+      <div className="flex flex-col gap-1 px-1 transition-all duration-300 group-hover:translate-y-1">
+        <h3 className="text-[15px] font-medium text-white/90 leading-tight truncate group-hover:text-white transition-colors">
+          {displayTitle}
+        </h3>
 
-						<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-					</BlurFade>
-				) : (
-					<div className="flex items-center justify-center w-full h-full bg-muted/20 text-muted-foreground/50">
-						<span className="text-xs">No Image</span>
-					</div>
-				)}
-			</div>
-
-			<div className="flex flex-col gap-0.5 px-0.5">
-				<div className="flex items-center justify-between">
-					<h3 className="text-sm font-semibold text-foreground leading-tight truncate pr-2 group-hover:text-primary transition-colors">
-						{displayTitle}
-					</h3>
-				</div>
-
-				<div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium">
-					{vote_average > 0 && (
-						<div className="flex items-center gap-1 text-foreground/80">
-							<Star className="w-3 h-3 fill-foreground/80 text-foreground/80" />
-							<span>{vote_average.toFixed(1)}</span>
-						</div>
-					)}
-
-					{year && (
-						<>
-							<span className="text-muted-foreground/30">•</span>
-							<span>{year}</span>
-						</>
-					)}
-				</div>
-			</div>
-		</div>
-	);
+        <div className="flex items-center gap-2 text-[13px] text-zinc-400 font-medium">
+          {year && <span>{year}</span>}
+          {vote_average > 0 && (
+            <>
+              <span className="opacity-30">•</span>
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 fill-zinc-400 text-zinc-400" />
+                <span>{vote_average.toFixed(1)}</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

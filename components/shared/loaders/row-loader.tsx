@@ -1,55 +1,65 @@
+'use client';
+
 import {
-	Carousel,
-	CarouselContent,
-	CarouselItem,
-	CarouselNext,
-	CarouselPrevious,
+  Carousel,
+  CarouselContent,
+  CarouselItem,
 } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
+import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/lib/use-media-hook';
 
-export default function RowLoader({ withHeader }: { withHeader: boolean }) {
-	return (
-		<section className="w-full py-6 space-y-4">
-			{withHeader && (
-				<div className="mb-4 flex items-center justify-between group/title">
-					<Skeleton className="h-9 w-48 md:h-10 md:w-56 bg-muted" />
-				</div>
-			)}
+export default function RowLoader({
+  withHeader,
+  isVertical = false
+}: {
+  withHeader: boolean;
+  isVertical?: boolean;
+}) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const effectiveIsVertical = isMobile || isVertical;
 
-			<Carousel
-				opts={{
-					align: 'start',
-					dragFree: true,
-					loop: false,
-				}}
-				className="w-full group/row relative"
-			>
-				<CarouselPrevious
-					className="hidden lg:flex absolute left-4 top-[40%] -translate-y-1/2 z-40 h-12 w-12 border-0 bg-black/50 text-white hover:bg-black/70 hover:text-white opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
-					icon={<ChevronLeft className="h-8 w-8" />}
-				/>
-				<CarouselNext
-					className="hidden lg:flex absolute right-4 top-[40%] -translate-y-1/2 z-40 h-12 w-12 border-0 bg-black/50 text-white hover:bg-black/70 hover:text-white opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
-					icon={<ChevronRight className="h-8 w-8" />}
-				/>
+  return (
+    <section className="w-full py-4 space-y-2 overflow-hidden">
+      {withHeader && (
+        <div className="px-1 mb-1">
+          <Skeleton className="h-7 w-40 md:h-8 md:w-56 bg-zinc-800/50 rounded-ui" />
+        </div>
+      )}
 
-				<div className="">
-					<CarouselContent className="-ml-4 items-start">
-						{Array.from({ length: 6 }).map((_, index) => (
-							<CarouselItem
-								key={index}
-								className="pl-4 basis-[45%] md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
-							>
-								<div className="h-full w-full">
-									<Skeleton className="aspect-video w-full rounded-sm bg-muted" />
-								</div>
-							</CarouselItem>
-						))}
-					</CarouselContent>
-				</div>
-			</Carousel>
-		</section>
-	);
+      <Carousel
+        opts={{ align: 'start', dragFree: true }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-3">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <CarouselItem
+              key={index}
+              className={cn(
+                "pl-3",
+                !effectiveIsVertical && "basis-[75%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5",
+                effectiveIsVertical && "basis-[42%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[14.28%]"
+              )}
+            >
+              <div className="py-3 flex flex-col gap-3">
+                <Skeleton
+                  className={cn(
+                    "w-full rounded-card md:rounded-card-md bg-zinc-800/50",
+                    effectiveIsVertical ? "aspect-[2/3]" : "aspect-video"
+                  )}
+                />
+
+                {/* The Text Skeletons (Title & Meta) */}
+                <div className="space-y-2 px-1">
+                  <Skeleton className="h-4 w-3/4 bg-zinc-800/50 rounded-sm" />
+                  <Skeleton className="h-3 w-1/2 bg-zinc-800/50 rounded-sm" />
+                </div>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    </section>
+  );
 }

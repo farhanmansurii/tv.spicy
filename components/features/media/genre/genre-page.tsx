@@ -1,5 +1,6 @@
 import { fetchGenres } from '@/lib/utils';
 import Link from 'next/link';
+import CommonTitle from '@/components/shared/animated/common-title';
 
 interface Genre {
 	id: number;
@@ -18,9 +19,12 @@ async function GenreList({ type }: { type: 'movie' | 'tv' }) {
 
 	return (
 		<div className="">
-			<h2 className="text-xl md:2x; font-bold mb-4">
-				{type.charAt(0).toUpperCase() + type.slice(1)} Genres
-			</h2>
+			<CommonTitle
+				text={`${type.charAt(0).toUpperCase() + type.slice(1)} Genres`}
+				variant="section"
+				as="h2"
+				className="mb-4"
+			/>
 			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 				{genres.map((genre) => (
 					<Link

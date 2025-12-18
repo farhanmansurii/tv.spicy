@@ -40,7 +40,7 @@ export default function CastCrewLoader() {
 							>
 								<div className="flex flex-col gap-2 w-full">
 									{/* Actor Photo */}
-									<Skeleton className="aspect-[2/3] w-full rounded-lg md:rounded-xl bg-muted" />
+									<Skeleton className="aspect-[2/3] w-full rounded-card md:rounded-card-md bg-muted" />
 									{/* Actor Info */}
 									<div className="flex flex-col gap-1 px-0.5">
 										<Skeleton className="h-4 w-24 bg-muted" />
@@ -60,7 +60,7 @@ export default function CastCrewLoader() {
 					{Array.from({ length: 3 }).map((_, index) => (
 						<div
 							key={index}
-							className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5"
+							className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-card md:rounded-card-md p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5"
 						>
 							<Skeleton className="h-4 w-20 bg-muted" />
 							<div className="flex flex-wrap gap-2">

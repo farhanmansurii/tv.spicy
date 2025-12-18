@@ -36,7 +36,6 @@ interface Genre {
 	name: string;
 }
 
-// 1. Icon Mapping
 const getGenreIcon = (name: string) => {
 	const n = name.toLowerCase();
 	if (n.includes('action')) return <Swords className="w-full h-full" />;
@@ -109,35 +108,27 @@ async function GenreList({ type }: { type: 'movie' | 'tv' }) {
 							href={`/discover/${genre.id}?type=${type}&id=${genre.id}&title=${genre.name}`}
 							key={genre.id}
 							className={cn(
-								'group relative aspect-[16/9] w-full overflow-hidden rounded-xl border bg-card text-card-foreground',
+								'group relative aspect-[16/9] w-full overflow-hidden rounded-hero md:rounded-hero-md border bg-card text-card-foreground',
 								'transition-all duration-300 ease-out',
 								'hover:scale-[1.02] hover:shadow-xl',
 								'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background',
-								colorClass // Applies the specific hover color
+								colorClass
 							)}
 						>
-							{/* Hover: Subtle Gradient Wash */}
 							<div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-							{/* Background Icon (Decorative) */}
 							<div className="absolute -right-6 -top-6 h-40 w-40 opacity-[0.03] group-hover:opacity-[0.1] transition-opacity duration-500 rotate-12 transform text-current">
 								{Icon}
 							</div>
-
 							<div className="absolute inset-0 p-5 flex flex-col justify-between">
-								{/* Top Right: Icon */}
 								<div className="self-end">
 									<div className="h-8 w-8 text-muted-foreground group-hover:text-current transition-colors duration-300">
 										{Icon}
 									</div>
 								</div>
-
-								{/* Bottom Left: Title */}
 								<div className="space-y-2">
 									<h3 className="text-lg md:text-xl font-bold leading-tight tracking-wide group-hover:translate-x-1 transition-transform duration-300">
 										{genre.name}
 									</h3>
-									{/* Decorative Line */}
 									<div className="h-1 w-8 rounded-full bg-muted group-hover:bg-current transition-colors duration-300" />
 								</div>
 							</div>

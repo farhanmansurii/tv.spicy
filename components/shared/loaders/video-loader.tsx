@@ -12,12 +12,12 @@ export default function VideoLoader() {
 				{Array.from({ length: 6 }).map((_, index) => (
 					<div
 						key={index}
-						className="group relative aspect-video w-full overflow-hidden rounded-xl md:rounded-2xl bg-black/40 shadow-lg ring-1 ring-white/10"
+						className="group relative aspect-video w-full overflow-hidden rounded-card md:rounded-card-md bg-black/40 shadow-lg ring-1 ring-white/10"
 					>
 						<Skeleton className="h-full w-full bg-muted" />
 						{/* Badge Skeleton */}
 						<div className="absolute top-3 left-3">
-							<Skeleton className="h-5 w-16 rounded-md bg-muted" />
+							<Skeleton className="h-5 w-16 rounded-ui bg-muted" />
 						</div>
 						{/* Title Skeleton */}
 						<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4">
