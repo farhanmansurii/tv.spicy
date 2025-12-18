@@ -8,7 +8,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/lib/use-media-hook';
+import { useMediaQuery } from '@/store/mediaQueryStore';
 
 export default function RowLoader({
   withHeader,
@@ -17,7 +17,7 @@ export default function RowLoader({
   withHeader: boolean;
   isVertical?: boolean;
 }) {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery();
   const effectiveIsVertical = isMobile || isVertical;
 
   return (

@@ -7,6 +7,7 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 import { Header } from '@/components/layout/header/header';
 import Footer from '@/components/layout/footer/footer';
 import SidebarProvider from './sidebar-provider';
+import { useMediaQueryStore } from '@/store/mediaQueryStore';
 
 const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 	const [queryClient] = useState(() => {
@@ -33,6 +34,12 @@ const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 
 		return client;
 	});
+
+	// Initialize media query store
+	const initMediaQuery = useMediaQueryStore((state) => state.init);
+	useEffect(() => {
+		initMediaQuery();
+	}, [initMediaQuery]);
 
 	return (
 		<QueryClientProvider client={queryClient}>

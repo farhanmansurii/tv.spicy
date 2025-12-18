@@ -6,12 +6,12 @@ import { tmdbImage } from '@/lib/tmdb-image';
 import { Star } from 'lucide-react';
 import BlurFade from '@/components/ui/blur-fade';
 import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/lib/use-media-hook';
+import { useMediaQuery } from '@/store/mediaQueryStore';
 
 export default function MediaCard({
   index,
   show,
-  isVertical = false,
+  isVertical,
   type,
   onClick,
 }: {
@@ -21,15 +21,11 @@ export default function MediaCard({
   type?: string;
   onClick?: (show: Show) => void;
 }) {
-  const isMobile = useMediaQuery('(max-width: 768px)');
   const mediaType = show.media_type || type;
 
   if (!mediaType) return <div className="bg-muted/20 animate-pulse rounded-card md:rounded-card-md aspect-video" />;
 
   const href = `/${mediaType}/${show.id}`;
-
-  // Force vertical (poster) on mobile, otherwise use the prop
-  const effectiveIsVertical = isMobile || isVertical;
 
   return (
     <Link
@@ -40,7 +36,7 @@ export default function MediaCard({
       <ShowCardContent
         show={show}
         index={index}
-        isVertical={effectiveIsVertical}
+        isVertical={isVertical}
       />
     </Link>
   );
@@ -53,12 +49,25 @@ function ShowCardContent({
 }: {
   show: Show;
   index: number;
-  isVertical: boolean;
+  isVertical?: boolean;
 }) {
+  const isMobile = useMediaQuery();
   const { title, name, backdrop_path, poster_path, first_air_date, release_date, vote_average } = show;
 
-  // Logic: Use poster if vertical, backdrop if horizontal
-  const imagePath = isVertical ? poster_path : backdrop_path;
+  // Logic:
+  // - If isVertical is explicitly true: use poster
+  // - If isVertical is explicitly false: use backdrop
+  // - If isVertical is undefined: use poster on mobile, backdrop on desktop
+  let imagePath: string | null = null;
+  if (isVertical === true) {
+    imagePath = poster_path;
+  } else if (isVertical === false) {
+    imagePath = backdrop_path;
+  } else {
+    // isVertical is undefined - use mobile/desktop logic
+    imagePath = isMobile ? poster_path : backdrop_path;
+  }
+
   const imageUrl = imagePath ? tmdbImage(imagePath, 'w500') : null;
 
   const displayTitle = title || name || 'Untitled';
@@ -72,7 +81,7 @@ function ShowCardContent({
           'group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] group-hover:scale-[1.05] group-hover:-translate-y-1',
           'group-focus-visible:ring-4 group-focus-visible:ring-white/40',
           'rounded-card md:rounded-card-md',
-          isVertical ? 'aspect-[2/3]' : 'aspect-video'
+          (isVertical === true || (isVertical === undefined && isMobile)) ? 'aspect-[2/3]' : 'aspect-video'
         )}
       >
         {imageUrl ? (
