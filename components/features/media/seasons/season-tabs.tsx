@@ -26,8 +26,26 @@ import CommonTitle from '@/components/shared/animated/common-title';
 const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId, showData }) => {
   const searchParams = useSearchParams();
   const [activeSeason, setActiveSeason] = useState<number | null>(null);
-  const [view, setView] = useState<'grid' | 'list' | 'carousel'>('list');
+
+  const [view, setView] = useState<'grid' | 'list' | 'carousel'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('episode-view-preference');
+      if (saved === 'grid' || saved === 'list' || saved === 'carousel') {
+        return saved;
+      }
+    }
+    return 'list';
+  });
+
   const { activeEP, setActiveEP } = useEpisodeStore();
+
+  // Save view preference to localStorage when it changes
+  const handleViewChange = (newView: 'grid' | 'list' | 'carousel') => {
+    setView(newView);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('episode-view-preference', newView);
+    }
+  };
 
   const episodePlayerRef = useRef<HTMLDivElement>(null);
 
@@ -183,7 +201,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId, showData }) =>
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => setView('list')}
+              onClick={() => handleViewChange('list')}
               className={cn(
                 'h-8 px-3 rounded-ui text-white/60 hover:text-white transition-all',
                 view === 'list' && 'bg-white/10 text-white shadow-sm'
@@ -195,7 +213,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId, showData }) =>
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => setView('grid')}
+              onClick={() => handleViewChange('grid')}
               className={cn(
                 'h-8 px-3 rounded-ui text-white/60 hover:text-white transition-all',
                 view === 'grid' && 'bg-white/10 text-white shadow-sm'
@@ -207,7 +225,7 @@ const SeasonTabs: React.FC<SeasonTabsProps> = ({ seasons, showId, showData }) =>
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => setView('carousel')}
+              onClick={() => handleViewChange('carousel')}
               className={cn(
                 'h-8 px-3 rounded-ui text-white/60 hover:text-white transition-all',
                 view === 'carousel' && 'bg-white/10 text-white shadow-sm'
