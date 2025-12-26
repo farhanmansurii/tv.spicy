@@ -335,7 +335,7 @@ export default function SearchPageClient() {
 							</div>
 							<div className="space-y-2">
 								<h2 className="text-2xl font-bold tracking-tight">No matches found</h2>
-								<p className="text-muted-foreground max-w-sm mx-auto">We couldn't find anything matching your search. Try adjusting your filters.</p>
+								<p className="text-muted-foreground max-w-sm mx-auto">We couldn&apos;t find anything matching your search. Try adjusting your filters.</p>
 							</div>
 							<Button variant="secondary" className="rounded-xl px-8" onClick={resetSearch}>Clear Search</Button>
 						</div>

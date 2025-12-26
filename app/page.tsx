@@ -26,9 +26,7 @@ export default async function HomePage() {
 
 		return (
 			<div className="min-h-screen bg-background text-foreground pb-20">
-				<Container className="w-full py-4 md:py-10">
 					<HeroCarousel shows={heroShows} type="tv" />
-				</Container>
 
 				<Container className="w-full">
 					<div>

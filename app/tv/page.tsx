@@ -29,9 +29,7 @@ export default async function Page() {
 
 	return (
 		<>
-			<Container className="w-full py-4 md:py-10">
-				<HeroCarousel shows={heroShows} type="tv" />
-			</Container>
+			<HeroCarousel shows={heroShows} type="tv" />
 			<Container>
 				<div className="flex flex-col space-y-12">
 					<Suspense fallback={null}>
