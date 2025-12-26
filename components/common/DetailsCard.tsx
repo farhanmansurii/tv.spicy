@@ -1,9 +1,7 @@
 import React from 'react';
 import { Show } from '@/lib/types';
 import { format } from 'date-fns';
-import ContinueWatchingButton from './ContinueWatchingButton';
-import { cn } from '@/lib/utils';
-import { Play, Plus, Info } from 'lucide-react'; // Example icons
+import ContinueWatchingButton from '../features/watchlist/continue-watching-button';
 
 interface CarousalCardProps {
   show: Show;

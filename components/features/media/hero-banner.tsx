@@ -1,163 +1,135 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { tmdbImage } from '@/lib/tmdb-image';
-import ContinueWatchingButton from '@/components/features/watchlist/continue-watching-button';
-import { ChevronRight, Play, Star } from 'lucide-react';
+import { Star, Plus, Info, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/store/mediaQueryStore';
 import { useEpisodeStore } from '@/store/episodeStore';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import Container from '@/components/shared/containers/container';
+import ContinueWatchingButton from '../watchlist/continue-watching-button';
 
-export function HeroBanner({ id, show, type, isDetailsPage = false, loading = 'lazy' }: any) {
+export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager' }: any) {
     const isMobile = useMediaQuery();
     const { activeEP } = useEpisodeStore();
 
+    // 1. DATA EXTRACTION
+    const title = show.title || show.name || 'Untitled';
     const releaseYear = (show.first_air_date || show.release_date)
         ? new Date(show.first_air_date || show.release_date).getFullYear()
-        : '';
+        : null;
 
     const rating = type === 'tv'
         ? show.content_ratings?.results?.find((r: any) => r.iso_3166_1 === 'US')?.rating
         : show.release_dates?.results?.find((r: any) => r.iso_3166_1 === 'US')?.release_dates?.[0]?.certification;
 
     const runtime = show.episode_run_time?.[0] || show.runtime;
-    const genres = show.genres?.map((g: any) => g.name).join(' · ');
+    const genres = show.genres?.map((g: any) => g.name).slice(0, 2).join(' • ');
 
-    const posterPath = show.images?.posters?.find((img: any) => img.iso_639_1 === null)?.file_path || show.poster_path;
-    const backdropPath = show.images?.backdrops?.find((img: any) => img.iso_639_1 === null)?.file_path || show.backdrop_path;
+    // 2. CLEAN IMAGE FILTERING (Industrial Standard)
+    const { cleanBackdrop, cleanPoster, logo } = useMemo(() => {
+        const backdrops = show.images?.backdrops || [];
+        const posters = show.images?.posters || [];
+        const logos = show.images?.logos || [];
 
-    // On Desktop we strictly want Backdrop, on Mobile we prefer Poster
-    const currentImage = isMobile ? (posterPath || backdropPath) : (backdropPath || posterPath);
+        return {
+            // Find backdrop with NO text (iso_639_1 is null)
+            cleanBackdrop: backdrops.find((img: any) => img.iso_639_1 === null)?.file_path || show.backdrop_path,
+            // Find portrait poster with NO text or English
+            cleanPoster: posters.find((img: any) => img.iso_639_1 === null)?.file_path || show.poster_path,
+            // Find English Logo
+            logo: logos.find((img: any) => img.iso_639_1 === 'en')?.file_path || logos[0]?.file_path
+        };
+    }, [show]);
 
-    const logo = show.images?.logos?.find((img: any) => img.iso_639_1 === 'en')?.file_path ||
-                 show.images?.logos?.[0]?.file_path;
-
-    // Build metadata items array
-    const metadataItems = [];
-    if (releaseYear) metadataItems.push({ type: 'text', content: releaseYear });
-    if (type === 'movie' && runtime) metadataItems.push({ type: 'text', content: `${runtime} min` });
-    if (type === 'tv' && show.number_of_seasons) {
-        metadataItems.push({ type: 'text', content: `${show.number_of_seasons} ${show.number_of_seasons === 1 ? 'Season' : 'Seasons'}` });
-    }
-    if (type === 'tv' && show.number_of_episodes) {
-        metadataItems.push({ type: 'text', content: `${show.number_of_episodes} ${show.number_of_episodes === 1 ? 'Episode' : 'Episodes'}` });
-    }
-    if (rating) metadataItems.push({ type: 'rating', content: rating });
-    if (show.vote_average && show.vote_average > 0) {
-        metadataItems.push({ type: 'vote', content: show.vote_average.toFixed(1) });
-    }
+    const currentImage = isMobile ? cleanPoster : cleanBackdrop;
 
     return (
-        <div className="relative w-full overflow-hidden group rounded-hero md:rounded-hero-md">
-            <div className={cn(
-                "relative w-full transition-transform duration-1000 ease-out overflow-hidden",
-                "aspect-[2/3] md:aspect-video lg:aspect-[16/8]",
-                'rounded-hero md:rounded-hero-md',
-            )}>
+        <section className={cn(
+            "relative w-full overflow-hidden bg-background top-0 left-0",
+            "h-[85vh] md:h-[75vh]"
+        )}>
+            <div className="absolute inset-0 z-0">
                 <img
                     src={tmdbImage(currentImage, 'original')}
-                    alt={show.title || show.name}
-                    className="w-full h-full object-cover rounded-hero md:rounded-hero-md scale-105 group-hover:scale-100 transition-transform duration-1000"
+                    alt={title}
+                    className="w-full h-full object-cover object-center md:object-[center_20%] animate-in fade-in duration-1000"
                     loading={loading}
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent md:bg-gradient-to-r md:from-black/80 md:via-black/20 md:to-transparent rounded-hero md:rounded-hero-md" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent hidden md:block rounded-hero md:rounded-hero-md" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
 
-                {/* Gradient blur effect similar to episode card */}
-                <div
-                    className={cn(
-                        "absolute inset-0 z-10 transition-opacity duration-500 rounded-hero md:rounded-hero-md",
-                        "backdrop-blur-[5px] opacity-100"
-                    )}
-                    style={{
-                        WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%, black 100%)',
-                        maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%, black 100%)',
-                    }}
-                />
+                <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-background/80 via-transparent to-transparent" />
             </div>
 
-            <div className={cn(
-                "absolute inset-0 flex flex-col justify-end px-6 pb-12 md:px-16 md:pb-20",
-                "items-center text-center md:items-start md:text-left z-20"
-            )}>
+            <div className="relative z-10 h-full flex flex-col justify-end">
+                <Container className={cn(
+                    "pb-10 md:pb-16",
+                )}>
+                    <div className="max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+                            <Badge className="bg-primary/20 text-primary border-none backdrop-blur-md px-3 py-1 uppercase text-[10px] font-bold">
+                                {type === 'tv' ? 'Series' : 'Movie'}
+                            </Badge>
+                            {releaseYear && <span className="text-sm font-bold text-white/90">{releaseYear}</span>}
+                            {rating && (
+                                <span className="border border-white/40 px-2 py-0.5 rounded text-[10px] font-black text-white">
+                                    {rating}
+                                </span>
+                            )}
+                            {show.vote_average > 0 && (
+                                <div className="flex items-center gap-1 text-sm font-bold text-yellow-500">
+                                    <Star className="w-4 h-4 fill-current" />
+                                    <span>{show.vote_average.toFixed(1)}</span>
+                                </div>
+                            )}
+                        </div>
 
+                        {/* Logo or Text Title */}
+                        <div className="flex flex-col items-center md:items-start">
+                            {logo ? (
+                                <img
+                                    src={tmdbImage(logo, 'w500')}
+                                    className="max-h-[120px] md:max-h-[200px] lg:max-h-[200px] max-w-xs md:max-w-sm lg:max-w-md w-auto object-contain drop-shadow-[0_20px_20px_rgba(0,0,0,0.8)]"
+                                    alt={title}
+                                />
+                            ) : (
+                                <h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter uppercase drop-shadow-2xl text-center md:text-left">
+                                    {title}
+                                </h1>
+                            )}
+                            <p className="mt-4 text-[10px] md:text-xs font-black text-white/50 tracking-[0.3em] uppercase">
+                                {genres} {runtime > 0 && ` • ${runtime}m`}
+                            </p>
+                        </div>
 
+                        {/* Overview / Episode Info */}
+                        <div className="max-w-xl text-center md:text-left">
+                            {isDetailsPage && type === 'tv' && activeEP ? (
+                                <div className="inline-flex items-center gap-4 rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur-xl hover:bg-white/10 transition-colors">
+                                    <div className="bg-primary p-2.5 rounded-full shadow-lg">
+                                        <Play className="w-4 h-4 fill-black text-black" />
+                                    </div>
+                                    <div className="text-left">
+                                        <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">Next Up</h4>
+                                        <p className="text-white font-bold text-sm">S{activeEP.season_number} E{activeEP.episode_number}: {activeEP.name}</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-white/80 text-sm md:text-lg leading-relaxed line-clamp-3 font-medium drop-shadow-md">
+                                    {show.overview}
+                                </p>
+                            )}
+                        </div>
 
-                <div className="w-full max-w-[280px] md:max-w-[300px] mb-2 md:mb-4  lg:max-w-[500px] flex items-center justify-center md:block">
-                    {logo ? (
-                        <img
-                            src={tmdbImage(logo, 'w500')}
-                            className="max-h-[80px] md:max-h-[140px] w-auto object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] md:object-left"
-                            alt={show.title || show.name}
-                        />
-                    ) : (
-                        <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter italic">
-                            {show.title || show.name}
-                        </h1>
-                    )}
-                </div>
-
-                <div className="flex items-center gap-2 text-white/70 mb-2 flex-wrap justify-center md:justify-start md:mb-4 text-[11px] md:text-[12px] font-semibold ">
-                    <span className=" rounded-card text px-2 border-2 border-white/20 whitespace-nowrap font-black">{type === 'tv' ? 'TV Show' : 'Movie'}</span>
-                    {genres && (
-                        <>
-                            <span className="text-white/40 font-light text-xl">·</span>
-                            <span className="line-clamp-1">{genres}</span>
-                        </>
-                    )}
-                </div>
-
-                <div className="flex flex-col md:flex-row items-center gap-4 mb-2 md:mb-4 w-full md:w-auto">
-                    <ContinueWatchingButton
-                        id={id}
-                        show={show}
-                        type={type}
-                        isDetailsPage={isDetailsPage}
-                        className="w-full md:w-auto h-11 px-8 text-lg"
-                    />
-
-                </div>
-                <div className="max-w-2xl space-y-3">
-                    {isDetailsPage && type === 'tv' && activeEP ? (
-                        <p className="text-white text-[15px] md:text-[17px] font-medium leading-snug">
-                            <span className="font-bold block md:inline mb-1 md:mb-0">
-                                S{activeEP.season_number}, E{activeEP.episode_number} · {activeEP.name}:
-                            </span>
-                            <span className="opacity-80  block line-clamp-2 md:line-clamp-3">
-                                {activeEP.overview || show.overview}
-                            </span>
-                        </p>
-                    ) : (
-                        <p className="text-white/80 text-[12px] md:text-[14px] leading-relaxed line-clamp-2 md:line-clamp-3">
-                            {show.overview}
-                        </p>
-                    )}
-
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 text-[11px] font-bold text-white/40 tracking-widest uppercase leading-none">
-                        {metadataItems.map((item, index) => (
-                            <React.Fragment key={index}>
-                                {item.type === 'text' && (
-                                    <span className="flex items-center">{item.content}</span>
-                                )}
-                                {item.type === 'rating' && (
-                                    <span className="bg-yellow-500 text-black px-1.5 py-0.5 rounded-sm font-bold flex items-center leading-none">{item.content}</span>
-                                )}
-                                {item.type === 'vote' && (
-                                    <span className="border border-white/20 px-1.5 py-0.5 rounded-sm flex items-center gap-1 leading-none">
-                                        <Star className="w-3 h-3 fill-white/40 text-white/40" />
-                                        {item.content}
-                                    </span>
-                                )}
-                                {index < metadataItems.length - 1 && (
-                                    <span className="text-white/20 text-base md:text-lg">·</span>
-                                )}
-                            </React.Fragment>
-                        ))}
+                        {/* Action Buttons */}
+                        <ContinueWatchingButton id={show.id} show={show} type={type} isDetailsPage={isDetailsPage} />
                     </div>
-                </div>
+                </Container>
             </div>
-        </div>
+        </section>
     );
 }

@@ -71,7 +71,7 @@ function VideoContent({ videos }: { videos: Video[] }) {
       <DialogTrigger asChild>
         <button
           onClick={() => setSelectedVideo(video)}
-          className="group relative aspect-video w-full overflow-hidden rounded-card md:rounded-card-md bg-black/40 shadow-lg ring-1 ring-white/10 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:ring-white/20 select-none"
+          className="group relative aspect-video w-full overflow-hidden rounded-card md:rounded-card-md bg-black/40 shadow-lg ring-1 ring-white/10 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:ring-white/20 active:scale-[0.98] select-none touch-manipulation"
         >
           {/* Thumbnail */}
           <img
@@ -89,29 +89,29 @@ function VideoContent({ videos }: { videos: Video[] }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
           {/* Overlay with Play Button */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-black shadow-2xl transition-transform duration-300 group-hover:scale-110">
-              <Play className="ml-1 h-8 w-8 fill-current" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]">
+            <div className="flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full bg-white text-black shadow-2xl transition-transform duration-300 group-hover:scale-110 group-active:scale-105">
+              <Play className="ml-1 h-7 w-7 md:h-8 md:w-8 fill-current" />
             </div>
           </div>
 
           {/* Video Type Badge */}
-          <div className="absolute top-3 left-3">
-            <span className="rounded-ui bg-black/70 backdrop-blur-md border border-white/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+          <div className="absolute top-2 left-2 md:top-3 md:left-3">
+            <span className="rounded-ui bg-black/70 backdrop-blur-md border border-white/10 px-2 py-1 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-white">
               {video.type}
             </span>
           </div>
 
           {/* Video Title */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4">
-            <p className="text-sm font-semibold text-white line-clamp-2 drop-shadow-md">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-3 md:p-4">
+            <p className="text-xs md:text-sm font-semibold text-white line-clamp-2 drop-shadow-md">
               {video.name}
             </p>
           </div>
         </button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-5xl w-full p-0 bg-black border-none rounded-dialog md:rounded-dialog-md overflow-hidden">
+      <DialogContent className="max-w-5xl w-full mx-2 md:mx-auto p-0 bg-black border-none rounded-dialog md:rounded-dialog-md overflow-hidden">
         <DialogTitle className="sr-only">{video.name}</DialogTitle>
         <div className="relative aspect-video w-full">
           {selectedVideo?.id === video.id && (
@@ -125,9 +125,10 @@ function VideoContent({ videos }: { videos: Video[] }) {
               />
               <button
                 onClick={() => setSelectedVideo(null)}
-                className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/70 backdrop-blur-md text-white border border-white/10 transition-colors hover:bg-black/90"
+                className="absolute top-2 right-2 md:top-4 md:right-4 z-10 flex h-11 w-11 md:h-10 md:w-10 items-center justify-center rounded-full bg-black/70 backdrop-blur-md text-white border border-white/10 transition-colors hover:bg-black/90 active:bg-black/90 touch-manipulation"
+                aria-label="Close video"
               >
-                <X className="h-5 w-5" />
+                <X className="h-6 w-6 md:h-5 md:w-5" />
               </button>
             </>
           )}
@@ -141,19 +142,19 @@ function VideoContent({ videos }: { videos: Video[] }) {
       <CommonTitle text="Videos & Trailers" />
 
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="bg-white/5 border border-white/10 rounded-xl p-1 h-auto">
+        <TabsList className="bg-white/5 border border-white/10 rounded-xl p-1 h-auto overflow-x-auto scrollbar-hide flex-nowrap md:flex-wrap">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.key}
               value={tab.key}
               className={cn(
-                'px-4 py-2 text-sm font-medium transition-all',
+                'px-3 py-2 text-xs md:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0',
                 'data-[state=active]:bg-white/10 data-[state=active]:text-white',
-                'data-[state=inactive]:text-white/50 hover:text-white/70'
+                'data-[state=inactive]:text-white/50 hover:text-white/70 active:text-white/70'
               )}
             >
               {tab.title}
-              <span className="ml-2 text-xs opacity-70">({tab.videos.length})</span>
+              <span className="ml-1.5 md:ml-2 text-[10px] md:text-xs opacity-70">({tab.videos.length})</span>
             </TabsTrigger>
           ))}
         </TabsList>
@@ -170,7 +171,7 @@ function VideoContent({ videos }: { videos: Video[] }) {
             <TabsContent key={tab.key} value={tab.key} className="mt-6">
               <div className="space-y-4">
                 {/* Video Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
                   {displayedVideos.map(renderVideoCard)}
                 </div>
 
@@ -178,7 +179,7 @@ function VideoContent({ videos }: { videos: Video[] }) {
                 {hasMore && (
                   <button
                     onClick={() => toggleTab(tab.key)}
-                    className="w-full py-3 text-center text-sm text-white/50 font-medium hover:text-white transition-colors"
+                    className="w-full py-3 md:py-3 text-center text-xs md:text-sm text-white/50 font-medium hover:text-white active:text-white transition-colors touch-manipulation"
                   >
                     {isExpanded
                       ? `Show Less`

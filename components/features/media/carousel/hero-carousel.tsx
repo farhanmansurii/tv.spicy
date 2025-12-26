@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/carousel';
 import { Show } from '@/lib/types';
 import { HeroBanner } from '@/components/features/media/hero-banner';
+import { cn } from '@/lib/utils';
 
 interface HeroCarouselProps {
     shows: Show[];
@@ -24,7 +25,11 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
     if (validShows.length === 0) return null;
 
     return (
-        <div className="relative w-full group px-0 md:px-0">
+        <div className={cn(
+            "relative w-full group",
+            "w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]",
+            "md:w-full md:left-auto md:right-auto md:ml-0 md:mr-0"
+        )}>
             <Carousel
                 plugins={[plugin.current]}
                 className="w-full"
@@ -37,21 +42,19 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
                     {validShows.slice(0, 10).map((show, index) => (
                         <CarouselItem key={show.id} className="pl-0 relative w-full">
                             <HeroBanner
-                                id={show.id}
                                 show={show}
                                 type={type}
                                 isDetailsPage={false}
-                                enableHover={true}
                                 loading={index === 0 ? 'eager' : 'lazy'}
                             />
                         </CarouselItem>
                     ))}
                 </CarouselContent>
 
-                {/* Navigation Buttons (Apple Glass Pill Style) */}
+                {/* Navigation Buttons */}
                 <div className="hidden md:flex absolute right-12 bottom-12 z-20 gap-3">
-                    <CarouselPrevious className="static translate-y-0 h-14 w-14 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-3xl transition-all duration-300" />
-                    <CarouselNext className="static translate-y-0 h-14 w-14 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-3xl transition-all duration-300" />
+                    <CarouselPrevious className="static translate-y-0 h-12 w-12 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-md transition-all" />
+                    <CarouselNext className="static translate-y-0 h-12 w-12 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-md transition-all" />
                 </div>
             </Carousel>
         </div>

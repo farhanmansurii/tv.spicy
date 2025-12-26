@@ -8,6 +8,15 @@
 	input {
 		font-size: 16px;
 	}
+
+	/* Hide scrollbar while maintaining scroll functionality */
+	.scrollbar-hide {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none; /* Chrome, Safari and Opera */
+	}
 }
 
 /* --- Light Theme (Clean, Swiss Style) --- */
@@ -201,6 +210,8 @@
 		/* Essential for text crispness on dark mode */
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		/* Prevent layout shift when dialog opens by maintaining scrollbar space */
+		scrollbar-gutter: stable;
 	}
 }
 @keyframes shimmer {
