@@ -3,88 +3,87 @@
 import { Anime, Show } from '@/lib/types';
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import MoreDetailsLoader from '@/components/shared/loaders/more-details-loader';
 import { cn } from '@/lib/utils';
 import CommonTitle from '@/components/shared/animated/common-title';
 
 const RelatedShowsContainer = dynamic(() => import('./related-shows-container'), {
-	ssr: false,
-	loading: () => <MoreDetailsLoader />,
+    ssr: false,
+    loading: () => <MoreDetailsLoader />,
 });
 
-const tabs = ['Related Shows', 'Recommendations'];
-
-interface TabProps {
-	text: string;
-	selected: boolean;
-	setSelected: (text: string) => void;
-}
+const TABS = ['Related', 'Recommendations'] as const;
+type TabType = (typeof TABS)[number];
 
 export default function MoreDetailsContainer({ show, type }: { show: Show | Anime; type: string }) {
-	const [selected, setSelected] = useState<string>(tabs[0]);
+    const [selected, setSelected] = useState<TabType>(TABS[0]);
 
-	const renderContent = () => {
-		switch (selected) {
-			case 'Recommendations':
-				return <RelatedShowsContainer relation="recommendations" type={type} show={show} />;
-			case 'Related Shows':
-				return <RelatedShowsContainer relation="similar" type={type} show={show} />;
-			default:
-				return <div className="text-white/40 text-center py-10">No Content Available</div>;
-		}
-	};
+    return (
+        <div className="w-full animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out">
+            <div className="space-y-2">
+                <CommonTitle text="Discovery" variant="section" spacing="none" />
+                <CommonTitle
+                    text="More Like This"
+                    variant="small"
+                    spacing="large"
+                >
+                    <div className="flex items-center p-1 bg-white/[0.03] border border-white/[0.08] rounded-full backdrop-blur-3xl shadow-2xl">
+                        {TABS.map((tab) => (
+                            <Tab
+                                key={tab}
+                                text={tab}
+                                selected={selected === tab}
+                                setSelected={(val) => setSelected(val as TabType)}
+                            />
+                        ))}
+                    </div>
+                </CommonTitle>
+            </div>
 
-	return (
-		<div className="w-full  animate-in fade-in slide-in-from-bottom-8 duration-700">
-			<div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-				<CommonTitle text="More Like This" />
-				<div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-full backdrop-blur-xl shadow-lg ring-1 ring-white/5">
-					{tabs.map((tab) => (
-						<Tab
-							text={tab}
-							selected={selected === tab}
-							setSelected={setSelected}
-							key={tab}
-						/>
-					))}
-				</div>
-			</div>
-
-			<div className="w-full min-h-[400px]">{renderContent()}</div>
-		</div>
-	);
+            <div className="w-full  relative">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={selected}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+                    >
+                        <RelatedShowsContainer
+                            relation={selected === 'Recommendations' ? 'recommendations' : 'similar'}
+                            type={type}
+                            show={show}
+                        />
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+        </div>
+    );
 }
 
-const Tab = ({ text, selected, setSelected }: TabProps) => {
-	return (
-		<button
-			onClick={() => setSelected(text)}
-			className={cn(
-				'relative px-5 py-2 text-sm font-semibold rounded-full transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-white/50',
-				selected ? 'text-black' : 'text-white/60 hover:text-white'
-			)}
-		>
-			<span className="relative z-10">{text}</span>
+const Tab = ({ text, selected, setSelected }: { text: string; selected: boolean; setSelected: (t: string) => void }) => {
+    return (
+        <button
+            onClick={() => setSelected(text)}
+            className={cn(
+                'relative px-5 md:px-7 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-500 outline-none z-10',
+                selected ? 'text-black' : 'text-zinc-500 hover:text-white'
+            )}
+        >
+            <span className="relative z-10">{text}</span>
 
-			{selected && (
-				<motion.span
-					layoutId="active-pill"
-					style={{
-						position: 'absolute',
-						inset: 0,
-						zIndex: 0,
-						backgroundColor: 'white',
-						borderRadius: '9999px',
-						boxShadow: '0 0 20px rgba(255,255,255,0.3)',
-					}}
-					transition={{
-						type: 'spring',
-						stiffness: 300,
-						damping: 30,
-					}}
-				/>
-			)}
-		</button>
-	);
+            {selected && (
+                <motion.span
+                    layoutId="active-pill"
+                    className="absolute inset-0 z-0 bg-white rounded-full shadow-[0_0_25px_rgba(255,255,255,0.4)]"
+                    transition={{
+                        type: 'spring',
+                        stiffness: 350,
+                        damping: 30,
+                    }}
+                />
+            )}
+        </button>
+    );
 };

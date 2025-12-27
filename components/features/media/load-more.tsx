@@ -2,7 +2,7 @@
 
 import { useInView } from 'react-intersection-observer';
 import { useEffect, useState } from 'react';
-import { fetchGenreById } from '@/lib/utils';
+import { fetchGenreById } from '@/lib/api';
 import { Show } from '@/lib/types';
 import MediaRow from './row/media-row';
 import GridLoader from '@/components/shared/loaders/grid-loader';
@@ -93,11 +93,11 @@ function LoadMore(props: { params: any }) {
 	}, [searchParams?.id, searchParams?.type]);
 
 	if (!searchParams?.type || !searchParams?.id) {
-		return <GridLoader />;
+		return <GridLoader isVertical={true} />;
 	}
 
 	if (isLoading) {
-		return <GridLoader />;
+		return <GridLoader isVertical={true} />;
 	}
 
 	// Normalize type for MediaRow
@@ -107,12 +107,11 @@ function LoadMore(props: { params: any }) {
 		<div className="space-y-10">
 			<MediaRow
 				isVertical={true}
-				showRank={false}
 				text=""
 				shows={data}
 				type={normalizedType}
 			/>
-			<div ref={ref}>{inView && isLoadingMore && <GridLoader />}</div>
+			<div ref={ref}>{inView && isLoadingMore && <GridLoader isVertical={true} />}</div>
 		</div>
 	);
 }

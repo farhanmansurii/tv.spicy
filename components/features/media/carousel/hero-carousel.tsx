@@ -45,7 +45,7 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
                                 show={show}
                                 type={type}
                                 isDetailsPage={false}
-                                loading={index === 0 ? 'eager' : 'lazy'}
+                                loading={index < 3 ? 'eager' : 'lazy'}
                             />
                         </CarouselItem>
                     ))}
@@ -53,8 +53,8 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 
                 {/* Navigation Buttons */}
                 <div className="hidden md:flex absolute right-12 bottom-12 z-20 gap-3">
-                    <CarouselPrevious className="static translate-y-0 h-12 w-12 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-md transition-all" />
-                    <CarouselNext className="static translate-y-0 h-12 w-12 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-md transition-all" />
+                    <CarouselPrevious className="static translate-y-0 h-12 w-12 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-md transition-all duration-300 will-change-transform" />
+                    <CarouselNext className="static translate-y-0 h-12 w-12 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-md transition-all duration-300 will-change-transform" />
                 </div>
             </Carousel>
         </div>

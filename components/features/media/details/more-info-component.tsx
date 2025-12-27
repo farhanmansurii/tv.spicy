@@ -1,5 +1,5 @@
 import { Show } from '@/lib/types';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/api';
 import React from 'react';
 import EstimateFinishTime from '@/components/features/media/player/estimate-finish-time';
 import { Separator } from '@/components/ui/separator';

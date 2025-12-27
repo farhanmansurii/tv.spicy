@@ -1,6 +1,6 @@
 import MediaDetails from '@/components/features/media/details/media-details';
 import Footer from '@/components/layout/footer/footer';
-import { fetchDetails, fetchDetailsTMDB } from '@/lib/utils';
+import { fetchDetails, fetchDetailsTMDB } from '@/lib/api';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import React from 'react';

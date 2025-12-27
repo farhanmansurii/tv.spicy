@@ -1,4 +1,4 @@
-import { fetchGenres } from '@/lib/utils';
+import { fetchGenres } from '@/lib/api';
 import Link from 'next/link';
 import CommonTitle from '@/components/shared/animated/common-title';
 
@@ -18,7 +18,7 @@ async function GenreList({ type }: { type: 'movie' | 'tv' }) {
 	}
 
 	return (
-		<div className="">
+		<div className="mt-20">
 			<CommonTitle
 				text={`${type.charAt(0).toUpperCase() + type.slice(1)} Genres`}
 				variant="section"

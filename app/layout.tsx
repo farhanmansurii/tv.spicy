@@ -56,7 +56,7 @@ export const generateViewport = (): Viewport => ({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning className={inter.variable}>
-			<body className="pt-20">
+			<body className="antialiased selection:bg-primary/30">
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="dark"
@@ -64,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					disableTransitionOnChange
 				>
 					<TanstackQueryProvider>
-						{children}
+						<main className="relative min-h-screen">{children}</main>
 						<Toaster />
 					</TanstackQueryProvider>
 				</ThemeProvider>

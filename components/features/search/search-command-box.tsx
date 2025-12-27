@@ -13,7 +13,8 @@ import {
 	Calendar,
 	MonitorPlay,
 } from 'lucide-react';
-import { cn, searchShows } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { searchShows } from '@/lib/tmdb-fetch-helper';
 import { Button } from '@/components/ui/button';
 import {
 	Command,

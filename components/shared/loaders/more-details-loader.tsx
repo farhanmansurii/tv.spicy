@@ -11,13 +11,13 @@ export default function MoreDetailsLoader() {
 
 				{/* Tab Selector Skeleton */}
 				<div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-full backdrop-blur-xl shadow-lg ring-1 ring-white/5">
-					<Skeleton className="h-8 w-24 rounded-full bg-muted" />
-					<Skeleton className="h-8 w-32 rounded-full bg-muted" />
+					<Skeleton className="h-8 w-24 rounded-full" />
+					<Skeleton className="h-8 w-32 rounded-full" />
 				</div>
 			</div>
 
 			<div className="w-full min-h-[400px]">
-				<GridLoader />
+				<GridLoader isVertical={true} />
 			</div>
 		</div>
 	);

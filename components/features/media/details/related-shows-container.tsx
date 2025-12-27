@@ -13,6 +13,7 @@ export default function RelatedShowsContainer(props: {
 			type={props.type}
 			isVertical={true}
 			hideHeader={true}
+			gridLayout={true}
 		/>
 	);
 }

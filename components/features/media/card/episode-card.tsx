@@ -9,7 +9,6 @@ import { tmdbImage } from '@/lib/tmdb-image';
 export const EpisodeCard = ({ episode, active, toggle }: any) => {
   if (!episode) return null;
 
-  // Logic for unreleased or missing data
   const isReleased = episode.air_date ? new Date(episode.air_date) <= new Date() : true;
   const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'original') : null;
 
@@ -17,97 +16,88 @@ export const EpisodeCard = ({ episode, active, toggle }: any) => {
     <div
       onClick={(e) => isReleased && toggle(episode, e)}
       className={cn(
-        'group relative cursor-pointer overflow-hidden transition-all duration-500 ease-out',
-        'rounded-[24px] border bg-[#1a1a1a] shadow-2xl',
-        'aspect-[1.62/1] w-full select-none',
+        'group relative aspect-video w-full overflow-hidden select-none transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]',
+        'rounded-xl md:rounded-2xl border bg-card text-card-foreground',
         active
-          ? 'border-white/40 ring-1 ring-white/20 scale-[0.98] z-10 shadow-white/5'
-          : 'border-white/[0.08] hover:border-white/20',
-        !isReleased && 'opacity-50 cursor-not-allowed'
+          ? 'border-primary ring-1 ring-primary/40 scale-[0.98] shadow-2xl'
+          : 'border-white/10 hover:border-white/30 hover:scale-[1.02]',
+        !isReleased && 'opacity-40 cursor-not-allowed'
       )}
     >
-      {stillUrl ? (
-        <img
-          src={stillUrl}
-          className={cn(
-            "absolute inset-0 z-0 h-full w-full object-cover transition-all duration-1000",
-            active ? "scale-105 saturate-[1.1]" : "group-hover:scale-105 opacity-80"
-          )}
-          alt={episode.name}
-        />
-      ) : (
-        <div className="absolute inset-0 z-0 h-full w-full flex flex-col items-center justify-center gap-3 text-white/20 bg-[#1a1a1a]">
-          <ImageOff className="w-12 h-12 md:w-16 md:h-16" />
-        </div>
-      )}
-      <div
-        className={cn(
-            "absolute inset-0 z-10 transition-opacity duration-500",
-            active ? "backdrop-blur-none opacity-0" : "backdrop-blur-[5px] opacity-100"
+      <div className="absolute inset-0 z-0">
+        {stillUrl ? (
+          <img
+            key={stillUrl}
+            src={stillUrl}
+            alt=""
+            className={cn(
+              "h-full w-full object-cover transition-transform duration-1000 ease-out",
+              active ? "scale-110 saturate-[1.1] opacity-100" : "opacity-70 group-hover:opacity-100 group-hover:scale-110"
+            )}
+          />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center bg-muted text-muted-foreground">
+            <ImageOff className="w-10 h-10 opacity-20" />
+          </div>
         )}
-        style={{
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%, black 100%)',
-          maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%, black 100%)',
-        }}
-      />
+      </div>
 
       <div className={cn(
-        "absolute inset-0 z-20 transition-opacity duration-500",
-        active
-            ? "bg-gradient-to-t from-black/95 via-black/40 to-transparent"
-            : "bg-gradient-to-t from-black/95 via-black/40 to-transparent"
+        "absolute inset-0 z-10 transition-opacity duration-700",
+        "bg-gradient-to-t from-black via-black/60 to-transparent",
+        active ? "opacity-100" : "opacity-0 group-hover:opacity-100"
       )} />
 
-      <div className="relative z-30 h-full w-full flex flex-col justify-end px-5 md:px-6 pb-5">
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-2.5">
+      <div className="relative z-20 h-full w-full flex flex-col justify-end p-5 md:p-6">
+        <div className={cn(
+            "flex flex-col gap-1 transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+            active ? "translate-y-0" : "translate-y-6 group-hover:translate-y-0"
+        )}>
+          <div className="flex items-center gap-2">
             <span className={cn(
-              "text-[10px] md:text-[11px] font-bold uppercase tracking-[0.18em] transition-colors duration-300",
-              active ? "text-white" : "text-white/50"
+              "text-[10px] md:text-[11px] font-black tracking-[0.2em] uppercase transition-colors duration-500",
+              active ? "text-primary" : "text-white/70 group-hover:text-primary"
             )}>
               Episode {episode.episode_number}
             </span>
-            {!isReleased && (
-              <span className="text-[9px] font-black bg-white/10 px-2 py-0.5 rounded text-white/60 uppercase">
-                Unreleased
+            {episode.runtime && (
+              <span className="text-[10px] font-bold text-white/40 tabular-nums">
+                {episode.runtime}m
               </span>
             )}
           </div>
 
           <h3 className={cn(
-            "text-lg md:text-[23px] font-bold tracking-tight leading-tight transition-colors duration-300",
-            active ? "text-white" : "text-white/90"
+            "text-base md:text-xl font-bold tracking-tight leading-tight transition-colors duration-500",
+            "text-white"
           )}>
-            {episode.name}
+            {episode.name || `Chapter ${episode.episode_number}`}
           </h3>
 
           <p className={cn(
-            "text-[12.5px] md:text-[14.5px] line-clamp-2 leading-[1.5] font-medium max-w-[98%] mt-1 transition-colors duration-300",
-            active ? "text-white/90" : "text-white/60"
+            "text-[11px] md:text-[13px] line-clamp-2 leading-relaxed font-semibold mt-1.5 transition-all duration-700",
+            "text-white/80",
+            active
+              ? "opacity-100 translate-y-0 visible"
+              : "opacity-0 translate-y-4 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible"
           )}>
             {episode.overview || "No description available for this episode."}
           </p>
         </div>
 
-        <div className="flex items-center justify-between mt-4">
-          <div className={cn(
-            "flex items-center gap-2.5 transition-colors duration-300",
-            active ? "text-white" : "text-white/80"
-          )}>
-            <span className="text-[14px] font-bold tabular-nums tracking-tight">
-              {episode.runtime ? `${episode.runtime}m` : '56m'}
-            </span>
+        {active && (
+          <div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-500">
+             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl">
+                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+             </div>
           </div>
+        )}
 
-          {active && (
-            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-in fade-in slide-in-from-right-4 duration-500">
-              <Play className="w-3 h-3 fill-black text-black" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-black">
-                Now Playing
-              </span>
+        {!isReleased && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                <Lock className="w-6 h-6 text-white/40" />
             </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

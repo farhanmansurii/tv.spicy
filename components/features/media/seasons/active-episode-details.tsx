@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchEpisodeDetails } from '@/lib/tmdb-fetch-helper';
+import { fetchEpisodeDetails } from '@/lib/api';
 import { Star, CheckCircle2, ListPlus, Play } from 'lucide-react';
 import { tmdbImage } from '@/lib/tmdb-image';
 import CommonTitle from '@/components/shared/animated/common-title';

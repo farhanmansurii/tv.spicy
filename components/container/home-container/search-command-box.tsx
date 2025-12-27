@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
 import { Command } from 'cmdk';
 import { Loader2 } from 'lucide-react';
-import { searchShows } from '@/lib/utils';
 import useSearchStore from '@/store/recentsSearchStore';
 import { Show, Anime } from '@/lib/types';
 import { fetchData } from '@/lib/anime-helpers';
@@ -17,6 +16,8 @@ import {
 	CommandItem,
 	CommandList,
 } from '@/components/ui/command';
+import { searchShows } from '@/lib/tmdb-fetch-helper';
+import CommandPalette from '@/components/ui/command-palette';
 
 export const SearchCommandBox = ({
 	children,
@@ -38,7 +39,7 @@ export const SearchCommandBox = ({
 		queryKey: ['search', query, searchType],
 		queryFn: () =>
 			searchType === 'tvshow'
-				? searchShows(query).then((results) => ({
+				? searchShows(query).then((results: any) => ({
 						...results,
 						results: results.results.filter(
 							(item: any) => item.media_type === 'tv' || item.media_type === 'movie'
@@ -181,17 +182,8 @@ export const SearchCommandBox = ({
 	}, []);
 	return (
 		<>
-			<Command>
-				<CommandDialog open={open} onOpenChange={setOpen}>
-					<CommandInput
-						onValueChange={handleInputChange}
-						value={inputValue}
-						placeholder={`Search For ${searchType === 'anime' ? 'Anime' : 'Movies / TV show'}`}
-					/>
-					<CommandList>{renderSearchResults()}</CommandList>
-				</CommandDialog>
-				<div onClick={() => setOpen(true)}>{children}</div>
-			</Command>
+			 <CommandPalette open={open} setOpen={setOpen} />
+
 		</>
 	);
 };

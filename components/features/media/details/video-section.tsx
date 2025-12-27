@@ -4,223 +4,65 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Play, X, Youtube } from 'lucide-react';
+import { fetchVideos } from '@/lib/api';
 import CommonTitle from '@/components/shared/animated/common-title';
-import { Play, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { fetchVideosClient } from '@/lib/utils';
 import VideoLoader from '@/components/shared/loaders/video-loader';
+import { cn } from '@/lib/utils';
 
-interface Video {
-  id: string;
-  key: string;
-  name: string;
-  site: string;
-  type: string;
-  official: boolean;
-  published_at: string;
-}
+export default function VideoSection({ id, type }: { id: string; type: string }) {
+    const { data, isLoading } = useQuery({
+        queryKey: ['videos', id, type],
+        queryFn: () => fetchVideos(id, type as 'movie' | 'tv'),
+    });
 
-interface VideoSectionProps {
-  id: string;
-  type: string;
-}
+    const videos = data?.results || [];
+    const trailers = videos.filter((v: any) => v.type === 'Trailer');
+    const teasers = videos.filter((v: any) => v.type === 'Teaser');
 
-function VideoContent({ videos }: { videos: Video[] }) {
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [expandedTabs, setExpandedTabs] = useState<Record<string, boolean>>({});
+    if (isLoading) return <VideoLoader />;
+    if (!videos.length) return null;
 
-  // Filter for YouTube videos
-  const youtubeVideos = videos?.filter((video) => video.site === 'YouTube') || [];
-  const trailers = youtubeVideos.filter((video) => video.type === 'Trailer');
-  const teasers = youtubeVideos.filter((video) => video.type === 'Teaser');
-  const clips = youtubeVideos.filter((video) => video.type === 'Clip');
-  const otherVideos = youtubeVideos.filter(
-    (video) => !['Trailer', 'Teaser', 'Clip'].includes(video.type)
-  );
-
-  // Define tabs with their videos
-  const tabs = [
-    { title: 'Trailers', videos: trailers, key: 'trailers' },
-    { title: 'Teasers', videos: teasers, key: 'teasers' },
-    { title: 'Clips', videos: clips, key: 'clips' },
-    { title: 'Other', videos: otherVideos, key: 'other' },
-  ].filter((tab) => tab.videos.length > 0);
-
-  if (tabs.length === 0) return null;
-
-  // Default to first tab
-  const defaultTab = tabs[0]?.key || 'trailers';
-
-  const getThumbnailUrl = (videoKey: string) => {
-    return `https://img.youtube.com/vi/${videoKey}/maxresdefault.jpg`;
-  };
-
-  const getEmbedUrl = (videoKey: string) => {
-    return `https://www.youtube.com/embed/${videoKey}?autoplay=1&rel=0`;
-  };
-
-  const toggleTab = (key: string) => {
-    setExpandedTabs((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
-  const renderVideoCard = (video: Video) => (
-    <Dialog key={video.id}>
-      <DialogTrigger asChild>
-        <button
-          onClick={() => setSelectedVideo(video)}
-          className="group relative aspect-video w-full overflow-hidden rounded-card md:rounded-card-md bg-black/40 shadow-lg ring-1 ring-white/10 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:ring-white/20 active:scale-[0.98] select-none touch-manipulation"
-        >
-          {/* Thumbnail */}
-          <img
-            src={getThumbnailUrl(video.key)}
-            alt={video.name}
-            className="h-full w-full object-cover"
-            onError={(e) => {
-              // Fallback to a default thumbnail if YouTube thumbnail fails
-              (e.target as HTMLImageElement).src =
-                `https://img.youtube.com/vi/${video.key}/hqdefault.jpg`;
-            }}
-          />
-
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-          {/* Overlay with Play Button */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]">
-            <div className="flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full bg-white text-black shadow-2xl transition-transform duration-300 group-hover:scale-110 group-active:scale-105">
-              <Play className="ml-1 h-7 w-7 md:h-8 md:w-8 fill-current" />
-            </div>
-          </div>
-
-          {/* Video Type Badge */}
-          <div className="absolute top-2 left-2 md:top-3 md:left-3">
-            <span className="rounded-ui bg-black/70 backdrop-blur-md border border-white/10 px-2 py-1 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-white">
-              {video.type}
-            </span>
-          </div>
-
-          {/* Video Title */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-3 md:p-4">
-            <p className="text-xs md:text-sm font-semibold text-white line-clamp-2 drop-shadow-md">
-              {video.name}
-            </p>
-          </div>
-        </button>
-      </DialogTrigger>
-
-      <DialogContent className="max-w-5xl w-full mx-2 md:mx-auto p-0 bg-black border-none rounded-dialog md:rounded-dialog-md overflow-hidden">
-        <DialogTitle className="sr-only">{video.name}</DialogTitle>
-        <div className="relative aspect-video w-full">
-          {selectedVideo?.id === video.id && (
-            <>
-              <iframe
-                src={getEmbedUrl(video.key)}
-                title={video.name}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="h-full w-full"
-              />
-              <button
-                onClick={() => setSelectedVideo(null)}
-                className="absolute top-2 right-2 md:top-4 md:right-4 z-10 flex h-11 w-11 md:h-10 md:w-10 items-center justify-center rounded-full bg-black/70 backdrop-blur-md text-white border border-white/10 transition-colors hover:bg-black/90 active:bg-black/90 touch-manipulation"
-                aria-label="Close video"
-              >
-                <X className="h-6 w-6 md:h-5 md:w-5" />
-              </button>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-
-  return (
-    <div className="w-full space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-      <CommonTitle text="Videos & Trailers" />
-
-      <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="bg-white/5 border border-white/10 rounded-xl p-1 h-auto overflow-x-auto scrollbar-hide flex-nowrap md:flex-wrap">
-          {tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.key}
-              value={tab.key}
-              className={cn(
-                'px-3 py-2 text-xs md:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0',
-                'data-[state=active]:bg-white/10 data-[state=active]:text-white',
-                'data-[state=inactive]:text-white/50 hover:text-white/70 active:text-white/70'
-              )}
-            >
-              {tab.title}
-              <span className="ml-1.5 md:ml-2 text-[10px] md:text-xs opacity-70">({tab.videos.length})</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {tabs.map((tab) => {
-          const isExpanded = expandedTabs[tab.key] ?? false;
-          const maxInitialVideos = 6;
-          const displayedVideos = isExpanded
-            ? tab.videos
-            : tab.videos.slice(0, maxInitialVideos);
-          const hasMore = tab.videos.length > maxInitialVideos;
-
-          return (
-            <TabsContent key={tab.key} value={tab.key} className="mt-6">
-              <div className="space-y-4">
-                {/* Video Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
-                  {displayedVideos.map(renderVideoCard)}
+    return (
+        <div className="w-full space-y-8 animate-in fade-in duration-1000">
+            <Tabs defaultValue="trailers" className="w-full">
+                <div className="space-y-2">
+                    <CommonTitle text="Cinematic Media" variant="section" spacing="none" />
+                    <CommonTitle text="Trailers & Extras" variant="small" spacing="medium">
+                        <TabsList className="bg-white/[0.03] border border-white/5 rounded-full p-1 h-auto backdrop-blur-xl">
+                            <TabsTrigger value="trailers" className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">
+                                Trailers ({trailers.length})
+                            </TabsTrigger>
+                            <TabsTrigger value="teasers" className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">
+                                Teasers ({teasers.length})
+                            </TabsTrigger>
+                        </TabsList>
+                    </CommonTitle>
                 </div>
 
-                {/* Show More/Less Button */}
-                {hasMore && (
-                  <button
-                    onClick={() => toggleTab(tab.key)}
-                    className="w-full py-3 md:py-3 text-center text-xs md:text-sm text-white/50 font-medium hover:text-white active:text-white transition-colors touch-manipulation"
-                  >
-                    {isExpanded
-                      ? `Show Less`
-                      : `+${tab.videos.length - maxInitialVideos} more videos`}
-                  </button>
-                )}
-              </div>
-            </TabsContent>
-          );
-        })}
-      </Tabs>
-    </div>
-  );
-}
-
-export default function VideoSection({ id, type }: VideoSectionProps) {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['videos', id, type],
-    queryFn: () => fetchVideosClient(id, type),
-    enabled: !!id && !!type,
-    staleTime: 1000 * 60 * 60 * 24 * 7, // 7 days
-    gcTime: 1000 * 60 * 60 * 24 * 7,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="w-full">
-        <VideoLoader />
-      </div>
+                <TabsContent value="trailers" className="mt-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {trailers.slice(0, 6).map((video: any) => (
+                            <Dialog key={video.id}>
+                                <DialogTrigger className="relative aspect-video rounded-2xl overflow-hidden group border border-white/5 shadow-2xl">
+                                    <img src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
+                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+                                        <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-2xl"><Play className="ml-1 w-5 h-5 fill-black text-black" /></div>
+                                    </div>
+                                    <div className="absolute bottom-4 left-4 right-4 text-left">
+                                        <p className="text-sm font-bold text-white line-clamp-1">{video.name}</p>
+                                    </div>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-5xl p-0 bg-black border-none rounded-[2rem] overflow-hidden">
+                                    <div className="aspect-video w-full">
+                                        <iframe src={`https://www.youtube.com/embed/${video.key}?autoplay=1`} className="w-full h-full" allowFullScreen />
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        ))}
+                    </div>
+                </TabsContent>
+            </Tabs>
+        </div>
     );
-  }
-
-  if (error || !data || !data.results || data.results.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="w-full">
-      <VideoContent videos={data.results} />
-    </div>
-  );
 }

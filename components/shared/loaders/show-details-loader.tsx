@@ -1,66 +1,57 @@
 import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import Container from '@/components/shared/containers/container';
 
 export default function ShowDetailsLoader() {
     return (
-        <div className="relative w-full overflow-hidden group rounded-hero md:rounded-hero-md">
-            <div className={cn(
-                "relative w-full transition-transform duration-1000 ease-out overflow-hidden",
-                "aspect-[2/3] md:aspect-video lg:aspect-[16/8]",
-                'rounded-hero md:rounded-hero-md',
-            )}>
-                <Skeleton className="w-full h-full bg-muted/40 rounded-hero md:rounded-hero-md" />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent md:bg-gradient-to-r md:from-black/80 md:via-black/20 md:to-transparent rounded-hero md:rounded-hero-md" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent hidden md:block rounded-hero md:rounded-hero-md" />
-
-                {/* Gradient blur effect similar to episode card */}
-                <div
-                    className={cn(
-                        "absolute inset-0 z-10 transition-opacity duration-500 rounded-hero md:rounded-hero-md",
-                        "backdrop-blur-[5px] opacity-100"
-                    )}
-                    style={{
-                        WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%, black 100%)',
-                        maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%, black 100%)',
-                    }}
-                />
+        <section className={cn(
+            "relative w-full overflow-hidden bg-zinc-950",
+            "h-[75vh] md:h-[80vh] lg:h-[85vh]"
+        )}>
+            <div className="absolute inset-0 z-0">
+                <Skeleton className="w-full h-full" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
+                <div className="absolute inset-0 hidden md:block bg-[radial-gradient(circle_at_left_center,rgba(9,9,11,0.8)_0%,transparent_75%)]" />
             </div>
 
-            <div className={cn(
-                "absolute inset-0 flex flex-col justify-end px-6 pb-12 md:px-16 md:pb-20",
-                "items-center text-center md:items-start md:text-left z-20"
-            )}>
-                <div className="w-full max-w-[280px] md:max-w-[300px] mb-2 md:mb-4 lg:max-w-[500px] flex items-center justify-center md:block">
-                    <Skeleton className="h-12 md:h-24 w-[180px] md:w-[300px] bg-white/10 rounded-ui md:rounded-ui-md" />
-                </div>
+            <div className="relative z-10 h-full flex flex-col justify-end">
+                <Container className="pb-10 md:pb-20">
+                    <div className="max-w-4xl flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                        {/* Badge and Meta */}
+                        <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-3 md:mb-5">
+                            <Skeleton className="h-5 w-16 rounded-sm" />
+                            <div className="flex items-center gap-2.5">
+                                <Skeleton className="h-4 w-12" />
+                                <Skeleton className="h-5 w-8 rounded-sm" />
+                                <Skeleton className="h-4 w-12" />
+                            </div>
+                        </div>
 
-                <div className="flex items-center gap-2 text-white/70 mb-2 flex-wrap justify-center md:justify-start md:mb-4">
-                    <Skeleton className="h-6 w-20 bg-white/10 rounded-card" />
-                    <Skeleton className="h-4 w-1 bg-white/20" />
-                    <Skeleton className="h-4 w-32 bg-white/10" />
-                </div>
+                        {/* Title */}
+                        <div className="flex flex-col items-center md:items-start">
+                            <Skeleton className="h-12 md:h-24 w-[200px] md:w-[400px] mb-3 md:mb-4" />
+                            <Skeleton className="h-3 md:h-4 w-[150px] md:w-[200px]" />
+                        </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-4 mb-2 md:mb-4 w-full md:w-auto">
-                    <Skeleton className="h-11 w-full md:w-48 bg-white/10 rounded-lg" />
-                </div>
+                        {/* Overview */}
+                        <div className="max-w-2xl hidden md:block mt-6 md:mt-8">
+                            <div className="space-y-2">
+                                <Skeleton className="h-5 w-full" />
+                                <Skeleton className="h-5 w-5/6" />
+                                <Skeleton className="h-5 w-4/5" />
+                            </div>
+                        </div>
 
-                <div className="max-w-2xl space-y-3">
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-full bg-white/10" />
-                        <Skeleton className="h-4 w-5/6 bg-white/10" />
+                        {/* Action Buttons */}
+                        <div className="flex justify-center md:justify-start mt-8 md:mt-10 gap-2.5">
+                            <Skeleton className="h-[42px] md:h-[50px] w-[120px] md:w-[140px] rounded-full" />
+                            <Skeleton className="h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full" />
+                            <Skeleton className="h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full" />
+                        </div>
                     </div>
-
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
-                        <Skeleton className="h-5 w-12 bg-white/10 rounded-sm" />
-                        <Skeleton className="h-4 w-1 bg-white/20" />
-                        <Skeleton className="h-5 w-16 bg-white/10 rounded-sm" />
-                        <Skeleton className="h-4 w-1 bg-white/20" />
-                        <Skeleton className="h-5 w-10 bg-white/10 rounded-sm" />
-                    </div>
-                </div>
+                </Container>
             </div>
-        </div>
+        </section>
     );
 }

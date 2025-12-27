@@ -23,7 +23,7 @@ const MediaDetails = (props: any) => {
 				<ShowDetails id={data?.id} show={data} type={type} />
 			</div>
 			{/* Rest of content in container */}
-			<Container className="w-full space-y-8 md:space-y-12 py-6 md:py-8">
+			<Container className="w-full mt-4 space-y-8 md:space-y-12 py-6 md:py-8">
 				<ShowContainer showData={data} id={data?.id} type={type} seasons={data.seasons} />
 				{mediaId && <CastCrewSection id={mediaId} type={type} />}
 				{mediaId && <VideoSection id={mediaId} type={type} />}

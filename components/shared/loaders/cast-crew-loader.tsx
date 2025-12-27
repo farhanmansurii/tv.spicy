@@ -12,18 +12,15 @@ import CommonTitle from '@/components/shared/animated/common-title';
 
 export default function CastCrewLoader() {
 	return (
-		<div className="w-full space-y-8 md:space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-500">
+		<div className="w-full space-y-10 animate-in fade-in duration-1000">
 			{/* Cast Section */}
-			<div className="space-y-6">
-				<CommonTitle text="Cast" />
-				<Carousel
-					opts={{
-						align: 'start',
-						dragFree: true,
-						loop: false,
-					}}
-					className="w-full group/row relative"
-				>
+			<div>
+				<CommonTitle text="The Ensemble" variant="section" spacing="none" />
+				<CommonTitle text="Leading Cast" variant="small" spacing="medium">
+					<Skeleton className="h-3 w-24 inline-block" />
+				</CommonTitle>
+
+				<Carousel opts={{ align: 'start', dragFree: true }} className="w-full group/row relative">
 					<CarouselPrevious
 						className="hidden lg:flex absolute left-4 top-[40%] -translate-y-1/2 z-40 h-12 w-12 border-0 bg-black/50 backdrop-blur-md text-white hover:bg-black/70 hover:text-white opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 rounded-full"
 						icon={<ChevronLeft className="h-8 w-8" />}
@@ -32,45 +29,25 @@ export default function CastCrewLoader() {
 						className="hidden lg:flex absolute right-4 top-[40%] -translate-y-1/2 z-40 h-12 w-12 border-0 bg-black/50 backdrop-blur-md text-white hover:bg-black/70 hover:text-white opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 rounded-full"
 						icon={<ChevronRight className="h-8 w-8" />}
 					/>
-					<CarouselContent className="-ml-4 items-start">
-						{Array.from({ length: 10 }).map((_, index) => (
+					<CarouselContent className="-ml-4 md:-ml-6">
+						{Array.from({ length: 12 }).map((_, index) => (
 							<CarouselItem
 								key={index}
-								className="pl-4 basis-[28%] md:basis-1/5 lg:basis-1/6 xl:basis-1/7"
+								className="pl-4 md:pl-6 basis-[35%] sm:basis-[22%] lg:basis-[15%] xl:basis-[12.5%]"
 							>
-								<div className="flex flex-col gap-2 w-full">
-									{/* Actor Photo */}
-									<Skeleton className="aspect-[2/3] w-full rounded-card md:rounded-card-md bg-muted" />
+								<div className="flex flex-col items-center gap-4 group">
+									{/* Actor Photo - Circular */}
+									<Skeleton className="aspect-square w-full rounded-full ring-1 ring-white/10" />
 									{/* Actor Info */}
-									<div className="flex flex-col gap-1 px-0.5">
-										<Skeleton className="h-4 w-24 bg-muted" />
-										<Skeleton className="h-3 w-32 bg-muted" />
+									<div className="text-center space-y-1 w-full">
+										<Skeleton className="h-4 w-24 mx-auto" />
+										<Skeleton className="h-3 w-32 mx-auto" />
 									</div>
 								</div>
 							</CarouselItem>
 						))}
 					</CarouselContent>
 				</Carousel>
-			</div>
-
-			{/* Crew Section */}
-			<div className="space-y-6">
-				<CommonTitle text="Crew" />
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					{Array.from({ length: 3 }).map((_, index) => (
-						<div
-							key={index}
-							className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-card md:rounded-card-md p-4 md:p-6 space-y-3 shadow-lg ring-1 ring-white/5"
-						>
-							<Skeleton className="h-4 w-20 bg-muted" />
-							<div className="flex flex-wrap gap-2">
-								{Array.from({ length: 3 }).map((_, i) => (
-									<Skeleton key={i} className="h-4 w-24 rounded bg-muted" />
-								))}
-							</div>
-						</div>
-					))}
-				</div>
 			</div>
 		</div>
 	);

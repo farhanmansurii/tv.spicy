@@ -1,6 +1,6 @@
 'use client';
 
-import { fetchGenreById, fetchRowData } from '@/lib/utils';
+import { fetchGenreById, fetchRowData } from '@/lib/api';
 import MediaRow from './media-row';
 import RowLoader from '@/components/shared/loaders/row-loader';
 import GridLoader from '@/components/shared/loaders/grid-loader';
@@ -15,6 +15,7 @@ interface FetchAndRenderRowProps {
 	isVertical?: boolean;
 	isGenre?: boolean;
 	hideHeader?: boolean;
+	gridLayout?: boolean;
 }
 
 const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
@@ -23,10 +24,11 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
 	showRank,
 	type,
 	isGenre = false,
-	isVertical = false,
+	isVertical = undefined,
 	hideHeader = false,
+	gridLayout = false,
 }) => {
-	const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
+	const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.05 });
 
 	const queryKey = ['movies', apiEndpoint];
 
@@ -44,7 +46,7 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
 	});
 
 	if (isLoading || isFetching) {
-		return isVertical ? <GridLoader /> : <RowLoader withHeader />;
+		return <RowLoader withHeader isVertical={isVertical} gridLayout={gridLayout} />;
 	}
 
 	if (error) {
@@ -57,16 +59,14 @@ const FetchAndRenderRow: React.FC<FetchAndRenderRowProps> = ({
 			{Array.isArray(data) && data.length > 0 ? (
 				<MediaRow
 					isVertical={isVertical}
+					gridLayout={gridLayout}
 					text={text}
 					shows={showRank ? data.slice(0, 10) : data}
 					type={type}
-					showRank={showRank}
 					hideHeader={hideHeader}
 				/>
-			) : isVertical ? (
-				<GridLoader />
 			) : (
-				<RowLoader withHeader />
+				<RowLoader withHeader isVertical={isVertical} gridLayout={gridLayout} />
 			)}
 		</div>
 	);

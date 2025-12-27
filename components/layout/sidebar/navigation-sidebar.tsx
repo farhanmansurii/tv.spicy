@@ -7,7 +7,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '@/components/ui/sheet';
-import { fetchGenres } from '@/lib/utils';
+import { fetchGenres } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { TabsContent, Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';

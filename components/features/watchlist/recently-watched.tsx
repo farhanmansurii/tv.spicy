@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 import useTVShowStore from '@/store/recentsStore';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,22 +22,26 @@ const RecentlyWatched = () => {
     store.deleteRecentlyWatched();
   }
 
-  if (!hasMounted || recentlyWatched.length === 0) return null;
+  const shows: Show[] = useMemo(() => {
+    if (!hasMounted || recentlyWatched.length === 0) return [];
 
-  const shows: Show[] = recentlyWatched
-    .filter((ep: Episode) => ep.still_path)
-    .map((ep: Episode) => ({
-      id: Number(ep.tv_id) || ep.id,
-      name: ep.show_name || ep.name,
-      title: ep.show_name || ep.name,
-      overview: ep.overview || '',
-      backdrop_path: ep.still_path || '',
-      poster_path: ep.still_path || '',
-      media_type: 'tv',
-      vote_average: ep.vote_average || 0,
-      first_air_date: ep.air_date || '',
-      release_date: ep.air_date || '',
-    }));
+    return recentlyWatched
+      .filter((ep: Episode) => ep.still_path)
+      .map((ep: Episode) => ({
+        id: Number(ep.tv_id) || ep.id,
+        name: ep.show_name || ep.name,
+        title: ep.show_name || ep.name,
+        overview: ep.overview || '',
+        backdrop_path: ep.still_path || '',
+        poster_path: ep.still_path || '',
+        media_type: 'tv',
+        vote_average: ep.vote_average || 0,
+        first_air_date: ep.air_date || '',
+        release_date: ep.air_date || '',
+      }));
+  }, [hasMounted, recentlyWatched]);
+
+  if (shows.length === 0) return null;
 
   return (
     <MediaRow

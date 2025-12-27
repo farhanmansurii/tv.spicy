@@ -1,4 +1,4 @@
-import { fetchRowData } from '@/lib/utils';
+import { fetchRowData } from '@/lib/api';
 import MediaRow from '../row/media-row';
 
 interface AnimeListProps {

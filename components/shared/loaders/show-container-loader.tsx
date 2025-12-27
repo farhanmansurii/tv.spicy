@@ -6,17 +6,14 @@ import { Button } from '@/components/ui/button';
 export default function ShowContainerLoader() {
 	return (
 		<div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
-			{/* Season Selector & View Toggle */}
 			<div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
-				{/* Season Selector */}
-				<Skeleton className="h-10 w-[180px] rounded-ui md:rounded-ui-md bg-muted" />
+				<Skeleton className="h-10 w-[180px] rounded-2xl" />
 
-				{/* View Toggle */}
-				<div className="flex items-center p-1 gap-1 bg-white/5 border border-white/10 rounded-ui md:rounded-ui-md">
+				<div className="flex items-center p-1 gap-1 bg-white/5 border border-white/10 rounded-2xl">
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 px-3 rounded-ui bg-white/10 text-white"
+						className="h-8 px-3 rounded-2xl bg-white/10 text-white"
 						disabled
 					>
 						<List className="w-4 h-4 mr-2 md:mr-0 lg:mr-2" />
@@ -25,7 +22,7 @@ export default function ShowContainerLoader() {
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 px-3 rounded-ui text-white/60"
+						className="h-8 px-3 rounded-2xl text-white/60"
 						disabled
 					>
 						<Grid className="w-4 h-4 mr-2 md:mr-0 lg:mr-2" />
@@ -34,7 +31,7 @@ export default function ShowContainerLoader() {
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 px-3 rounded-ui text-white/60"
+						className="h-8 px-3 rounded-2xl text-white/60"
 						disabled
 					>
 						<GalleryVerticalEnd className="w-4 h-4 mr-2 md:mr-0 lg:mr-2" />
@@ -48,18 +45,18 @@ export default function ShowContainerLoader() {
 				{Array.from({ length: 8 }).map((_, index) => (
 					<div
 						key={index}
-						className="group relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1a1a1a] shadow-2xl aspect-[1.62/1] w-full"
+						className="group relative aspect-video w-full overflow-hidden rounded-xl md:rounded-2xl border border-white/10 bg-card"
 					>
-						<Skeleton className="absolute inset-0 z-0 h-full w-full bg-muted/40" />
-						<div className="relative z-30 h-full w-full flex flex-col justify-end px-5 md:px-6 pb-5">
-							<div className="space-y-0.5">
-								<Skeleton className="h-3 w-20 bg-white/20 rounded-sm" />
-								<Skeleton className="h-6 md:h-7 w-3/4 bg-white/30 rounded-sm" />
-								<Skeleton className="h-4 w-full bg-white/20 rounded-sm mt-1" />
-							</div>
-
-							<div className="flex items-center justify-between mt-4">
-								<Skeleton className="h-4 w-12 bg-white/20 rounded-sm" />
+						<Skeleton className="absolute inset-0 z-0 h-full w-full" />
+						<div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10" />
+						<div className="relative z-20 h-full w-full flex flex-col justify-end p-5 md:p-6">
+							<div className="flex flex-col gap-1">
+								<div className="flex items-center gap-2">
+									<Skeleton className="h-3 w-20 rounded-sm" />
+									<Skeleton className="h-3 w-12 rounded-sm" />
+								</div>
+								<Skeleton className="h-5 md:h-6 w-3/4 rounded-sm" />
+								<Skeleton className="h-3 md:h-4 w-full rounded-sm mt-1.5" />
 							</div>
 						</div>
 					</div>

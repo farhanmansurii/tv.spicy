@@ -1,6 +1,6 @@
 'use client';
 
-import { fetchRowData } from '@/lib/utils';
+import { fetchRowData } from '@/lib/api';
 import MediaRow from './media-row';
 import RowLoader from '@/components/shared/loaders/row-loader';
 import { useInView } from 'react-intersection-observer';
@@ -13,25 +13,30 @@ interface HomeRowProps {
   type: string;
   viewAllLink?: string;
   showRank?: boolean;
+  initialData?: any[];
 }
 
-export function HomeRow({ endpoint, text, type, viewAllLink, showRank = false }: HomeRowProps) {
+export function HomeRow({ endpoint, text, type, viewAllLink, showRank = false, initialData }: HomeRowProps) {
   const hasMounted = useHasMounted();
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.05 });
 
   const queryKey = ['homepage', endpoint, type];
+  const shouldFetch = hasMounted && inView && !!endpoint && !initialData;
 
   const { data, error, isLoading, isFetching } = useQuery({
     queryKey,
     queryFn: async () => fetchRowData(endpoint),
-    enabled: inView && !!endpoint,
+    enabled: shouldFetch,
+    initialData: initialData,
     staleTime: 1000 * 60 * 60 * 24, // 24h
     gcTime: 1000 * 60 * 60 * 24 * 7, // 7d
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 
-  if (!hasMounted || isLoading || isFetching) {
+  const displayData = initialData || data;
+
+  if (isLoading || isFetching) {
     return (
       <div ref={ref}>
         <RowLoader withHeader />
@@ -41,17 +46,16 @@ export function HomeRow({ endpoint, text, type, viewAllLink, showRank = false }:
 
   if (error) {
     console.error('Error fetching data:', error);
-    return null; // Fail silently for homepage rows
+    return null;
   }
 
   return (
     <div ref={ref}>
-      {Array.isArray(data) && data.length > 0 ? (
+      {Array.isArray(displayData) && displayData.length > 0 ? (
         <MediaRow
           text={text}
-          shows={showRank ? data.slice(0, 10) : data}
+          shows={showRank ? displayData.slice(0, 10) : displayData}
           type={type}
-          showRank={showRank}
           viewAllLink={viewAllLink}
         />
       ) : (

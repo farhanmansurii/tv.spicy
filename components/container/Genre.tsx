@@ -1,4 +1,4 @@
-import { fetchGenres } from '@/lib/utils';
+import { fetchGenres } from '@/lib/api';
 import Link from 'next/link';
 
 interface Genre {

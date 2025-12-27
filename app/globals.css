@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
 @custom-variant dark (&:is(.dark *));
 
 @layer utilities {
@@ -20,36 +22,34 @@
 }
 
 /* --- Light Theme (Clean, Swiss Style) --- */
-:root {
-	--background: #ffffff;
-	--foreground: #09090b; /* Zinc-950 */
+:root { /* Zinc-950 */
 
-	--card: #ffffff;
-	--card-foreground: #09090b;
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0 0);
 
-	--popover: #ffffff;
-	--popover-foreground: #09090b;
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.145 0 0);
 
-	--primary: #18181b; /* Zinc-900 */
-	--primary-foreground: #fafafa;
+	--primary: oklch(0.205 0 0); /* Zinc-900 */
+	--primary-foreground: oklch(0.985 0 0);
 
-	--secondary: #f4f4f5; /* Zinc-100 */
-	--secondary-foreground: #18181b;
+	--secondary: oklch(0.97 0 0); /* Zinc-100 */
+	--secondary-foreground: oklch(0.205 0 0);
 
-	--muted: #f4f4f5;
-	--muted-foreground: #71717a; /* Zinc-500 */
+	--muted: oklch(0.97 0 0);
+	--muted-foreground: oklch(0.556 0 0); /* Zinc-500 */
 
-	--accent: #f4f4f5;
-	--accent-foreground: #18181b;
+	--accent: oklch(0.97 0 0);
+	--accent-foreground: oklch(0.205 0 0);
 
-	--destructive: #ef4444;
+	--destructive: oklch(0.577 0.245 27.325);
 	--destructive-foreground: #fafafa;
 
-	--border: #e4e4e7; /* Zinc-200 */
-	--input: #e4e4e7;
-	--ring: #18181b;
+	--border: oklch(0.922 0 0); /* Zinc-200 */
+	--input: oklch(0.922 0 0);
+	--ring: oklch(0.708 0 0);
 
-	--radius: 0.6rem; /* Modern rounded corners */
+	--radius: 0.625rem; /* Modern rounded corners */
 
 	/* Design System: Border Radius */
 	--radius-hero: 1.5rem; /* 24px - Hero banners */
@@ -91,11 +91,24 @@
 	--tracking-extra: 0.2em; /* For uppercase labels */
 
 	/* Chart colors */
-	--chart-1: #e11d48;
-	--chart-2: #2563eb;
-	--chart-3: #d97706;
-	--chart-4: #16a34a;
-	--chart-5: #7c3aed;
+	--chart-1: oklch(0.646 0.222 41.116);
+	--chart-2: oklch(0.6 0.118 184.704);
+	--chart-3: oklch(0.398 0.07 227.392);
+	--chart-4: oklch(0.828 0.189 84.429);
+	--chart-5: oklch(0.769 0.188 70.08);
+	--sidebar: oklch(0.985 0 0);
+	--sidebar-foreground: oklch(0.145 0 0);
+	--sidebar-primary: oklch(0.205 0 0);
+	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-accent: oklch(0.97 0 0);
+	--sidebar-accent-foreground: oklch(0.205 0 0);
+	--sidebar-border: oklch(0.922 0 0);
+	--sidebar-ring: oklch(0.708 0 0);
+	--background: oklch(1 0 0);
+	--foreground: oklch(0.145 0 0);
+	--foreground-rgb: 255, 255, 255;
+	--background-start-rgb: 0, 0, 0;
+	--background-end-rgb: 0, 0, 0;
 }
 
 /* --- Dark Theme (Cinematic, OLED Friendly) --- */
@@ -103,39 +116,47 @@
 	/* Using #050505 instead of generic #1f1f1f
      This creates that deep "infinite" black look
   */
-	--background: #050505;
-	--foreground: #fafafa;
+	--background: oklch(0.145 0 0);
+	--foreground: oklch(0.985 0 0);
 
-	--card: #0a0a0a;
-	--card-foreground: #fafafa;
+	--card: oklch(0.205 0 0);
+	--card-foreground: oklch(0.985 0 0);
 
-	--popover: #0a0a0a;
-	--popover-foreground: #fafafa;
+	--popover: oklch(0.205 0 0);
+	--popover-foreground: oklch(0.985 0 0);
 
-	--primary: #fafafa;
-	--primary-foreground: #18181b;
+	--primary: oklch(0.922 0 0);
+	--primary-foreground: oklch(0.205 0 0);
 
-	--secondary: #27272a; /* Zinc-800 */
-	--secondary-foreground: #fafafa;
+	--secondary: oklch(0.269 0 0); /* Zinc-800 */
+	--secondary-foreground: oklch(0.985 0 0);
 
-	--muted: #18181b; /* Zinc-900 */
-	--muted-foreground: #a1a1aa; /* Zinc-400 */
+	--muted: oklch(0.269 0 0); /* Zinc-900 */
+	--muted-foreground: oklch(0.708 0 0); /* Zinc-400 */
 
-	--accent: #27272a;
-	--accent-foreground: #fafafa;
+	--accent: oklch(0.269 0 0);
+	--accent-foreground: oklch(0.985 0 0);
 
-	--destructive: #7f1d1d;
+	--destructive: oklch(0.704 0.191 22.216);
 	--destructive-foreground: #fafafa;
 
-	--border: #27272a; /* Subtle dark borders */
-	--input: #27272a;
-	--ring: #d4d4d8;
+	--border: oklch(1 0 0 / 10%); /* Subtle dark borders */
+	--input: oklch(1 0 0 / 15%);
+	--ring: oklch(0.556 0 0);
 
-	--chart-1: #f43f5e;
-	--chart-2: #3b82f6;
-	--chart-3: #f59e0b;
-	--chart-4: #22c55e;
-	--chart-5: #8b5cf6;
+	--chart-1: oklch(0.488 0.243 264.376);
+	--chart-2: oklch(0.696 0.17 162.48);
+	--chart-3: oklch(0.769 0.188 70.08);
+	--chart-4: oklch(0.627 0.265 303.9);
+	--chart-5: oklch(0.645 0.246 16.439);
+	--sidebar: oklch(0.205 0 0);
+	--sidebar-foreground: oklch(0.985 0 0);
+	--sidebar-primary: oklch(0.488 0.243 264.376);
+	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-accent: oklch(0.269 0 0);
+	--sidebar-accent-foreground: oklch(0.985 0 0);
+	--sidebar-border: oklch(1 0 0 / 10%);
+	--sidebar-ring: oklch(0.556 0 0);
 }
 
 @theme inline {
@@ -199,7 +220,52 @@
 	--shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -2px hsl(0 0% 0% / 0.05);
 	--shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 10px 10px -5px hsl(0 0% 0% / 0.04);
 	--shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.25);
+	--color-sidebar-ring: var(--sidebar-ring);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar: var(--sidebar);
+	--radius-2xl: calc(var(--radius) + 8px);
+	--radius-3xl: calc(var(--radius) + 12px);
+	--radius-4xl: calc(var(--radius) + 16px);
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --background-end-rgb: var(----background-end-rgb);
+  --background-start-rgb: var(----background-start-rgb);
+  --foreground-rgb: var(----foreground-rgb);
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+		}
+    to {
+      height: var(--radix-accordion-content-height);
+		}
+	}
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+		}
+    to {
+      height: 0;
+		}
+	}
 }
+@layer base {
+	body {
+	  /* Prevents Radix/Shadcn from adding extra padding when modals open */
+	  padding-right: 0px !important;
+	}
+  }
+
+  html {
+	/* Forces the scrollbar space to always be reserved, even when hidden */
+	scrollbar-gutter: stable;
+  }
 
 @layer base {
 	* {

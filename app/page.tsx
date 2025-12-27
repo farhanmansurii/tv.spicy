@@ -1,6 +1,6 @@
 import WatchList from '@/components/features/watchlist/watch-list';
 import RecentlyWatched from '@/components/features/watchlist/recently-watched';
-import { fetchRowData, fetchHeroItemsWithDetails } from '@/lib/utils';
+import { fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
 import Container from '@/components/shared/containers/container';
 import { Show } from '@/lib/types';
 import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
@@ -12,10 +12,13 @@ export const revalidate = 604800;
 
 export default async function HomePage() {
 	try {
-		// Phase 1: Only fetch hero data server-side (2 calls instead of 8)
-		const [trendingTV, trendingMovies] = await Promise.all([
+		// Phase 1: Fetch hero data and first 2-3 rows server-side for instant loading
+		const [trendingTV, trendingMovies, tvPopular, tvOnTheAir, movieNowPlaying] = await Promise.all([
 			fetchRowData('trending/tv/week'),
 			fetchRowData('trending/movie/week'),
+			fetchRowData('tv/popular'),
+			fetchRowData('tv/on_the_air'),
+			fetchRowData('movie/now_playing'),
 		]);
 
 		const allTrending = [...(trendingTV || []), ...(trendingMovies || [])].filter(Boolean);
@@ -29,37 +32,35 @@ export default async function HomePage() {
 					<HeroCarousel shows={heroShows} type="tv" />
 
 				<Container className="w-full">
-					<div>
+				<div className="flex flex-col space-y-4 md:space-y-6">
 						<RecentlyWatched />
 						<WatchList type="movie" />
 						<WatchList type="tv" />
 
-						<Suspense fallback={<RowLoader withHeader />}>
-							<HomeRow
-								endpoint="trending/tv/week"
-								text="Binge-Worthy Series"
-								type="tv"
-								viewAllLink="/browse/binge-worthy-series"
-							/>
-						</Suspense>
+						{/* Pre-fetched rows - no Suspense needed since data is already available */}
+						<HomeRow
+							endpoint="trending/tv/week"
+							text="Binge-Worthy Series"
+							type="tv"
+							viewAllLink="/browse/binge-worthy-series"
+							initialData={trendingTV}
+						/>
 
-						<Suspense fallback={<RowLoader withHeader />}>
-							<HomeRow
-								endpoint="tv/popular"
-								text="Crowd Favorites: TV"
-								type="tv"
-								viewAllLink="/browse/crowd-favorites-tv"
-							/>
-						</Suspense>
+						<HomeRow
+							endpoint="tv/popular"
+							text="Crowd Favorites: TV"
+							type="tv"
+							viewAllLink="/browse/crowd-favorites-tv"
+							initialData={tvPopular}
+						/>
 
-						<Suspense fallback={<RowLoader withHeader />}>
-							<HomeRow
-								endpoint="tv/on_the_air"
-								text="Airing This Week"
-								type="tv"
-								viewAllLink="/browse/airing-this-week"
-							/>
-						</Suspense>
+						<HomeRow
+							endpoint="tv/on_the_air"
+							text="Airing This Week"
+							type="tv"
+							viewAllLink="/browse/airing-this-week"
+							initialData={tvOnTheAir}
+						/>
 
 						<Suspense fallback={<RowLoader withHeader />}>
 							<HomeRow
@@ -70,23 +71,22 @@ export default async function HomePage() {
 							/>
 						</Suspense>
 
-						<Suspense fallback={<RowLoader withHeader />}>
-							<HomeRow
-								endpoint="trending/movie/week"
-								text="Blockbuster Hits"
-								type="movie"
-								viewAllLink="/browse/blockbuster-hits"
-							/>
-						</Suspense>
+						{/* Pre-fetched rows - no Suspense needed since data is already available */}
+						<HomeRow
+							endpoint="trending/movie/week"
+							text="Blockbuster Hits"
+							type="movie"
+							viewAllLink="/browse/blockbuster-hits"
+							initialData={trendingMovies}
+						/>
 
-						<Suspense fallback={<RowLoader withHeader />}>
-							<HomeRow
-								endpoint="movie/now_playing"
-								text="Fresh in Theaters"
-								type="movie"
-								viewAllLink="/browse/fresh-in-theaters"
-							/>
-						</Suspense>
+						<HomeRow
+							endpoint="movie/now_playing"
+							text="Fresh in Theaters"
+							type="movie"
+							viewAllLink="/browse/fresh-in-theaters"
+							initialData={movieNowPlaying}
+						/>
 
 						<Suspense fallback={<RowLoader withHeader />}>
 							<HomeRow
