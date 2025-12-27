@@ -2,16 +2,43 @@ import axios from 'axios';
 import { Episode, Show } from './types';
 
 const BASE_URL = 'https://api.themoviedb.org/3';
-const API_KEY = 'e3ca0f283f1ab903fd5e2324faadd88e';
+
+// Get API credentials from environment variables
+const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || '';
+const TMDB_BEARER_TOKEN = process.env.NEXT_PUBLIC_TMDB_BEARER_TOKEN || process.env.TMDB_BEARER_TOKEN || '';
+
+// Validate API credentials
+if (!TMDB_BEARER_TOKEN && !TMDB_API_KEY) {
+	console.warn(
+		'⚠️  TMDB API credentials not found. Please set NEXT_PUBLIC_TMDB_BEARER_TOKEN or NEXT_PUBLIC_TMDB_API_KEY in your environment variables.'
+	);
+}
 
 const fetchData = async (endpoint: string, params: object = {}) => {
 	try {
 		const url = new URL(`${BASE_URL}${endpoint}`);
-		Object.entries({ ...params, api_key: API_KEY }).forEach(([key, value]) =>
+
+		// Add params
+		Object.entries(params).forEach(([key, value]) =>
 			url.searchParams.append(key, String(value))
 		);
 
-		const response = await axios.get(url.toString());
+		// Add API key if Bearer token is not available
+		if (!TMDB_BEARER_TOKEN && TMDB_API_KEY && !url.searchParams.has('api_key')) {
+			url.searchParams.append('api_key', TMDB_API_KEY);
+		}
+
+		// Prepare headers
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json',
+		};
+
+		// Use Bearer token if available
+		if (TMDB_BEARER_TOKEN) {
+			headers['Authorization'] = `Bearer ${TMDB_BEARER_TOKEN}`;
+		}
+
+		const response = await axios.get(url.toString(), { headers });
 		return response.data;
 	} catch (error) {
 		console.error(`Error fetching data from ${endpoint}:`, error);

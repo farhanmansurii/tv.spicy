@@ -18,7 +18,6 @@ const MediaDetails = (props: any) => {
 			<div className={cn(
 				"w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]",
 				"md:w-full md:left-auto md:right-auto md:ml-0 md:mr-0",
-				"-mt-20 md:mt-0"
 			)}>
 				<ShowDetails id={data?.id} show={data} type={type} />
 			</div>

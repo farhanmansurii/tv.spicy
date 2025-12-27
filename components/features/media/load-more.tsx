@@ -109,6 +109,7 @@ function LoadMore(props: { params: any }) {
 				isVertical={true}
 				text=""
 				shows={data}
+				gridLayout={true}
 				type={normalizedType}
 			/>
 			<div ref={ref}>{inView && isLoadingMore && <GridLoader isVertical={true} />}</div>

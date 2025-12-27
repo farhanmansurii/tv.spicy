@@ -135,7 +135,7 @@ export default function MediaRow({
       {!hideHeader && (
         <div className="flex items-end justify-between px-1 mb-4 md:mb-6">
           <CommonTitle
-            text={text || "Featured"}
+            text={text || ""}
             variant="small"
             as="h2"
             spacing="none"

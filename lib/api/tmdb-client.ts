@@ -9,7 +9,6 @@
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
-// Environment variables with fallbacks (for development only)
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || '';
 const TMDB_BEARER_TOKEN = process.env.NEXT_PUBLIC_TMDB_BEARER_TOKEN || process.env.TMDB_BEARER_TOKEN || '';
 
@@ -490,10 +489,15 @@ export async function fetchSeasonEpisodes(
 	showId: string,
 	seasonNumber: number
 ): Promise<any> {
-	const endpoint = `/tv/${showId}/season/${seasonNumber}?language=en-US`;
+	const endpoint = `/tv/${showId}/season/${seasonNumber}`;
 
 	try {
-		return await tmdbFetch<any>(endpoint, {
+		// Build URL with query params
+		const url = new URL(endpoint, 'http://dummy.com');
+		url.searchParams.set('language', 'en-US');
+		const fullEndpoint = url.pathname + url.search;
+
+		return await tmdbFetch<any>(fullEndpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 	} catch (error) {
@@ -510,10 +514,16 @@ export async function fetchEpisodeDetails(
 	seasonNumber: number,
 	episodeNumber: number
 ) {
-	const endpoint = `/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}?language=en-US&append_to_response=credits,images`;
+	const endpoint = `/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}`;
 
 	try {
-		return await tmdbFetch<any>(endpoint, {
+		// Build URL with query params
+		const url = new URL(endpoint, 'http://dummy.com');
+		url.searchParams.set('language', 'en-US');
+		url.searchParams.set('append_to_response', 'credits,images');
+		const fullEndpoint = url.pathname + url.search;
+
+		return await tmdbFetch<any>(fullEndpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 	} catch (error) {

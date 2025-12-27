@@ -77,7 +77,6 @@ export const Header = () => {
 			// Cmd/Ctrl + K for search
 			if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
 				e.preventDefault();
-				// Trigger search - you can add a ref to SearchCommandBox if needed
 				const searchButton = document.querySelector('[data-search-trigger]');
 				if (searchButton) {
 					(searchButton as HTMLElement).click();

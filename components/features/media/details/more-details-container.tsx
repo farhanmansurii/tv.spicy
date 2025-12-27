@@ -13,7 +13,7 @@ const RelatedShowsContainer = dynamic(() => import('./related-shows-container'),
     loading: () => <MoreDetailsLoader />,
 });
 
-const TABS = ['Related', 'Recommendations'] as const;
+const TABS = ['RELATED', 'RECOMMENDATIONS'] as const;
 type TabType = (typeof TABS)[number];
 
 export default function MoreDetailsContainer({ show, type }: { show: Show | Anime; type: string }) {
@@ -21,7 +21,7 @@ export default function MoreDetailsContainer({ show, type }: { show: Show | Anim
 
     return (
         <div className="w-full animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out">
-            <div className="space-y-2">
+            <div className="space-y-2 sm:space-y-3">
                 <CommonTitle text="Discovery" variant="section" spacing="none" />
                 <CommonTitle
                     text="More Like This"
@@ -51,7 +51,7 @@ export default function MoreDetailsContainer({ show, type }: { show: Show | Anim
                         transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
                     >
                         <RelatedShowsContainer
-                            relation={selected === 'Recommendations' ? 'recommendations' : 'similar'}
+                            relation={selected === 'RECOMMENDATIONS' ? 'recommendations' : 'similar'}
                             type={type}
                             show={show}
                         />

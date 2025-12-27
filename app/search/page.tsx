@@ -5,13 +5,11 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { searchTMDB, fetchGenres, discoverMedia } from '@/lib/api';
 
-// UI Components
 import Container from '@/components/shared/containers/container';
 import SectionWrapper from '@/components/shared/animated/section-layout';
 import CommonTitle from '@/components/shared/animated/common-title';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
     Search, X, SlidersHorizontal, ArrowUpDown,
     Film, Tv, LayoutGrid, ChevronLeft, ChevronRight
@@ -22,7 +20,6 @@ import {
 import MediaCard from '@/components/features/media/card/media-card';
 import GridLoader from '@/components/shared/loaders/grid-loader';
 
-// Utils
 import { Show } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -74,25 +71,24 @@ export default function SearchPageClient() {
     const isLoading = isFetching || isDiscovering;
 
     return (
-        <div className="min-h-screen mt-20 overflow-x-hidden">
+        <div className="min-h-screen mt-40 overflow-x-hidden">
             <SectionWrapper spacing="large" className="pb-0">
                 <Container>
-                    <div className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto w-full">
-                        <div className="space-y-2">
-                            <CommonTitle text="Search Everything" variant="large" as="h1" className="text-white" />
-                            <p className="text-zinc-500 text-sm md:text-base font-medium max-w-lg mx-auto tracking-wide">
+                    <div className="flex flex-col items-center text-center space-y-6 max-w-4xl mx-auto w-full">
+                        <div className="space-y-2 items-center flex flex-col  justify-center">
+                            <div className="text-white text-4xl md:text-5xl font-bold tracking-tight text-center align-center">Search Everything</div>
+                            <p className="text-zinc-500 text-sm md:text-base font-medium max-w-lg mx-auto tracking-wide text-center">
                                 Explore thousands of cinematic titles, curated series, and hidden gems in our archive.
                             </p>
                         </div>
 
-                        {/* SPOTLIGHT SEARCH HUD */}
                         <div className="relative w-full group px-2 md:px-0">
                             <div className="absolute -inset-1 bg-primary/20 blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 rounded-[2rem]" />
-                            <div className="relative flex items-center bg-zinc-900/40 border border-white/5 backdrop-blur-3xl rounded-[1.5rem] md:rounded-[2rem] h-16 md:h-20 px-6 md:px-10 shadow-2xl">
+                            <div className="relative flex items-center bg-zinc-900/40 border border-white/5 backdrop-blur-3xl rounded-[1.5rem] md:rounded-[2rem] h-12 md:h-16 px-4 md:px-6 shadow-2xl">
                                 <Search className="w-5 h-5 text-zinc-600 mr-4 shrink-0" />
                                 <Input
-                                    placeholder="Titles, actors, or genres..."
-                                    className="border-none bg-transparent text-lg md:text-2xl p-0 h-full focus-visible:ring-0 placeholder:text-zinc-800 text-white font-medium"
+                                    placeholder="Type to search..."
+                                    className="border-none bg-transparent text-base md:text-lg p-0 h-full focus-visible:ring-0 placeholder:text-zinc-800 text-white font-medium"
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                 />
@@ -107,11 +103,9 @@ export default function SearchPageClient() {
                 </Container>
             </SectionWrapper>
 
-            {/* 2. PERSISTENT NAVIGATION HUD */}
             <div className="sticky top-4 z-40 mt-8 md:mt-12 px-4 md:px-0">
                 <Container>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-2 bg-zinc-900/60 backdrop-blur-2xl border border-white/[0.04] rounded-2xl shadow-2xl">
-                        {/* MOBILE-FRIENDLY TABS */}
                         <div className="flex items-center p-1 bg-black/40 rounded-xl w-full md:w-auto ring-1 ring-white/5">
                             {[
                                 { id: 'all', label: 'All', icon: LayoutGrid },
@@ -132,7 +126,6 @@ export default function SearchPageClient() {
                             ))}
                         </div>
 
-                        {/* DESKTOP CONTROLS */}
                         <div className="flex items-center gap-2 w-full md:w-auto">
                             <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
                                 <SelectTrigger className="w-full md:w-[150px] h-9 bg-black/20 border-white/5 rounded-xl text-[9px] font-black uppercase tracking-widest text-zinc-400">
@@ -162,21 +155,18 @@ export default function SearchPageClient() {
                 </Container>
             </div>
 
-            {/* 3. GRID RESULTS AREA */}
             <SectionWrapper spacing="medium">
                 <Container>
                     {isLoading ? (
                         <GridLoader />
                     ) : results.length > 0 ? (
                         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                            {/* RESPONSIVE GRID: 2 COL MOBILE, 6 COL DESKTOP */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 md:gap-x-6 gap-y-10">
                                 {results.map((show, index) => (
                                     <MediaCard key={show.id} show={show} index={index} type={show.media_type || 'tv'} isVertical={true} />
                                 ))}
                             </div>
 
-                            {/* CINEMATIC PAGINATION */}
                             {totalPages > 1 && (
                                 <div className="flex justify-center items-center gap-4 pt-10 border-t border-white/[0.03]">
                                     <Button variant="ghost" disabled={page === 1} onClick={() => setPage(p => p - 1)} className="text-[10px] font-black uppercase tracking-widest text-zinc-600"><ChevronLeft size={16}/></Button>
