@@ -10,8 +10,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '@/components/ui/sidebar';
 import { HeaderActions } from './header-actions';
 import { HeaderNavigation } from './header-navigation';
-import { navigationItems } from './navigation-data';
+import { getNavigationItems } from './navigation-data';
 import { cn } from '@/lib/utils';
+import { useSession } from '@/lib/auth-client';
 
 interface HeaderProps {
 	className?: string;
@@ -34,6 +35,10 @@ export function Header({ className }: HeaderProps) {
 	const [scrolled, setScrolled] = React.useState(false);
 	const pathname = usePathname();
 	const { toggleSidebar, openMobile } = useSidebar();
+	const { data: session } = useSession();
+	const navigationItems = React.useMemo(() => {
+		return getNavigationItems({ isSignedIn: Boolean(session?.user?.id) });
+	}, [session?.user?.id]);
 
 	// Apple-style scroll detection with passive listener and hysteresis
 	React.useEffect(() => {

@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Home, Search, MenuSquare, User, List } from 'lucide-react';
+import { Home, Search, MenuSquare, User, Bookmark } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -13,7 +13,7 @@ interface MobileHeaderProps {
 }
 
 interface MobileNavItem {
-	id: 'home' | 'search' | 'explore' | 'lists' | 'account';
+	id: 'home' | 'search' | 'explore' | 'library' | 'account';
 	label: string;
 	icon: React.ReactNode;
 	href?: string;
@@ -89,9 +89,9 @@ export default function MobileHeader({ center }: MobileHeaderProps) {
 	const { toggleSidebar } = useSidebar();
 	const { data: session } = useSession();
 
-	const profileHref = session?.user?.id
-		? '/profile'
-		: '/auth/signin?callbackUrl=/profile';
+	const accountHref = session?.user?.id ? '/profile' : '/auth/signin?callbackUrl=/profile';
+	const libraryHref = session?.user?.id ? '/library' : '/auth/signin?callbackUrl=/library';
+	const libraryLabel = session?.user?.id ? 'Library' : 'Sign in first';
 
 	const handleNavigate = React.useCallback(
 		(href: string) => {
@@ -105,14 +105,15 @@ export default function MobileHeader({ center }: MobileHeaderProps) {
 			{ id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, href: '/' },
 			{ id: 'search', label: 'Search', icon: <Search className="h-4 w-4" />, href: '/search' },
 			{ id: 'explore', label: 'Explore', icon: <MenuSquare className="h-4 w-4" />, onClick: toggleSidebar },
-			{ id: 'lists', label: 'My Lists', icon: <List className="h-4 w-4" />, href: profileHref },
-			{ id: 'account', label: 'Profile', icon: <User className="h-4 w-4" />, href: profileHref },
+			{ id: 'library', label: libraryLabel, icon: <Bookmark className="h-4 w-4" />, href: libraryHref },
+			{ id: 'account', label: 'Profile', icon: <User className="h-4 w-4" />, href: accountHref },
 		];
-	}, [toggleSidebar, profileHref]);
+	}, [toggleSidebar, libraryLabel, libraryHref, accountHref]);
 
 	const selectedId = React.useMemo<MobileNavItem['id']>(() => {
 		if (pathname === '/') return 'home';
 		if (pathname.startsWith('/search')) return 'search';
+		if (pathname.startsWith('/library')) return 'library';
 		if (pathname.startsWith('/profile')) return 'account';
 		return 'home';
 	}, [pathname]);

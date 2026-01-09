@@ -2,7 +2,7 @@ import {
 	Home,
 	Clapperboard,
 	Tv,
-	List,
+	Bookmark,
 	Sparkles,
 	Play,
 	Heart,
@@ -100,8 +100,21 @@ export const navigationItems: NavigationItem[] = [
 		],
 	},
 	{
-		label: 'My Lists',
-		href: '/profile',
-		icon: List,
+		label: 'Library',
+		href: '/library',
+		icon: Bookmark,
 	},
 ];
+
+export function getNavigationItems(options: { isSignedIn: boolean }) {
+	if (options.isSignedIn) return navigationItems;
+
+	return navigationItems.map((item) => {
+		if (item.href !== '/library') return item;
+		return {
+			...item,
+			label: 'Sign in first',
+			href: '/auth/signin?callbackUrl=/library',
+		};
+	});
+}
