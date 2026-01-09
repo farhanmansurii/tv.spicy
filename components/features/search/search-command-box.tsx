@@ -30,11 +30,14 @@ import {
 	CommandList,
 	CommandInput,
 } from '@/components/ui/command';
-import { Button } from '@/components/ui/button';
 
 const APPLE_FLUID = 'expo.out';
 
-export function SearchCommandBox() {
+interface SearchCommandBoxProps {
+	variant?: 'default' | 'expanded';
+}
+
+export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps) {
 	const router = useRouter();
 	const [open, setOpen] = React.useState(false);
 	const [inputValue, setInputValue] = React.useState('');
@@ -203,22 +206,73 @@ export function SearchCommandBox() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-			<Button
-					variant="outline"
-					size="icon"
-					className={cn(
-						// Mobile: Icon only
-						'h-10 w-10 rounded-full border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all',
-						// Desktop: Full search box
-						'lg:relative lg:h-10 lg:w-64 lg:justify-start lg:gap-2 lg:rounded-card md:lg:rounded-card-md lg:px-4 lg:font-normal lg:shadow-sm lg:backdrop-blur-md'
-					)}
-				>
-					<Search className="w-5 h-5" />
-					<span className="hidden lg:inline-flex">Search...</span>
-					<kbd className="pointer-events-none absolute right-2 hidden h-5 select-none items-center gap-1 rounded border border-white/10 bg-black/20 px-1.5 font-mono text-[10px] font-medium opacity-50 lg:flex">
-						<span className="text-xs">⌘</span>K
-					</kbd>
-				</Button>
+				{variant === 'expanded' ? (
+					// Expanded variant - Full width search bar (for sidebar/mobile menu)
+					<button
+						className={cn(
+							'relative flex items-center w-full',
+							'h-11 rounded-xl px-3.5 gap-3',
+							'bg-foreground/[0.04] hover:bg-foreground/[0.06] active:bg-foreground/[0.08]',
+							'border border-border/40 hover:border-border/50',
+							'transition-all duration-300 ease-out',
+							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2',
+							'touch-manipulation',
+							'group'
+						)}
+					>
+						<Search
+							className={cn(
+								'h-[18px] w-[18px]',
+								'text-muted-foreground/50 group-hover:text-muted-foreground/70',
+								'transition-colors duration-300',
+								'flex-shrink-0'
+							)}
+							strokeWidth={1.75}
+						/>
+						<span className="flex-1 text-left text-[14px] text-muted-foreground/50 group-hover:text-muted-foreground/70 transition-colors">
+							Search movies, shows...
+						</span>
+					</button>
+				) : (
+					// Default variant - Icon button on mobile, expanded on desktop
+					<button
+						className={cn(
+							// Mobile: Circular icon button
+							'relative flex items-center justify-center',
+							'h-10 w-10 sm:h-11 sm:w-11 rounded-full',
+							'bg-foreground/[0.03] hover:bg-foreground/[0.06] active:bg-foreground/[0.08]',
+							'border border-border/40 hover:border-border/60',
+							'transition-all duration-300 ease-out',
+							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2',
+							'touch-manipulation',
+							'group',
+							// Desktop: Expanded search bar
+							'lg:w-64 lg:h-10 lg:rounded-xl lg:justify-start lg:gap-2.5 lg:px-3.5'
+						)}
+					>
+						<Search
+							className={cn(
+								'h-[18px] w-[18px] sm:h-5 sm:w-5 lg:h-4 lg:w-4',
+								'text-foreground/60 group-hover:text-foreground/80',
+								'transition-colors duration-300',
+								'flex-shrink-0'
+							)}
+							strokeWidth={1.75}
+						/>
+						<span className="hidden lg:inline-flex text-[14px] text-muted-foreground/50 group-hover:text-muted-foreground/70 transition-colors">
+							Search...
+						</span>
+						<kbd className={cn(
+							'pointer-events-none absolute right-2.5 hidden lg:flex',
+							'h-5 items-center gap-0.5 rounded-md',
+							'bg-foreground/[0.04] border border-border/30',
+							'px-1.5 font-mono text-[10px] font-medium',
+							'text-muted-foreground/40'
+						)}>
+							<span className="text-[11px]">⌘</span>K
+						</kbd>
+					</button>
+				)}
 			</DialogTrigger>
 			<DialogContent className="p-0 border-none bg-transparent max-w-2xl top-[15%] translate-y-0 shadow-none outline-none overflow-visible">
 				<div

@@ -256,16 +256,50 @@
 	}
 }
 @layer base {
-	body {
-	  /* Prevents Radix/Shadcn from adding extra padding when modals open */
-	  padding-right: 0px !important;
+	/*
+	 * HIDDEN SCROLLBAR - No layout shift guaranteed
+	 * Scrollbar is hidden but scrolling still works
+	 */
+	:root {
+		--removed-body-scroll-bar-size: 0px !important;
 	}
-  }
 
-  html {
-	/* Forces the scrollbar space to always be reserved, even when hidden */
-	scrollbar-gutter: stable;
-  }
+	html {
+		overflow-y: auto;
+		overflow-x: hidden;
+		/* Hide scrollbar - Firefox */
+		scrollbar-width: none;
+	}
+
+	/* Hide scrollbar - Chrome, Safari, Edge */
+	html::-webkit-scrollbar {
+		display: none;
+		width: 0;
+		height: 0;
+	}
+
+	body {
+		padding-right: 0px !important;
+		margin-right: 0px !important;
+		width: 100% !important;
+		--removed-body-scroll-bar-size: 0px !important;
+	}
+
+	/* When scroll is locked (modal open) */
+	body[data-scroll-locked],
+	body[data-scroll-locked="1"] {
+		padding-right: 0px !important;
+		margin-right: 0px !important;
+		overflow: hidden !important;
+	}
+
+	/* Ensure fixed elements don't shift */
+	header[role="banner"],
+	[data-radix-popper-content-wrapper] {
+		padding-right: 0px !important;
+		margin-right: 0px !important;
+	}
+}
 
 @layer base {
 	* {
@@ -281,54 +315,32 @@
 	}
 }
 
-/* Custom Minimal Scrollbar - Apple Style */
-/* Webkit browsers (Chrome, Safari, Edge) */
+/*
+ * HIDDEN SCROLLBAR STYLES
+ * Main page has no scrollbar, inner containers can have thin scrollbar
+ */
+
+/* Hide scrollbar globally by default */
 * {
-	scrollbar-width: thin;
-	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+	scrollbar-width: none;
 }
 
 *::-webkit-scrollbar {
-	width: 6px;
-	height: 6px;
+	display: none;
+	width: 0;
+	height: 0;
 }
 
-*::-webkit-scrollbar-track {
-	background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-	background-color: rgba(0, 0, 0, 0.2);
-	border-radius: 10px;
-	border: 2px solid transparent;
-	background-clip: padding-box;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(0, 0, 0, 0.3);
-}
-
-/* Dark mode scrollbar */
-.dark * {
-	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
-.dark *::-webkit-scrollbar-thumb {
-	background-color: rgba(255, 255, 255, 0.2);
-}
-
-.dark *::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Custom scrollbar for sidebar content */
+/* Custom scrollbar for specific containers that need scroll indication */
 .custom-scrollbar {
 	scrollbar-width: thin;
-	scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+	scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
+	display: block;
 	width: 4px;
+	background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -336,26 +348,24 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-	background-color: rgba(0, 0, 0, 0.15);
+	background-color: rgba(128, 128, 128, 0.3);
 	border-radius: 10px;
-	border: 1px solid transparent;
-	background-clip: padding-box;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(0, 0, 0, 0.25);
+	background-color: rgba(128, 128, 128, 0.5);
 }
 
 .dark .custom-scrollbar {
-	scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-	background-color: rgba(255, 255, 255, 0.15);
+	background-color: rgba(255, 255, 255, 0.2);
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(255, 255, 255, 0.25);
+	background-color: rgba(255, 255, 255, 0.35);
 }
 @keyframes shimmer {
 	0% {
