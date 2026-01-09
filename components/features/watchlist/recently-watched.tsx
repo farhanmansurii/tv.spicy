@@ -1,7 +1,7 @@
 'use client';
 import useTVShowStore from '@/store/recentsStore';
 import React, { useEffect, useMemo, useState, memo, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Episode } from '@/lib/types';

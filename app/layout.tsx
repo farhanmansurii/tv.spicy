@@ -9,19 +9,19 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
 export const generateMetadata = (): Metadata => ({
-	title: 'Watvh TV - Stream Movies, TV Shows, and Anime',
+	title: 'Spicy TV - Stream Movies, TV Shows, and Anime',
 	description:
-		'Discover and stream your favorite movies, TV series, and anime on Watvh TV. Enjoy unlimited entertainment with our vast library of content.',
-	keywords: ['streaming', 'movies', 'TV shows', 'anime', 'entertainment', 'Watvh TV'],
-	authors: [{ name: 'Watvh TV Team' }],
-	creator: 'Watvh TV',
-	publisher: 'Watvh TV',
+		'Discover and stream your favorite movies, TV series, and anime on Spicy TV. Enjoy unlimited entertainment with our vast library of content.',
+	keywords: ['streaming', 'movies', 'TV shows', 'anime', 'entertainment', 'Spicy TV'],
+	authors: [{ name: 'Spicy TV Team' }],
+	creator: 'Spicy TV',
+	publisher: 'Spicy TV',
 	openGraph: {
-		title: 'Watvh TV - Your Ultimate Streaming Destination',
+		title: 'Spicy TV - Your Ultimate Streaming Destination',
 		description:
-			'Stream the latest movies, binge-worthy TV shows, and popular anime series on Watvh TV. Start watching now!',
-		url: 'https://www.watvh.vercel.app',
-		siteName: 'Watvh TV',
+			'Stream the latest movies, binge-worthy TV shows, and popular anime series on Spicy TV. Start watching now!',
+		url: 'https://www.spicy.tv',
+		siteName: 'Spicy TV',
 		locale: 'en_US',
 		type: 'website',
 	},

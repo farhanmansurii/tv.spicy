@@ -1,6 +1,5 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { syncLocalToDatabase } from '@/lib/sync/local-to-db';
@@ -8,9 +7,12 @@ import useWatchListStore from '@/store/watchlistStore';
 import useTVShowStore from '@/store/recentsStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 
+/**
+ * Component that handles database syncing and data loading when user is authenticated
+ * Session syncing is now handled by useAuth hook, so this focuses on data operations
+ */
 export function AuthSync() {
-	const { data: session } = useSession();
-	const { setUser, clearUser } = useAuthStore();
+	const { user, userId } = useAuthStore();
 	const hasSyncedRef = useRef(false);
 	const hasLoadedRef = useRef(false);
 	const { loadFromDatabase: loadWatchlistFromDB } = useWatchListStore();
@@ -18,22 +20,17 @@ export function AuthSync() {
 	const { loadFromDatabase: loadFavoritesFromDB } = useFavoritesStore();
 
 	useEffect(() => {
-		if (session?.user) {
-			setUser({
-				id: session.user.id || '',
-				email: session.user.email || null,
-				name: session.user.name || null,
-				image: session.user.image || null,
-			});
-
-			if (!hasSyncedRef.current && session.user.id) {
+		if (user && userId) {
+			// Sync local data to database
+			if (!hasSyncedRef.current) {
 				hasSyncedRef.current = true;
-				syncLocalToDatabase(session.user.id).catch((error) => {
+				syncLocalToDatabase(userId).catch((error) => {
 					console.error('Auto-sync failed:', error);
 				});
 			}
 
-			if (!hasLoadedRef.current && session.user.id) {
+			// Load data from database
+			if (!hasLoadedRef.current) {
 				hasLoadedRef.current = true;
 				Promise.all([
 					loadWatchlistFromDB().catch((error) => {
@@ -48,11 +45,11 @@ export function AuthSync() {
 				]);
 			}
 		} else {
-			clearUser();
+			// Reset refs when user logs out
 			hasSyncedRef.current = false;
 			hasLoadedRef.current = false;
 		}
-	}, [session, setUser, clearUser, loadWatchlistFromDB, loadRecentsFromDB, loadFavoritesFromDB]);
+	}, [user, userId, loadWatchlistFromDB, loadRecentsFromDB, loadFavoritesFromDB]);
 
 	return null;
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import { syncLocalToDatabase } from '@/lib/sync/local-to-db';
 import { toast } from 'sonner';
 

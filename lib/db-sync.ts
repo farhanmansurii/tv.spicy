@@ -1,12 +1,10 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-
 // Helper functions to sync Zustand stores with database
 
 export async function syncWatchlistFromDB() {
-	const session = await fetch('/api/auth/session').then((res) => res.json());
-	if (!session?.user?.id) return;
+	const session = await fetch('/api/auth/get-session').then((res) => res.json());
+	if (!session?.data?.user?.id) return;
 
 	try {
 		const response = await fetch('/api/watchlist');
@@ -22,8 +20,8 @@ export async function syncWatchlistFromDB() {
 }
 
 export async function syncRecentlyWatchedFromDB() {
-	const session = await fetch('/api/auth/session').then((res) => res.json());
-	if (!session?.user?.id) return;
+	const session = await fetch('/api/auth/get-session').then((res) => res.json());
+	if (!session?.data?.user?.id) return;
 
 	try {
 		const response = await fetch('/api/recently-watched');
@@ -38,8 +36,8 @@ export async function syncRecentlyWatchedFromDB() {
 }
 
 export async function syncFavoritesFromDB() {
-	const session = await fetch('/api/auth/session').then((res) => res.json());
-	if (!session?.user?.id) return;
+	const session = await fetch('/api/auth/get-session').then((res) => res.json());
+	if (!session?.data?.user?.id) return;
 
 	try {
 		const response = await fetch('/api/favorites');

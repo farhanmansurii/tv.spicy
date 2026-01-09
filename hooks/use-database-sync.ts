@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 

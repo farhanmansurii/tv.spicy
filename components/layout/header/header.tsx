@@ -169,7 +169,7 @@ export function Header({ className }: HeaderProps) {
 							<div className="relative h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-[0.98]">
 								<Image
 									src="/logo.webp"
-									alt="Watvh TV"
+									alt="Spicy TV"
 									fill
 									className="object-contain drop-shadow-sm"
 									priority
@@ -177,7 +177,10 @@ export function Header({ className }: HeaderProps) {
 								/>
 							</div>
 							<span className="hidden sm:inline-block text-[17px] font-semibold tracking-[-0.41px] text-foreground/90 transition-colors duration-300 group-hover:text-foreground">
-								Watvh TV
+								Spicy TV
+							</span>
+							<span className="sm:hidden text-[17px] font-semibold tracking-[-0.41px] text-foreground/90 transition-colors duration-300 group-hover:text-foreground">
+								Spicy TV
 							</span>
 						</Link>
 					</div>

@@ -10,7 +10,6 @@
 		"postinstall": "prisma generate"
 	},
 	"dependencies": {
-		"@auth/prisma-adapter": "^2.11.1",
 		"@emotion/memoize": "^0.9.0",
 		"@hookform/resolvers": "^5.2.2",
 		"@imbios/next-pwa": "^1.1.1",
@@ -56,9 +55,12 @@
 		"@tanstack/react-query": "^5.37.1",
 		"@tanstack/react-query-devtools": "^5.37.1",
 		"@tanstack/react-query-persist-client": "^5.56.2",
+		"@types/bcryptjs": "^2.4.6",
 		"@types/lodash": "^4.17.7",
 		"@vercel/postgres": "^0.10.0",
 		"axios": "^1.6.8",
+		"bcryptjs": "^3.0.3",
+		"better-auth": "^1.4.10",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^0.2.1",
@@ -75,7 +77,6 @@
 		"lodash": "^4.17.21",
 		"lucide-react": "^0.279.0",
 		"next": "^16.0.0",
-		"next-auth": "^5.0.0-beta.30",
 		"next-themes": "^0.2.1",
 		"next-transition-router": "^0.2.1",
 		"npm": "^10.8.0",

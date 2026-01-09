@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/auth-server';
 import { getRecentSearches, addRecentSearch, clearRecentSearches } from '@/lib/db/recent-searches';
 
 export async function GET(request: NextRequest) {
 	try {
-		const session = await auth();
+		const session = await getServerSession();
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const session = await auth();
+		const session = await getServerSession();
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
 	try {
-		const session = await auth();
+		const session = await getServerSession();
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}

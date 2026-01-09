@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 
 interface WatchlistItem {
 	id: string;

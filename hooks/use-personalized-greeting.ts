@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 
 interface GreetingMessage {
 	text: string;

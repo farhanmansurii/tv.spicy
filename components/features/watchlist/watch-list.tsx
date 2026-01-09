@@ -5,7 +5,7 @@ import useWatchListStore from '@/store/watchlistStore';
 import MediaRow from '@/components/features/media/row/media-row';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 
 function WatchListComponent({ type }: { type: string }) {
   const hasMounted = useHasMounted();

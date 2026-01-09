@@ -10,8 +10,8 @@ import React, { Suspense } from 'react';
 import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
 
 export const metadata: Metadata = {
-	title: 'Watvh TV',
-	description: 'Watch any TV / Movies / Anime with Watvh ',
+	title: 'Spicy TV',
+	description: 'Watch any TV / Movies / Anime with Spicy TV',
 };
 
 export const revalidate = 604800;

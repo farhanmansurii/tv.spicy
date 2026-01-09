@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 import Container from '@/components/shared/containers/container';
@@ -31,7 +31,6 @@ import { Show } from '@/lib/types';
 import MediaRow from '@/components/features/media/row/media-row';
 import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
 import { Button } from '@/components/ui/button';
-import { signOut } from 'next-auth/react';
 import RecentlyWatchedComponent from '@/components/features/watchlist/recently-watched';
 
 interface StatCardProps {
@@ -114,7 +113,7 @@ function ProfileContentSection({
 }
 
 export default function ProfilePage() {
-	const { data: session, status } = useSession();
+	const { data: session, isPending } = useSession();
 	const router = useRouter();
 	const { watchlist, tvwatchlist } = useWatchListStore();
 	const { recentlyWatched } = useTVShowStore();
@@ -137,10 +136,10 @@ export default function ProfilePage() {
 	const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
 	useEffect(() => {
-		if (status === 'unauthenticated') {
+		if (!isPending && !session) {
 			router.push('/auth/signin?callbackUrl=/profile');
 		}
-	}, [status, router]);
+	}, [isPending, session, router]);
 
 	// Fetch details for watchlist items
 	useEffect(() => {
@@ -274,7 +273,7 @@ export default function ProfilePage() {
 	}, [favoritesTV]);
 
 	// Conditional returns must come after all hooks
-	if (status === 'loading') {
+	if (isPending) {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
 				<div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />

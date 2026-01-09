@@ -1,37 +1,25 @@
-import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
-import GitHubProvider from 'next-auth/providers/github';
-import { PrismaAdapter } from '@auth/prisma-adapter';
+import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '@/lib/db/prisma';
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-	adapter: PrismaAdapter(prisma),
-	providers: [
-		GoogleProvider({
+const baseURL = (process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000').replace(/\/$/, '');
+
+export const auth = betterAuth({
+	database: prismaAdapter(prisma, {
+		provider: 'postgresql',
+	}),
+	emailAndPassword: {
+		enabled: true,
+	},
+	socialProviders: {
+		google: {
 			clientId: process.env.GOOGLE_CLIENT_ID || '',
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-		}),
-		GitHubProvider({
-			clientId: process.env.GITHUB_CLIENT_ID || '',
-			clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
-		}),
-	],
-	pages: {
-		signIn: '/auth/signin',
-		error: '/auth/error',
-	},
-	debug: process.env.NODE_ENV === 'development',
-	callbacks: {
-		async session({ session, user }) {
-			if (session.user) {
-				session.user.id = user.id;
-			}
-			return session;
 		},
 	},
-	session: {
-		strategy: 'database',
-		maxAge: 30 * 24 * 60 * 60, // 30 days
-	},
-	secret: process.env.NEXTAUTH_SECRET,
+	baseURL,
+	basePath: '/api/auth',
+	secret: process.env.BETTER_AUTH_SECRET || process.env.NEXTAUTH_SECRET || '',
 });
+
+export type Session = typeof auth.$Infer.Session;

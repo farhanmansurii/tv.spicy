@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession, signIn, signOut } from '@/lib/auth-client';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -25,11 +25,11 @@ import { cn } from '@/lib/utils';
  * - Touch-friendly sizing (44px minimum)
  */
 export function AuthButton() {
-	const { data: session, status } = useSession();
+	const { data: session, isPending } = useSession();
 	const router = useRouter();
 
 	// Loading state with refined spinner
-	if (status === 'loading') {
+	if (isPending) {
 		return (
 			<div
 				className={cn(
@@ -48,7 +48,7 @@ export function AuthButton() {
 	if (!session) {
 		return (
 			<button
-				onClick={() => signIn()}
+				onClick={() => router.push('/auth/signin')}
 				className={cn(
 					'relative flex items-center justify-center',
 					'h-10 w-10 sm:h-11 sm:w-11 rounded-full',
@@ -192,7 +192,10 @@ export function AuthButton() {
 
 				{/* Sign Out */}
 				<DropdownMenuItem
-					onClick={() => signOut({ callbackUrl: '/' })}
+					onClick={async () => {
+						await signOut();
+						router.push('/');
+					}}
 					className={cn(
 						'group/item flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer',
 						'text-[14px] text-red-500/80 dark:text-red-400/80',

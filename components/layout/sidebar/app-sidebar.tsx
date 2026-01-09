@@ -96,7 +96,7 @@ export function AppSidebar() {
 						<div className="relative h-10 w-10 flex-shrink-0">
 							<Image
 								src="/logo.webp"
-								alt="Watvh TV"
+								alt="Spicy TV"
 								fill
 								className="object-contain"
 								priority
@@ -105,7 +105,7 @@ export function AppSidebar() {
 						</div>
 						<div className="flex flex-col gap-0.5">
 							<span className="text-[17px] font-semibold tracking-[-0.41px] leading-tight text-foreground">
-								Watvh TV
+								Spicy TV
 							</span>
 							<span className="text-[12px] text-muted-foreground/70 leading-tight">
 								Streaming Platform

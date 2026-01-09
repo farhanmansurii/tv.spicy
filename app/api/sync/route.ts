@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/auth-server';
 import { addToWatchlist } from '@/lib/db/watchlist';
 import { addRecentlyWatched } from '@/lib/db/recently-watched';
 import { addFavorite } from '@/lib/db/favorites';
@@ -7,7 +7,7 @@ import { addRecentSearch } from '@/lib/db/recent-searches';
 
 export async function POST(request: NextRequest) {
 	try {
-		const session = await auth();
+		const session = await getServerSession();
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}

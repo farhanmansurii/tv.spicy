@@ -1,15 +1,18 @@
-import { auth } from '@/lib/auth';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSessionCookie } from 'better-auth/cookies';
 
-export default auth((req) => {
+export default async function proxy(request: NextRequest) {
 	// Protect /profile route
-	if (req.nextUrl.pathname.startsWith('/profile')) {
-		if (!req.auth) {
-			return NextResponse.redirect(new URL('/auth/signin?callbackUrl=/profile', req.url));
+	if (request.nextUrl.pathname.startsWith('/profile')) {
+		const sessionCookie = getSessionCookie(request);
+		if (!sessionCookie) {
+			return NextResponse.redirect(
+				new URL('/auth/signin?callbackUrl=/profile', request.url)
+			);
 		}
 	}
 	return NextResponse.next();
-});
+}
 
 export const config = {
 	matcher: ['/profile/:path*'],

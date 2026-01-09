@@ -8,7 +8,7 @@ import { useHasMounted } from '@/hooks/use-has-mounted';
 import { toast } from 'sonner';
 import { fetchDetailsTMDB } from '@/lib/api';
 import { Show } from '@/lib/types';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import { useUserFavorites } from '@/hooks/use-user-data';
 
