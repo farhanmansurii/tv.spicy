@@ -17,7 +17,7 @@ export default function ShowDetailsLoader() {
 
             <div className="relative z-10 h-full flex flex-col justify-end">
                 <Container className="pb-10 md:pb-20">
-                    <div className="max-w-4xl flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                    <div className="max-w-4xl flex flex-col">
                         {/* Badge and Meta */}
                         <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-3 md:mb-5">
                             <Skeleton className="h-5 w-16 rounded-sm" />
@@ -44,10 +44,12 @@ export default function ShowDetailsLoader() {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex justify-center md:justify-start mt-8 md:mt-10 gap-2.5">
-                            <Skeleton className="h-[42px] md:h-[50px] w-[120px] md:w-[140px] rounded-full" />
-                            <Skeleton className="h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full" />
-                            <Skeleton className="h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full" />
+                        <div className="flex justify-center md:justify-start mt-8 md:mt-10">
+                            <div className="flex flex-wrap items-center gap-2.5 md:gap-3">
+                                <Skeleton className="h-[42px] md:h-[50px] w-[140px] md:w-[160px] rounded-full" />
+                                <Skeleton className="h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full" />
+                                <Skeleton className="h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full" />
+                            </div>
                         </div>
                     </div>
                 </Container>

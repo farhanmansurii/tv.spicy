@@ -50,6 +50,21 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
     }
   }, [validSeasons, searchParams]);
 
+  // Initialize active episode from URL params when episodes are loaded
+  useEffect(() => {
+    const sParam = searchParams.get('season');
+    const eParam = searchParams.get('episode');
+
+    if (episodes && eParam && sParam && parseInt(sParam) === activeSeason) {
+      const episode = episodes.find(
+        (ep: any) => ep.season_number === parseInt(sParam) && ep.episode_number === parseInt(eParam)
+      );
+      if (episode && activeEP?.id !== episode.id) {
+        setActiveEP(episode);
+      }
+    }
+  }, [episodes, searchParams, activeSeason, activeEP, setActiveEP]);
+
   // 4. ACTION HANDLERS (Functional Fixes)
   const handleSeasonChange = (value: string) => {
     const sNum = Number(value);
@@ -63,7 +78,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
   const onEpisodeClick = useCallback((episode: any) => {
     setActiveEP(episode);
 
-    // Smooth scroll only if player exists
+    // Smooth scroll to player if it exists
     if (playerRef.current) {
         playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -73,6 +88,75 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
     params.set('episode', String(episode.episode_number));
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [router, pathname, searchParams, setActiveEP]);
+
+  // Handle next episode navigation
+  const handleNextEpisode = useCallback(() => {
+    // First, try to get current episode from activeEP or URL params
+    let currentEpisode = activeEP;
+
+    if (!currentEpisode && episodes && episodes.length > 0) {
+      const sParam = searchParams.get('season');
+      const eParam = searchParams.get('episode');
+      if (sParam && eParam) {
+        currentEpisode = episodes.find(
+          (ep: any) => ep.season_number === parseInt(sParam) && ep.episode_number === parseInt(eParam)
+        );
+      }
+    }
+
+    if (!currentEpisode || !episodes || episodes.length === 0) {
+      return;
+    }
+
+    // TypeScript guard: currentEpisode is guaranteed to be non-null here
+    const episode = currentEpisode;
+
+    // Find current episode index
+    const currentIndex = episodes.findIndex(
+      (ep: any) => ep.id === episode.id ||
+      (ep.season_number === episode.season_number && ep.episode_number === episode.episode_number)
+    );
+
+    if (currentIndex === -1) {
+      return;
+    }
+
+    // Check if there's a next episode in the current season
+    if (currentIndex < episodes.length - 1) {
+      const nextEpisode = episodes[currentIndex + 1];
+      onEpisodeClick(nextEpisode);
+      return;
+    }
+
+    // If at the end of current season, try to move to next season
+    const currentSeasonIndex = validSeasons.findIndex(
+      (s: any) => s.season_number === activeSeason
+    );
+
+    if (currentSeasonIndex < validSeasons.length - 1) {
+      const nextSeason = validSeasons[currentSeasonIndex + 1];
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('season', String(nextSeason.season_number));
+      params.set('episode', '1');
+      router.push(`${pathname}?${params.toString()}`);
+    }
+  }, [activeEP, episodes, activeSeason, validSeasons, router, pathname, searchParams, onEpisodeClick]);
+
+  // Scroll active episode into view when it changes
+  const activeEpisodeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeEP && activeEpisodeRef.current) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        activeEpisodeRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+  }, [activeEP]);
 
   if (isError) return (
     <div className="flex flex-col items-center py-20 gap-4 text-destructive">
@@ -88,12 +172,12 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
         <TVContainer
           key={`${activeEP?.id}-${activeSeason}`}
           showId={showId}
-          getNextEp={() => {}}
+          getNextEp={handleNextEpisode}
         />
       </div>
 
       {/* NAVIGATION CONTROLS */}
-      <div className="space-y-4 animate-in fade-in duration-500">
+      <div className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-4">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
@@ -110,35 +194,40 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
                 </SelectContent>
               </Select>
               <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
-                {episodes?.length || 0} Chapters
+                {episodes?.length || 0} Episodes
               </span>
             </div>
           </div>
 
           <div className="flex items-center p-1 gap-1 bg-zinc-900 border border-white/10 rounded-full">
             {[
-              { id: 'list', icon: List, label: 'Digest' },
-              { id: 'grid', icon: LayoutDashboard, label: 'Archive' },
-              { id: 'carousel', icon: GalleryVerticalEnd, label: 'Binge' },
+              { id: 'list', icon: List, label: 'List View', tooltip: 'Compact list with episode details' },
+              { id: 'grid', icon: LayoutDashboard, label: 'Grid View', tooltip: 'Visual grid with thumbnails' },
+              { id: 'carousel', icon: GalleryVerticalEnd, label: 'Carousel', tooltip: 'Swipeable horizontal view' },
             ].map((v) => (
               <Button
                 key={v.id}
                 variant="ghost"
                 onClick={() => setView(v.id as any)}
                 className={cn(
-                  'h-8 px-4 rounded-full transition-all text-[10px] font-black uppercase tracking-wider',
+                  'h-8 px-3 md:px-4 rounded-full transition-all text-[10px] font-black uppercase tracking-wider relative group',
                   view === v.id ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'
                 )}
+                title={v.tooltip}
               >
-                <v.icon className="w-3 h-3 mr-2" />
-                {v.label}
+                <v.icon className="w-3 h-3 md:mr-2" />
+                <span className="hidden md:inline">{v.label}</span>
+                {/* Tooltip */}
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-[9px] font-medium text-white bg-zinc-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-white/10">
+                  {v.tooltip}
+                </span>
               </Button>
             ))}
           </div>
         </div>
 
         {/* CONTENT RENDERER */}
-        <div className={cn("min-h-[400px]", isLoading && "opacity-50 pointer-events-none")}>
+        <div className={cn(isLoading ? "opacity-50 pointer-events-none min-h-[400px]" : "")}>
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -148,14 +237,24 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
               {view === 'grid' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {episodes?.map((ep: any) => (
-                    <EpisodeCard key={ep.id} episode={ep} active={activeEP?.id === ep.id} toggle={onEpisodeClick} />
+                    <div
+                      key={ep.id}
+                      ref={activeEP?.id === ep.id ? activeEpisodeRef : null}
+                    >
+                      <EpisodeCard episode={ep} active={activeEP?.id === ep.id} toggle={onEpisodeClick} />
+                    </div>
                   ))}
                 </div>
               )}
               {view === 'list' && (
                 <div className="flex flex-col gap-3">
                   {episodes?.map((ep: any) => (
-                    <EpisodeListRow key={ep.id} episode={ep} active={activeEP?.id === ep.id} toggle={onEpisodeClick} />
+                    <div
+                      key={ep.id}
+                      ref={activeEP?.id === ep.id ? activeEpisodeRef : null}
+                    >
+                      <EpisodeListRow episode={ep} active={activeEP?.id === ep.id} toggle={onEpisodeClick} />
+                    </div>
                   ))}
                 </div>
               )}
@@ -164,7 +263,9 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
                   <CarouselContent className="-ml-2 py-2">
                     {episodes?.map((ep: any) => (
                       <CarouselItem key={ep.id} className="pl-4 basis-[85%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/3">
-                        <EpisodeCard episode={ep} active={activeEP?.id === ep.id} toggle={onEpisodeClick} />
+                        <div ref={activeEP?.id === ep.id ? activeEpisodeRef : null}>
+                          <EpisodeCard episode={ep} active={activeEP?.id === ep.id} toggle={onEpisodeClick} />
+                        </div>
                       </CarouselItem>
                     ))}
                   </CarouselContent>

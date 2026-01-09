@@ -1,5 +1,6 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import ShowContainer from './show-container';
 import MoreDetailsContainer from './more-details-container';
 import ShowDetails from './show-details';
@@ -11,6 +12,13 @@ import { cn } from '@/lib/utils';
 const MediaDetails = (props: any) => {
 	const { data, type, id } = props;
 	const mediaId = id || data?.id?.toString();
+	const pathname = usePathname();
+
+	// Scroll to top when navigating to details page
+	useEffect(() => {
+		// Smooth scroll to top, but not aggressive
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}, [pathname]);
 
 	return (
 		<div className="w-full">

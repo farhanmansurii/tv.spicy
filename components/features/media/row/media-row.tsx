@@ -142,7 +142,7 @@ export default function MediaRow({
             className="text-lg md:text-xl font-bold tracking-tight text-white/90"
           />
           {headerAction && (
-            <div className="flex items-center animate-in fade-in slide-in-from-right-2 duration-500">
+            <div className="flex items-center transition-all duration-300 ease-out" style={{ willChange: 'opacity, transform' }}>
               {headerAction}
             </div>
           )}

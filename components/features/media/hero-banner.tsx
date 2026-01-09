@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { Star, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,10 @@ import ContinueWatchingButton from '../watchlist/continue-watching-button';
 export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager' }: any) {
     const isMobile = useMediaQuery();
     const { activeEP } = useEpisodeStore();
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [shouldAnimate, setShouldAnimate] = useState(false);
+    const imageRef = useRef<HTMLImageElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const title = show.title || show.name || 'Untitled';
     const releaseYear = (show.first_air_date || show.release_date)
@@ -37,6 +41,28 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 
     const currentImage = isMobile ? poster : backdrop;
 
+    // Reset image loaded state when image changes
+    useEffect(() => {
+        setImageLoaded(false);
+        setShouldAnimate(false);
+    }, [currentImage]);
+
+    // Handle image load
+    const handleImageLoad = () => {
+        setImageLoaded(true);
+        // Small delay to ensure image is fully rendered before animating
+        setTimeout(() => {
+            setShouldAnimate(true);
+        }, 50);
+    };
+
+    // Check if image is already loaded (cached)
+    useEffect(() => {
+        if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) {
+            handleImageLoad();
+        }
+    }, [currentImage]);
+
     return (
         <section className={cn(
             "relative w-full overflow-hidden bg-zinc-950",
@@ -44,13 +70,17 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
         )}>
             <div className="absolute inset-0 z-0">
                 <img
+                    ref={imageRef}
                     key={currentImage}
                     src={tmdbImage(currentImage, 'original')}
                     alt=""
                     className={cn(
-                        "w-full h-full object-cover animate-in fade-in duration-1000",
+                        "w-full h-full object-cover transition-opacity duration-700 ease-out",
+                        imageLoaded ? "opacity-100" : "opacity-0",
                         isMobile ? "object-top" : "object-center"
                     )}
+                    style={{ willChange: 'opacity' }}
+                    onLoad={handleImageLoad}
                     loading={loading}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
@@ -59,7 +89,16 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 
             <div className="relative z-10 h-full flex flex-col justify-end">
                 <Container className="pb-10 md:pb-20">
-                    <div className="max-w-4xl flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                    <div
+                        ref={contentRef}
+                        className={cn(
+                            "max-w-4xl flex flex-col transition-all duration-500 ease-out",
+                            shouldAnimate
+                                ? "opacity-100 translate-y-0"
+                                : "opacity-0 translate-y-2"
+                        )}
+                        style={{ willChange: 'opacity, transform' }}
+                    >
 
                         <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-3 md:mb-5">
                             <Badge className="bg-white/10 text-white border-none backdrop-blur-xl px-2 py-0.5 uppercase text-[10px] font-black tracking-widest">

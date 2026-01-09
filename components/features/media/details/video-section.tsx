@@ -24,7 +24,7 @@ export default function VideoSection({ id, type }: { id: string; type: string })
     if (!videos.length) return null;
 
     return (
-        <div className="w-full space-y-8 animate-in fade-in duration-1000">
+        <div className="w-full space-y-8">
             <Tabs defaultValue="trailers" className="w-full">
                 <div className="space-y-2">
                     <CommonTitle text="Cinematic Media" variant="section" spacing="none" />

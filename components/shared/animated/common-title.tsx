@@ -53,7 +53,7 @@ export default function CommonTitle({
             </Component>
 
             {children && (
-                <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto animate-in fade-in duration-500">
+                <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto transition-opacity duration-300 ease-out" style={{ willChange: 'opacity' }}>
                     {children}
                 </div>
             )}

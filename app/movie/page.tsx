@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic';
 import Container from '@/components/shared/containers/container';
 import FetchAndRenderRow from '@/components/features/media/row/fetch-and-render-row';
 import RowLoader from '@/components/shared/loaders/row-loader';
+import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
 import { fetchGenres, fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
 import { Metadata } from 'next';
 import React, { Suspense } from 'react';
@@ -31,7 +32,7 @@ export default async function Page() {
 			<HeroCarousel shows={heroShows} type="movie" />
 			<Container>
 			<div className="flex flex-col space-y-4 md:space-y-6">
-					<Suspense fallback={null}>
+					<Suspense fallback={<WatchlistLoader />}>
 						<WatchList type="movie" />
 					</Suspense>
 

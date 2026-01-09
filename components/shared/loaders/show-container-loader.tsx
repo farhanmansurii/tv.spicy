@@ -5,43 +5,48 @@ import { Button } from '@/components/ui/button';
 
 export default function ShowContainerLoader() {
 	return (
-		<div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
-			<div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
-				<Skeleton className="h-10 w-[180px] rounded-2xl" />
+		<div className="w-full space-y-6">
+			<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-4">
+				<div className="space-y-4">
+					<div className="flex items-center gap-4">
+						<Skeleton className="h-10 w-40 rounded-xl" />
+						<Skeleton className="h-4 w-24" />
+					</div>
+				</div>
 
-				<div className="flex items-center p-1 gap-1 bg-white/5 border border-white/10 rounded-2xl">
+				<div className="flex items-center p-1 gap-1 bg-zinc-900 border border-white/10 rounded-full">
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 px-3 rounded-2xl bg-white/10 text-white"
+						className="h-8 px-4 rounded-full bg-white text-black"
 						disabled
 					>
-						<List className="w-4 h-4 mr-2 md:mr-0 lg:mr-2" />
-						<span className="hidden lg:inline">List</span>
+						<List className="w-3 h-3 mr-2" />
+						Digest
 					</Button>
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 px-3 rounded-2xl text-white/60"
+						className="h-8 px-4 rounded-full text-zinc-500"
 						disabled
 					>
-						<Grid className="w-4 h-4 mr-2 md:mr-0 lg:mr-2" />
-						<span className="hidden lg:inline">Grid</span>
+						<Grid className="w-3 h-3 mr-2" />
+						Archive
 					</Button>
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 px-3 rounded-2xl text-white/60"
+						className="h-8 px-4 rounded-full text-zinc-500"
 						disabled
 					>
-						<GalleryVerticalEnd className="w-4 h-4 mr-2 md:mr-0 lg:mr-2" />
-						<span className="hidden lg:inline">Deck</span>
+						<GalleryVerticalEnd className="w-3 h-3 mr-2" />
+						Binge
 					</Button>
 				</div>
 			</div>
 
 			{/* Episodes Grid Skeleton */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 min-h-[200px]">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
 				{Array.from({ length: 8 }).map((_, index) => (
 					<div
 						key={index}

@@ -26,18 +26,24 @@ export default function BlurFade({
 	variant,
 	duration = 0.4,
 	delay = 0,
-	yOffset = 0,
+	yOffset = 6,
 	inView = false,
 	inViewMargin = '-50px',
-	blur = '6px',
+	blur = '0px',
 }: BlurFadeProps) {
 	const ref = useRef(null);
 	const inViewResult = useInView(ref, { once: true, margin: inViewMargin });
 	const isInView = !inView || inViewResult;
 
 	const defaultVariants: Variants = {
-		hidden: { y: yOffset, opacity: 0, filter: `blur(${blur})` },
-		visible: { y: -yOffset, opacity: 1, filter: 'blur(0px)' },
+		hidden: {
+			opacity: 0,
+			y: yOffset,
+		},
+		visible: {
+			opacity: 1,
+			y: 0,
+		},
 	};
 
 	const combinedVariants = variant || defaultVariants;
@@ -49,9 +55,12 @@ export default function BlurFade({
 			animate={isInView ? 'visible' : 'hidden'}
 			variants={combinedVariants}
 			transition={{
-				delay: 0.04 + delay,
+				delay: delay,
 				duration,
-				ease: 'easeOut',
+				ease: [0.25, 0.4, 0.25, 1],
+			}}
+			style={{
+				willChange: 'opacity, transform',
 			}}
 			className={className}
 		>

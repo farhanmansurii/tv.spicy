@@ -33,7 +33,7 @@ export default function MediaCard({ index, show, isVertical, type, onClick }: an
           )}
         >
           {imageUrl ? (
-            <BlurFade key={imageUrl} delay={0.02 * (index % 8)} inView className="h-full w-full">
+            <BlurFade key={imageUrl} delay={0.015 * (index % 12)} inView duration={0.3} yOffset={4} className="h-full w-full">
               <img
                 src={imageUrl}
                 alt=""

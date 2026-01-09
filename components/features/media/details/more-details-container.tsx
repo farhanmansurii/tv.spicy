@@ -20,7 +20,7 @@ export default function MoreDetailsContainer({ show, type }: { show: Show | Anim
     const [selected, setSelected] = useState<TabType>(TABS[0]);
 
     return (
-        <div className="w-full animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out">
+        <div className="w-full">
             <div className="space-y-2 sm:space-y-3">
                 <CommonTitle text="Discovery" variant="section" spacing="none" />
                 <CommonTitle

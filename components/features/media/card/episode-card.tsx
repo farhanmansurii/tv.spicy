@@ -2,15 +2,17 @@
 'use client';
 
 import React from 'react';
-import { Play, ImageOff, Lock } from 'lucide-react';
+import { Play, ImageOff, Lock, Star, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 
-export const EpisodeCard = ({ episode, active, toggle }: any) => {
+export const EpisodeCard = ({ episode, active, toggle, watched }: any) => {
   if (!episode) return null;
 
   const isReleased = episode.air_date ? new Date(episode.air_date) <= new Date() : true;
   const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'original') : null;
+  const rating = episode.vote_average ? episode.vote_average.toFixed(1) : null;
+  const hasGoodRating = episode.vote_average && episode.vote_average >= 8.0;
 
   return (
     <div
@@ -64,6 +66,15 @@ export const EpisodeCard = ({ episode, active, toggle }: any) => {
               <span className="text-[10px] font-bold text-white/40 tabular-nums">
                 {episode.runtime}m
               </span>
+            )}
+            {rating && (
+              <div className={cn(
+                "flex items-center gap-0.5 text-[10px] font-bold tabular-nums opacity-0 group-hover:opacity-100 transition-opacity",
+                hasGoodRating ? "text-yellow-500" : "text-white/50"
+              )}>
+                <Star className={cn("w-2.5 h-2.5", hasGoodRating && "fill-current")} />
+                {rating}
+              </div>
             )}
           </div>
 

@@ -1,246 +1,206 @@
 'use client';
 
 import * as React from 'react';
+import gsap from 'gsap';
 import {
-	ArrowRightIcon,
-	Loader2,
-	Tv,
-	Film,
+	Search,
 	X,
-	Trash2,
 	Star,
-	TrendingUp,
-	Calendar,
-	MonitorPlay,
+	Film,
+	Clock,
+	ChevronRight,
+	Command as CmdIcon,
+	Loader2,
+	AlertCircle,
 } from 'lucide-react';
+import { debounce } from 'lodash';
+import { useQuery } from '@tanstack/react-query';
+
 import { cn } from '@/lib/utils';
 import { searchShows } from '@/lib/tmdb-fetch-helper';
-import { Button } from '@/components/ui/button';
+import { tmdbImage } from '@/lib/tmdb-image';
+import useSearchStore from '@/store/recentsSearchStore';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import {
 	Command,
-	CommandEmpty,
 	CommandGroup,
-	CommandInput,
 	CommandItem,
 	CommandList,
+	CommandInput,
 } from '@/components/ui/command';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog';
-import useSearchStore from '@/store/recentsSearchStore';
-import { useQuery } from '@tanstack/react-query';
-import { useCallback, useState, useEffect, useMemo } from 'react';
-import { debounce } from 'lodash';
-import Link from 'next/link';
-import { tmdbImage } from '@/lib/tmdb-image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
-// --- Types ---
-type FilterType = 'all' | 'movie' | 'tv';
-type SortType = 'popularity' | 'rating' | 'newest';
+const APPLE_FLUID = 'expo.out';
 
 export function SearchCommandBox() {
-	const [open, setOpen] = useState(false);
-	const [query, setQuery] = useState('');
-	const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-	const [activeSort, setActiveSort] = useState<SortType>('popularity');
+	const [open, setOpen] = React.useState(false);
+	const [inputValue, setInputValue] = React.useState('');
+	const [debouncedQuery, setDebouncedQuery] = React.useState('');
+	const [filter, setFilter] = React.useState<'all' | 'movie' | 'tv'>('all');
+	const [showLoader, setShowLoader] = React.useState(false);
 
-	const {
-		recentlySearched,
-		addToRecentlySearched,
-		removeFromRecentlySearched,
-		clearRecentlySearched,
-	} = useSearchStore();
+	const containerRef = React.useRef<HTMLDivElement>(null);
+	const inputRef = React.useRef<HTMLInputElement>(null);
+	const animationRef = React.useRef<gsap.core.Tween | null>(null);
+	const prevResultsLengthRef = React.useRef(0);
+	const loaderTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+	const { recentlySearched, removeFromRecentlySearched } = useSearchStore();
 
-	useEffect(() => {
-		const down = (e: KeyboardEvent) => {
-			if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-				e.preventDefault();
-				setOpen((open) => !open);
-			}
-		};
-		document.addEventListener('keydown', down);
-		return () => document.removeEventListener('keydown', down);
-	}, []);
-
-	useEffect(() => {
-		if (open) {
-			// Focus input after dialog opens (without causing scroll)
-			const timer = setTimeout(() => {
-				const input = document.querySelector('[cmdk-input]') as HTMLInputElement;
-				if (input) {
-					input.focus({ preventScroll: true });
-				}
-			}, 100);
-			return () => clearTimeout(timer);
-		} else {
-			// Reset state after dialog closes
-			setTimeout(() => {
-				setQuery('');
-				setActiveFilter('all');
-				setActiveSort('popularity');
-			}, 300);
-		}
-	}, [open]);
-
-	const {
-		data: rawResults,
-		isFetching,
-		error,
-	} = useQuery({
-		queryKey: ['search', query, 'multi'],
-		queryFn: () => searchShows(query),
-		enabled: query.trim().length > 0,
-		staleTime: 1000 * 60 * 5,
-	});
-
-	const processedResults = useMemo(() => {
-		if (!rawResults?.results) return [];
-		let filtered = rawResults.results.filter(
-			(item: any) => item.media_type === 'tv' || item.media_type === 'movie'
-		);
-
-		if (activeFilter !== 'all') {
-			filtered = filtered.filter((item: any) => item.media_type === activeFilter);
-		}
-
-		return filtered.sort((a: any, b: any) => {
-			switch (activeSort) {
-				case 'rating':
-					return (b.vote_average || 0) - (a.vote_average || 0);
-				case 'newest':
-					return (
-						new Date(b.release_date || b.first_air_date || 0).getTime() -
-						new Date(a.release_date || a.first_air_date || 0).getTime()
-					);
-				default:
-					return (b.popularity || 0) - (a.popularity || 0);
-			}
-		});
-	}, [rawResults, activeFilter, activeSort]);
-
-	const debouncedSearch = useCallback(
-		debounce((value: string) => setQuery(value), 400),
+	const debouncedSetQuery = React.useMemo(
+		() => debounce((v: string) => setDebouncedQuery(v), 500),
 		[]
 	);
 
-	const handleSelectShow = (item: any) => {
-		addToRecentlySearched(item);
-		setOpen(false);
-	};
+	React.useEffect(() => {
+		if (open && inputRef.current) {
+			setTimeout(() => {
+				inputRef.current?.focus();
+			}, 100);
+		} else if (!open) {
+			setInputValue('');
+			setDebouncedQuery('');
+			setFilter('all');
+			setShowLoader(false);
+			debouncedSetQuery.cancel();
+			if (animationRef.current) {
+				animationRef.current.kill();
+				animationRef.current = null;
+			}
+			if (loaderTimeoutRef.current) {
+				clearTimeout(loaderTimeoutRef.current);
+				loaderTimeoutRef.current = null;
+			}
+			prevResultsLengthRef.current = 0;
+		}
+	}, [open, debouncedSetQuery]);
 
-	const removeItem = (e: React.MouseEvent, id: number | string) => {
-		e.stopPropagation();
-		removeFromRecentlySearched(id);
-	};
-
-	const getFormattedDate = (item: any) => {
-		const dateString = item.releaseDate || item.first_air_date || item.release_date;
-		return dateString ? new Date(dateString).getFullYear() : '';
-	};
-
-	const renderItem = (item: any, isRecent = false) => {
-		const show = {
-			id: item.id,
-			title: item.name || item.title || item.title?.english || 'Unknown Title',
-			type: item.media_type || 'anime',
-			date: getFormattedDate(item),
-			image: item.poster_path || item.coverImage?.medium || item.coverImage?.large,
-			rating: item.vote_average ? item.vote_average.toFixed(1) : null,
-			overview: item.overview || '',
+	React.useEffect(() => {
+		return () => {
+			if (animationRef.current) {
+				animationRef.current.kill();
+			}
+			debouncedSetQuery.cancel();
 		};
+	}, [debouncedSetQuery]);
 
-		return (
-			<CommandItem
-				key={`${isRecent ? 'recent' : 'search'}-${show.type}-${show.id}`}
-				onSelect={() => handleSelectShow(item)}
-				value={show.title}
-				className="group relative flex items-start gap-4 rounded-card md:rounded-card-md p-2 cursor-pointer transition-all duration-300 aria-selected:bg-white/10 aria-selected:shadow-2xl aria-selected:scale-[1.01] border border-transparent aria-selected:border-white/5 my-1 select-none"
-			>
-				<Link
-					href={`/${show.type}/${show.id}`}
-					className="flex items-start gap-4 w-full"
-					onClick={(e) => {
-						e.preventDefault();
-						setOpen(false);
-						setTimeout(() => {
-							window.location.href = `/${show.type}/${show.id}`;
-						}, 100);
-					}}
-				>
-					{/* Glass Poster Container - Aspect Ratio 2:3 */}
-					<div className="relative aspect-[2/3] w-12 shrink-0 overflow-hidden rounded-ui bg-white/5 shadow-inner ring-1 ring-white/10 group-aria-selected:ring-white/30 transition-all">
-						{show.image ? (
-							<img
-								src={tmdbImage(show.image, 'w92')}
-								alt={show.title}
-								className="h-full w-full object-cover transition-transform duration-500 group-aria-selected:scale-110"
-							/>
-						) : (
-							<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-white/5 to-white/0">
-								{show.type === 'tv' ? (
-									<Tv size={16} className="text-white/20" />
-								) : (
-									<Film size={16} className="text-white/20" />
-								)}
-							</div>
-						)}
-						<div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-transparent opacity-0 group-aria-selected:opacity-100 transition-opacity pointer-events-none" />
-					</div>
+	const { data, isFetching, isError } = useQuery({
+		queryKey: ['search', debouncedQuery],
+		queryFn: () => searchShows(debouncedQuery),
+		enabled: debouncedQuery.length > 1,
+		placeholderData: (previousData) => previousData,
+		staleTime: 5000,
+	});
 
-					<div className="flex flex-col flex-1 min-w-0 pt-0.5 gap-0.5">
-						<div className="flex items-center justify-between">
-							<span className="truncate font-medium text-sm text-white/90 group-aria-selected:text-white transition-colors">
-								{show.title}
-							</span>
-							{isRecent && (
-								<Button
-									variant="ghost"
-									size="icon"
-									className="h-6 w-6 -mr-2 text-white/20 hover:text-red-400 hover:bg-transparent transition-colors z-10"
-									onClick={(e) => removeItem(e, show.id)}
-								>
-									<X className="h-3.5 w-3.5" />
-								</Button>
-							)}
-						</div>
+	const isSearching = isFetching && debouncedQuery !== '';
 
-						<div className="flex items-center gap-2 text-xs text-white/40 group-aria-selected:text-white/60">
-							<span className="capitalize text-[10px] font-medium tracking-wide border border-white/10 px-1 rounded bg-white/5">
-								{show.type === 'movie' ? 'Movie' : 'TV'}
-							</span>
-							{show.date && <span>{show.date}</span>}
-							{show.rating && (
-								<div className="flex items-center gap-1 text-yellow-500/80">
-									<Star className="w-2.5 h-2.5 fill-current" />
-									<span>{show.rating}</span>
-								</div>
-							)}
-						</div>
+	React.useEffect(() => {
+		if (loaderTimeoutRef.current) {
+			clearTimeout(loaderTimeoutRef.current);
+			loaderTimeoutRef.current = null;
+		}
 
-						{!isRecent && show.overview && (
-							<p className="text-[10px] text-white/30 line-clamp-1 mt-1 font-light pr-4 group-aria-selected:text-white/50">
-								{show.overview}
-							</p>
-						)}
-					</div>
+		if (isSearching) {
+			loaderTimeoutRef.current = setTimeout(() => {
+				setShowLoader(true);
+			}, 300);
+		} else {
+			if (showLoader) {
+				loaderTimeoutRef.current = setTimeout(() => {
+					setShowLoader(false);
+				}, 200);
+			} else {
+				setShowLoader(false);
+			}
+		}
 
-					{!isRecent && (
-						<ArrowRightIcon className="self-center w-4 h-4 text-white/0 -translate-x-2 transition-all duration-300 group-aria-selected:opacity-50 group-aria-selected:translate-x-0 group-aria-selected:text-white" />
-					)}
-				</Link>
-			</CommandItem>
-		);
+		return () => {
+			if (loaderTimeoutRef.current) {
+				clearTimeout(loaderTimeoutRef.current);
+			}
+		};
+	}, [isSearching, showLoader]);
+
+	const results = React.useMemo(() => {
+		const raw = (data?.results as any[]) || [];
+		return raw.filter((i) => filter === 'all' || i.media_type === filter).slice(0, 8);
+	}, [data, filter]);
+
+	React.useLayoutEffect(() => {
+		if (!containerRef.current || !open) return;
+
+		const hasResults = results.length > 0;
+		const hasRecentSearches = !debouncedQuery && recentlySearched.length > 0;
+		const hasContent = hasResults || hasRecentSearches || isSearching;
+		const currentResultsLength =
+			results.length + (debouncedQuery ? 0 : recentlySearched.length);
+		const shouldAnimate = currentResultsLength !== prevResultsLengthRef.current && hasContent;
+		prevResultsLengthRef.current = currentResultsLength;
+
+		if (animationRef.current) {
+			animationRef.current.kill();
+			animationRef.current = null;
+		}
+
+		if (shouldAnimate && hasContent) {
+			const startHeight = containerRef.current.offsetHeight;
+			gsap.set(containerRef.current, { height: 'auto' });
+			const endHeight = containerRef.current.offsetHeight;
+			gsap.set(containerRef.current, { height: startHeight });
+
+			requestAnimationFrame(() => {
+				if (containerRef.current) {
+					animationRef.current = gsap.to(containerRef.current, {
+						height: endHeight,
+						duration: 0.4,
+						ease: APPLE_FLUID,
+						overwrite: true,
+						onComplete: () => {
+							if (containerRef.current) {
+								gsap.set(containerRef.current, { clearProps: 'height' });
+							}
+							animationRef.current = null;
+						},
+					});
+				}
+			});
+		} else if (!hasContent) {
+			gsap.set(containerRef.current, { clearProps: 'height' });
+		}
+
+		const items = containerRef.current.querySelectorAll('.search-item-anim:not(.animated)');
+		if (items.length > 0) {
+			items.forEach((item) => item.classList.add('animated'));
+			gsap.fromTo(
+				items,
+				{ opacity: 0, y: 8, filter: 'blur(4px)', scale: 0.99 },
+				{
+					opacity: 1,
+					y: 0,
+					filter: 'blur(0px)',
+					scale: 1,
+					duration: 0.3,
+					stagger: 0.02,
+					ease: 'power2.out',
+					clearProps: 'all',
+				}
+			);
+		}
+	}, [results.length, recentlySearched.length, debouncedQuery, open, isSearching]);
+
+	const handleInputChange = (v: string) => {
+		setInputValue(v);
+		if (v.length === 0) {
+			setDebouncedQuery('');
+			debouncedSetQuery.cancel();
+		} else {
+			debouncedSetQuery(v);
+		}
 	};
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button
+			<Button
 					variant="outline"
 					size="icon"
 					className={cn(
@@ -250,212 +210,216 @@ export function SearchCommandBox() {
 						'lg:relative lg:h-10 lg:w-64 lg:justify-start lg:gap-2 lg:rounded-card md:lg:rounded-card-md lg:px-4 lg:font-normal lg:shadow-sm lg:backdrop-blur-md'
 					)}
 				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="2"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						className="size-4 opacity-50"
-					>
-						<circle cx="11" cy="11" r="8" />
-						<path d="m21 21-4.3-4.3" />
-					</svg>
+					<Search className="w-5 h-5" />
 					<span className="hidden lg:inline-flex">Search...</span>
 					<kbd className="pointer-events-none absolute right-2 hidden h-5 select-none items-center gap-1 rounded border border-white/10 bg-black/20 px-1.5 font-mono text-[10px] font-medium opacity-50 lg:flex">
 						<span className="text-xs">⌘</span>K
 					</kbd>
 				</Button>
 			</DialogTrigger>
-
-			<DialogContent className="p-0 overflow-hidden bg-transparent border-none shadow-none max-w-xl w-full">
-				<DialogHeader className="sr-only">
-					<DialogTitle>Search</DialogTitle>
-				</DialogHeader>
-
-				<Command
-					className="w-full bg-black/60 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-dialog md:rounded-dialog-md overflow-hidden ring-1 ring-white/5"
-					shouldFilter={false}
+			<DialogContent className="p-0 border-none bg-transparent max-w-2xl top-[15%] translate-y-0 shadow-none outline-none overflow-visible">
+				<div
+					ref={containerRef}
+					className="bg-[#0C0C0C]/80 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,1)] flex flex-col will-change-[height]"
 				>
-					<CommandInput
-						placeholder="Movies, shows, anime..."
-						onValueChange={(v) => debouncedSearch(v)}
-						autoFocus={false}
-					/>
-					<div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-white/[0.02]">
-						<div className="flex items-center p-0.5 bg-black/20 rounded-ui md:rounded-ui-md border border-white/5">
-							{(['all', 'movie', 'tv'] as FilterType[]).map((tab) => (
-								<button
-									key={tab}
-									onClick={() => setActiveFilter(tab)}
+					<Command shouldFilter={false} className="bg-transparent h-auto">
+						<div className="flex items-center px-4 h-20 border-b border-white/5 shrink-0 gap-2">
+							<div className="relative w-6 h-6 shrink-0 flex items-center justify-center">
+								<Search
 									className={cn(
-										'relative px-3 py-1 text-[10px] font-medium transition-colors rounded-ui min-w-[50px] z-10',
-										activeFilter === tab
-											? 'text-white'
-											: 'text-white/40 hover:text-white/70'
+										'absolute w-5 h-5 transition-all duration-300 pointer-events-none',
+										isSearching
+											? 'opacity-0 scale-50'
+											: 'opacity-100 scale-100 text-white/20'
+									)}
+								/>
+								<Loader2
+									className={cn(
+										'absolute w-6 h-6 animate-spin transition-all duration-300 pointer-events-none',
+										isSearching
+											? 'opacity-100 scale-100 text-blue-500'
+											: 'opacity-0 scale-50'
+									)}
+								/>
+							</div>
+							<CommandInput
+								ref={inputRef}
+								placeholder="Search movies, TV shows..."
+								value={inputValue}
+								onValueChange={handleInputChange}
+								className="flex-1 min-w-0 bg-transparent border-none focus:ring-0 text-xl h-full placeholder:text-white/5 text-white/90"
+							/>
+							{inputValue && (
+								<div className="flex pr-10 items-center gap-3 animate-in fade-in zoom-in duration-300">
+									{/* Visual Separator - very Apple */}
+									<div className="w-[1px] h-6 bg-white/5" />
+
+									<button
+										onClick={() => handleInputChange('')}
+										className="group/clear relative p-2 flex items-center gap-2 hover:bg-white/10 rounded-full transition-all active:scale-95"
+										title="Clear search"
+									>
+										<span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+											Clear
+										</span>
+										{/* Subtle outer ring on hover */}
+										<span className="absolute inset-0 rounded-full border border-white/0 group-hover/clear:border-white/10 transition-all" />
+									</button>
+								</div>
+							)}
+						</div>
+						<div className="flex gap-2 p-3 bg-white/[0.02] border-b border-white/5">
+							{(['all', 'movie', 'tv'] as const).map((t) => (
+								<button
+									key={t}
+									onClick={() => setFilter(t)}
+									className={cn(
+										'px-4 py-1.5 text-[10px] font-bold rounded-full transition-all uppercase tracking-widest',
+										filter === t
+											? 'text-white bg-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]'
+											: 'text-white/30 hover:text-white/50'
 									)}
 								>
-									{activeFilter === tab && (
-										<motion.div
-											{...({ layoutId: 'active-pill' } as any)}
-											className="absolute inset-0 bg-white/10 rounded-[4px] -z-10 border border-white/5 shadow-sm"
-											transition={{
-												type: 'spring',
-												stiffness: 400,
-												damping: 30,
-											}}
-										/>
-									)}
-									{tab === 'all' ? 'All' : tab === 'movie' ? 'Movies' : 'TV'}
+									{t === 'all'
+										? 'Everything'
+										: t === 'movie'
+											? 'Movies'
+											: 'TV Shows'}
 								</button>
 							))}
 						</div>
-						<div className="flex items-center gap-1">
-							{[
-								{ id: 'popularity', icon: TrendingUp, label: 'Popular' },
-								{ id: 'rating', icon: Star, label: 'Top Rated' },
-								{ id: 'newest', icon: Calendar, label: 'Newest' },
-							].map((sort) => (
-								<button
-									key={sort.id}
-									onClick={() => setActiveSort(sort.id as SortType)}
-									title={sort.label}
-									className={cn(
-										'p-1.5 rounded-ui transition-all',
-										activeSort === sort.id
-											? 'bg-white/10 text-white shadow-sm'
-											: 'text-white/20 hover:text-white/60'
-									)}
+						<CommandList className="max-h-[480px] overflow-y-auto px-3 pb-3 custom-scrollbar min-h-[120px]">
+							{isError && (
+								<div className="py-20 flex flex-col items-center text-red-400/50">
+									<AlertCircle className="w-8 h-8 mb-2" />
+									<span className="text-[10px] font-bold uppercase tracking-widest">
+										Network Error
+									</span>
+								</div>
+							)}
+							{!debouncedQuery && !isSearching && (
+								<CommandGroup
+									heading={
+										<span className="px-3 py-3 text-[10px] font-bold text-white/10 uppercase tracking-[0.2em]">
+											Recently Viewed
+										</span>
+									}
 								>
-									<sort.icon className="w-3.5 h-3.5" />
-								</button>
-							))}
-						</div>
-					</div>
-
-					<div className="min-h-[350px] relative">
-						<CommandList className="max-h-[55vh] overflow-y-auto p-2 scrollbar-none">
-							{isFetching && (
-								<div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/30 bg-black/40 backdrop-blur-[2px] z-20">
-									<Loader2 className="w-8 h-8 animate-spin text-white/50" />
-									<p className="text-[10px] font-medium uppercase tracking-widest">
-										Searching Multiverse...
-									</p>
-								</div>
-							)}
-
-							{error && (
-								<div className="py-20 text-center text-red-400/80 flex flex-col items-center gap-2">
-									<X className="w-10 h-10 opacity-20" />
-									<p className="text-sm">Network error.</p>
-								</div>
-							)}
-
-							{!isFetching && !error && (
-								<>
-									{/* Empty State: Initial */}
-									{!query && recentlySearched.length === 0 && (
-										<div className="py-20 flex flex-col items-center justify-center text-center opacity-100">
-											<div className="h-16 w-16 rounded-card md:rounded-card-md bg-gradient-to-tr from-white/10 to-transparent border border-white/5 flex items-center justify-center mb-4 shadow-2xl shadow-indigo-500/10">
-												<MonitorPlay className="w-8 h-8 text-white/30" />
-											</div>
-											<h3 className="text-base font-medium text-white/90">
-												What to watch?
-											</h3>
-											<p className="text-xs text-white/40 mt-1 max-w-[200px]">
-												Search for movies, TV shows, and anime.
-											</p>
+									{recentlySearched.length > 0 ? (
+										recentlySearched.map((item: any) => (
+											<ResultItem
+												key={`recent-${item.id}`}
+												item={item}
+												isRecent
+												onRemove={() => removeFromRecentlySearched(item.id)}
+											/>
+										))
+									) : (
+										<div className="py-10 text-center text-white/5 text-xs italic">
+											No recent searches
 										</div>
 									)}
-
-									{!query && recentlySearched.length > 0 && (
+								</CommandGroup>
+							)}
+							{debouncedQuery && !isError && (
+								<>
+									{showLoader ? (
+										<div className="py-20 flex flex-col items-center justify-center min-h-[120px]">
+											<Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-3" />
+											<span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+												Searching...
+											</span>
+										</div>
+									) : results.length > 0 ? (
 										<CommandGroup
 											heading={
-												<div className="flex items-center justify-between px-1">
-													<span>Recent</span>
-													<button
-														onClick={clearRecentlySearched}
-														className="flex items-center gap-1 text-[9px] text-white/20 hover:text-red-300 transition-colors uppercase tracking-wider font-bold"
-													>
-														<Trash2 className="w-2.5 h-2.5" /> Clear
-													</button>
-												</div>
+												<span className="px-3 py-3 text-[10px] font-bold text-white/10 uppercase tracking-[0.2em]">
+													Matches
+												</span>
 											}
 										>
-											{recentlySearched.map((item: any) =>
-												renderItem(item, true)
-											)}
+											{results.map((item: any) => (
+												<ResultItem key={item.id} item={item} />
+											))}
 										</CommandGroup>
-									)}
-
-									{query && processedResults.length === 0 && (
-										<CommandEmpty className="py-12 text-center text-white/40 flex flex-col items-center gap-3">
-											<div className="p-3 rounded-full bg-white/5 border border-white/5">
-												<X className="w-5 h-5 opacity-50" />
-											</div>
-											<span>
-												No results found for &quot;
-												<span className="text-white/70">{query}</span>&quot;
+									) : (
+										<div className="py-20 text-center text-white/20 text-sm min-h-[120px] flex items-center justify-center">
+											No results found for{' '}
+											<span className="text-white/50">
+												"{debouncedQuery}"
 											</span>
-										</CommandEmpty>
-									)}
-
-									{query && processedResults.length > 0 && (
-										<CommandGroup
-											heading={`Results (${processedResults.length})`}
-										>
-											<AnimatePresence mode="popLayout">
-												{processedResults.map((item: any) => (
-													<motion.div
-														key={item.id}
-														layout
-														initial={{ opacity: 0, scale: 0.98 }}
-														animate={{ opacity: 1, scale: 1 }}
-														exit={{ opacity: 0, scale: 0.98 }}
-														transition={{ duration: 0.2 }}
-													>
-														{renderItem(item)}
-													</motion.div>
-												))}
-											</AnimatePresence>
-										</CommandGroup>
+										</div>
 									)}
 								</>
 							)}
 						</CommandList>
-					</div>
-					<div className="border-t border-white/5 bg-white/[0.02] px-4 py-2.5 flex justify-between items-center z-10">
-						<div className="flex gap-3 text-[10px] text-white/30 font-medium">
-							<span className="flex items-center gap-1">
-								<kbd className="bg-white/5 border border-white/10 px-1 rounded font-sans text-white/50 min-w-[18px] text-center">
-									↑↓
-								</kbd>{' '}
-								Select
-							</span>
-							<span className="flex items-center gap-1">
-								<kbd className="bg-white/5 border border-white/10 px-1 rounded font-sans text-white/50 min-w-[18px] text-center">
-									↵
-								</kbd>{' '}
-								Open
-							</span>
+
+						<div className="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-black/20 text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">
+							<div className="flex gap-4">
+								<span className="flex items-center gap-1.5">
+									<CmdIcon className="w-3 h-3" /> Select
+								</span>
+								<span className="flex items-center gap-1.5">
+									<ChevronRight className="w-3 h-3 rotate-90" /> Navigate
+								</span>
+							</div>
+							<span>Powered by TMDB</span>
 						</div>
-						{query && (
-							<Link
-								href={`/search?q=${query}`}
-								className="text-[10px] text-white/40 hover:text-white transition-colors flex items-center gap-1 group"
-								onClick={() => setOpen(false)}
-							>
-								See all results{' '}
-								<ArrowRightIcon className="w-2.5 h-2.5 group-hover:translate-x-0.5 transition-transform" />
-							</Link>
-						)}
-					</div>
-				</Command>
+					</Command>
+				</div>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+function ResultItem({ item, isRecent, onRemove }: any) {
+	const year = (item.release_date || item.first_air_date || '').split('-')[0];
+	return (
+		<div className="search-item-anim">
+			<CommandItem className="flex items-center gap-4 p-2.5 rounded-xl cursor-pointer transition-all aria-selected:bg-white/10 group mx-1 mb-1 outline-none">
+				<div className="h-12 w-9 rounded-md bg-white/5 border border-white/10 overflow-hidden relative shadow-2xl">
+					{item.poster_path ? (
+						<img
+							src={tmdbImage(item.poster_path, 'w92')}
+							className="h-full w-full object-cover"
+							alt=""
+						/>
+					) : (
+						<div className="h-full w-full flex items-center justify-center opacity-10">
+							<Film className="w-4 h-4" />
+						</div>
+					)}
+				</div>
+				<div className="flex flex-col flex-1 min-w-0">
+					<div className="flex items-center justify-between gap-2">
+						<span className="text-sm font-semibold text-white/80 group-aria-selected:text-white truncate">
+							{item.title || item.name}
+						</span>
+						{isRecent && (
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+									onRemove();
+								}}
+								className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all"
+							>
+								<X className="w-3 h-3" />
+							</button>
+						)}
+					</div>
+					<div className="flex items-center gap-2 mt-0.5 text-[10px] font-bold text-white/20">
+						<span>{item.media_type?.toUpperCase() || 'INFO'}</span>
+						<span className="w-0.5 h-0.5 rounded-full bg-white/10" />
+						<span>{year || 'N/A'}</span>
+						{item.vote_average > 0 && (
+							<div className="flex items-center gap-1 text-yellow-500/40 ml-auto">
+								<Star className="w-2.5 h-2.5 fill-current" />
+								<span>{item.vote_average.toFixed(1)}</span>
+							</div>
+						)}
+					</div>
+				</div>
+			</CommandItem>
+		</div>
 	);
 }

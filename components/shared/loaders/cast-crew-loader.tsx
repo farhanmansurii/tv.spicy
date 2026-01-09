@@ -12,12 +12,14 @@ import CommonTitle from '@/components/shared/animated/common-title';
 
 export default function CastCrewLoader() {
 	return (
-		<div className="w-full space-y-10 animate-in fade-in duration-1000">
+		<div className="w-full space-y-10">
 			{/* Cast Section */}
 			<div>
 				<CommonTitle text="The Ensemble" variant="section" spacing="none" />
 				<CommonTitle text="Leading Cast" variant="small" spacing="medium">
-					<Skeleton className="h-3 w-24 inline-block" />
+					<span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest tabular-nums">
+						Loading...
+					</span>
 				</CommonTitle>
 
 				<Carousel opts={{ align: 'start', dragFree: true }} className="w-full group/row relative">

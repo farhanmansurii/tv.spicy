@@ -5,17 +5,17 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function VideoLoader() {
 	return (
-		<div className="w-full space-y-8 animate-in fade-in duration-1000">
+		<div className="w-full space-y-8">
 			<Tabs defaultValue="trailers" className="w-full">
 				<div className="space-y-2">
 					<CommonTitle text="Cinematic Media" variant="section" spacing="none" />
 					<CommonTitle text="Trailers & Extras" variant="small" spacing="medium">
 						<TabsList className="bg-white/[0.03] border border-white/5 rounded-full p-1 h-auto backdrop-blur-xl">
-							<TabsTrigger value="trailers" className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-								<Skeleton className="h-4 w-20" />
+							<TabsTrigger value="trailers" className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">
+								Trailers (0)
 							</TabsTrigger>
-							<TabsTrigger value="teasers" className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-								<Skeleton className="h-4 w-20" />
+							<TabsTrigger value="teasers" className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">
+								Teasers (0)
 							</TabsTrigger>
 						</TabsList>
 					</CommonTitle>

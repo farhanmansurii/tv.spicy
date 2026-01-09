@@ -2,15 +2,17 @@
 'use client';
 
 import React from 'react';
-import { Play, ImageOff, Lock } from 'lucide-react';
+import { Play, ImageOff, Lock, Star, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 
-export const EpisodeListRow = ({ episode, active, toggle }: any) => {
+export const EpisodeListRow = ({ episode, active, toggle, watched }: any) => {
   if (!episode) return null;
 
   const isReleased = episode.air_date ? new Date(episode.air_date) <= new Date() : true;
   const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w500') : null;
+  const rating = episode.vote_average ? episode.vote_average.toFixed(1) : null;
+  const hasGoodRating = episode.vote_average && episode.vote_average >= 8.0;
 
   return (
     <div
@@ -18,8 +20,8 @@ export const EpisodeListRow = ({ episode, active, toggle }: any) => {
       className={cn(
         'group relative flex items-center gap-4 md:gap-6 p-2 md:p-2.5 transition-all duration-500 rounded-xl select-none',
         active
-          ? 'bg-white/[0.06] shadow-sm'
-          : 'hover:bg-white/[0.03] cursor-pointer',
+          ? 'bg-primary/10 border border-primary/30 shadow-lg shadow-primary/10'
+          : 'hover:bg-white/[0.03] cursor-pointer border border-transparent',
         !isReleased && 'opacity-40 cursor-not-allowed'
       )}
     >
@@ -67,7 +69,7 @@ export const EpisodeListRow = ({ episode, active, toggle }: any) => {
         <div className="flex items-center gap-2">
           <span className={cn(
             "text-[10px] font-bold tracking-widest uppercase",
-            active ? "text-white" : "text-zinc-500"
+            active ? "text-primary" : "text-zinc-500"
           )}>
             EP {episode.episode_number}
           </span>
@@ -76,11 +78,20 @@ export const EpisodeListRow = ({ episode, active, toggle }: any) => {
                 {episode.runtime} MIN
             </span>
           )}
+          {rating && (
+            <div className={cn(
+              "flex items-center gap-0.5 text-[10px] font-bold tabular-nums opacity-70",
+              hasGoodRating ? "text-yellow-500" : "text-white/50"
+            )}>
+              <Star className={cn("w-2.5 h-2.5", hasGoodRating && "fill-current")} />
+              {rating}
+            </div>
+          )}
         </div>
 
         <h4 className={cn(
           "text-sm md:text-base font-semibold truncate transition-colors",
-          active ? "text-white" : "text-zinc-200 group-hover:text-white"
+          active ? "text-white font-bold" : "text-zinc-200 group-hover:text-white"
         )}>
           {episode.name || `Episode ${episode.episode_number}`}
         </h4>

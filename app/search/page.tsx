@@ -160,7 +160,7 @@ export default function SearchPageClient() {
                     {isLoading ? (
                         <GridLoader />
                     ) : results.length > 0 ? (
-                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                        <div className="space-y-12 transition-all duration-500 ease-out" style={{ willChange: 'opacity, transform', animation: 'fadeInUp 0.5s ease-out forwards' }}>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 md:gap-x-6 gap-y-10">
                                 {results.map((show, index) => (
                                     <MediaCard key={show.id} show={show} index={index} type={show.media_type || 'tv'} isVertical={true} />

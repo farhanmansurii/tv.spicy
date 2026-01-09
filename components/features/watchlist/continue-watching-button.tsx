@@ -1,17 +1,19 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import useTVShowStore from '@/store/recentsStore';
 import { Episode } from '@/lib/types';
 import useWatchListStore from '@/store/watchlistStore';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
     Play,
     Plus,
     Check,
     Info,
     Share2,
-    ThumbsUp
+    ThumbsUp,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,45 +24,23 @@ interface ContinueWatchingButtonProps {
     isDetailsPage?: boolean;
 }
 
-// Simple toast notification utility
-const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 shadow-lg transition-all duration-300 transform translate-y-0 opacity-0 ${
-        type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-    } text-white text-sm font-medium`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
+// Like/ThumbsUp store utilities
+const LIKED_ITEMS_KEY = 'likedItems';
 
-    setTimeout(() => {
-        toast.style.opacity = '1';
-    }, 10);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            if (document.body.contains(toast)) {
-                document.body.removeChild(toast);
-            }
-        }, 300);
-    }, 3000);
-};
-
-// Like/ThumbsUp store (using localStorage)
 const getLikedItems = (): number[] => {
     if (typeof window === 'undefined') return [];
     try {
-        const stored = localStorage.getItem('likedItems');
+        const stored = localStorage.getItem(LIKED_ITEMS_KEY);
         return stored ? JSON.parse(stored) : [];
     } catch {
         return [];
     }
 };
 
-const saveLikedItems = (items: number[]) => {
+const saveLikedItems = (items: number[]): void => {
     if (typeof window === 'undefined') return;
     try {
-        localStorage.setItem('likedItems', JSON.stringify(items));
+        localStorage.setItem(LIKED_ITEMS_KEY, JSON.stringify(items));
     } catch (error) {
         console.error('Error saving liked items:', error);
     }
@@ -85,7 +65,9 @@ export default function ContinueWatchingButton({
 
     const [isLiked, setIsLiked] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
+    // Load episodes on mount
     useEffect(() => {
         loadEpisodes();
     }, [loadEpisodes]);
@@ -96,43 +78,83 @@ export default function ContinueWatchingButton({
         setIsLiked(likedItems.includes(Number(id)));
     }, [id]);
 
-    const isAdded = type === 'movie'
-        ? watchlist.some((s) => s?.id === id)
-        : tvwatchlist.some((s) => s?.id === id);
+    // Memoize watchlist status
+    const isAdded = useMemo(() => {
+        return type === 'movie'
+            ? watchlist.some((s) => s?.id === id)
+            : tvwatchlist.some((s) => s?.id === id);
+    }, [type, watchlist, tvwatchlist, id]);
 
-    const handleAddOrRemove = (e: React.MouseEvent) => {
+    // Find most recent episode for this show
+    const recent = useMemo(() => {
+        return recentlyWatched
+            .filter((ep: Episode) => ep.tv_id === id)
+            .sort((a: Episode, b: Episode) => {
+                if (b.season_number !== a.season_number) {
+                    return b.season_number - a.season_number;
+                }
+                return b.episode_number - a.episode_number;
+            })[0];
+    }, [recentlyWatched, id]);
+
+    // Handle add/remove from watchlist
+    const handleAddOrRemove = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (isAdded) {
-            type === 'movie' ? removeFromWatchList(Number(id)) : removeFromTvWatchList(Number(id));
-            showToast('Removed from watchlist', 'info');
-        } else {
-            type === 'movie' ? addToWatchlist(show) : addToTvWatchlist(show);
-            showToast('Added to watchlist', 'success');
+        try {
+            if (isAdded) {
+                type === 'movie'
+                    ? removeFromWatchList(Number(id))
+                    : removeFromTvWatchList(Number(id));
+                toast.info('Removed from watchlist', {
+                    description: `${show?.name || show?.title || 'Item'} has been removed from your watchlist.`
+                });
+            } else {
+                type === 'movie' ? addToWatchlist(show) : addToTvWatchlist(show);
+                toast.success('Added to watchlist', {
+                    description: `${show?.name || show?.title || 'Item'} has been added to your watchlist.`
+                });
+            }
+        } catch (error) {
+            toast.error('Something went wrong', {
+                description: 'Failed to update watchlist. Please try again.'
+            });
         }
-    };
+    }, [isAdded, type, id, show, addToWatchlist, addToTvWatchlist, removeFromWatchList, removeFromTvWatchList]);
 
+    // Handle like/unlike
     const handleLike = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
-        const likedItems = getLikedItems();
-        const itemId = Number(id);
+        try {
+            const likedItems = getLikedItems();
+            const itemId = Number(id);
 
-        if (isLiked) {
-            const updated = likedItems.filter((item) => item !== itemId);
-            saveLikedItems(updated);
-            setIsLiked(false);
-            showToast('Removed from favorites', 'info');
-        } else {
-            const updated = [...likedItems, itemId];
-            saveLikedItems(updated);
-            setIsLiked(true);
-            showToast('Added to favorites', 'success');
+            if (isLiked) {
+                const updated = likedItems.filter((item) => item !== itemId);
+                saveLikedItems(updated);
+                setIsLiked(false);
+                toast.info('Removed from favorites', {
+                    description: `${show?.name || show?.title || 'Item'} has been removed from your favorites.`
+                });
+            } else {
+                const updated = [...likedItems, itemId];
+                saveLikedItems(updated);
+                setIsLiked(true);
+                toast.success('Added to favorites', {
+                    description: `${show?.name || show?.title || 'Item'} has been added to your favorites.`
+                });
+            }
+        } catch (error) {
+            toast.error('Something went wrong', {
+                description: 'Failed to update favorites. Please try again.'
+            });
         }
-    }, [id, isLiked]);
+    }, [id, isLiked, show]);
 
+    // Handle share
     const handleShare = useCallback(async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -152,11 +174,13 @@ export default function ContinueWatchingButton({
                     text,
                     url,
                 });
-                showToast('Shared successfully!', 'success');
+                toast.success('Shared successfully!');
             } else {
                 // Fallback: Copy to clipboard
                 await navigator.clipboard.writeText(url);
-                showToast('Link copied to clipboard!', 'success');
+                toast.success('Link copied!', {
+                    description: 'The link has been copied to your clipboard.'
+                });
             }
         } catch (error: any) {
             // User cancelled or error occurred
@@ -164,9 +188,13 @@ export default function ContinueWatchingButton({
                 // Fallback: Copy to clipboard
                 try {
                     await navigator.clipboard.writeText(url);
-                    showToast('Link copied to clipboard!', 'success');
+                    toast.success('Link copied!', {
+                        description: 'The link has been copied to your clipboard.'
+                    });
                 } catch (clipboardError) {
-                    showToast('Failed to share', 'error');
+                    toast.error('Failed to share', {
+                        description: 'Unable to copy link. Please try again.'
+                    });
                 }
             }
         } finally {
@@ -174,35 +202,82 @@ export default function ContinueWatchingButton({
         }
     }, [id, type, show, isSharing]);
 
-    const handlePlay = useCallback(() => {
-        router.push(`/${type}/${id}`);
-    }, [router, type, id]);
+    // Handle play/resume
+    const handlePlay = useCallback(async () => {
+        setIsLoading(true);
 
+        try {
+            if (type === 'tv') {
+                if (recent) {
+                    // Navigate to the specific episode
+                    const params = new URLSearchParams();
+                    params.set('season', String(recent.season_number));
+                    params.set('episode', String(recent.episode_number));
+                    router.push(`/${type}/${id}?${params.toString()}`);
+                } else {
+                    // No recent episode, go to first season/episode
+                    router.push(`/${type}/${id}?season=1&episode=1`);
+                }
+            } else {
+                // For movies, navigate to details page which will play automatically
+                router.push(`/${type}/${id}`);
+            }
+        } catch (error) {
+            toast.error('Navigation failed', {
+                description: 'Unable to navigate. Please try again.'
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [router, type, id, recent]);
+
+    // Handle info button (non-details page only)
     const handleInfo = useCallback(() => {
-        router.push(`/${type}/${id}`);
-    }, [router, type, id]);
+        if (!isDetailsPage) {
+            router.push(`/${type}/${id}`);
+        }
+    }, [router, type, id, isDetailsPage]);
 
-    const recent = recentlyWatched
-        .filter((ep: Episode) => ep.tv_id === id)
-        .sort((a: Episode, b: Episode) =>
-            b.season_number - a.season_number || b.episode_number - a.episode_number
-        )[0];
+    // Determine play button text and label
+    const playButtonText = useMemo(() => {
+        if (type === 'tv' && recent) {
+            return `Resume S${recent.season_number}:E${recent.episode_number}`;
+        }
+        return 'Play Now';
+    }, [type, recent]);
+
+    const playButtonLabel = useMemo(() => {
+        if (type === 'tv' && recent) {
+            return `Resume Season ${recent.season_number} Episode ${recent.episode_number}`;
+        }
+        return 'Play Now';
+    }, [type, recent]);
 
     return (
         <div className="flex flex-wrap items-center gap-2.5 md:gap-3">
-            {/* Play/Resume Button */}
+            {/* Play/Resume Button - Primary Action */}
             <button
                 onClick={handlePlay}
+                disabled={isLoading}
                 className={cn(
-                    "h-[42px] md:h-[50px] px-6 md:px-8 rounded-full flex items-center justify-center gap-2.5 transition-all duration-500",
-                    "bg-white text-black hover:bg-zinc-200 active:scale-95 group shadow-lg",
-                    "focus:outline-none focus:ring-2 focus:ring-white/50"
+                    "relative h-[42px] md:h-[50px] px-6 md:px-8 rounded-full",
+                    "flex items-center justify-center gap-2.5 transition-all duration-300",
+                    "bg-white text-black hover:bg-zinc-200 active:scale-95",
+                    "group shadow-lg shadow-black/20",
+                    "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950",
+                    "disabled:opacity-70 disabled:cursor-wait",
+                    "min-w-[120px] md:min-w-[140px]"
                 )}
-                aria-label={recent ? `Resume Season ${recent.season_number} Episode ${recent.episode_number}` : 'Play Now'}
+                aria-label={playButtonLabel}
+                aria-busy={isLoading}
             >
-                <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current transition-transform group-hover:scale-110" />
+                {isLoading ? (
+                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                ) : (
+                    <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current transition-transform group-hover:scale-110" />
+                )}
                 <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] whitespace-nowrap">
-                    {recent ? `Resume S${recent.season_number}:E${recent.episode_number}` : "Play Now"}
+                    {isLoading ? 'Loading...' : playButtonText}
                 </span>
             </button>
 
@@ -210,18 +285,20 @@ export default function ContinueWatchingButton({
             <button
                 onClick={handleAddOrRemove}
                 className={cn(
-                    "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full flex items-center justify-center transition-all duration-300",
-                    "bg-white/10 hover:bg-white/15 border border-white/5 backdrop-blur-xl text-white group",
-                    "focus:outline-none focus:ring-2 focus:ring-white/50",
-                    isAdded && "bg-white/20 border-white/20"
+                    "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full",
+                    "flex items-center justify-center transition-all duration-300",
+                    "bg-white/10 hover:bg-white/15 active:scale-95",
+                    "border border-white/5 backdrop-blur-xl text-white group",
+                    "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950",
+                    isAdded && "bg-primary/20 border-primary/30 shadow-lg shadow-primary/10"
                 )}
                 aria-label={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
                 title={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
             >
                 {isAdded ? (
-                    <Check className="w-4 h-4 md:w-5 md:h-5 text-primary animate-in zoom-in duration-300" />
+                    <Check className="w-4 h-4 md:w-5 md:h-5 text-primary transition-all duration-300" />
                 ) : (
-                    <Plus className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:rotate-90" />
+                    <Plus className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:rotate-90 duration-300" />
                 )}
             </button>
 
@@ -232,11 +309,13 @@ export default function ContinueWatchingButton({
                     <button
                         onClick={handleLike}
                         className={cn(
-                            "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full flex items-center justify-center transition-all duration-300",
-                            "bg-white/5 hover:bg-white/10 border border-white/5 backdrop-blur-xl group",
-                            "focus:outline-none focus:ring-2 focus:ring-white/50",
+                            "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full",
+                            "flex items-center justify-center transition-all duration-300",
+                            "bg-white/5 hover:bg-white/10 active:scale-95",
+                            "border border-white/5 backdrop-blur-xl group",
+                            "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950",
                             isLiked
-                                ? "bg-white/20 border-white/20 text-white"
+                                ? "bg-primary/20 border-primary/30 text-white shadow-lg shadow-primary/10"
                                 : "text-zinc-300 hover:text-white"
                         )}
                         aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
@@ -244,7 +323,7 @@ export default function ContinueWatchingButton({
                     >
                         <ThumbsUp
                             className={cn(
-                                "w-4 h-4 md:w-5 md:h-5 transition-all",
+                                "w-4 h-4 md:w-5 md:h-5 transition-all duration-300",
                                 isLiked
                                     ? "fill-current scale-110"
                                     : "group-hover:-translate-y-0.5"
@@ -257,19 +336,24 @@ export default function ContinueWatchingButton({
                         onClick={handleShare}
                         disabled={isSharing}
                         className={cn(
-                            "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full flex items-center justify-center transition-all duration-300",
-                            "bg-white/5 hover:bg-white/10 border border-white/5 backdrop-blur-xl text-zinc-300 hover:text-white",
-                            "focus:outline-none focus:ring-2 focus:ring-white/50",
-                            "disabled:opacity-50 disabled:cursor-not-allowed",
+                            "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full",
+                            "flex items-center justify-center transition-all duration-300",
+                            "bg-white/5 hover:bg-white/10 active:scale-95",
+                            "border border-white/5 backdrop-blur-xl",
+                            "text-zinc-300 hover:text-white group",
+                            "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950",
+                            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/5",
                             isSharing && "animate-pulse"
                         )}
                         aria-label="Share"
                         title="Share"
+                        aria-busy={isSharing}
                     >
-                        <Share2 className={cn(
-                            "w-4 h-4 md:w-5 md:h-5 transition-transform",
-                            !isSharing && "group-hover:scale-105"
-                        )} />
+                        {isSharing ? (
+                            <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                        ) : (
+                            <Share2 className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:scale-105" />
+                        )}
                     </button>
                 </div>
             )}
@@ -279,9 +363,12 @@ export default function ContinueWatchingButton({
                 <button
                     onClick={handleInfo}
                     className={cn(
-                        "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full flex items-center justify-center transition-all duration-300",
-                        "bg-white/5 hover:bg-white/10 border border-white/5 backdrop-blur-xl text-zinc-300 hover:text-white",
-                        "focus:outline-none focus:ring-2 focus:ring-white/50 group"
+                        "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full",
+                        "flex items-center justify-center transition-all duration-300",
+                        "bg-white/5 hover:bg-white/10 active:scale-95",
+                        "border border-white/5 backdrop-blur-xl",
+                        "text-zinc-300 hover:text-white group",
+                        "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950"
                     )}
                     aria-label="View details"
                     title="View details"
