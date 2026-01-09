@@ -5,7 +5,7 @@ import MediaRow from './media-row';
 import RowLoader from '@/components/shared/loaders/row-loader';
 import { useInView } from 'react-intersection-observer';
 import { useQuery } from '@tanstack/react-query';
-import { useHasMounted } from '@/hooks/use-has-mounted';
+import { useState, useEffect } from 'react';
 
 interface HomeRowProps {
   endpoint: string;
@@ -17,8 +17,13 @@ interface HomeRowProps {
 }
 
 export function HomeRow({ endpoint, text, type, viewAllLink, showRank = false, initialData }: HomeRowProps) {
-  const hasMounted = useHasMounted();
+  // Use useState with consistent initial value to prevent hydration mismatch
+  const [hasMounted, setHasMounted] = useState(false);
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.05 });
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const queryKey = ['homepage', endpoint, type];
   const shouldFetch = hasMounted && inView && !!endpoint && !initialData;
@@ -34,9 +39,14 @@ export function HomeRow({ endpoint, text, type, viewAllLink, showRank = false, i
     refetchOnReconnect: false,
   });
 
-  const displayData = initialData || data;
+  // Show loader if:
+  // 1. Query is loading/fetching, OR
+  // 2. No initialData and component hasn't mounted yet (to ensure server/client consistency)
+  // 3. No data available
+  const hasData = initialData || data;
+  const shouldShowLoader = isLoading || isFetching || (!initialData && !hasMounted) || !hasData;
 
-  if (isLoading || isFetching) {
+  if (shouldShowLoader) {
     return (
       <div ref={ref}>
         <RowLoader withHeader />
@@ -49,18 +59,25 @@ export function HomeRow({ endpoint, text, type, viewAllLink, showRank = false, i
     return null;
   }
 
+  const displayData = initialData || data;
+
+  // Double-check we have valid data before rendering
+  if (!Array.isArray(displayData) || displayData.length === 0) {
+    return (
+      <div ref={ref}>
+        <RowLoader withHeader />
+      </div>
+    );
+  }
+
   return (
     <div ref={ref}>
-      {Array.isArray(displayData) && displayData.length > 0 ? (
-        <MediaRow
-          text={text}
-          shows={showRank ? displayData.slice(0, 10) : displayData}
-          type={type}
-          viewAllLink={viewAllLink}
-        />
-      ) : (
-        <RowLoader withHeader />
-      )}
+      <MediaRow
+        text={text}
+        shows={showRank ? displayData.slice(0, 10) : displayData}
+        type={type}
+        viewAllLink={viewAllLink}
+      />
     </div>
   );
 }

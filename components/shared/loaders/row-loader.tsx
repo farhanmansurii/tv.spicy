@@ -8,7 +8,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/store/mediaQueryStore';
 
 export default function RowLoader({
   withHeader,
@@ -19,8 +18,9 @@ export default function RowLoader({
   isVertical?: boolean;
   gridLayout?: boolean;
 }) {
-  const isMobile = useMediaQuery();
-  const effectiveIsVertical = isVertical ?? isMobile;
+  // Use CSS-only responsive design - default to horizontal layout, use md: breakpoint for vertical
+  // This ensures server and client render the same HTML structure
+  const effectiveIsVertical = isVertical ?? false;
 
   // Grid Layout Loader
   if (gridLayout) {

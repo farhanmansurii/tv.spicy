@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import {
@@ -13,7 +13,6 @@ import {
 import { Show } from '@/lib/types';
 import MediaCard from '@/components/features/media/card/media-card';
 import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/store/mediaQueryStore';
 import CommonTitle from '@/components/shared/animated/common-title';
 
 interface MediaRowProps {
@@ -24,10 +23,10 @@ interface MediaRowProps {
   viewAllLink?: string;
   hideHeader?: boolean;
   headerAction?: React.ReactNode;
-  gridLayout?: boolean; // Prop to toggle between Grid and Carousel
+  gridLayout?: boolean;
 }
 
-export default function MediaRow({
+function MediaRowComponent({
   shows,
   text,
   type,
@@ -37,18 +36,20 @@ export default function MediaRow({
   headerAction,
   gridLayout = false,
 }: MediaRowProps) {
-  const isMobile = useMediaQuery();
-  const effectiveIsVertical = isVertical ?? isMobile;
+  const effectiveIsVertical = isVertical ?? false;
 
   const validShows = useMemo(() => {
-    return shows?.filter((show) =>
-      effectiveIsVertical ? !!show.poster_path : !!show.backdrop_path
-    ) || [];
-  }, [shows, effectiveIsVertical]);
+    if (!shows) return [];
+    if (isVertical !== undefined) {
+      return shows.filter((show: Show) =>
+        isVertical ? !!show.poster_path : !!show.backdrop_path
+      );
+    }
+    return shows.filter((show: Show) => !!show.backdrop_path || !!show.poster_path);
+  }, [shows, isVertical]);
 
   if (validShows.length === 0) return null;
 
-  // Render Logic for Grid Layout
   const renderGrid = () => (
     <div className={cn(
       "grid gap-4 md:gap-8",
@@ -56,10 +57,10 @@ export default function MediaRow({
         ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
         : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
     )}>
-      {validShows.map((show, index) => (
+      {validShows.map((show: Show, index: number) => (
         <MediaCard
           key={show.id}
-          type={type}
+          type={type as 'movie' | 'tv'}
           show={show}
           index={index}
           isVertical={effectiveIsVertical}
@@ -68,7 +69,6 @@ export default function MediaRow({
     </div>
   );
 
-  // Render Logic for Carousel Layout
   const renderCarousel = () => (
     <Carousel
       opts={{
@@ -79,7 +79,7 @@ export default function MediaRow({
       className="w-full relative"
     >
       <CarouselContent className="-ml-4 md:-ml-6 overflow-visible cursor-grab active:cursor-grabbing">
-        {validShows.map((show, index) => (
+        {validShows.map((show: Show, index: number) => (
           <CarouselItem
             key={show.id}
             className={cn(
@@ -90,7 +90,7 @@ export default function MediaRow({
             )}
           >
             <MediaCard
-              type={type}
+              type={type as 'movie' | 'tv'}
               show={show}
               index={index}
               isVertical={effectiveIsVertical}
@@ -152,3 +152,6 @@ export default function MediaRow({
     </div>
   );
 }
+
+export default memo(MediaRowComponent);
+MediaRowComponent.displayName = 'MediaRow';

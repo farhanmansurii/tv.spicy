@@ -1,72 +1,53 @@
 'use client';
+
+import Container from '@/components/shared/containers/container';
+import SectionWrapper from '@/components/shared/animated/section-layout';
+import CommonTitle from '@/components/shared/animated/common-title';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, Home, RefreshCw } from 'lucide-react';
+import { Home, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
-export default function ErrorPage({ error }) {
-	const [errorCode, setErrorCode] = useState('404');
-	const [errorMessage, setErrorMessage] = useState('Page Not Found');
-
-	useEffect(() => {
-		if (error) {
-			setErrorCode(error.statusCode || '500');
-			setErrorMessage(error.message || 'Internal Server Error');
-		}
-	}, [error]);
-
-	const handleHardReload = () => {
-		window.location.reload(true);
-	};
-
+export default function NotFound() {
 	return (
-		<div className="flex items-center justify-center p-4">
-			<Card className="w-full max-w-md overflow-hidden shadow-xl">
-				<div className="relative h-40 bg-primary">
-					<div className="absolute inset-0 backdrop-blur-sm bg-white/30" />
-					<div className="absolute inset-0 flex items-center justify-center">
-						<AlertCircle className="w-20 h-20 text-primary-foreground animate-pulse" />
+		<div className="min-h-screen mt-20">
+			<Container>
+				<SectionWrapper spacing="large" className="pb-4">
+					<div className="max-w-4xl space-y-6">
+						<div className="space-y-2">
+							<CommonTitle text="Error" variant="section" spacing="none" />
+							<CommonTitle text="404" variant="large" as="h1" className="text-white" />
+						</div>
+						<p className="text-lg md:text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl">
+							The page you're looking for doesn't exist or has been moved.
+							Let's get you back on track.
+						</p>
 					</div>
-				</div>
-				<CardContent className="p-6 border-0 text-center">
-					<h1 className="text-4xl font-bold text-primary mb-2">{errorCode}</h1>
-					<p className="text-xl text-muted-foreground mb-6">{errorMessage}</p>
-					<p className="text-sm text-muted-foreground mb-8">
-						We apologize for the inconvenience. Please try reloading the page or return
-						to the homepage.
-					</p>
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				</SectionWrapper>
+
+				<SectionWrapper spacing="medium">
+					<div className="flex flex-col sm:flex-row gap-4 max-w-md">
+						<Link href="/" className="flex-1">
+							<Button
+								variant="default"
+								size="lg"
+								className="w-full group bg-white text-black hover:bg-white/90"
+							>
+								<Home className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+								Go Home
+							</Button>
+						</Link>
 						<Button
 							variant="outline"
 							size="lg"
-							className="w-full group"
-							onClick={handleHardReload}
+							className="flex-1 group border-white/10 hover:bg-white/5"
+							onClick={() => window.history.back()}
 						>
-							<RefreshCw className="mr-2 h-4 w-4 group-hover:animate-spin" />
-							Reload Page
+							<ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+							Go Back
 						</Button>
-						<Link href="/" className="sm:col-start-2">
-							<Button variant="default" size="lg" className="w-full group">
-								<svg
-									className="mr-2 h-4 w-4 group-hover:scale-105"
-									viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<g fill="currentColor">
-										<path
-											d="M17 21H7a2 2 0 0 1-2-2v-9l7-7l7 7v9a2 2 0 0 1-2 2"
-											opacity=".16"
-										/>
-										<path d="M20 10a1 1 0 1 0-2 0zM6 10a1 1 0 0 0-2 0zm14.293 2.707a1 1 0 0 0 1.414-1.414zM12 3l.707-.707a1 1 0 0 0-1.414 0zm-9.707 8.293a1 1 0 1 0 1.414 1.414zM7 22h10v-2H7zm13-3v-9h-2v9zM6 19v-9H4v9zm15.707-7.707l-9-9l-1.414 1.414l9 9zm-10.414-9l-9 9l1.414 1.414l9-9zM17 22a3 3 0 0 0 3-3h-2a1 1 0 0 1-1 1zM7 20a1 1 0 0 1-1-1H4a3 3 0 0 0 3 3z" />
-									</g>
-								</svg>
-								Homepage
-							</Button>
-						</Link>
 					</div>
-				</CardContent>
-			</Card>
+				</SectionWrapper>
+			</Container>
 		</div>
 	);
 }

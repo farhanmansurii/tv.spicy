@@ -53,16 +53,25 @@ export default async function Page(props: PageProps) {
 	};
 
 	return (
-		<Container className="mt-40">
-			<div className="max-w-4xl space-y-4">
-				<CommonTitle text={typeLabel} variant="section" spacing="none" />
-				<CommonTitle text={title} variant="large" className="text-white mb-0" as="h1" />
-				<p className="text-lg md:text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl">
-					A curated selection of the most immersive {title.toLowerCase()}{' '}
-					{typeLabel.toLowerCase()} available.
-				</p>
-			</div>
-			<LoadMore params={loadMoreParams} />
-		</Container>
+		<div className="min-h-screen mt-20">
+			<Container>
+				<SectionWrapper spacing="large" className="pb-4">
+					<div className="max-w-4xl space-y-6">
+						<div className="space-y-2">
+							<CommonTitle text={typeLabel} variant="section" spacing="none" />
+							<CommonTitle text={title} variant="large" as="h1" className="text-white" />
+						</div>
+						<p className="text-lg md:text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl">
+							A curated selection of the most immersive {title.toLowerCase()}{' '}
+							{typeLabel.toLowerCase()} available.
+						</p>
+					</div>
+				</SectionWrapper>
+
+				<SectionWrapper spacing="medium">
+					<LoadMore params={loadMoreParams} />
+				</SectionWrapper>
+			</Container>
+		</div>
 	);
 }

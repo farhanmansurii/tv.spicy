@@ -1,36 +1,47 @@
 'use client';
 import { Show } from '@/lib/types';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, memo } from 'react';
 import useWatchListStore from '@/store/watchlistStore';
 import MediaRow from '@/components/features/media/row/media-row';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
+import { useSession } from 'next-auth/react';
 
-export default function WatchList({ type }: { type: string }) {
+function WatchListComponent({ type }: { type: string }) {
   const hasMounted = useHasMounted();
-  const { watchlist, tvwatchlist } = useWatchListStore();
+  const { data: session } = useSession();
+  const { watchlist, tvwatchlist, loadFromDatabase } = useWatchListStore();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Filter out items without backdrop_path to ensure they render properly
-  const filteredMovieWatchlist = useMemo(() =>
-    watchlist?.filter((show: Show) => show.poster_path || show.backdrop_path) || [],
-    [watchlist]
-  );
-  const filteredTVWatchlist = useMemo(() =>
-    tvwatchlist?.filter((show: Show) => show.poster_path || show.backdrop_path) || [],
-    [tvwatchlist]
-  );
-
-  // Simulate loading state to prevent layout shift
+  // Load from database on mount if authenticated
   useEffect(() => {
-    if (hasMounted) {
-      // Small delay to ensure store is hydrated
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 100);
-      return () => clearTimeout(timer);
+    if (hasMounted && session?.user?.id) {
+      loadFromDatabase()
+        .then(() => setIsLoading(false))
+        .catch(() => setIsLoading(false));
+    } else if (hasMounted) {
+      setIsLoading(false);
     }
-  }, [hasMounted]);
+  }, [hasMounted, session?.user?.id, loadFromDatabase]);
+
+  // Filter and ensure proper categorization
+  const filteredMovieWatchlist = useMemo(() => {
+    if (!watchlist) return [];
+    return watchlist.filter((show: Show) => {
+      const hasImage = show.poster_path || show.backdrop_path;
+      const isMovie = show.media_type === 'movie' || (!show.media_type && type === 'movie');
+      return hasImage && isMovie;
+    });
+  }, [watchlist, type]);
+
+  const filteredTVWatchlist = useMemo(() => {
+    if (!tvwatchlist) return [];
+    return tvwatchlist.filter((show: Show) => {
+      const hasImage = show.poster_path || show.backdrop_path;
+      const isTV = show.media_type === 'tv' || (!show.media_type && type === 'tv');
+      return hasImage && isTV;
+    });
+  }, [tvwatchlist, type]);
 
   // Show skeleton while loading or mounting
   if (!hasMounted || isLoading) {
@@ -67,3 +78,5 @@ export default function WatchList({ type }: { type: string }) {
     </>
   );
 }
+
+export default memo(WatchListComponent);

@@ -1,69 +1,64 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, memo, useCallback } from 'react';
 import { Heart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import MediaRow from '@/components/features/media/row/media-row';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { toast } from 'sonner';
 import { fetchDetailsTMDB } from '@/lib/api';
 import { Show } from '@/lib/types';
+import { useSession } from 'next-auth/react';
+import { useFavoritesStore } from '@/store/favoritesStore';
+import { useUserFavorites } from '@/hooks/use-user-data';
 
-const LIKED_ITEMS_KEY = 'likedItems';
-
-const getLikedItems = (): number[] => {
-    if (typeof window === 'undefined') return [];
-    try {
-        const stored = localStorage.getItem(LIKED_ITEMS_KEY);
-        return stored ? JSON.parse(stored) : [];
-    } catch {
-        return [];
-    }
-};
-
-const clearLikedItems = (): void => {
-    if (typeof window === 'undefined') return;
-    try {
-        localStorage.removeItem(LIKED_ITEMS_KEY);
-    } catch (error) {
-        console.error('Error clearing liked items:', error);
-    }
-};
-
-export function MyFavorites() {
+function MyFavoritesComponent() {
     const hasMounted = useHasMounted();
-    const [likedIds, setLikedIds] = useState<number[]>([]);
+    const { data: session } = useSession();
+    const { favoriteMovies: dbFavoriteMovies, favoriteTV: dbFavoriteTV, loadFromDatabase } = useFavoritesStore();
+    const { data: dbMovies = [], isLoading: loadingMovies } = useUserFavorites('movie');
+    const { data: dbTV = [], isLoading: loadingTV } = useUserFavorites('tv');
     const [favorites, setFavorites] = useState<Show[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Load from database on mount if authenticated
     useEffect(() => {
-        if (hasMounted) {
-            const items = getLikedItems();
-            setLikedIds(items);
+        if (hasMounted && session?.user?.id) {
+            loadFromDatabase()
+                .then(() => setIsLoading(false))
+                .catch(() => setIsLoading(false));
+        } else if (hasMounted) {
+            setIsLoading(false);
         }
-    }, [hasMounted]);
+    }, [hasMounted, session?.user?.id, loadFromDatabase]);
 
-    // Fetch favorite items details
+    // Fetch details for database favorites
     useEffect(() => {
-        const fetchFavorites = async () => {
-            if (likedIds.length === 0) {
-                setFavorites([]);
+        const fetchFavoritesDetails = async () => {
+            if (!session?.user?.id) {
                 setIsLoading(false);
                 return;
             }
 
             setIsLoading(true);
             try {
-                const promises = likedIds.map(async (id) => {
+                const allFavoriteIds = [
+                    ...dbMovies.map((f: any) => ({ id: f.mediaId, type: 'movie' as const })),
+                    ...dbTV.map((f: any) => ({ id: f.mediaId, type: 'tv' as const })),
+                ];
+
+                if (allFavoriteIds.length === 0) {
+                    setFavorites([]);
+                    setIsLoading(false);
+                    return;
+                }
+
+                const promises = allFavoriteIds.map(async ({ id, type }) => {
                     try {
-                        // Try TV first, then movie
-                        const data = await fetchDetailsTMDB(String(id), 'tv').catch(() =>
-                            fetchDetailsTMDB(String(id), 'movie')
-                        );
-                        return data;
+                        const data = await fetchDetailsTMDB(String(id), type);
+                        return { ...data, media_type: type };
                     } catch (error) {
-                        console.error(`Failed to fetch item ${id}:`, error);
+                        console.error(`Failed to fetch favorite ${id}:`, error);
                         return null;
                     }
                 });
@@ -81,29 +76,33 @@ export function MyFavorites() {
             }
         };
 
-        if (hasMounted && likedIds.length > 0) {
-            fetchFavorites();
+        if (hasMounted && session?.user?.id && (dbMovies.length > 0 || dbTV.length > 0)) {
+            fetchFavoritesDetails();
         } else if (hasMounted) {
             setIsLoading(false);
         }
-    }, [likedIds, hasMounted]);
+    }, [hasMounted, session?.user?.id, dbMovies, dbTV]);
 
-    const handleClearFavorites = () => {
-        clearLikedItems();
-        setLikedIds([]);
+    const handleClearFavorites = useCallback(async () => {
+        const { clearFavorites } = useFavoritesStore.getState();
+        await clearFavorites();
         setFavorites([]);
         toast.success('Favorites cleared', {
             description: 'All favorites have been removed.'
         });
-    };
+    }, []);
 
-    // Group favorites by type
+    // Group favorites by type with proper categorization
     const movieFavorites = useMemo(() => {
-        return favorites.filter((item) => item.media_type === 'movie' || !item.media_type);
+        return favorites.filter((item) => {
+            return item.media_type === 'movie' || (!item.media_type && item.title); // Movies have title, TV shows have name
+        });
     }, [favorites]);
 
     const tvFavorites = useMemo(() => {
-        return favorites.filter((item) => item.media_type === 'tv');
+        return favorites.filter((item) => {
+            return item.media_type === 'tv' || (!item.media_type && item.name); // TV shows have name
+        });
     }, [favorites]);
 
     if (!hasMounted || isLoading) {
@@ -117,7 +116,7 @@ export function MyFavorites() {
         );
     }
 
-    if (likedIds.length === 0 || favorites.length === 0) {
+    if (favorites.length === 0 && !isLoading && hasMounted) {
         return (
             <div className="flex flex-col items-center justify-center py-20 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
@@ -159,7 +158,6 @@ export function MyFavorites() {
                     shows={movieFavorites}
                     type="movie"
                     isVertical={false}
-                    showRank={false}
                 />
             )}
 
@@ -170,9 +168,11 @@ export function MyFavorites() {
                     shows={tvFavorites}
                     type="tv"
                     isVertical={false}
-                    showRank={false}
                 />
             )}
         </div>
     );
 }
+
+export const MyFavorites = memo(MyFavoritesComponent);
+MyFavorites.displayName = 'MyFavorites';

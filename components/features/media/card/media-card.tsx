@@ -1,17 +1,23 @@
 /* eslint-disable @next/next/no-img-element */
-import React from 'react';
+import React, { memo } from 'react';
 import Link from 'next/link';
 import { Show } from '@/lib/types';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { Star } from 'lucide-react';
 import BlurFade from '@/components/ui/blur-fade';
 import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/store/mediaQueryStore';
 
-export default function MediaCard({ index, show, isVertical, type, onClick }: any) {
-  const isMobile = useMediaQuery();
+interface MediaCardProps {
+	index: number;
+	show: Show;
+	isVertical?: boolean;
+	type: 'movie' | 'tv';
+	onClick?: (show: Show) => void;
+}
+
+function MediaCardComponent({ index, show, isVertical = false, type, onClick }: MediaCardProps) {
   const mediaType = show.media_type || type;
-  const effectiveIsVertical = isVertical ?? isMobile;
+  const effectiveIsVertical = isVertical;
 
   if (!mediaType) return <div className="bg-zinc-900 animate-pulse rounded-xl aspect-video" />;
 
@@ -66,3 +72,6 @@ export default function MediaCard({ index, show, isVertical, type, onClick }: an
     </Link>
   );
 }
+
+export default memo(MediaCardComponent);
+MediaCardComponent.displayName = 'MediaCard';

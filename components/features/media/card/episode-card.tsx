@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Play, ImageOff, Lock, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
@@ -13,16 +13,29 @@ export const EpisodeCard = ({ episode, active, toggle }: any) => {
   const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'original') : null;
   const rating = episode.vote_average ? episode.vote_average.toFixed(1) : null;
 
+  const [isClicked, setIsClicked] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isReleased) return;
+
+    // Immediate visual feedback
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 150);
+
+    toggle(episode, e);
+  };
+
   return (
     <div
-      onClick={(e) => isReleased && toggle(episode, e)}
+      onClick={handleClick}
       className={cn(
         'group relative aspect-video w-full overflow-hidden select-none transition-all duration-500 ease-out',
         'rounded-2xl border bg-black shadow-sm',
         active
           ? 'ring-[3px] ring-primary ring-offset-2 ring-offset-background scale-[0.97] shadow-xl'
           : 'border-white/5 hover:scale-[1.02] hover:shadow-2xl',
-        !isReleased && 'opacity-60 cursor-not-allowed'
+        !isReleased && 'opacity-60 cursor-not-allowed',
+        isClicked && 'scale-[0.98]'
       )}
     >
       <div className="absolute inset-0 z-0">

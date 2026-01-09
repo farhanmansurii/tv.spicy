@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Play, ImageOff, Lock, Star, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
@@ -14,15 +14,28 @@ export const EpisodeListRow = ({ episode, active, toggle, watched }: any) => {
   const rating = episode.vote_average ? episode.vote_average.toFixed(1) : null;
   const hasGoodRating = episode.vote_average && episode.vote_average >= 8.0;
 
+  const [isClicked, setIsClicked] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isReleased) return;
+
+    // Immediate visual feedback
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 150);
+
+    toggle(episode, e);
+  };
+
   return (
     <div
-      onClick={(e) => isReleased && toggle(episode, e)}
+      onClick={handleClick}
       className={cn(
         'group relative flex items-center gap-4 md:gap-6 p-2 md:p-2.5 transition-all duration-500 rounded-xl select-none',
         active
           ? 'bg-primary/10 border border-primary/30 shadow-lg shadow-primary/10'
           : 'hover:bg-white/[0.03] cursor-pointer border border-transparent',
-        !isReleased && 'opacity-40 cursor-not-allowed'
+        !isReleased && 'opacity-40 cursor-not-allowed',
+        isClicked && 'scale-[0.98]'
       )}
     >
       {/* 1. THUMBNAIL: Disciplined Aspect Ratio */}

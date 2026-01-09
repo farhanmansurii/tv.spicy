@@ -12,9 +12,11 @@ import {
 	Command as CmdIcon,
 	Loader2,
 	AlertCircle,
+	ArrowRight,
 } from 'lucide-react';
 import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
 import { searchShows } from '@/lib/tmdb-fetch-helper';
@@ -33,6 +35,7 @@ import { Button } from '@/components/ui/button';
 const APPLE_FLUID = 'expo.out';
 
 export function SearchCommandBox() {
+	const router = useRouter();
 	const [open, setOpen] = React.useState(false);
 	const [inputValue, setInputValue] = React.useState('');
 	const [debouncedQuery, setDebouncedQuery] = React.useState('');
@@ -44,7 +47,7 @@ export function SearchCommandBox() {
 	const animationRef = React.useRef<gsap.core.Tween | null>(null);
 	const prevResultsLengthRef = React.useRef(0);
 	const loaderTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-	const { recentlySearched, removeFromRecentlySearched } = useSearchStore();
+	const { recentlySearched, removeFromRecentlySearched, addToRecentlySearched } = useSearchStore();
 
 	const debouncedSetQuery = React.useMemo(
 		() => debounce((v: string) => setDebouncedQuery(v), 500),
@@ -298,28 +301,60 @@ export function SearchCommandBox() {
 								</div>
 							)}
 							{!debouncedQuery && !isSearching && (
-								<CommandGroup
-									heading={
-										<span className="px-3 py-3 text-[10px] font-bold text-white/10 uppercase tracking-[0.2em]">
-											Recently Viewed
-										</span>
-									}
-								>
-									{recentlySearched.length > 0 ? (
-										recentlySearched.map((item: any) => (
-											<ResultItem
-												key={`recent-${item.id}`}
-												item={item}
-												isRecent
-												onRemove={() => removeFromRecentlySearched(item.id)}
-											/>
-										))
-									) : (
-										<div className="py-10 text-center text-white/5 text-xs italic">
-											No recent searches
-										</div>
-									)}
-								</CommandGroup>
+								<>
+									<CommandGroup
+										heading={
+											<span className="px-3 py-3 text-[10px] font-bold text-white/10 uppercase tracking-[0.2em]">
+												Recently Viewed
+											</span>
+										}
+									>
+										{recentlySearched.length > 0 ? (
+											recentlySearched.map((item: any) => (
+												<ResultItem
+													key={`recent-${item.id}`}
+													item={item}
+													isRecent
+													onRemove={() => removeFromRecentlySearched(item.id)}
+													onSelect={() => {
+														const mediaType = item.media_type || 'movie';
+														router.push(`/${mediaType}/${item.id}`);
+														setOpen(false);
+													}}
+												/>
+											))
+										) : (
+											<div className="py-10 text-center text-white/5 text-xs italic">
+												No recent searches
+											</div>
+										)}
+									</CommandGroup>
+									{/* Go to Search Page Option */}
+									<CommandGroup>
+										<CommandItem
+											onSelect={() => {
+												router.push('/search');
+												setOpen(false);
+											}}
+											className="flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all aria-selected:bg-white/10 group mx-1 mb-1 outline-none border-t border-white/5 mt-2"
+										>
+											<div className="flex items-center gap-3">
+												<div className="h-10 w-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+													<Search className="w-5 h-5 text-white/40" />
+												</div>
+												<div className="flex flex-col">
+													<span className="text-sm font-semibold text-white/80 group-aria-selected:text-white">
+														Open Search Page
+													</span>
+													<span className="text-[10px] font-medium text-white/20">
+														Browse all content with filters
+													</span>
+												</div>
+											</div>
+											<ArrowRight className="w-4 h-4 text-white/30 group-aria-selected:text-white/40 transition-colors flex-shrink-0 ml-2" />
+										</CommandItem>
+									</CommandGroup>
+								</>
 							)}
 							{debouncedQuery && !isError && (
 								<>
@@ -331,17 +366,53 @@ export function SearchCommandBox() {
 											</span>
 										</div>
 									) : results.length > 0 ? (
-										<CommandGroup
-											heading={
-												<span className="px-3 py-3 text-[10px] font-bold text-white/10 uppercase tracking-[0.2em]">
-													Matches
-												</span>
-											}
-										>
-											{results.map((item: any) => (
-												<ResultItem key={item.id} item={item} />
-											))}
-										</CommandGroup>
+										<>
+											<CommandGroup
+												heading={
+													<span className="px-3 py-3 text-[10px] font-bold text-white/10 uppercase tracking-[0.2em]">
+														Matches
+													</span>
+												}
+											>
+												{results.map((item: any) => (
+													<ResultItem
+														key={item.id}
+														item={item}
+														onSelect={() => {
+															const mediaType = item.media_type || 'movie';
+															router.push(`/${mediaType}/${item.id}`);
+															setOpen(false);
+															addToRecentlySearched(item);
+														}}
+													/>
+												))}
+											</CommandGroup>
+											{/* Go to Search Page Option */}
+											<CommandGroup>
+												<CommandItem
+													onSelect={() => {
+														router.push(`/search?q=${encodeURIComponent(debouncedQuery)}`);
+														setOpen(false);
+													}}
+													className="flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all aria-selected:bg-white/10 group mx-1 mb-1 outline-none border-t border-white/5 mt-2"
+												>
+													<div className="flex items-center gap-3">
+														<div className="h-10 w-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+															<Search className="w-5 h-5 text-white/40" />
+														</div>
+														<div className="flex flex-col">
+															<span className="text-sm font-semibold text-white/80 group-aria-selected:text-white">
+																View All Results
+															</span>
+															<span className="text-[10px] font-medium text-white/20">
+																See all matches for "{debouncedQuery}"
+															</span>
+														</div>
+													</div>
+													<ArrowRight className="w-4 h-4 text-white/30 group-aria-selected:text-white transition-colors" />
+												</CommandItem>
+											</CommandGroup>
+										</>
 									) : (
 										<div className="py-20 text-center text-white/20 text-sm min-h-[120px] flex items-center justify-center">
 											No results found for{' '}
@@ -363,7 +434,6 @@ export function SearchCommandBox() {
 									<ChevronRight className="w-3 h-3 rotate-90" /> Navigate
 								</span>
 							</div>
-							<span>Powered by TMDB</span>
 						</div>
 					</Command>
 				</div>
@@ -372,17 +442,28 @@ export function SearchCommandBox() {
 	);
 }
 
-function ResultItem({ item, isRecent, onRemove }: any) {
+function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 	const year = (item.release_date || item.first_air_date || '').split('-')[0];
+
+	const handleClick = (e: React.MouseEvent) => {
+		e.preventDefault();
+		if (onSelect)
+			onSelect();
+
+	};
+
 	return (
 		<div className="search-item-anim">
-			<CommandItem className="flex items-center gap-4 p-2.5 rounded-xl cursor-pointer transition-all aria-selected:bg-white/10 group mx-1 mb-1 outline-none">
-				<div className="h-12 w-9 rounded-md bg-white/5 border border-white/10 overflow-hidden relative shadow-2xl">
+			<CommandItem
+				onSelect={onSelect || handleClick}
+				className="flex items-center gap-4 p-2.5 rounded-xl cursor-pointer transition-all aria-selected:bg-white/10 group mx-1 mb-1 outline-none"
+			>
+				<div className="h-12 w-9 rounded-md bg-white/5 border border-white/10 overflow-hidden relative shadow-2xl flex-shrink-0">
 					{item.poster_path ? (
 						<img
 							src={tmdbImage(item.poster_path, 'w92')}
 							className="h-full w-full object-cover"
-							alt=""
+							alt={item.title || item.name || 'Poster'}
 						/>
 					) : (
 						<div className="h-full w-full flex items-center justify-center opacity-10">
@@ -399,9 +480,11 @@ function ResultItem({ item, isRecent, onRemove }: any) {
 							<button
 								onClick={(e) => {
 									e.stopPropagation();
+									e.preventDefault();
 									onRemove();
 								}}
-								className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all"
+								className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all z-10"
+								aria-label="Remove from recent searches"
 							>
 								<X className="w-3 h-3" />
 							</button>
@@ -419,6 +502,7 @@ function ResultItem({ item, isRecent, onRemove }: any) {
 						)}
 					</div>
 				</div>
+				<ChevronRight className="w-4 h-4 text-white/20 group-aria-selected:text-white/40 transition-colors flex-shrink-0 ml-2" />
 			</CommandItem>
 		</div>
 	);

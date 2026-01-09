@@ -23,13 +23,13 @@ import useWatchListStore from '@/store/watchlistStore';
 import useTVShowStore from '@/store/recentsStore';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
+import { AuthButton } from '@/components/auth/auth-button';
 
 // Type bypass for framer-motion strictness issues
 const MotionDiv = motion.div as any;
 const MotionLi = motion.li as any;
 
 const menuItems = [
-	{ name: 'Library', href: '/library' },
 	{ name: 'TV Shows', href: '/tv'},
 	{ name: 'Movies', href: '/movie'},
 	{ name: 'Genres', href: '/genres'},
@@ -110,13 +110,10 @@ export const Header = () => {
 				router.push('/');
 				break;
 			case 'watchlist':
-				router.push('/library?tab=watchlist');
+				router.push('/#watchlist');
 				break;
 			case 'recent':
-				router.push('/library?tab=continue');
-				break;
-			case 'my':
-				router.push('/library');
+				router.push('/#continue-watching');
 				break;
 			case 'genres':
 				router.push('/genres');
@@ -236,13 +233,6 @@ export const Header = () => {
 									<span>Home</span>
 									<DropdownMenuShortcut>⌘H</DropdownMenuShortcut>
 								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={() => handleQuickAction('my')}
-									className="text-white/90 hover:text-white hover:bg-white/10 cursor-pointer font-semibold"
-								>
-									<Bookmark className="w-4 h-4 mr-2" />
-									<span>Library</span>
-								</DropdownMenuItem>
 								<DropdownMenuSeparator className="bg-white/10" />
 								<DropdownMenuItem
 									onClick={() => handleQuickAction('recent')}
@@ -285,6 +275,9 @@ export const Header = () => {
 						</DropdownMenu>
 
 					<SearchCommandBox />
+
+					<AuthButton />
+
 						<Button
 							variant="ghost"
 							size="icon"

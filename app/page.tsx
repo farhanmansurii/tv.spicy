@@ -1,4 +1,3 @@
-import WatchList from '@/components/features/watchlist/watch-list';
 import RecentlyWatched from '@/components/features/watchlist/recently-watched';
 import { fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
 import Container from '@/components/shared/containers/container';
@@ -7,19 +6,25 @@ import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
 import { HomeRow } from '@/components/features/media/row/home-row';
 import RowLoader from '@/components/shared/loaders/row-loader';
 import { Suspense } from 'react';
+import { PersonalizedGreeting } from '@/components/features/home/personalized-greeting';
+import { UserWatchlistMovies } from '@/components/features/home/user-watchlist-movies';
+import { UserWatchlistTV } from '@/components/features/home/user-watchlist-tv';
+import { UserFavoritesMovies } from '@/components/features/home/user-favorites-movies';
+import { UserFavoritesTV } from '@/components/features/home/user-favorites-tv';
 
 export const revalidate = 604800;
 
 export default async function HomePage() {
 	try {
 		// Phase 1: Fetch hero data and first 2-3 rows server-side for instant loading
-		const [trendingTV, trendingMovies, tvPopular, tvOnTheAir, movieNowPlaying] = await Promise.all([
-			fetchRowData('trending/tv/week'),
-			fetchRowData('trending/movie/week'),
-			fetchRowData('tv/popular'),
-			fetchRowData('tv/on_the_air'),
-			fetchRowData('movie/now_playing'),
-		]);
+		const [trendingTV, trendingMovies, tvPopular, tvOnTheAir, movieNowPlaying] =
+			await Promise.all([
+				fetchRowData('trending/tv/week'),
+				fetchRowData('trending/movie/week'),
+				fetchRowData('tv/popular'),
+				fetchRowData('tv/on_the_air'),
+				fetchRowData('movie/now_playing'),
+			]);
 
 		const allTrending = [...(trendingTV || []), ...(trendingMovies || [])].filter(Boolean);
 		const basicHeroShows = allTrending.filter((show: Show) => show?.backdrop_path).slice(0, 10);
@@ -29,13 +34,14 @@ export default async function HomePage() {
 
 		return (
 			<div className="min-h-screen bg-background text-foreground pb-20">
-					<HeroCarousel shows={heroShows} type="tv" />
-
+				<HeroCarousel shows={heroShows} type="tv" />
 				<Container className="w-full">
-				<div className="flex flex-col space-y-4 md:space-y-6">
+					<div className="flex flex-col space-y-4 md:space-y-6">
 						<RecentlyWatched />
-						<WatchList type="movie" />
-						<WatchList type="tv" />
+						<UserWatchlistMovies />
+						<UserWatchlistTV />
+						<UserFavoritesMovies />
+						<UserFavoritesTV />
 
 						{/* Pre-fetched rows - no Suspense needed since data is already available */}
 						<HomeRow

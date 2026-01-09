@@ -41,20 +41,22 @@ export default function MoreDetailsContainer({ show, type }: { show: Show | Anim
                 </CommonTitle>
             </div>
 
-            <div className="w-full  relative">
+            <div className="w-full relative mt-6 md:mt-8">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={selected}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+                        transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
                     >
-                        <RelatedShowsContainer
-                            relation={selected === 'RECOMMENDATIONS' ? 'recommendations' : 'similar'}
-                            type={type}
-                            show={show}
-                        />
+                        <React.Suspense fallback={<MoreDetailsLoader />}>
+                            <RelatedShowsContainer
+                                relation={selected === 'RECOMMENDATIONS' ? 'recommendations' : 'similar'}
+                                type={type}
+                                show={show}
+                            />
+                        </React.Suspense>
                     </motion.div>
                 </AnimatePresence>
             </div>
@@ -67,9 +69,13 @@ const Tab = ({ text, selected, setSelected }: { text: string; selected: boolean;
         <button
             onClick={() => setSelected(text)}
             className={cn(
-                'relative px-5 md:px-7 py-2 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-500 outline-none z-10',
-                selected ? 'text-black' : 'text-zinc-500 hover:text-white'
+                'relative px-5 md:px-7 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 outline-none z-10 rounded-full',
+                selected 
+                    ? 'text-black shadow-lg' 
+                    : 'text-zinc-400 hover:text-white'
             )}
+            aria-pressed={selected}
+            aria-label={`Switch to ${text} view`}
         >
             <span className="relative z-10">{text}</span>
 
@@ -79,7 +85,7 @@ const Tab = ({ text, selected, setSelected }: { text: string; selected: boolean;
                     className="absolute inset-0 z-0 bg-white rounded-full shadow-[0_0_25px_rgba(255,255,255,0.4)]"
                     transition={{
                         type: 'spring',
-                        stiffness: 350,
+                        stiffness: 400,
                         damping: 30,
                     }}
                 />

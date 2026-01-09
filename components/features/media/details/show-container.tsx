@@ -23,13 +23,13 @@ interface ShowContainerProps {
 
 const ShowContainer: React.FC<ShowContainerProps> = ({ type, id, seasons, showData }) => {
 	return (
-		<>
+		<div className="w-full py-8 md:py-12">
 			{type === 'tv' ? (
 				<SeasonTabs seasons={seasons} showId={id} showData={showData} />
 			) : (
 				<Episode episodeId={''} id={id || ''} movieID={id} type={type} />
 			)}
-		</>
+		</div>
 	);
 };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { memo, useState } from 'react';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
 import { Episode } from '@/lib/types';
@@ -13,15 +13,26 @@ interface ContinueWatchingCardProps {
     index: number;
 }
 
-export function ContinueWatchingCard({ episode, index }: ContinueWatchingCardProps) {
+function ContinueWatchingCardComponent({ episode, index }: ContinueWatchingCardProps) {
+    const [isClicked, setIsClicked] = useState(false);
     const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w500') : null;
     const showId = episode.tv_id;
     const episodeUrl = `/tv/${showId}?season=${episode.season_number}&episode=${episode.episode_number}`;
 
+    const handleClick = () => {
+        // Immediate visual feedback
+        setIsClicked(true);
+        setTimeout(() => setIsClicked(false), 200);
+    };
+
     return (
         <Link
             href={episodeUrl}
-            className="group block w-full outline-none select-none"
+            onClick={handleClick}
+            className={cn(
+                "group block w-full outline-none select-none transition-transform duration-200",
+                isClicked && "scale-[0.98]"
+            )}
         >
             <div className="flex flex-col gap-3 w-full transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
                 <div
@@ -76,3 +87,6 @@ export function ContinueWatchingCard({ episode, index }: ContinueWatchingCardPro
         </Link>
     );
 }
+
+export const ContinueWatchingCard = memo(ContinueWatchingCardComponent);
+ContinueWatchingCard.displayName = 'ContinueWatchingCard';

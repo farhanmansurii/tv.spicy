@@ -65,7 +65,7 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 
     return (
         <section className={cn(
-            "relative w-full overflow-hidden bg-zinc-950",
+            "relative w-full overflow-hidden bg-background",
             "h-[75vh] md:h-[80vh] lg:h-[85vh]"
         )}>
             <div className="absolute inset-0 z-0">
@@ -83,7 +83,7 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
                     onLoad={handleImageLoad}
                     loading={loading}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                 <div className="absolute inset-0 hidden md:block bg-[radial-gradient(circle_at_left_center,rgba(9,9,11,0.8)_0%,transparent_75%)]" />
             </div>
 

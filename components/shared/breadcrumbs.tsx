@@ -57,25 +57,6 @@ export function Breadcrumbs({ showName, showType, className }: BreadcrumbsProps)
 				href: pathname,
 			});
 		}
-	} else if (pathSegments[0] === 'library') {
-		items.push({
-			label: 'Library',
-			href: '/library',
-		});
-		const tab = searchParams.get('tab');
-		if (tab) {
-			const tabLabels: Record<string, string> = {
-				continue: 'Continue Watching',
-				watchlist: 'Watchlist',
-				favorites: 'Favorites',
-			};
-			if (tabLabels[tab]) {
-				items.push({
-					label: tabLabels[tab],
-					href: pathname,
-				});
-			}
-		}
 	} else if (pathSegments[0] === 'genres') {
 		items.push({
 			label: 'Genres',

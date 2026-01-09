@@ -2,6 +2,8 @@ import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import TanstackQueryProvider from '@/components/providers/tanstack-query-provider';
 import SidebarProvider from '@/components/providers/sidebar-provider';
+import { AuthProvider } from '@/components/auth/auth-provider';
+import { AuthSync } from '@/components/auth/auth-sync';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
@@ -63,10 +65,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					enableSystem
 					disableTransitionOnChange
 				>
-					<TanstackQueryProvider>
-						<main className="relative min-h-screen">{children}</main>
-						<Toaster />
-					</TanstackQueryProvider>
+					<AuthProvider>
+						<TanstackQueryProvider>
+							<AuthSync />
+							<main className="relative min-h-screen">{children}</main>
+							<Toaster />
+						</TanstackQueryProvider>
+					</AuthProvider>
 				</ThemeProvider>
 			</body>
 		</html>

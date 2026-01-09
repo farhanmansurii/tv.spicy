@@ -1,7 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 import useTVShowStore from '@/store/recentsStore';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, memo, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Episode } from '@/lib/types';
@@ -17,30 +17,40 @@ import {
     CarouselPrevious,
 } from '@/components/ui/carousel';
 
-const RecentlyWatched = () => {
+const RecentlyWatchedComponent = () => {
   const hasMounted = useHasMounted();
-  const { recentlyWatched, loadEpisodes, deleteRecentlyWatched } = useTVShowStore();
+  const { data: session } = useSession();
+  const { recentlyWatched, loadEpisodes, loadFromDatabase } = useTVShowStore();
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadEpisodes();
-  }, []);
+  const loadData = useCallback(async () => {
+    if (!hasMounted) return;
 
-  // Simulate loading state to prevent layout shift
-  useEffect(() => {
-    if (hasMounted) {
-      // Small delay to ensure store is hydrated
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 150);
-      return () => clearTimeout(timer);
+    try {
+      if (session?.user?.id) {
+        await loadFromDatabase();
+      } else {
+        await loadEpisodes();
+      }
+    } catch (error) {
+      console.error('Error loading episodes:', error);
+      // Fallback to IndexedDB if database load fails
+      if (session?.user?.id) {
+        await loadEpisodes();
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }, [hasMounted]);
+  }, [hasMounted, session?.user?.id, loadFromDatabase, loadEpisodes]);
 
-  function clearRecentlyWatched() {
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const clearRecentlyWatched = useCallback(() => {
     const store = useTVShowStore.getState();
     store.deleteRecentlyWatched();
-  }
+  }, []);
 
   const episodes = useMemo(() => {
     if (!hasMounted || recentlyWatched.length === 0) return [];
@@ -116,4 +126,4 @@ const RecentlyWatched = () => {
   );
 };
 
-export default RecentlyWatched;
+export default memo(RecentlyWatchedComponent);

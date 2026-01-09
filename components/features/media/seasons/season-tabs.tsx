@@ -51,6 +51,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
   }, [validSeasons, searchParams]);
 
   // Initialize active episode from URL params when episodes are loaded
+  // Also handle high-intent navigation scroll (from Continue Watching)
   useEffect(() => {
     const sParam = searchParams.get('season');
     const eParam = searchParams.get('episode');
@@ -61,6 +62,17 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
       );
       if (episode && activeEP?.id !== episode.id) {
         setActiveEP(episode);
+
+        // High-intent navigation: scroll to player immediately
+        // This handles Continue Watching card clicks
+        if (playerRef.current && !hasInitializedRef.current) {
+          setTimeout(() => {
+            playerRef.current?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            });
+          }, 300); // After page settles
+        }
       }
     }
   }, [episodes, searchParams, activeSeason, activeEP, setActiveEP]);
@@ -75,19 +87,49 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const onEpisodeClick = useCallback((episode: any) => {
-    setActiveEP(episode);
+  // Track if user is browsing (already on page) vs navigating (new page load)
+  const [isBrowsingContext, setIsBrowsingContext] = useState(false);
+  const hasInitializedRef = useRef(false);
 
-    // Smooth scroll to player if it exists
-    if (playerRef.current) {
-        playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  useEffect(() => {
+    // After initial load, user is in browsing context
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      // Small delay to distinguish initial load from browsing
+      setTimeout(() => setIsBrowsingContext(true), 1000);
     }
+  }, []);
+
+  const onEpisodeClick = useCallback((episode: any, event?: React.MouseEvent) => {
+    // Immediate visual feedback
+    if (event?.currentTarget) {
+      const target = event.currentTarget as HTMLElement;
+      target.style.transform = 'scale(0.98)';
+      setTimeout(() => {
+        target.style.transform = '';
+      }, 150);
+    }
+
+    setActiveEP(episode);
 
     const params = new URLSearchParams(searchParams.toString());
     params.set('season', String(episode.season_number));
     params.set('episode', String(episode.episode_number));
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [router, pathname, searchParams, setActiveEP]);
+
+    // Context-aware scrolling: Only scroll to player if browsing (low intent)
+    // High-intent navigation (from Continue Watching) handled separately
+    if (isBrowsingContext && playerRef.current) {
+      // Single scroll: only to player, not to episode card
+      setTimeout(() => {
+        playerRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }, 100);
+    }
+    // If not browsing context, let navigation handlers manage scroll
+  }, [router, pathname, searchParams, setActiveEP, isBrowsingContext]);
 
   // Handle next episode navigation
   const handleNextEpisode = useCallback(() => {
@@ -142,21 +184,35 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
     }
   }, [activeEP, episodes, activeSeason, validSeasons, router, pathname, searchParams, onEpisodeClick]);
 
-  // Scroll active episode into view when it changes
+  // Scroll active episode into view when it changes (only for initial load with URL params)
   const activeEpisodeRef = useRef<HTMLDivElement>(null);
+  const hasScrolledToEpisodeRef = useRef(false);
 
   useEffect(() => {
-    if (activeEP && activeEpisodeRef.current) {
-      // Small delay to ensure DOM is updated
+    const eParam = searchParams.get('episode');
+    const sParam = searchParams.get('season');
+
+    // Only scroll to episode on initial load with URL params (high-intent navigation)
+    // Not when browsing episodes on the same page
+    if (
+      activeEP &&
+      activeEpisodeRef.current &&
+      eParam &&
+      sParam &&
+      !hasScrolledToEpisodeRef.current &&
+      !isBrowsingContext
+    ) {
+      hasScrolledToEpisodeRef.current = true;
+      // Delay to ensure DOM is ready and player has scrolled first
       setTimeout(() => {
         activeEpisodeRef.current?.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
           inline: 'nearest'
         });
-      }, 100);
+      }, 600); // After player scroll completes
     }
-  }, [activeEP]);
+  }, [activeEP, searchParams, isBrowsingContext]);
 
   if (isError) return (
     <div className="flex flex-col items-center py-20 gap-4 text-destructive">
@@ -198,7 +254,10 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
               </span>
             </div>
           </div>
+        </div>
 
+        {/* View Mode Toggle - Repositioned closer to content */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center p-1 gap-1 bg-zinc-900 border border-white/10 rounded-full">
             {[
               { id: 'list', icon: List, label: 'List View', tooltip: 'Compact list with episode details' },
@@ -210,15 +269,19 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
                 variant="ghost"
                 onClick={() => setView(v.id as any)}
                 className={cn(
-                  'h-8 px-3 md:px-4 rounded-full transition-all text-[10px] font-black uppercase tracking-wider relative group',
-                  view === v.id ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'
+                  'h-9 px-4 md:px-5 rounded-full transition-all text-[10px] md:text-[11px] font-black uppercase tracking-wider relative group',
+                  view === v.id 
+                    ? 'bg-white text-black shadow-lg border-2 border-white' 
+                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 )}
                 title={v.tooltip}
+                aria-pressed={view === v.id}
+                aria-label={v.label}
               >
-                <v.icon className="w-3 h-3 md:mr-2" />
-                <span className="hidden md:inline">{v.label}</span>
+                <v.icon className="w-3.5 h-3.5 md:w-4 md:h-4 mr-2" />
+                <span className="hidden sm:inline">{v.label}</span>
                 {/* Tooltip */}
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-[9px] font-medium text-white bg-zinc-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-white/10">
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-[9px] font-medium text-white bg-zinc-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-white/10 shadow-lg">
                   {v.tooltip}
                 </span>
               </Button>

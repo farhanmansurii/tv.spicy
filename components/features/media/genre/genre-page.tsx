@@ -1,6 +1,7 @@
 import { fetchGenres } from '@/lib/api';
 import Link from 'next/link';
 import CommonTitle from '@/components/shared/animated/common-title';
+import Container from '@/components/shared/containers/container';
 
 interface Genre {
 	id: number;
@@ -19,12 +20,19 @@ async function GenreList({ type }: { type: 'movie' | 'tv' }) {
 
 	return (
 		<div className="mt-20">
-			<CommonTitle
-				text={`${type.charAt(0).toUpperCase() + type.slice(1)} Genres`}
-				variant="section"
-				as="h2"
-				className="mb-4"
-			/>
+			<Container className="relative pt-12 md:pt-16 pb-8">
+                    <div className="space-y-4">
+                        <div>
+                            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-foreground">
+                                ${type.charAt(0).toUpperCase() + type.slice(1)} Genres
+                            </h1>
+                            <p className="text-muted-foreground text-sm md:text-base mt-1.5">
+                                Explore the ${type.charAt(0).toUpperCase() + type.slice(1)} genres
+                            </p>
+                        </div>
+                    </div>
+                </Container>
+
 			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 				{genres.map((genre) => (
 					<Link
