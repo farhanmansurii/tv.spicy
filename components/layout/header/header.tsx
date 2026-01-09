@@ -32,9 +32,8 @@ interface HeaderProps {
  */
 export function Header({ className }: HeaderProps) {
 	const [scrolled, setScrolled] = React.useState(false);
-	const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 	const pathname = usePathname();
-	const { toggleSidebar } = useSidebar();
+	const { toggleSidebar, openMobile } = useSidebar();
 
 	// Apple-style scroll detection with passive listener and hysteresis
 	React.useEffect(() => {
@@ -53,11 +52,6 @@ export function Header({ className }: HeaderProps) {
 		window.addEventListener('scroll', handleScroll, { passive: true });
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, []);
-
-	// Close mobile menu on route change
-	React.useEffect(() => {
-		setMobileMenuOpen(false);
-	}, [pathname]);
 
 	const isActive = (href: string) => {
 		if (href === '/') {
@@ -211,12 +205,12 @@ export function Header({ className }: HeaderProps) {
 									'touch-manipulation',
 									'group'
 								)}
-								aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-								aria-expanded={mobileMenuOpen}
+								aria-label={openMobile ? 'Close menu' : 'Open menu'}
+								aria-expanded={openMobile}
 							>
 								<div className="relative w-5 h-5 flex items-center justify-center">
 									<AnimatePresence mode="wait" initial={false}>
-										{mobileMenuOpen ? (
+										{openMobile ? (
 											<motion.div
 												key="close"
 												initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
