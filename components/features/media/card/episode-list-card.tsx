@@ -30,104 +30,98 @@ export const EpisodeListRow = ({ episode, active, toggle, watched }: any) => {
     <div
       onClick={handleClick}
       className={cn(
-        'group relative flex items-center gap-4 md:gap-6 p-2 md:p-2.5 transition-all duration-500 rounded-xl select-none',
+        'group relative flex items-center gap-4 md:gap-6 p-3 md:p-4 transition-all duration-300 rounded-xl select-none',
         active
-          ? 'bg-primary/10 border border-primary/30 shadow-lg shadow-primary/10'
-          : 'hover:bg-white/[0.03] cursor-pointer border border-transparent',
+          ? 'bg-zinc-900/80 border border-white/20 shadow-xl shadow-black/50 backdrop-blur-sm'
+          : 'hover:bg-zinc-900/40 cursor-pointer border border-white/5 hover:border-white/10',
         !isReleased && 'opacity-40 cursor-not-allowed',
         isClicked && 'scale-[0.98]'
       )}
     >
-      {/* 1. THUMBNAIL: Disciplined Aspect Ratio */}
-      <div className="relative flex-shrink-0 w-32 md:w-44 aspect-video rounded-lg overflow-hidden bg-zinc-900 ring-1 ring-inset ring-white/5">
+      {/* 1. THUMBNAIL: Improved Aspect Ratio */}
+      <div className="relative flex-shrink-0 w-36 md:w-48 aspect-video rounded-lg overflow-hidden bg-zinc-950 ring-1 ring-white/10 shadow-lg">
         {stillUrl ? (
           <img
             src={stillUrl}
             alt=""
             className={cn(
-                "h-full w-full object-cover transition-transform duration-1000 ease-out",
-                active ? "scale-105" : "group-hover:scale-110"
+                "h-full w-full object-cover transition-transform duration-500 ease-out",
+                active ? "scale-105 brightness-110" : "group-hover:scale-105 group-hover:brightness-110"
             )}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-800">
-            <ImageOff className="w-5 h-5" />
+          <div className="w-full h-full flex items-center justify-center bg-zinc-900">
+            <ImageOff className="w-6 h-6 text-zinc-600" />
           </div>
         )}
 
+        {/* Playing Indicator - Top Right Corner */}
+
         {/* Dynamic Overlay based on state */}
         {active ? (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center animate-in fade-in duration-500">
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-2xl scale-90 md:scale-100">
-              <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center animate-in fade-in duration-300">
+            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-2xl">
+              <Play className="w-5 h-5 fill-black text-black ml-0.5" />
             </div>
           </div>
         ) : isReleased && (
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center">
-              <Play className="w-3.5 h-3.5 fill-white text-white ml-0.5" />
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/30 flex items-center justify-center">
+              <Play className="w-4 h-4 fill-white text-white ml-0.5" />
             </div>
           </div>
         )}
 
         {!isReleased && (
-            <div className="absolute inset-0 bg-zinc-950/60 flex items-center justify-center">
-                <Lock className="w-4 h-4 text-white/40" />
+            <div className="absolute inset-0 bg-zinc-950/80 flex items-center justify-center backdrop-blur-sm">
+                <Lock className="w-5 h-5 text-white/50" />
             </div>
         )}
       </div>
 
-      {/* 2. INFO SECTION: High-Density Typography */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-        <div className="flex items-center gap-2">
+      {/* 2. INFO SECTION: Improved Typography and Spacing */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
+        {/* Metadata Row - Wraps on small screens */}
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
           <span className={cn(
-            "text-[10px] font-bold tracking-widest uppercase",
-            active ? "text-primary" : "text-zinc-500"
+            "text-xs font-bold tracking-wider uppercase px-2 py-0.5 rounded-md whitespace-nowrap flex-shrink-0",
+            active ? "text-white bg-white/10" : "text-zinc-400 bg-zinc-800/50"
           )}>
             EP {episode.episode_number}
           </span>
           {episode.runtime && (
-            <span className="text-[10px] font-medium text-zinc-600 tabular-nums">
+            <span className="text-xs font-medium text-zinc-500 tabular-nums whitespace-nowrap flex-shrink-0">
                 {episode.runtime} MIN
             </span>
           )}
           {rating && (
             <div className={cn(
-              "flex items-center gap-0.5 text-[10px] font-bold tabular-nums opacity-70",
-              hasGoodRating ? "text-yellow-500" : "text-white/50"
+              "flex items-center gap-1 text-xs font-bold tabular-nums whitespace-nowrap flex-shrink-0",
+              hasGoodRating ? "text-yellow-500" : "text-zinc-400"
             )}>
-              <Star className={cn("w-2.5 h-2.5", hasGoodRating && "fill-current")} />
-              {rating}
+              <Star className={cn("w-3 h-3 flex-shrink-0", hasGoodRating && "fill-current")} />
+              <span>{rating}</span>
             </div>
           )}
         </div>
 
+        {/* Title - Truncates with ellipsis */}
         <h4 className={cn(
-          "text-sm md:text-base font-semibold truncate transition-colors",
+          "text-base md:text-lg font-semibold leading-tight transition-colors min-w-0",
           active ? "text-white font-bold" : "text-zinc-200 group-hover:text-white"
         )}>
-          {episode.name || `Episode ${episode.episode_number}`}
+          <span className="block truncate" title={episode.name || `Episode ${episode.episode_number}`}>
+            {episode.name || `Episode ${episode.episode_number}`}
+          </span>
         </h4>
 
+        {/* Description - Clamps to 2 lines */}
         <p className={cn(
-            "text-[12px] md:text-xs line-clamp-1 md:line-clamp-2 mt-0.5 font-medium leading-relaxed transition-colors",
+            "text-sm leading-relaxed transition-colors min-w-0 line-clamp-2",
             active ? "text-zinc-400" : "text-zinc-500 group-hover:text-zinc-400"
-        )}>
+        )} title={episode.overview || "No description available for this episode."}>
           {episode.overview || "No description available for this episode."}
         </p>
-      </div>
-
-      {/* 3. STATUS INDICATOR: Minimalist */}
-      <div className="flex-shrink-0 ml-2 md:ml-4">
-        {active && (
-          <div className="flex items-center gap-2 py-1 px-3 rounded-full bg-white/5 border border-white/10">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
-            </span>
-            <span className="text-[9px] font-black uppercase tracking-wider text-white">Playing</span>
-          </div>
-        )}
       </div>
     </div>
   );

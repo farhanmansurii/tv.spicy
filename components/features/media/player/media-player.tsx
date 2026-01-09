@@ -225,5 +225,5 @@ export default function MediaPlayer({
 		};
 	}, [activeEP?.tv_id, updateTimeWatched]);
 
-	return <div id="oplayer" className="mx-auto mb-10  aspect-video  w-full " />;
+	return <div id="oplayer" className="w-full aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-white/10 shadow-2xl" />;
 }

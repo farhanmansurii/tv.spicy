@@ -51,44 +51,43 @@ export default function Episode(props: EpisodeProps) {
     const currentSource = sourcesMap.find((s) => s.name === selectedProvider) || sourcesMap[0];
 
     return (
-        <div className="group relative w-full flex flex-col p-2 md:p-3 gap-3">
-            <div className="flex items-center justify-between">
+        <div className="group relative w-full flex flex-col gap-4">
+            <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-4">
                     <Select value={selectedProvider} onValueChange={setProvider}>
-                        <SelectTrigger className="h-10 w-fit bg-white/[0.03] border-white/10 rounded-xl px-4 hover:bg-white/[0.08] transition-all gap-3 shadow-2xl">
-                            <Settings className="w-3.5 h-3.5 text-primary" />
-                            <SelectValue className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                        <SelectTrigger className="h-11 w-fit bg-zinc-900/80 border-white/10 rounded-xl px-4 hover:bg-zinc-800/80 transition-all gap-3 shadow-lg backdrop-blur-sm">
+                            <Settings className="w-4 h-4 text-primary" />
+                            <SelectValue className="text-xs font-bold uppercase tracking-wider text-zinc-300">
                                 {currentSource.label}
                             </SelectValue>
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-950 border-white/10 rounded-2xl backdrop-blur-3xl p-1.5 shadow-2xl max-h-[300px]">
+                        <SelectContent className="bg-zinc-950 border-white/10 rounded-xl backdrop-blur-xl p-1.5 shadow-2xl max-h-[300px]">
                             {sourcesMap.map((source) => (
                                 <SelectItem
                                     value={source.name}
                                     key={source.name}
+                                    className="text-xs"
                                 >
-                                    <span className="text-[11px] ">{source.label}</span>
+                                    {source.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
-
-
                 </div>
 
                 {getNextEp && type === 'tv' && (
                     <Button
                         variant="ghost"
                         onClick={getNextEp}
-                        className="h-10 rounded-xl px-6 transition-all gap-2 group/next shadow-2xl"
+                        className="h-11 rounded-xl px-6 transition-all gap-2 group/next bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
                     >
-                        <span className="text-[10px] font-black uppercase tracking-widest">Next Chapter</span>
+                        <span className="text-xs font-bold uppercase tracking-wider">Next Episode</span>
                         <ChevronRight className="w-4 h-4 transition-transform group-hover/next:translate-x-1" />
                     </Button>
                 )}
             </div>
 
-            <div className="relative aspect-video  rounded-2xl md:rounded-2xl overflow-hidden  bg-black ring-1 ring-white/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,1)] group-hover:ring-white/20 transition-all duration-700">
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-white/10 shadow-2xl group-hover:ring-white/20 transition-all duration-300">
                 <iframe
                     ref={iframeRef}
                     allowFullScreen
@@ -99,7 +98,7 @@ export default function Episode(props: EpisodeProps) {
                 />
 
                 {/* Visual Depth Overlay */}
-                <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/5 rounded-[1.5rem] md:rounded-[2rem]" />
+                <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/5 rounded-xl" />
             </div>
         </div>
     );

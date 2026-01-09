@@ -224,7 +224,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
   return (
     <div className="w-full flex flex-col gap-10 md:gap-16">
       {/* PLAYER COMPONENT */}
-      <div ref={playerRef} className="w-full bg-black rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+      <div ref={playerRef} className="w-full">
         <TVContainer
           key={`${activeEP?.id}-${activeSeason}`}
           showId={showId}
@@ -310,7 +310,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
                 </div>
               )}
               {view === 'list' && (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   {episodes?.map((ep: any) => (
                     <div
                       key={ep.id}
