@@ -70,8 +70,8 @@ const Tab = ({ text, selected, setSelected }: { text: string; selected: boolean;
             onClick={() => setSelected(text)}
             className={cn(
                 'relative px-5 md:px-7 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 outline-none z-10 rounded-full',
-                selected 
-                    ? 'text-black shadow-lg' 
+                selected
+                    ? 'text-black shadow-lg'
                     : 'text-zinc-400 hover:text-white'
             )}
             aria-pressed={selected}

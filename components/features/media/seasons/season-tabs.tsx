@@ -270,8 +270,8 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
                 onClick={() => setView(v.id as any)}
                 className={cn(
                   'h-9 px-4 md:px-5 rounded-full transition-all text-[10px] md:text-[11px] font-black uppercase tracking-wider relative group',
-                  view === v.id 
-                    ? 'bg-white text-black shadow-lg border-2 border-white' 
+                  view === v.id
+                    ? 'bg-white text-black shadow-lg border-2 border-white'
                     : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 )}
                 title={v.tooltip}

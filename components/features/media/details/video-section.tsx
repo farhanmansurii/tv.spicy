@@ -45,10 +45,10 @@ export default function VideoSection({ id, type }: { id: string; type: string })
                         {trailers.slice(0, 6).map((video: any) => (
                             <Dialog key={video.id}>
                                 <DialogTrigger className="relative aspect-video rounded-2xl overflow-hidden group border border-white/5 shadow-2xl">
-                                    <img 
-                                        src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`} 
-                                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                                        alt={video.name || 'Trailer thumbnail'} 
+                                    <img
+                                        src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
+                                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        alt={video.name || 'Trailer thumbnail'}
                                     />
                                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
                                         <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-2xl">
@@ -61,10 +61,10 @@ export default function VideoSection({ id, type }: { id: string; type: string })
                                 </DialogTrigger>
                                 <DialogContent className="max-w-5xl p-0 bg-black border-none rounded-[2rem] overflow-hidden">
                                     <div className="aspect-video w-full">
-                                        <iframe 
-                                            src={`https://www.youtube.com/embed/${video.key}?autoplay=1`} 
-                                            className="w-full h-full" 
-                                            allowFullScreen 
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${video.key}?autoplay=1`}
+                                            className="w-full h-full"
+                                            allowFullScreen
                                             title={video.name || 'Video player'}
                                         />
                                     </div>
