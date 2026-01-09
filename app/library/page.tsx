@@ -8,12 +8,16 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
-import { Bookmark, Heart, History, LogIn, User } from 'lucide-react'
+import { Bookmark, Heart, History, LogIn } from 'lucide-react'
 
 import { LibraryWatchlist } from '@/components/features/watchlist/library-watchlist'
-import { MyFavorites } from '@/components/features/watchlist/my-favorites'
-import RecentlyWatchedComponent from '@/components/features/watchlist/recently-watched'
+import { LibraryContinueWatching } from '@/components/features/watchlist/library-continue-watching'
+import { LibraryFavoritesSynced } from '@/components/features/watchlist/library-favorites-synced'
 import { useUserFavorites, useUserRecentlyWatched, useUserWatchlist } from '@/hooks/use-user-data'
+import useWatchListStore from '@/store/watchlistStore'
+import useTVShowStore from '@/store/recentsStore'
+import { useFavoritesStore } from '@/store/favoritesStore'
+import { usePersonalizedGreeting } from '@/hooks/use-personalized-greeting'
 
 interface LibraryStatCardProps {
 	label: string
@@ -46,65 +50,13 @@ function LibraryStatCard({ label, value, icon, className }: LibraryStatCardProps
 	)
 }
 
-function SignInFirst() {
-	return (
-		<div className="min-h-screen mt-20 bg-background">
-			<div className="relative w-full overflow-hidden bg-gradient-to-b from-zinc-950 via-zinc-950/95 to-zinc-950 border-b border-white/5">
-				<Container className="relative py-10 md:py-14">
-					<div className="max-w-3xl">
-						<p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.18em]">
-							Library
-						</p>
-						<h1 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-							Sign in first
-						</h1>
-						<p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl">
-							Your Library keeps your watchlist, favorites, and continue-watching progress synced
-							across devices.
-						</p>
-						<div className="mt-6 flex flex-wrap items-center gap-3">
-							<Button asChild className="gap-2">
-								<Link href="/auth/signin?callbackUrl=/library">
-									<LogIn className="h-4 w-4" />
-									Sign in
-								</Link>
-							</Button>
-							<Button asChild variant="outline" className="gap-2">
-								<Link href="/auth/signin?callbackUrl=/profile">
-									<User className="h-4 w-4" />
-									Account
-								</Link>
-							</Button>
-						</div>
-					</div>
-				</Container>
-			</div>
-
-			<Container className="py-8 md:py-12">
-				<div className="grid gap-3 sm:grid-cols-3">
-					<LibraryStatCard
-						label="Watchlist"
-						value={0}
-						icon={<Bookmark className="h-5 w-5 text-foreground" />}
-					/>
-					<LibraryStatCard
-						label="Favorites"
-						value={0}
-						icon={<Heart className="h-5 w-5 text-foreground" />}
-					/>
-					<LibraryStatCard
-						label="Continue watching"
-						value={0}
-						icon={<History className="h-5 w-5 text-foreground" />}
-					/>
-				</div>
-			</Container>
-		</div>
-	)
-}
-
 export default function LibraryPage() {
 	const { data: session, isPending } = useSession()
+	const { watchlist, tvwatchlist } = useWatchListStore()
+	const { favoriteMovies, favoriteTV } = useFavoritesStore()
+	const { recentlyWatched } = useTVShowStore()
+	const { message: greetingMessage, isAuthenticated } = usePersonalizedGreeting()
+	const isSignedIn = Boolean(session?.user?.id)
 
 	// DB-backed counts (only enabled when signed in)
 	const { data: dbWatchlistMovies = [] } = useUserWatchlist('movie')
@@ -114,12 +66,30 @@ export default function LibraryPage() {
 	const { data: dbRecentlyWatched = [] } = useUserRecentlyWatched()
 
 	const counts = React.useMemo(() => {
-		return {
-			watchlist: dbWatchlistMovies.length + dbWatchlistTV.length,
-			favorites: dbFavoritesMovies.length + dbFavoritesTV.length,
-			recent: dbRecentlyWatched.length
+		const localCounts = {
+			watchlist: (watchlist?.length || 0) + (tvwatchlist?.length || 0),
+			favorites: (favoriteMovies?.length || 0) + (favoriteTV?.length || 0),
+			recent: recentlyWatched?.length || 0
 		}
-	}, [dbWatchlistMovies.length, dbWatchlistTV.length, dbFavoritesMovies.length, dbFavoritesTV.length, dbRecentlyWatched.length])
+
+		return {
+			watchlist: isSignedIn ? dbWatchlistMovies.length + dbWatchlistTV.length : localCounts.watchlist,
+			favorites: isSignedIn ? dbFavoritesMovies.length + dbFavoritesTV.length : localCounts.favorites,
+			recent: isSignedIn ? dbRecentlyWatched.length : localCounts.recent
+		}
+	}, [
+		isSignedIn,
+		dbWatchlistMovies.length,
+		dbWatchlistTV.length,
+		dbFavoritesMovies.length,
+		dbFavoritesTV.length,
+		dbRecentlyWatched.length,
+		watchlist,
+		tvwatchlist,
+		favoriteMovies,
+		favoriteTV,
+		recentlyWatched
+	])
 
 	if (isPending) {
 		return (
@@ -129,22 +99,40 @@ export default function LibraryPage() {
 		)
 	}
 
-	if (!session) return <SignInFirst />
-
 	return (
 		<div className="min-h-screen mt-20 bg-background">
 			<div className="relative w-full overflow-hidden bg-gradient-to-b from-zinc-950 via-zinc-950/95 to-zinc-950 border-b border-white/5">
 				<Container className="relative py-10 md:py-14">
 					<div className="max-w-4xl">
 						<p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.18em]">
-							Library
+							{isSignedIn ? 'Library · Synced' : 'Library · Local mode'}
 						</p>
-						<h1 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-							Your Library
-						</h1>
+						{isAuthenticated && greetingMessage ? (
+							<h1 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+								{greetingMessage}
+							</h1>
+						) : (
+							<h1 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+								Your Library
+							</h1>
+						)}
 						<p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl">
 							Everything you saved in one place: watchlist, favorites, and continue-watching.
+							{isSignedIn ? ' Synced across devices.' : ' Stored on this device.'}
 						</p>
+						{!isSignedIn && (
+							<div className="mt-6 flex flex-wrap items-center gap-3">
+								<Button asChild className="gap-2">
+									<Link href="/auth/signin?callbackUrl=/library">
+										<LogIn className="h-4 w-4" />
+										Sign in to sync
+									</Link>
+								</Button>
+								<p className="text-xs text-muted-foreground/70">
+									Signing in keeps your Library across devices.
+								</p>
+							</div>
+						)}
 					</div>
 				</Container>
 			</div>
@@ -187,20 +175,7 @@ export default function LibraryPage() {
 							</TabsList>
 
 							<TabsContent value="continue" className="mt-6">
-								{counts.recent > 0 ? (
-									<RecentlyWatchedComponent />
-								) : (
-									<div className="flex flex-col items-center justify-center py-16 space-y-4">
-										<div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-2">
-											<History className="w-8 h-8 text-zinc-600" />
-										</div>
-										<h3 className="text-xl font-bold text-foreground">No recent activity</h3>
-										<p className="text-muted-foreground text-center max-w-md">
-											Start watching a show or movie and it will show up here so you can resume
-											instantly.
-										</p>
-									</div>
-								)}
+								<LibraryContinueWatching />
 							</TabsContent>
 
 							<TabsContent value="watchlist" className="mt-6">
@@ -208,7 +183,7 @@ export default function LibraryPage() {
 							</TabsContent>
 
 							<TabsContent value="favorites" className="mt-6">
-								<MyFavorites />
+								<LibraryFavoritesSynced />
 							</TabsContent>
 						</Tabs>
 					</div>

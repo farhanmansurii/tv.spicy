@@ -90,8 +90,8 @@ export default function MobileHeader({ center }: MobileHeaderProps) {
 	const { data: session } = useSession();
 
 	const accountHref = session?.user?.id ? '/profile' : '/auth/signin?callbackUrl=/profile';
-	const libraryHref = session?.user?.id ? '/library' : '/auth/signin?callbackUrl=/library';
-	const libraryLabel = session?.user?.id ? 'Library' : 'Sign in first';
+	const libraryHref = '/library';
+	const libraryLabel = 'Library';
 
 	const handleNavigate = React.useCallback(
 		(href: string) => {

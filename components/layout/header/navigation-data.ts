@@ -107,14 +107,6 @@ export const navigationItems: NavigationItem[] = [
 ];
 
 export function getNavigationItems(options: { isSignedIn: boolean }) {
-	if (options.isSignedIn) return navigationItems;
-
-	return navigationItems.map((item) => {
-		if (item.href !== '/library') return item;
-		return {
-			...item,
-			label: 'Sign in first',
-			href: '/auth/signin?callbackUrl=/library',
-		};
-	});
+	void options;
+	return navigationItems;
 }

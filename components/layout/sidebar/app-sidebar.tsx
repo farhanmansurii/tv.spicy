@@ -17,10 +17,9 @@ import {
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SearchCommandBox } from '@/components/features/search/search-command-box';
-import { getNavigationItems } from '../header/navigation-data';
+import { navigationItems } from '../header/navigation-data';
 import { cn } from '@/lib/utils';
 import { AuthButton } from '@/components/auth/auth-button';
-import { useSession } from '@/lib/auth-client';
 
 /**
  * AppSidebar - Apple-inspired mobile navigation sidebar
@@ -36,10 +35,6 @@ export function AppSidebar() {
 	const { setOpenMobile } = useSidebar();
 	const [openSections, setOpenSections] = React.useState<Set<string>>(new Set());
 	const pathname = usePathname();
-	const { data: session } = useSession();
-	const navigationItems = React.useMemo(() => {
-		return getNavigationItems({ isSignedIn: Boolean(session?.user?.id) });
-	}, [session?.user?.id]);
 
 	// Auto-expand sections if current path matches
 	React.useEffect(() => {
