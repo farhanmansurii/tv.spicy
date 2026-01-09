@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, useMemo, useEffect, useState } from 'react';
+import React, { memo, useMemo, useEffect, useState, useRef } from 'react';
 import { useUserFavorites } from '@/hooks/use-user-data';
 import MediaRow from '@/components/features/media/row/media-row';
 import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
@@ -12,10 +12,33 @@ function UserFavoritesMoviesComponent() {
 	const [favoriteShows, setFavoriteShows] = useState<Show[]>([]);
 	const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
+	// Create a stable dependency based on favorite IDs to prevent infinite loops
+	const favoriteIds = useMemo(() => {
+		if (!favorites || favorites.length === 0) {
+			return '';
+		}
+		return favorites.map((fav: any) => fav.mediaId).sort().join(',');
+	}, [favorites]);
+
+	const previousFavoriteIdsRef = useRef<string>('');
+
 	useEffect(() => {
+		// Skip if favoriteIds haven't actually changed
+		if (previousFavoriteIdsRef.current === favoriteIds) {
+			return;
+		}
+
+		previousFavoriteIdsRef.current = favoriteIds;
+
 		const fetchDetails = async () => {
-			if (favorites.length === 0) {
-				setFavoriteShows([]);
+			if (!favorites || favorites.length === 0) {
+				setFavoriteShows((prevShows) => {
+					// Only update if state actually changed
+					if (prevShows.length === 0) {
+						return prevShows;
+					}
+					return [];
+				});
 				return;
 			}
 
@@ -42,7 +65,8 @@ function UserFavoritesMoviesComponent() {
 		};
 
 		fetchDetails();
-	}, [favorites]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [favoriteIds]);
 
 	const filteredFavorites = useMemo(() => {
 		return favoriteShows.filter((show: Show) => show.poster_path || show.backdrop_path);

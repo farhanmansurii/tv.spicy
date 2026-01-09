@@ -67,8 +67,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				>
 					<AuthProvider>
 						<TanstackQueryProvider>
-							<AuthSync />
-							<main className="relative min-h-screen">{children}</main>
+							<SidebarProvider>
+								<AuthSync />
+								{children}
+							</SidebarProvider>
 							<Toaster />
 						</TanstackQueryProvider>
 					</AuthProvider>

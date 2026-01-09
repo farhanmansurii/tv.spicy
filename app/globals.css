@@ -280,6 +280,83 @@
 		scrollbar-gutter: stable;
 	}
 }
+
+/* Custom Minimal Scrollbar - Apple Style */
+/* Webkit browsers (Chrome, Safari, Edge) */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+*::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: rgba(0, 0, 0, 0.2);
+	border-radius: 10px;
+	border: 2px solid transparent;
+	background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode scrollbar */
+.dark * {
+	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Custom scrollbar for sidebar content */
+.custom-scrollbar {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+	width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	background-color: rgba(0, 0, 0, 0.15);
+	border-radius: 10px;
+	border: 1px solid transparent;
+	background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.25);
+}
+
+.dark .custom-scrollbar {
+	scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+	background-color: rgba(255, 255, 255, 0.15);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(255, 255, 255, 0.25);
+}
 @keyframes shimmer {
 	0% {
 		transform: translateX(-100%);
@@ -309,4 +386,10 @@
 		opacity: 1;
 		transform: translateY(0) translateX(0);
 	}
+}
+
+/* Mobile sidebar fixed width override */
+[data-mobile="true"][data-sidebar="sidebar"] {
+	width: 80vw !important;
+	max-width: 80vw !important;
 }

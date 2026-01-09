@@ -12,6 +12,11 @@ function UserFavoritesTVComponent() {
 	const [favoriteShows, setFavoriteShows] = useState<Show[]>([]);
 	const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
+	// Create a stable dependency based on favorite IDs to prevent infinite loops
+	const favoriteIds = useMemo(() => {
+		return favorites.map((fav: any) => fav.mediaId).sort().join(',');
+	}, [favorites]);
+
 	useEffect(() => {
 		const fetchDetails = async () => {
 			if (favorites.length === 0) {
@@ -42,7 +47,8 @@ function UserFavoritesTVComponent() {
 		};
 
 		fetchDetails();
-	}, [favorites]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [favoriteIds]);
 
 	const filteredFavorites = useMemo(() => {
 		return favoriteShows.filter((show: Show) => show.poster_path || show.backdrop_path);

@@ -4,9 +4,6 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState, useEffect } from 'react';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-import { Header } from '@/components/layout/header/header';
-import Footer from '@/components/layout/footer/footer';
-import SidebarProvider from './sidebar-provider';
 import { useMediaQueryStore } from '@/store/mediaQueryStore';
 
 const QueryProvider = ({ children }: { children: React.ReactNode }) => {
@@ -43,9 +40,7 @@ const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Header />
 			{children}
-			<Footer />
 			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	);

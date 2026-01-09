@@ -13,7 +13,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, LogOut, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
 
 export function AuthButton() {
 	const { data: session, status } = useSession();
@@ -24,10 +23,11 @@ export function AuthButton() {
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-10 w-10 rounded-full border border-white/10 bg-white/5"
+				className="h-10 w-10 sm:h-11 sm:w-11 rounded-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 touch-manipulation"
 				disabled
+				aria-label="Loading authentication"
 			>
-				<div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+				<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 dark:border-gray-700 border-t-gray-600 dark:border-t-gray-400" />
 			</Button>
 		);
 	}
@@ -37,17 +37,18 @@ export function AuthButton() {
 			<Button
 				onClick={() => signIn()}
 				variant="outline"
-				className="hidden md:flex items-center gap-2 border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
+				size="icon"
+				className="h-10 w-10 sm:h-11 sm:w-11 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors duration-200 touch-manipulation"
+				aria-label="Sign in to your account"
 			>
-				<User className="w-4 h-4" />
-				<span>Sign In</span>
+				<User className="w-5 h-5" strokeWidth={2} />
 			</Button>
 		);
 	}
 
 	const userInitials = session.user?.name
 		?.split(' ')
-		.map((n) => n[0])
+		.map((name) => name[0])
 		.join('')
 		.toUpperCase()
 		.slice(0, 2) || 'U';
@@ -58,37 +59,49 @@ export function AuthButton() {
 				<Button
 					variant="ghost"
 					size="icon"
-					className="h-10 w-10 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all"
+					className="h-10 w-10 sm:h-11 sm:w-11 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-all duration-200 touch-manipulation p-0"
+					aria-label="Account menu"
+					aria-haspopup="true"
 				>
-					<Avatar className="h-10 w-10">
-						<AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
-						<AvatarFallback className="bg-primary/20 text-primary font-bold">
+					<Avatar className="h-10 w-10 sm:h-11 sm:w-11 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 transition-colors">
+						<AvatarImage
+							src={session.user?.image || ''}
+							alt={session.user?.name || 'User account'}
+						/>
+						<AvatarFallback className="bg-blue-500 text-white text-[13px] sm:text-[15px] font-semibold">
 							{userInitials}
 						</AvatarFallback>
 					</Avatar>
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-56 bg-black/95 backdrop-blur-xl border-white/10 shadow-2xl">
-				<DropdownMenuLabel className="text-white">
-					<div className="flex flex-col space-y-1">
-						<p className="text-sm font-medium leading-none">{session.user?.name || 'User'}</p>
-						<p className="text-xs leading-none text-white/60">{session.user?.email}</p>
+			<DropdownMenuContent
+				align="end"
+				className="w-64 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 shadow-lg rounded-2xl p-2 mt-2"
+			>
+				<DropdownMenuLabel className="px-3 py-2.5">
+					<div className="flex flex-col gap-0.5">
+						<p className="text-[15px] font-semibold text-gray-900 dark:text-white leading-tight">
+							{session.user?.name || 'User'}
+						</p>
+						<p className="text-[13px] text-gray-500 dark:text-gray-400 leading-tight">
+							{session.user?.email}
+						</p>
 					</div>
 				</DropdownMenuLabel>
-				<DropdownMenuSeparator className="bg-white/10" />
+				<DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-gray-800" />
 				<DropdownMenuItem
 					onClick={() => router.push('/profile')}
-					className="text-white/90 hover:text-white hover:bg-white/10 cursor-pointer"
+					className="px-3 py-2.5 text-[15px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl cursor-pointer transition-colors duration-150 touch-manipulation"
 				>
-					<Settings className="w-4 h-4 mr-2" />
+					<Settings className="w-4 h-4 mr-3" strokeWidth={2} />
 					<span>Profile Settings</span>
 				</DropdownMenuItem>
-				<DropdownMenuSeparator className="bg-white/10" />
+				<DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-gray-800" />
 				<DropdownMenuItem
 					onClick={() => signOut({ callbackUrl: '/' })}
-					className="text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer"
+					className="px-3 py-2.5 text-[15px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl cursor-pointer transition-colors duration-150 touch-manipulation"
 				>
-					<LogOut className="w-4 h-4 mr-2" />
+					<LogOut className="w-4 h-4 mr-3" strokeWidth={2} />
 					<span>Sign Out</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
