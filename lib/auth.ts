@@ -16,10 +16,18 @@ function getBaseURL(): string {
 		return `https://${process.env.VERCEL_URL}`;
 	}
 	// Fallback to localhost for development
+	if (process.env.NODE_ENV === 'development') {
+		return 'http://localhost:3000';
+	}
 	return 'https://spicy-tv.vercel.app';
 }
 
 const baseURL = getBaseURL();
+
+// Configure trusted origins for development
+const trustedOrigins = process.env.NODE_ENV === 'development'
+	? ['http://localhost:3000', 'http://localhost']
+	: undefined;
 
 // Validate required environment variables in production
 if (process.env.NODE_ENV === 'production') {
@@ -50,6 +58,7 @@ export const auth = betterAuth({
 	baseURL,
 	basePath: '/api/auth',
 	secret: process.env.BETTER_AUTH_SECRET || process.env.NEXTAUTH_SECRET || '',
+	trustedOrigins,
 });
 
 export type Session = typeof auth.$Infer.Session;

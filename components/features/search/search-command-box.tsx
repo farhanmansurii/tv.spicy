@@ -13,6 +13,10 @@ import {
 	Loader2,
 	AlertCircle,
 	ArrowRight,
+	Compass,
+	Library,
+	Sparkles,
+	Tag,
 } from 'lucide-react';
 import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
@@ -22,7 +26,13 @@ import { cn } from '@/lib/utils';
 import { searchShows } from '@/lib/tmdb-fetch-helper';
 import { tmdbImage } from '@/lib/tmdb-image';
 import useSearchStore from '@/store/recentsSearchStore';
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, VisuallyHidden } from '@/components/ui/dialog';
+import {
+	Dialog,
+	DialogContent,
+	DialogTrigger,
+	DialogTitle,
+	VisuallyHidden,
+} from '@/components/ui/dialog';
 import {
 	Command,
 	CommandGroup,
@@ -50,7 +60,8 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 	const animationRef = React.useRef<gsap.core.Tween | null>(null);
 	const prevResultsLengthRef = React.useRef(0);
 	const loaderTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-	const { recentlySearched, removeFromRecentlySearched, addToRecentlySearched } = useSearchStore();
+	const { recentlySearched, removeFromRecentlySearched, addToRecentlySearched } =
+		useSearchStore();
 
 	const debouncedSetQuery = React.useMemo(
 		() => debounce((v: string) => setDebouncedQuery(v), 500),
@@ -262,13 +273,15 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 						<span className="hidden lg:inline-flex text-[14px] text-muted-foreground/50 group-hover:text-muted-foreground/70 transition-colors">
 							Search...
 						</span>
-						<kbd className={cn(
-							'pointer-events-none absolute right-2.5 hidden lg:flex',
-							'h-5 items-center gap-0.5 rounded-md',
-							'bg-foreground/[0.04] border border-border/30',
-							'px-1.5 font-mono text-[10px] font-medium',
-							'text-muted-foreground/40'
-						)}>
+						<kbd
+							className={cn(
+								'pointer-events-none absolute right-2.5 hidden lg:flex',
+								'h-5 items-center gap-0.5 rounded-md',
+								'bg-foreground/[0.04] border border-border/30',
+								'px-1.5 font-mono text-[10px] font-medium',
+								'text-muted-foreground/40'
+							)}
+						>
 							<span className="text-[11px]">⌘</span>K
 						</kbd>
 					</button>
@@ -373,9 +386,12 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 													key={`recent-${item.id}`}
 													item={item}
 													isRecent
-													onRemove={() => removeFromRecentlySearched(item.id)}
+													onRemove={() =>
+														removeFromRecentlySearched(item.id)
+													}
 													onSelect={() => {
-														const mediaType = item.media_type || 'movie';
+														const mediaType =
+															item.media_type || 'movie';
 														router.push(`/${mediaType}/${item.id}`);
 														setOpen(false);
 													}}
@@ -437,7 +453,8 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 														key={item.id}
 														item={item}
 														onSelect={() => {
-															const mediaType = item.media_type || 'movie';
+															const mediaType =
+																item.media_type || 'movie';
 															router.push(`/${mediaType}/${item.id}`);
 															setOpen(false);
 															addToRecentlySearched(item);
@@ -449,7 +466,9 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 											<CommandGroup>
 												<CommandItem
 													onSelect={() => {
-														router.push(`/search?q=${encodeURIComponent(debouncedQuery)}`);
+														router.push(
+															`/search?q=${encodeURIComponent(debouncedQuery)}`
+														);
 														setOpen(false);
 													}}
 													className="flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all aria-selected:bg-white/10 group mx-1 mb-1 outline-none border-t border-white/5 mt-2"
@@ -463,7 +482,8 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 																View All Results
 															</span>
 															<span className="text-[10px] font-medium text-white/20">
-																See all matches for &quot;{debouncedQuery}&quot;
+																See all matches for &quot;
+																{debouncedQuery}&quot;
 															</span>
 														</div>
 													</div>
@@ -503,7 +523,8 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 	const year = (item.release_date || item.first_air_date || '').split('-')[0];
 	const title = item.title || item.name || 'Untitled';
-	const mediaType = item.media_type === 'movie' ? 'Movie' : item.media_type === 'tv' ? 'TV Show' : 'Media';
+	const mediaType =
+		item.media_type === 'movie' ? 'Movie' : item.media_type === 'tv' ? 'TV Show' : 'Media';
 
 	return (
 		<div className="px-1 py-1">
@@ -522,11 +543,13 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 					cursor-pointer outline-none overflow-hidden"
 			>
 				{/* Poster Image - 2:3 Aspect Ratio */}
-				<div className="relative w-12 aspect-[2/3] rounded-lg overflow-hidden
+				<div
+					className="relative w-12 aspect-[2/3] rounded-lg overflow-hidden
 					bg-gradient-to-br from-white/[0.03] to-white/[0.01]
 					border border-white/[0.08] flex-shrink-0 shadow-md
 					group-hover:shadow-xl group-hover:scale-[1.02]
-					transition-all duration-300">
+					transition-all duration-300"
+				>
 					{item.poster_path ? (
 						<>
 							<img
@@ -535,8 +558,10 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 								alt=""
 								loading="lazy"
 							/>
-							<div className="absolute inset-0 bg-gradient-to-t
-								from-black/30 via-transparent to-transparent" />
+							<div
+								className="absolute inset-0 bg-gradient-to-t
+								from-black/30 via-transparent to-transparent"
+							/>
 						</>
 					) : (
 						<div className="w-full h-full flex items-center justify-center">
@@ -548,39 +573,43 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 				{/* Content Area */}
 				<div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
 					{/* Title */}
-					<h3 className="text-[13.5px] font-semibold text-white/90
+					<h3
+						className="text-[13.5px] font-semibold text-white/90
 						group-hover:text-white/95 group-aria-selected:text-white
 						truncate leading-tight tracking-tight
-						transition-colors duration-200">
+						transition-colors duration-200"
+					>
 						{title}
 					</h3>
 
 					{/* Metadata Row */}
 					<div className="flex items-center gap-2 text-[11px] font-medium">
 						{/* Media Type Badge */}
-						<span className="px-2 py-0.5 rounded-md
+						<span
+							className="px-2 py-0.5 rounded-md
 							bg-white/[0.06] group-aria-selected:bg-white/[0.08]
 							text-white/40 group-aria-selected:text-white/50
 							uppercase tracking-wider text-[10px] font-bold
-							transition-colors duration-200">
+							transition-colors duration-200"
+						>
 							{mediaType}
 						</span>
 
 						{/* Year */}
-						{year && (
-							<span className="text-white/30 font-semibold">
-								{year}
-							</span>
-						)}
+						{year && <span className="text-white/30 font-semibold">{year}</span>}
 
 						{/* Rating */}
 						{item.vote_average > 0 && (
 							<div className="flex items-center gap-1 ml-auto">
-								<div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md
+								<div
+									className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md
 									bg-amber-500/10 group-aria-selected:bg-amber-500/15
-									transition-colors duration-200">
-									<Star className="w-3 h-3 text-amber-400/70 fill-amber-400/70"
-										strokeWidth={0} />
+									transition-colors duration-200"
+								>
+									<Star
+										className="w-3 h-3 text-amber-400/70 fill-amber-400/70"
+										strokeWidth={0}
+									/>
 									<span className="text-amber-400/90 font-bold text-[11px]">
 										{item.vote_average.toFixed(1)}
 									</span>
@@ -591,9 +620,11 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 
 					{/* Overview/Description (optional, can be toggled) */}
 					{item.overview && (
-						<p className="text-[11px] text-white/25 leading-relaxed
+						<p
+							className="text-[11px] text-white/25 leading-relaxed
 							line-clamp-1 group-hover:text-white/30
-							transition-colors duration-200">
+							transition-colors duration-200"
+						>
 							{item.overview}
 						</p>
 					)}
@@ -622,19 +653,23 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 
 					{/* Chevron Indicator */}
 					<div className="p-1">
-						<ChevronRight className="w-4 h-4 text-white/10
+						<ChevronRight
+							className="w-4 h-4 text-white/10
 							group-hover:text-white/20 group-aria-selected:text-white/30
 							group-hover:translate-x-0.5 group-aria-selected:translate-x-1
 							transition-all duration-200"
-							strokeWidth={2.5} />
+							strokeWidth={2.5}
+						/>
 					</div>
 				</div>
 
 				{/* Subtle Glow Effect on Selection */}
-				<div className="absolute inset-0 rounded-2xl opacity-0
+				<div
+					className="absolute inset-0 rounded-2xl opacity-0
 					group-aria-selected:opacity-100 pointer-events-none
 					bg-gradient-to-r from-transparent via-white/[0.01] to-transparent
-					transition-opacity duration-500" />
+					transition-opacity duration-500"
+				/>
 			</CommandItem>
 		</div>
 	);

@@ -195,8 +195,25 @@ const useWatchListStore = create<WatchlistStore>()(
 						fetch('/api/watchlist?type=tv', { credentials: 'include' }),
 					]);
 
-					if (!moviesResponse.ok || !tvResponse.ok) {
-						throw new Error('Failed to fetch watchlist');
+					// Handle authentication errors gracefully
+					if (moviesResponse.status === 401 || tvResponse.status === 401) {
+						set({ isLoading: false, isInitialized: true });
+						return;
+					}
+
+					// Check for other errors and provide specific error messages
+					if (!moviesResponse.ok) {
+						const errorData = await moviesResponse.json().catch(() => ({}));
+						throw new Error(
+							`Failed to fetch movies watchlist: ${moviesResponse.status} ${moviesResponse.statusText}${errorData.error ? ` - ${errorData.error}` : ''}`
+						);
+					}
+
+					if (!tvResponse.ok) {
+						const errorData = await tvResponse.json().catch(() => ({}));
+						throw new Error(
+							`Failed to fetch TV watchlist: ${tvResponse.status} ${tvResponse.statusText}${errorData.error ? ` - ${errorData.error}` : ''}`
+						);
 					}
 
 					const movies = await moviesResponse.json();
