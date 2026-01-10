@@ -2,7 +2,7 @@
 
 import { loadEpisodesFromDB, loadRecentlySearchedFromDB } from '@/lib/indexedDB';
 import useWatchListStore from '@/store/watchlistStore';
-import { useSearchStore } from '@/store/recentsSearchStore';
+import { useFavoritesStore } from '@/store/favoritesStore';
 
 interface SyncData {
 	watchlist: any[];
@@ -24,12 +24,20 @@ export async function collectLocalData(): Promise<SyncData> {
 		const watchlistStore = useWatchListStore.getState();
 		data.watchlist = [
 			...(watchlistStore.watchlist || []).map((item: any) => ({
-				...item,
+				mediaId: item.id || item.mediaId,
 				mediaType: 'movie',
+				posterPath: item.poster_path || item.posterPath,
+				backdropPath: item.backdrop_path || item.backdropPath,
+				title: item.title || item.name || '',
+				overview: item.overview || null,
 			})),
 			...(watchlistStore.tvwatchlist || []).map((item: any) => ({
-				...item,
+				mediaId: item.id || item.mediaId,
 				mediaType: 'tv',
+				posterPath: item.poster_path || item.posterPath,
+				backdropPath: item.backdrop_path || item.backdropPath,
+				title: item.title || item.name || '',
+				overview: item.overview || null,
 			})),
 		];
 
@@ -47,16 +55,19 @@ export async function collectLocalData(): Promise<SyncData> {
 			progress: ep.time || 0,
 		}));
 
-		// Get favorites from localStorage
-		const likedIds = JSON.parse(localStorage.getItem('liked') || '[]');
-		data.favorites = likedIds.map((id: number) => {
-			// Try to determine type from watchlist or default to 'movie'
-			const inWatchlist = data.watchlist.find((w) => w.id === id);
-			return {
-				mediaId: id,
-				mediaType: inWatchlist?.mediaType || 'movie',
-			};
-		});
+		// Get favorites from Zustand store
+		const favoritesStore = useFavoritesStore.getState();
+		const allFavorites = [
+			...(favoritesStore.favoriteMovies || []).map((item: any) => ({
+				mediaId: item.id || item.mediaId,
+				mediaType: 'movie' as const,
+			})),
+			...(favoritesStore.favoriteTV || []).map((item: any) => ({
+				mediaId: item.id || item.mediaId,
+				mediaType: 'tv' as const,
+			})),
+		];
+		data.favorites = allFavorites;
 
 		// Get recent searches from IndexedDB
 		const searches = await loadRecentlySearchedFromDB();

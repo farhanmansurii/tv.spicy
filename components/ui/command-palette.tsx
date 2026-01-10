@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-const { useState, useEffect, useRef, useCallback } = React;
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
 // Define types for our items
 type CommandCategory =
@@ -159,25 +159,7 @@ export default function CommandPalette({
   const navigateTo = useCallback((url: string) => {
     window.location.href = url;
     setOpen(false);
-  }, []);
-
-  // Function to copy text to clipboard
-  const copyToClipboard = useCallback(
-    (text: string, successMessage = "Copied to clipboard!") => {
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          // Show success notification
-          showNotification(successMessage, "success");
-        })
-        .catch((err) => {
-          console.error("Failed to copy text: ", err);
-          showNotification("Failed to copy to clipboard", "error");
-        });
-      setOpen(false);
-    },
-    []
-  );
+  }, [setOpen]);
 
   // Function to show a notification
   const showNotification = useCallback(
@@ -213,6 +195,24 @@ export default function CommandPalette({
     []
   );
 
+  // Function to copy text to clipboard
+  const copyToClipboard = useCallback(
+    (text: string, successMessage = "Copied to clipboard!") => {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          // Show success notification
+          showNotification(successMessage, "success");
+        })
+        .catch((err) => {
+          console.error("Failed to copy text: ", err);
+          showNotification("Failed to copy to clipboard", "error");
+        });
+      setOpen(false);
+    },
+    [showNotification, setOpen]
+  );
+
   // Function to share current page
   const sharePage = useCallback(() => {
     if (navigator.share) {
@@ -234,7 +234,7 @@ export default function CommandPalette({
       copyToClipboard(window.location.href, "URL copied to clipboard!");
     }
     setOpen(false);
-  }, [copyToClipboard, showNotification]);
+  }, [copyToClipboard, showNotification, setOpen]);
 
   // Function to refresh the page
   const refreshPage = useCallback(() => {
@@ -254,7 +254,7 @@ export default function CommandPalette({
       showNotification("Cache API not supported in this browser", "error");
     }
     setOpen(false);
-  }, [showNotification]);
+  }, [showNotification, setOpen]);
 
   // Function to toggle fullscreen
   const toggleFullscreen = useCallback(() => {
@@ -271,13 +271,13 @@ export default function CommandPalette({
       }
     }
     setOpen(false);
-  }, [showNotification]);
+  }, [showNotification, setOpen]);
 
   // Function to print the current page
   const printPage = useCallback(() => {
     window.print();
     setOpen(false);
-  }, []);
+  }, [setOpen]);
 
   // Function to toggle AI prompt mode
   const toggleAIPrompt = useCallback(() => {
@@ -295,10 +295,10 @@ export default function CommandPalette({
       setShowAIPrompt(false);
       setOpen(false);
     }
-  }, [aiPrompt, showNotification]);
+  }, [aiPrompt, showNotification, setOpen]);
 
   // Define our command items with actions
-  const allCommandItems: CommandItem[] = [
+  const allCommandItems: CommandItem[] = useMemo(() => [
     // Navigation commands
     {
       id: "nav-home",
@@ -707,7 +707,19 @@ export default function CommandPalette({
       },
       keywords: ["language", "localization", "translate", "international"],
     },
-  ];
+  ], [
+    navigateTo,
+    setOpen,
+    showNotification,
+    recordCommandUsage,
+    toggleFullscreen,
+    copyToClipboard,
+    sharePage,
+    printPage,
+    clearCache,
+    toggleAIPrompt,
+    refreshPage,
+  ]);
 
   // Get recent commands based on history
   const getRecentCommands = useCallback(() => {
@@ -891,6 +903,8 @@ export default function CommandPalette({
     submitAIPrompt,
     toggleAIPrompt,
     allCommandItems,
+    setOpen,
+    setSearchTerm,
   ]);
 
   // Scroll selected item into view
@@ -922,7 +936,7 @@ export default function CommandPalette({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [open]);
+  }, [open, setOpen]);
 
   // Helper function to set refs safely
   const setItemRef = useCallback((el: HTMLDivElement | null, index: number) => {
@@ -1092,7 +1106,7 @@ export default function CommandPalette({
                           <ul className="mt-1 space-y-1 text-[#181818]/70 dark:text-[#f2f2f2]/70">
                             <li>• How do I create a new project?</li>
                             <li>
-                              • What's the best way to optimize performance?
+                              • What&apos;s the best way to optimize performance?
                             </li>
                             <li>
                               • Can you explain how the command palette works?
@@ -1304,7 +1318,7 @@ export default function CommandPalette({
                         <div className="mx-2 my-8 flex flex-col items-center justify-center text-center">
                           <Search className="mb-2 h-5 w-5 text-[#181818]/30 dark:text-[#f2f2f2]/30" />
                           <p className="text-sm text-[#181818]/50 dark:text-[#f2f2f2]/50">
-                            No commands found for "{searchTerm}"
+                            No commands found for &quot;{searchTerm}&quot;
                           </p>
                           <button
                             onClick={() => setSearchTerm("")}

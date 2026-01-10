@@ -7,18 +7,22 @@ import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
 import { fetchDetailsTMDB } from '@/lib/api';
 import { Show } from '@/lib/types';
 
-function UserFavoritesMoviesComponent() {
-	const { data: favorites = [], isLoading } = useUserFavorites('movie');
+function UserFavoritesAllComponent() {
+	const { data: favoritesMovies = [], isLoading: isLoadingMovies } = useUserFavorites('movie');
+	const { data: favoritesTV = [], isLoading: isLoadingTV } = useUserFavorites('tv');
 	const [favoriteShows, setFavoriteShows] = useState<Show[]>([]);
 	const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
+	const isLoading = isLoadingMovies || isLoadingTV;
+
 	// Create a stable dependency based on favorite IDs to prevent infinite loops
 	const favoriteIds = useMemo(() => {
-		if (!favorites || favorites.length === 0) {
+		const allFavorites = [...favoritesMovies, ...favoritesTV];
+		if (!allFavorites || allFavorites.length === 0) {
 			return '';
 		}
-		return favorites.map((fav: any) => fav.mediaId).sort().join(',');
-	}, [favorites]);
+		return allFavorites.map((fav: any) => `${fav.mediaType || 'MOVIE'}:${fav.mediaId}`).sort().join(',');
+	}, [favoritesMovies, favoritesTV]);
 
 	const previousFavoriteIdsRef = useRef<string>('');
 
@@ -31,7 +35,8 @@ function UserFavoritesMoviesComponent() {
 		previousFavoriteIdsRef.current = favoriteIds;
 
 		const fetchDetails = async () => {
-			if (!favorites || favorites.length === 0) {
+			const allFavorites = [...favoritesMovies, ...favoritesTV];
+			if (!allFavorites || allFavorites.length === 0) {
 				setFavoriteShows((prevShows) => {
 					// Only update if state actually changed
 					if (prevShows.length === 0) {
@@ -44,10 +49,12 @@ function UserFavoritesMoviesComponent() {
 
 			setIsLoadingDetails(true);
 			try {
-				const promises = favorites.map(async (fav: any) => {
+				const promises = allFavorites.map(async (fav: any) => {
 					try {
-						const data = await fetchDetailsTMDB(String(fav.mediaId), 'movie');
-						return { ...data, media_type: 'movie' };
+						// Convert uppercase mediaType (MOVIE/TV) to lowercase for API call
+						const mediaType = fav.mediaType ? fav.mediaType.toLowerCase() : 'movie';
+						const data = await fetchDetailsTMDB(String(fav.mediaId), mediaType as 'movie' | 'tv');
+						return { ...data, media_type: mediaType };
 					} catch (error) {
 						console.error(`Failed to fetch favorite ${fav.mediaId}:`, error);
 						return null;
@@ -82,12 +89,12 @@ function UserFavoritesMoviesComponent() {
 
 	return (
 		<MediaRow
-			text="Favorite Movies"
+			text="My Favorites"
 			shows={filteredFavorites}
-			type="movie"
+			type="tv"
 		/>
 	);
 }
 
-export const UserFavoritesMovies = memo(UserFavoritesMoviesComponent);
-UserFavoritesMovies.displayName = 'UserFavoritesMovies';
+export const UserFavoritesAll = memo(UserFavoritesAllComponent);
+UserFavoritesAll.displayName = 'UserFavoritesAll';

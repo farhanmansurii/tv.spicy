@@ -33,20 +33,20 @@ interface FavoriteItem {
 
 const fetchWatchlist = async (type?: 'movie' | 'tv'): Promise<WatchlistItem[]> => {
 	const url = type ? `/api/watchlist?type=${type}` : '/api/watchlist';
-	const response = await fetch(url);
+	const response = await fetch(url, { credentials: 'include' });
 	if (!response.ok) throw new Error('Failed to fetch watchlist');
 	return response.json();
 };
 
 const fetchRecentlyWatched = async (): Promise<RecentlyWatchedItem[]> => {
-	const response = await fetch('/api/recently-watched');
+	const response = await fetch('/api/recently-watched', { credentials: 'include' });
 	if (!response.ok) throw new Error('Failed to fetch recently watched');
 	return response.json();
 };
 
 const fetchFavorites = async (type?: 'movie' | 'tv'): Promise<FavoriteItem[]> => {
 	const url = type ? `/api/favorites?type=${type}` : '/api/favorites';
-	const response = await fetch(url);
+	const response = await fetch(url, { credentials: 'include' });
 	if (!response.ok) throw new Error('Failed to fetch favorites');
 	return response.json();
 };

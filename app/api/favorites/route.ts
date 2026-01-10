@@ -28,8 +28,20 @@ export async function POST(request: NextRequest) {
 		}
 
 		const body = await request.json();
-		const { mediaId, mediaType } = body;
-		const item = await addFavorite(session.user.id, mediaId, mediaType);
+
+		// Normalize the item structure
+		const mediaId = body.mediaId || body.id;
+		const mediaType = body.mediaType || 'movie';
+
+		// Validate required fields
+		if (!mediaId || !mediaType) {
+			return NextResponse.json(
+				{ error: 'Missing required fields: mediaId and mediaType are required' },
+				{ status: 400 }
+			);
+		}
+
+		const item = await addFavorite(session.user.id, Number(mediaId), mediaType);
 		return NextResponse.json(item, { status: 201 });
 	} catch (error) {
 		console.error('Error adding favorite:', error);

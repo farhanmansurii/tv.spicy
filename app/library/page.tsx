@@ -6,7 +6,6 @@ import { useSession } from '@/lib/auth-client'
 import Container from '@/components/shared/containers/container'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { Bookmark, Heart, History, LogIn } from 'lucide-react'
 
@@ -138,7 +137,7 @@ export default function LibraryPage() {
 			</div>
 
 			<Container className="py-8 md:py-12">
-				<div className="grid gap-3 sm:grid-cols-3">
+				<div className="grid gap-3 sm:grid-cols-3 mb-8">
 					<LibraryStatCard
 						label="Watchlist"
 						value={counts.watchlist}
@@ -156,38 +155,32 @@ export default function LibraryPage() {
 					/>
 				</div>
 
-				<Card className="mt-6 bg-background/40 backdrop-blur-xl border-border/50">
-					<div className="p-4 md:p-6">
-						<Tabs defaultValue="continue" className="w-full">
-							<TabsList className="w-full justify-start bg-transparent border border-border/50 rounded-xl p-1">
-								<TabsTrigger value="continue" className="gap-2">
-									<History className="h-4 w-4" />
-									Continue watching
-								</TabsTrigger>
-								<TabsTrigger value="watchlist" className="gap-2">
-									<Bookmark className="h-4 w-4" />
-									Watchlist
-								</TabsTrigger>
-								<TabsTrigger value="favorites" className="gap-2">
-									<Heart className="h-4 w-4" />
-									Favorites
-								</TabsTrigger>
-							</TabsList>
+				{/* Continue Watching Section */}
+				<div className="mb-12">
+					<Card className="bg-background/40 backdrop-blur-xl border-border/50">
+						<div className="p-4 md:p-6">
+							<LibraryContinueWatching />
+						</div>
+					</Card>
+				</div>
 
-							<TabsContent value="continue" className="mt-6">
-								<LibraryContinueWatching />
-							</TabsContent>
+				{/* Watchlist Section */}
+				<div className="mb-12">
+					<Card className="bg-background/40 backdrop-blur-xl border-border/50">
+						<div className="p-4 md:p-6">
+							<LibraryWatchlist />
+						</div>
+					</Card>
+				</div>
 
-							<TabsContent value="watchlist" className="mt-6">
-								<LibraryWatchlist />
-							</TabsContent>
-
-							<TabsContent value="favorites" className="mt-6">
-								<LibraryFavoritesSynced />
-							</TabsContent>
-						</Tabs>
-					</div>
-				</Card>
+				{/* Favorites Section */}
+				<div className="mb-12">
+					<Card className="bg-background/40 backdrop-blur-xl border-border/50">
+						<div className="p-4 md:p-6">
+							<LibraryFavoritesSynced />
+						</div>
+					</Card>
+				</div>
 			</Container>
 		</div>
 	)

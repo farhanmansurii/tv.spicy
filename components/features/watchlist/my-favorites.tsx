@@ -15,7 +15,7 @@ import { useUserFavorites } from '@/hooks/use-user-data';
 function MyFavoritesComponent() {
     const hasMounted = useHasMounted();
     const { data: session } = useSession();
-    const { favoriteMovies: dbFavoriteMovies, favoriteTV: dbFavoriteTV, loadFromDatabase } = useFavoritesStore();
+    const { favoriteMovies: dbFavoriteMovies, favoriteTV: dbFavoriteTV, initialize } = useFavoritesStore();
     const { data: dbMovies = [], isLoading: loadingMovies } = useUserFavorites('movie');
     const { data: dbTV = [], isLoading: loadingTV } = useUserFavorites('tv');
     const [favorites, setFavorites] = useState<Show[]>([]);
@@ -24,13 +24,13 @@ function MyFavoritesComponent() {
     // Load from database on mount if authenticated
     useEffect(() => {
         if (hasMounted && session?.user?.id) {
-            loadFromDatabase()
+            initialize()
                 .then(() => setIsLoading(false))
                 .catch(() => setIsLoading(false));
         } else if (hasMounted) {
             setIsLoading(false);
         }
-    }, [hasMounted, session?.user?.id, loadFromDatabase]);
+    }, [hasMounted, session?.user?.id, initialize]);
 
     // Fetch details for database favorites
     useEffect(() => {
@@ -83,9 +83,9 @@ function MyFavoritesComponent() {
         }
     }, [hasMounted, session?.user?.id, dbMovies, dbTV]);
 
-    const handleClearFavorites = useCallback(async () => {
+    const handleClearFavorites = useCallback(() => {
         const { clearFavorites } = useFavoritesStore.getState();
-        await clearFavorites();
+        clearFavorites();
         setFavorites([]);
         toast.success('Favorites cleared', {
             description: 'All favorites have been removed.'
