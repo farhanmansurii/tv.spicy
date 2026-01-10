@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import { searchShows } from '@/lib/tmdb-fetch-helper';
 import { tmdbImage } from '@/lib/tmdb-image';
 import useSearchStore from '@/store/recentsSearchStore';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, VisuallyHidden } from '@/components/ui/dialog';
 import {
 	Command,
 	CommandGroup,
@@ -275,12 +275,15 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 				)}
 			</DialogTrigger>
 			<DialogContent className="p-0 border-none bg-transparent max-w-2xl top-[15%] translate-y-0 shadow-none outline-none overflow-visible">
+				<VisuallyHidden>
+					<DialogTitle>Search movies and TV shows</DialogTitle>
+				</VisuallyHidden>
 				<div
 					ref={containerRef}
 					className="bg-[#0C0C0C]/80 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,1)] flex flex-col will-change-[height]"
 				>
 					<Command shouldFilter={false} className="bg-transparent h-auto">
-						<div className="flex items-center px-4 h-20 border-b border-white/5 shrink-0 gap-2">
+						<div className="flex items-center px-4  border-b border-white/5 shrink-0 gap-2">
 							<div className="relative w-6 h-6 shrink-0 flex items-center justify-center">
 								<Search
 									className={cn(
@@ -303,6 +306,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 								ref={inputRef}
 								placeholder="Search movies, TV shows..."
 								value={inputValue}
+								showSearchIcon={false}
 								onValueChange={handleInputChange}
 								className="flex-1 min-w-0 bg-transparent border-none focus:ring-0 text-xl h-full placeholder:text-white/5 text-white/90"
 							/>
@@ -325,7 +329,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 								</div>
 							)}
 						</div>
-						<div className="flex gap-2 p-3 bg-white/[0.02] border-b border-white/5">
+						<div className="flex gap-2 p-2 bg-white/[0.02] border-b border-white/5">
 							{(['all', 'movie', 'tv'] as const).map((t) => (
 								<button
 									key={t}
@@ -345,7 +349,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 								</button>
 							))}
 						</div>
-						<CommandList className="max-h-[480px] overflow-y-auto px-3 pb-3 custom-scrollbar min-h-[120px]">
+						<CommandList className="max-h-[480px] overflow-y-auto p-0 custom-scrollbar min-h-[120px]">
 							{isError && (
 								<div className="py-20 flex flex-col items-center text-red-400/50">
 									<AlertCircle className="w-8 h-8 mb-2" />
@@ -459,7 +463,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 																View All Results
 															</span>
 															<span className="text-[10px] font-medium text-white/20">
-																See all matches for "{debouncedQuery}"
+																See all matches for &quot;{debouncedQuery}&quot;
 															</span>
 														</div>
 													</div>
@@ -471,7 +475,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 										<div className="py-20 text-center text-white/20 text-sm min-h-[120px] flex items-center justify-center">
 											No results found for{' '}
 											<span className="text-white/50">
-												"{debouncedQuery}"
+												&quot;{debouncedQuery}&quot;
 											</span>
 										</div>
 									)}
@@ -498,65 +502,139 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 
 function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 	const year = (item.release_date || item.first_air_date || '').split('-')[0];
-
-	const handleClick = (e: React.MouseEvent) => {
-		e.preventDefault();
-		if (onSelect)
-			onSelect();
-
-	};
+	const title = item.title || item.name || 'Untitled';
+	const mediaType = item.media_type === 'movie' ? 'Movie' : item.media_type === 'tv' ? 'TV Show' : 'Media';
 
 	return (
-		<div className="search-item-anim">
+		<div className="px-1 py-1">
 			<CommandItem
-				onSelect={onSelect || handleClick}
-				className="flex items-center gap-4 p-2.5 rounded-xl cursor-pointer transition-all aria-selected:bg-white/10 group mx-1 mb-1 outline-none"
+				onSelect={onSelect}
+				className="group relative flex items-center gap-3.5 p-1.5 rounded-2xl
+					bg-gradient-to-br from-white/[0.02] to-white/[0.01]
+					hover:from-white/[0.05] hover:to-white/[0.02]
+					aria-selected:from-white/[0.08] aria-selected:to-white/[0.04]
+					border border-white/[0.04] hover:border-white/[0.08]
+					aria-selected:border-white/[0.12]
+					backdrop-blur-xl shadow-lg shadow-black/5
+					hover:shadow-xl hover:shadow-black/10
+					aria-selected:shadow-2xl aria-selected:shadow-black/20
+					transition-all duration-300 ease-out
+					cursor-pointer outline-none overflow-hidden"
 			>
-				<div className="h-12 w-9 rounded-md bg-white/5 border border-white/10 overflow-hidden relative shadow-2xl flex-shrink-0">
+				{/* Poster Image - 2:3 Aspect Ratio */}
+				<div className="relative w-12 aspect-[2/3] rounded-lg overflow-hidden
+					bg-gradient-to-br from-white/[0.03] to-white/[0.01]
+					border border-white/[0.08] flex-shrink-0 shadow-md
+					group-hover:shadow-xl group-hover:scale-[1.02]
+					transition-all duration-300">
 					{item.poster_path ? (
-						<img
-							src={tmdbImage(item.poster_path, 'w92')}
-							className="h-full w-full object-cover"
-							alt={item.title || item.name || 'Poster'}
-						/>
+						<>
+							<img
+								src={tmdbImage(item.poster_path, 'w92')}
+								className="w-full h-full object-cover"
+								alt=""
+								loading="lazy"
+							/>
+							<div className="absolute inset-0 bg-gradient-to-t
+								from-black/30 via-transparent to-transparent" />
+						</>
 					) : (
-						<div className="h-full w-full flex items-center justify-center opacity-10">
-							<Film className="w-4 h-4" />
+						<div className="w-full h-full flex items-center justify-center">
+							<Film className="w-6 h-6 text-white/[0.08]" strokeWidth={1.5} />
 						</div>
 					)}
 				</div>
-				<div className="flex flex-col flex-1 min-w-0">
-					<div className="flex items-center justify-between gap-2">
-						<span className="text-sm font-semibold text-white/80 group-aria-selected:text-white truncate">
-							{item.title || item.name}
+
+				{/* Content Area */}
+				<div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
+					{/* Title */}
+					<h3 className="text-[13.5px] font-semibold text-white/90
+						group-hover:text-white/95 group-aria-selected:text-white
+						truncate leading-tight tracking-tight
+						transition-colors duration-200">
+						{title}
+					</h3>
+
+					{/* Metadata Row */}
+					<div className="flex items-center gap-2 text-[11px] font-medium">
+						{/* Media Type Badge */}
+						<span className="px-2 py-0.5 rounded-md
+							bg-white/[0.06] group-aria-selected:bg-white/[0.08]
+							text-white/40 group-aria-selected:text-white/50
+							uppercase tracking-wider text-[10px] font-bold
+							transition-colors duration-200">
+							{mediaType}
 						</span>
-						{isRecent && (
-							<button
-								onClick={(e) => {
-									e.stopPropagation();
-									e.preventDefault();
-									onRemove();
-								}}
-								className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all z-10"
-								aria-label="Remove from recent searches"
-							>
-								<X className="w-3 h-3" />
-							</button>
+
+						{/* Year */}
+						{year && (
+							<span className="text-white/30 font-semibold">
+								{year}
+							</span>
 						)}
-					</div>
-					<div className="flex items-center gap-2 mt-0.5 text-[10px] font-bold text-white/20">
-						<span>{item.media_type?.toUpperCase() || 'INFO'}</span>
-						<span className="w-0.5 h-0.5 rounded-full bg-white/10" />
-						<span>{year || 'N/A'}</span>
+
+						{/* Rating */}
 						{item.vote_average > 0 && (
-							<div className="flex items-center gap-1 text-yellow-500/40 ml-auto">
-								<Star className="w-2.5 h-2.5 fill-current" />
-								<span>{item.vote_average.toFixed(1)}</span>
+							<div className="flex items-center gap-1 ml-auto">
+								<div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md
+									bg-amber-500/10 group-aria-selected:bg-amber-500/15
+									transition-colors duration-200">
+									<Star className="w-3 h-3 text-amber-400/70 fill-amber-400/70"
+										strokeWidth={0} />
+									<span className="text-amber-400/90 font-bold text-[11px]">
+										{item.vote_average.toFixed(1)}
+									</span>
+								</div>
 							</div>
 						)}
 					</div>
+
+					{/* Overview/Description (optional, can be toggled) */}
+					{item.overview && (
+						<p className="text-[11px] text-white/25 leading-relaxed
+							line-clamp-1 group-hover:text-white/30
+							transition-colors duration-200">
+							{item.overview}
+						</p>
+					)}
 				</div>
-				<ChevronRight className="w-4 h-4 text-white/20 group-aria-selected:text-white/40 transition-colors flex-shrink-0 ml-2" />
+
+				{/* Right Side Actions */}
+				<div className="flex items-center gap-1.5 flex-shrink-0">
+					{/* Remove Button (for recent searches) */}
+					{isRecent && (
+						<button
+							onClick={(e) => {
+								e.stopPropagation();
+								e.preventDefault();
+								onRemove();
+							}}
+							className="opacity-0 group-hover:opacity-100
+								p-1.5 rounded-lg
+								hover:bg-red-500/10 active:bg-red-500/20
+								text-white/20 hover:text-red-400/80
+								transition-all duration-200"
+							aria-label="Remove"
+						>
+							<X className="w-3.5 h-3.5" strokeWidth={2.5} />
+						</button>
+					)}
+
+					{/* Chevron Indicator */}
+					<div className="p-1">
+						<ChevronRight className="w-4 h-4 text-white/10
+							group-hover:text-white/20 group-aria-selected:text-white/30
+							group-hover:translate-x-0.5 group-aria-selected:translate-x-1
+							transition-all duration-200"
+							strokeWidth={2.5} />
+					</div>
+				</div>
+
+				{/* Subtle Glow Effect on Selection */}
+				<div className="absolute inset-0 rounded-2xl opacity-0
+					group-aria-selected:opacity-100 pointer-events-none
+					bg-gradient-to-r from-transparent via-white/[0.01] to-transparent
+					transition-opacity duration-500" />
 			</CommandItem>
 		</div>
 	);

@@ -344,7 +344,10 @@ export default function ProfilePage() {
 											variant="outline"
 											size="sm"
 											className="border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40 text-red-400"
-											onClick={() => signOut({ callbackUrl: '/' })}
+											onClick={async () => {
+												await signOut();
+												router.push('/');
+											}}
 										>
 											<LogOut className="w-4 h-4 mr-2" />
 											Sign Out

@@ -28,7 +28,26 @@ export async function POST(request: NextRequest) {
 		}
 
 		const body = await request.json();
-		const item = await addToWatchlist(session.user.id, body);
+
+		// Normalize the item structure to match WatchlistItem interface
+		const normalizedItem = {
+			mediaId: body.mediaId || body.id,
+			mediaType: body.mediaType || 'movie',
+			posterPath: body.posterPath || body.poster_path || null,
+			backdropPath: body.backdropPath || body.backdrop_path || null,
+			title: body.title || body.name || '',
+			overview: body.overview || null,
+		};
+
+		// Validate required fields
+		if (!normalizedItem.mediaId || !normalizedItem.title) {
+			return NextResponse.json(
+				{ error: 'Missing required fields: mediaId and title are required' },
+				{ status: 400 }
+			);
+		}
+
+		const item = await addToWatchlist(session.user.id, normalizedItem);
 		return NextResponse.json(item, { status: 201 });
 	} catch (error) {
 		console.error('Error adding to watchlist:', error);
@@ -50,7 +69,6 @@ export async function DELETE(request: NextRequest) {
 		if (mediaId && mediaType) {
 			await removeFromWatchlist(session.user.id, parseInt(mediaId), mediaType);
 		} else {
-			// Clear all
 			await clearWatchlist(session.user.id, mediaType || undefined);
 		}
 

@@ -10,19 +10,19 @@ import { useSession } from '@/lib/auth-client';
 function WatchListComponent({ type }: { type: string }) {
   const hasMounted = useHasMounted();
   const { data: session } = useSession();
-  const { watchlist, tvwatchlist, loadFromDatabase } = useWatchListStore();
+  const { watchlist, tvwatchlist, initialize } = useWatchListStore();
   const [isLoading, setIsLoading] = useState(true);
 
   // Load from database on mount if authenticated
   useEffect(() => {
     if (hasMounted && session?.user?.id) {
-      loadFromDatabase()
+      initialize()
         .then(() => setIsLoading(false))
         .catch(() => setIsLoading(false));
     } else if (hasMounted) {
       setIsLoading(false);
     }
-  }, [hasMounted, session?.user?.id, loadFromDatabase]);
+  }, [hasMounted, session?.user?.id, initialize]);
 
   // Filter and ensure proper categorization
   const filteredMovieWatchlist = useMemo(() => {

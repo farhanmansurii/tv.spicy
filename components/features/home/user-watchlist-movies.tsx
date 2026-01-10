@@ -47,7 +47,6 @@ function UserWatchlistMoviesComponent() {
 
 	return (
 		<MediaRow
-			isVertical={false}
 			text="My Movies"
 			shows={filteredWatchlist}
 			type="movie"

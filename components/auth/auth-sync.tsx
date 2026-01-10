@@ -15,41 +15,41 @@ export function AuthSync() {
 	const { user, userId } = useAuthStore();
 	const hasSyncedRef = useRef(false);
 	const hasLoadedRef = useRef(false);
-	const { loadFromDatabase: loadWatchlistFromDB } = useWatchListStore();
+	const { initialize: initializeWatchlist } = useWatchListStore();
 	const { loadFromDatabase: loadRecentsFromDB } = useTVShowStore();
-	const { loadFromDatabase: loadFavoritesFromDB } = useFavoritesStore();
+	const { initialize: initializeFavorites } = useFavoritesStore();
 
 	useEffect(() => {
 		if (user && userId) {
-			// Sync local data to database
-			if (!hasSyncedRef.current) {
-				hasSyncedRef.current = true;
-				syncLocalToDatabase(userId).catch((error) => {
-					console.error('Auto-sync failed:', error);
-				});
-			}
-
-			// Load data from database
+			// Initialize stores - load from database once
 			if (!hasLoadedRef.current) {
 				hasLoadedRef.current = true;
+				// Load from database first
 				Promise.all([
-					loadWatchlistFromDB().catch((error) => {
-						console.error('Error loading watchlist from database:', error);
-					}),
-					loadRecentsFromDB().catch((error) => {
-						console.error('Error loading recently watched from database:', error);
-					}),
-					loadFavoritesFromDB().catch((error) => {
-						console.error('Error loading favorites from database:', error);
-					}),
-				]);
+					initializeWatchlist(),
+					loadRecentsFromDB(),
+					initializeFavorites(),
+				]).then(() => {
+					// After loading, sync local data to database in background
+					if (!hasSyncedRef.current) {
+						hasSyncedRef.current = true;
+						syncLocalToDatabase(userId).catch((error) => {
+							console.error('Auto-sync failed:', error);
+						});
+					}
+				}).catch((error) => {
+					console.error('Initialization failed:', error);
+				});
 			}
 		} else {
 			// Reset refs when user logs out
 			hasSyncedRef.current = false;
 			hasLoadedRef.current = false;
+			// Reset initialization flags
+			useWatchListStore.setState({ isInitialized: false });
+			useFavoritesStore.setState({ isInitialized: false });
 		}
-	}, [user, userId, loadWatchlistFromDB, loadRecentsFromDB, loadFavoritesFromDB]);
+	}, [user, userId, initializeWatchlist, loadRecentsFromDB, initializeFavorites]);
 
 	return null;
 }

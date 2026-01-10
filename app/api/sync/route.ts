@@ -26,7 +26,24 @@ export async function POST(request: NextRequest) {
 		if (watchlist && Array.isArray(watchlist)) {
 			for (const item of watchlist) {
 				try {
-					await addToWatchlist(session.user.id, item);
+					// Normalize the item structure to match WatchlistItem interface
+					const normalizedItem = {
+						mediaId: item.mediaId || item.id,
+						mediaType: item.mediaType || 'movie',
+						posterPath: item.posterPath || item.poster_path || null,
+						backdropPath: item.backdropPath || item.backdrop_path || null,
+						title: item.title || item.name || '',
+						overview: item.overview || null,
+					};
+
+					// Validate required fields
+					if (!normalizedItem.mediaId || !normalizedItem.title) {
+						console.warn('Skipping invalid watchlist item:', item);
+						results.watchlist.errors++;
+						continue;
+					}
+
+					await addToWatchlist(session.user.id, normalizedItem);
 					results.watchlist.added++;
 				} catch (error) {
 					console.error('Error syncing watchlist item:', error);
@@ -52,7 +69,18 @@ export async function POST(request: NextRequest) {
 		if (favorites && Array.isArray(favorites)) {
 			for (const item of favorites) {
 				try {
-					await addFavorite(session.user.id, item.mediaId, item.mediaType);
+					// Normalize the item structure
+					const mediaId = item.mediaId || item.id;
+					const mediaType = item.mediaType || 'movie';
+
+					// Validate required fields
+					if (!mediaId) {
+						console.warn('Skipping invalid favorite item:', item);
+						results.favorites.errors++;
+						continue;
+					}
+
+					await addFavorite(session.user.id, mediaId, mediaType);
 					results.favorites.added++;
 				} catch (error) {
 					console.error('Error syncing favorite:', error);

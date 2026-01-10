@@ -1,25 +1,24 @@
 'use client';
-import { useState, ReactNode } from 'react';
+import * as React from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-	Fingerprint,
-	Info,
-	CircleDollarSign,
-	Newspaper,
-	User,
-	Home,
-	Search,
-	Sun,
-	MenuSquare,
-} from 'lucide-react';
+import { Home, Search, MenuSquare, User, Bookmark } from 'lucide-react';
 
-const tabs = [
-	{ title: 'Home', icon: <Home /> },
-	{ title: 'Search', icon: <Search /> },
-	{ title: 'Theme', icon: <Sun /> },
-	{ title: 'Explore', icon: <MenuSquare /> },
-	{ title: 'Profile', icon: <User /> },
-];
+import { cn } from '@/lib/utils';
+import { useSidebar } from '@/components/ui/sidebar';
+import { useSession } from '@/lib/auth-client';
+
+interface MobileHeaderProps {
+	center?: boolean;
+}
+
+interface MobileNavItem {
+	id: 'home' | 'search' | 'explore' | 'library' | 'account';
+	label: string;
+	icon: React.ReactNode;
+	href?: string;
+	onClick?: () => void;
+}
 
 const buttonVariants = {
 	initial: {
@@ -27,14 +26,14 @@ const buttonVariants = {
 		paddingLeft: '.5rem',
 		paddingRight: '.5rem',
 	},
-	animate: (selected: boolean) => ({
-		gap: selected ? '.5rem' : 0,
-		paddingLeft: selected ? '1rem' : '.5rem',
-		paddingRight: selected ? '1rem' : '.5rem',
+	animate: (isSelected: boolean) => ({
+		gap: isSelected ? '.5rem' : 0,
+		paddingLeft: isSelected ? '1rem' : '.5rem',
+		paddingRight: isSelected ? '1rem' : '.5rem',
 	}),
 };
 
-const spanVariants = {
+const labelVariants = {
 	initial: { width: 0, opacity: 0 },
 	animate: { width: 'auto', opacity: 1 },
 	exit: { width: 0, opacity: 0 },
@@ -42,72 +41,110 @@ const spanVariants = {
 
 const transition = { delay: 0.1, type: 'spring', bounce: 0, duration: 0.35 };
 
-interface TabProps {
-	text: string;
-	selected: boolean;
-	setSelected: (tab: Object) => void;
-	children: ReactNode;
-	index: number;
+interface TabButtonProps {
+	label: string;
+	icon: React.ReactNode;
+	isSelected: boolean;
+	onSelect: () => void;
 }
 
-const Tab = ({ text, selected, setSelected, index, children }: TabProps) => {
+function TabButton({ label, icon, isSelected, onSelect }: TabButtonProps) {
 	return (
 		<motion.button
 			variants={buttonVariants}
 			initial="initial"
 			animate="animate"
-			custom={selected}
-			onClick={() => setSelected(tabs[index])}
+			custom={isSelected}
+			onClick={onSelect}
 			transition={transition}
-			className={`${
-				selected ? 'bg-primary text-primary-foreground ' : ''
-			} relative flex items-center rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors duration-300 focus-within:outline-red-500/50`}
+			className={cn(
+				'relative flex items-center rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300',
+				'text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+				isSelected && 'bg-primary text-primary-foreground'
+			)}
+			aria-current={isSelected ? 'page' : undefined}
 		>
-			{children}
+			{icon}
 			<AnimatePresence>
-				{selected && (
+				{isSelected && (
 					<motion.span
-						variants={spanVariants}
+						variants={labelVariants}
 						initial="initial"
 						animate="animate"
 						exit="exit"
 						transition={transition}
 						className="overflow-hidden"
 					>
-						{text}
+						{label}
 					</motion.span>
 				)}
 			</AnimatePresence>
 		</motion.button>
 	);
-};
+}
 
-// IconTabs component
-const MobileHeader = ({ center }: { center?: boolean }) => {
-	// State to manage selected tab
-	const [selected, setSelected] = useState<Object>(tabs[0]);
+export default function MobileHeader({ center }: MobileHeaderProps) {
+	const pathname = usePathname();
+	const router = useRouter();
+	const { toggleSidebar } = useSidebar();
+	const { data: session } = useSession();
+
+	const accountHref = session?.user?.id ? '/profile' : '/auth/signin?callbackUrl=/profile';
+	const libraryHref = '/library';
+	const libraryLabel = 'Library';
+
+	const handleNavigate = React.useCallback(
+		(href: string) => {
+			router.push(href);
+		},
+		[router]
+	);
+
+	const navItems = React.useMemo<MobileNavItem[]>(() => {
+		return [
+			{ id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, href: '/' },
+			{ id: 'search', label: 'Search', icon: <Search className="h-4 w-4" />, href: '/search' },
+			{ id: 'explore', label: 'Explore', icon: <MenuSquare className="h-4 w-4" />, onClick: toggleSidebar },
+			{ id: 'library', label: libraryLabel, icon: <Bookmark className="h-4 w-4" />, href: libraryHref },
+			{ id: 'account', label: 'Profile', icon: <User className="h-4 w-4" />, href: accountHref },
+		];
+	}, [toggleSidebar, libraryLabel, libraryHref, accountHref]);
+
+	const selectedId = React.useMemo<MobileNavItem['id']>(() => {
+		if (pathname === '/') return 'home';
+		if (pathname.startsWith('/search')) return 'search';
+		if (pathname.startsWith('/library')) return 'library';
+		if (pathname.startsWith('/profile')) return 'account';
+		return 'home';
+	}, [pathname]);
+
+	const handleSelect = React.useCallback(
+		(item: MobileNavItem) => {
+			if (item.onClick) item.onClick();
+			if (item.href) handleNavigate(item.href);
+		},
+		[handleNavigate]
+	);
 
 	return (
-		<div
-			className={`fixed bottom-0 left-0 right-0 ${
-				center ? 'justify-center' : ''
-			} mb-8 r z-30 gap-2  justify-center items-center flex border-gray-200 pb-2 dark:border-gray-600`}
+		<nav
+			className={cn(
+				'fixed bottom-0 left-0 right-0 z-30 flex items-center justify-center pb-2',
+				center && 'justify-center'
+			)}
+			aria-label="Bottom navigation"
 		>
-			<div className="flex p-2 bg-background w-fit rounded-full flex-wrap items-center">
-				{tabs.map((tab, index) => (
-					<Tab
-						text={tab.title}
-						selected={selected === tab}
-						setSelected={setSelected}
-						index={index}
-						key={tab.title}
-					>
-						{tab.icon}
-					</Tab>
+			<div className="mb-6 flex w-fit flex-wrap items-center rounded-full bg-background/90 p-2 backdrop-blur-md border border-border/50">
+				{navItems.map((navItem) => (
+					<TabButton
+						key={navItem.id}
+						label={navItem.label}
+						icon={navItem.icon}
+						isSelected={selectedId === navItem.id}
+						onSelect={() => handleSelect(navItem)}
+					/>
 				))}
 			</div>
-		</div>
+		</nav>
 	);
-};
-
-export default MobileHeader;
+}

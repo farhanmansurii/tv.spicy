@@ -64,7 +64,6 @@ function UserFavoritesTVComponent() {
 
 	return (
 		<MediaRow
-			isVertical={false}
 			text="Favorite TV Shows"
 			shows={filteredFavorites}
 			type="tv"

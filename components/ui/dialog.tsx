@@ -44,7 +44,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-6 bg-white/10 p-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+      <DialogPrimitive.Close className="absolute right-3 top-[13px] bg-white/10 p-2 rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -108,6 +108,25 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
+const VisuallyHidden = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0",
+      "clip-[rect(0,0,0,0)]",
+      className
+    )}
+    style={{
+      clipPath: "inset(50%)",
+      clip: "rect(0, 0, 0, 0)",
+    }}
+    {...props}
+  />
+)
+VisuallyHidden.displayName = "VisuallyHidden"
+
 export {
   Dialog,
   DialogPortal,
@@ -119,4 +138,5 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
+  VisuallyHidden,
 }

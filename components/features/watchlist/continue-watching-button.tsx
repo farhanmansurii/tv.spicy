@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import useTVShowStore from '@/store/recentsStore';
 import { Episode } from '@/lib/types';
 import useWatchListStore from '@/store/watchlistStore';
+import { useFavoritesStore } from '@/store/favoritesStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -24,28 +25,6 @@ interface ContinueWatchingButtonProps {
     isDetailsPage?: boolean;
 }
 
-// Like/ThumbsUp store utilities
-const LIKED_ITEMS_KEY = 'likedItems';
-
-const getLikedItems = (): number[] => {
-    if (typeof window === 'undefined') return [];
-    try {
-        const stored = localStorage.getItem(LIKED_ITEMS_KEY);
-        return stored ? JSON.parse(stored) : [];
-    } catch {
-        return [];
-    }
-};
-
-const saveLikedItems = (items: number[]): void => {
-    if (typeof window === 'undefined') return;
-    try {
-        localStorage.setItem(LIKED_ITEMS_KEY, JSON.stringify(items));
-    } catch (error) {
-        console.error('Error saving liked items:', error);
-    }
-};
-
 export default function ContinueWatchingButton({
     id,
     show,
@@ -62,8 +41,13 @@ export default function ContinueWatchingButton({
         watchlist,
         tvwatchlist
     } = useWatchListStore();
+    const {
+        favoriteMovies,
+        favoriteTV,
+        addFavorite,
+        removeFavorite
+    } = useFavoritesStore();
 
-    const [isLiked, setIsLiked] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -72,11 +56,15 @@ export default function ContinueWatchingButton({
         loadEpisodes();
     }, [loadEpisodes]);
 
-    // Check if item is liked
-    useEffect(() => {
-        const likedItems = getLikedItems();
-        setIsLiked(likedItems.includes(Number(id)));
-    }, [id]);
+    // Check if item is liked using the store
+    const isLiked = useMemo(() => {
+        const itemId = Number(id);
+        if (type === 'movie') {
+            return favoriteMovies.some((item: any) => item.id === itemId);
+        } else {
+            return favoriteTV.some((item: any) => item.id === itemId);
+        }
+    }, [id, type, favoriteMovies, favoriteTV]);
 
     // Memoize watchlist status
     const isAdded = useMemo(() => {
@@ -102,57 +90,38 @@ export default function ContinueWatchingButton({
         e.preventDefault();
         e.stopPropagation();
 
-        try {
-            if (isAdded) {
-                type === 'movie'
-                    ? removeFromWatchList(Number(id))
-                    : removeFromTvWatchList(Number(id));
-                toast.info('Removed from watchlist', {
-                    description: `${show?.name || show?.title || 'Item'} has been removed from your watchlist.`
-                });
-            } else {
-                type === 'movie' ? addToWatchlist(show) : addToTvWatchlist(show);
-                toast.success('Added to watchlist', {
-                    description: `${show?.name || show?.title || 'Item'} has been added to your watchlist.`
-                });
-            }
-        } catch (error) {
-            toast.error('Something went wrong', {
-                description: 'Failed to update watchlist. Please try again.'
+        if (isAdded) {
+            type === 'movie'
+                ? removeFromWatchList(Number(id))
+                : removeFromTvWatchList(Number(id));
+            toast.info('Removed from watchlist', {
+                description: `${show?.name || show?.title || 'Item'} has been removed from your watchlist.`
+            });
+        } else {
+            type === 'movie' ? addToWatchlist(show) : addToTvWatchlist(show);
+            toast.success('Added to watchlist', {
+                description: `${show?.name || show?.title || 'Item'} has been added to your watchlist.`
             });
         }
     }, [isAdded, type, id, show, addToWatchlist, addToTvWatchlist, removeFromWatchList, removeFromTvWatchList]);
 
-    // Handle like/unlike
+    // Handle like/unlike using the store
     const handleLike = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
-        try {
-            const likedItems = getLikedItems();
-            const itemId = Number(id);
-
-            if (isLiked) {
-                const updated = likedItems.filter((item) => item !== itemId);
-                saveLikedItems(updated);
-                setIsLiked(false);
-                toast.info('Removed from favorites', {
-                    description: `${show?.name || show?.title || 'Item'} has been removed from your favorites.`
-                });
-            } else {
-                const updated = [...likedItems, itemId];
-                saveLikedItems(updated);
-                setIsLiked(true);
-                toast.success('Added to favorites', {
-                    description: `${show?.name || show?.title || 'Item'} has been added to your favorites.`
-                });
-            }
-        } catch (error) {
-            toast.error('Something went wrong', {
-                description: 'Failed to update favorites. Please try again.'
+        if (isLiked) {
+            removeFavorite(Number(id), type);
+            toast.info('Removed from favorites', {
+                description: `${show?.name || show?.title || 'Item'} has been removed from your favorites.`
+            });
+        } else {
+            addFavorite(show, type);
+            toast.success('Added to favorites', {
+                description: `${show?.name || show?.title || 'Item'} has been added to your favorites.`
             });
         }
-    }, [id, isLiked, show]);
+    }, [id, isLiked, show, type, addFavorite, removeFavorite]);
 
     // Handle share
     const handleShare = useCallback(async (e: React.MouseEvent) => {

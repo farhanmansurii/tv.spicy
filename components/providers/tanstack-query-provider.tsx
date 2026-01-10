@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { useMediaQueryStore } from '@/store/mediaQueryStore';
+import { setQueryClient } from '@/lib/query-client';
 
 const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 	const [queryClient] = useState(() => {
@@ -37,6 +38,11 @@ const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 	useEffect(() => {
 		initMediaQuery();
 	}, [initMediaQuery]);
+
+	// Set global query client instance
+	useEffect(() => {
+		setQueryClient(queryClient);
+	}, [queryClient]);
 
 	return (
 		<QueryClientProvider client={queryClient}>

@@ -7,8 +7,6 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '@/components/ui/sheet';
-import { fetchGenres } from '@/lib/api';
-import { Button } from '@/components/ui/button';
 import { TabsContent, Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { TextGlitch } from '@/components/shared/animated/text-glitch';
@@ -21,8 +19,8 @@ const NavigationSidebar = (props: { tvGenre: any; movieGenre: any }) => {
 				<SheetHeader>
 					<SheetTitle className=" p-2 text-xl ">Explore</SheetTitle>
 					<SheetDescription>
-						<Tabs className=" w-full lg:max-w-[80%]">
-							<TabsList className=" flex w-full bg-background" defaultValue={'tv'}>
+						<Tabs className=" w-full lg:max-w-[80%]" defaultValue="tv">
+							<TabsList className=" flex w-full bg-background">
 								<TabsTrigger className="w-full" value="movies">
 									Movies{' '}
 								</TabsTrigger>

@@ -34,13 +34,14 @@ const generateMessages = (firstName: string): GreetingMessage[] => {
 export function usePersonalizedGreeting() {
 	const { data: session } = useSession();
 	const [currentIndex, setCurrentIndex] = useState(0);
-	const [isVisible, setIsVisible] = useState(true);
+	const [hasRotated, setHasRotated] = useState(false);
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
-	const observerRef = useRef<IntersectionObserver | null>(null);
+	const hasRotatedRef = useRef(false);
 
 	const firstName = useMemo(() => {
-		if (!session?.user?.name) return null;
-		return session.user.name.split(' ')[0];
+		const name = session?.user?.name;
+		if (!name) return null;
+		return name.split(' ')[0];
 	}, [session?.user?.name]);
 
 	const messages = useMemo(() => {
@@ -54,57 +55,35 @@ export function usePersonalizedGreeting() {
 	}, [messages, currentIndex]);
 
 	const rotateMessage = useCallback(() => {
-		if (messages.length === 0) return;
-		setCurrentIndex((prev) => (prev + 1) % messages.length);
+		if (messages.length === 0 || hasRotatedRef.current) return;
+		setCurrentIndex((prev) => {
+			const nextIndex = (prev + 1) % messages.length;
+			hasRotatedRef.current = true;
+			setHasRotated(true);
+			return nextIndex;
+		});
 	}, [messages.length]);
 
-	// Intersection Observer to pause when not visible
+	// Rotate message once on mount/refresh
 	useEffect(() => {
-		if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-			return;
-		}
+		if (messages.length === 0 || hasRotatedRef.current) return;
 
-		observerRef.current = new IntersectionObserver(
-			([entry]) => {
-				setIsVisible(entry.isIntersecting);
-			},
-			{ threshold: 0.1 }
-		);
-
-		return () => {
-			if (observerRef.current) {
-				observerRef.current.disconnect();
-			}
-		};
-	}, []);
-
-	// Message rotation timer
-	useEffect(() => {
-		if (messages.length === 0 || !isVisible) {
-			if (intervalRef.current) {
-				clearInterval(intervalRef.current);
-				intervalRef.current = null;
-			}
-			return;
-		}
-
-		// Rotate every 3.5 seconds
-		intervalRef.current = setInterval(() => {
+		// Rotate once after a short delay (e.g., 2 seconds)
+		intervalRef.current = setTimeout(() => {
 			rotateMessage();
-		}, 3500);
+		}, 2000);
 
 		return () => {
 			if (intervalRef.current) {
-				clearInterval(intervalRef.current);
+				clearTimeout(intervalRef.current);
 				intervalRef.current = null;
 			}
 		};
-	}, [messages.length, isVisible, rotateMessage]);
+	}, [messages.length, rotateMessage]);
 
 	return {
 		message: currentMessage,
 		firstName,
 		isAuthenticated: !!session?.user,
-		observerRef,
 	};
 }
