@@ -24,7 +24,7 @@ Magic Link authentication allows users to sign in by clicking a link sent to the
 - You receive:
   - `email`: User's email address
   - `token`: The generated token
-  - `url`: Pre-built verification URL (e.g., `http://localhost:3000/api/auth/verify-magic-link?token=abc123`)
+  - `url`: Pre-built verification URL (e.g., `https://spicy-tv.vercel.app/api/auth/verify-magic-link?token=abc123`)
 - You send an email to the user with the magic link
 
 ### **Step 4: User Clicks Magic Link**

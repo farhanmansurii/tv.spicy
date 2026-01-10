@@ -6,7 +6,7 @@ Add the following environment variables to your `.env.local` file:
 
 ```env
 # NextAuth Configuration
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://spicy-tv.vercel.app
 NEXTAUTH_SECRET=your-secret-key-here
 
 # Google OAuth
@@ -27,7 +27,7 @@ GITHUB_CLIENT_SECRET=your-github-client-secret
 3. Enable Google+ API
 4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
 5. Set Application type to "Web application"
-6. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+6. Add authorized redirect URI: `https://spicy-tv.vercel.app/api/auth/callback/google`
 7. Copy the Client ID and Client Secret
 
 ### GitHub OAuth Setup
@@ -36,8 +36,8 @@ GITHUB_CLIENT_SECRET=your-github-client-secret
 2. Click "New OAuth App"
 3. Fill in:
    - Application name: SpicyTV
-   - Homepage URL: `http://localhost:3000`
-   - Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
+   - Homepage URL: `https://spicy-tv.vercel.app`
+   - Authorization callback URL: `https://spicy-tv.vercel.app/api/auth/callback/github`
 4. Copy the Client ID and Client Secret
 
 ### Generate NEXTAUTH_SECRET
