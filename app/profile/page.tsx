@@ -31,6 +31,8 @@ import { Show } from '@/lib/types';
 import MediaRow from '@/components/features/media/row/media-row';
 import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { usePlayerPrefsStore } from '@/store/playerPrefsStore';
 import RecentlyWatchedComponent from '@/components/features/watchlist/recently-watched';
 
 interface StatCardProps {
@@ -75,7 +77,6 @@ function StatCard({ icon, value, label, trend, className }: StatCardProps) {
 	);
 }
 
-
 function ProfileContentSection({
 	title,
 	children,
@@ -118,6 +119,7 @@ export default function ProfilePage() {
 	const { watchlist, tvwatchlist } = useWatchListStore();
 	const { recentlyWatched } = useTVShowStore();
 	const { favoriteMovies, favoriteTV } = useFavoritesStore();
+	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
 
 	// Fetch data from database
 	const { data: dbWatchlistMovies = [], isLoading: loadingWatchlistMovies } =
@@ -399,7 +401,9 @@ export default function ProfilePage() {
 								<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
 									<LayoutDashboard className="h-5 w-5 text-foreground" />
 								</div>
-								<h2 className="text-xl md:text-2xl font-bold text-foreground">Overview</h2>
+								<h2 className="text-xl md:text-2xl font-bold text-foreground">
+									Overview
+								</h2>
 							</div>
 							<div className="space-y-3 md:space-y-4 lg:space-y-6">
 								{recentlyWatched && recentlyWatched.length > 0 && (
@@ -408,24 +412,49 @@ export default function ProfilePage() {
 									</div>
 								)}
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
+									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-left">
+										<div className="flex items-center justify-between">
+											<div>
+												<p className="text-xs text-muted-foreground">
+													Sticky Player
+												</p>
+												<p className="text-sm font-semibold text-foreground">
+													{stickyEnabled ? 'On' : 'Off'}
+												</p>
+											</div>
+											<Switch
+												checked={stickyEnabled}
+												onCheckedChange={setStickyEnabled}
+												className="data-[state=checked]:bg-primary"
+											/>
+										</div>
+									</Card>
 									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
 										<Film className="w-5 h-5 text-foreground mx-auto mb-2" />
-										<p className="text-xl md:text-2xl font-bold text-foreground">{totalMovies}</p>
+										<p className="text-xl md:text-2xl font-bold text-foreground">
+											{totalMovies}
+										</p>
 										<p className="text-xs text-muted-foreground">Movies</p>
 									</Card>
 									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
 										<Tv className="w-5 h-5 text-foreground mx-auto mb-2" />
-										<p className="text-xl md:text-2xl font-bold text-foreground">{totalTV}</p>
+										<p className="text-xl md:text-2xl font-bold text-foreground">
+											{totalTV}
+										</p>
 										<p className="text-xs text-muted-foreground">TV Shows</p>
 									</Card>
 									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
 										<Star className="w-5 h-5 text-foreground mx-auto mb-2" />
-										<p className="text-xl md:text-2xl font-bold text-foreground">{totalFavorites}</p>
+										<p className="text-xl md:text-2xl font-bold text-foreground">
+											{totalFavorites}
+										</p>
 										<p className="text-xs text-muted-foreground">Favorites</p>
 									</Card>
 									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
 										<Calendar className="w-5 h-5 text-foreground mx-auto mb-2" />
-										<p className="text-xl md:text-2xl font-bold text-foreground">{totalWatched}</p>
+										<p className="text-xl md:text-2xl font-bold text-foreground">
+											{totalWatched}
+										</p>
 										<p className="text-xs text-muted-foreground">Watched</p>
 									</Card>
 								</div>
@@ -438,10 +467,14 @@ export default function ProfilePage() {
 								<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
 									<Bookmark className="h-5 w-5 text-foreground" />
 								</div>
-								<h2 className="text-xl md:text-2xl font-bold text-foreground">Watchlist</h2>
+								<h2 className="text-xl md:text-2xl font-bold text-foreground">
+									Watchlist
+								</h2>
 							</div>
 							<div className="space-y-3 md:space-y-4">
-								{loadingWatchlistMovies || loadingWatchlistTV || isLoadingDetails ? (
+								{loadingWatchlistMovies ||
+								loadingWatchlistTV ||
+								isLoadingDetails ? (
 									<WatchlistLoader />
 								) : (
 									<>
@@ -468,9 +501,12 @@ export default function ProfilePage() {
 											!isLoadingDetails && (
 												<div className="text-center py-6 md:py-8 text-muted-foreground">
 													<Bookmark className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 opacity-50" />
-													<p className="text-sm">Your watchlist is empty</p>
+													<p className="text-sm">
+														Your watchlist is empty
+													</p>
 													<p className="text-xs mt-2">
-														Start adding movies and shows to your watchlist!
+														Start adding movies and shows to your
+														watchlist!
 													</p>
 												</div>
 											)}
@@ -485,10 +521,14 @@ export default function ProfilePage() {
 								<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
 									<Heart className="h-5 w-5 text-foreground" />
 								</div>
-								<h2 className="text-xl md:text-2xl font-bold text-foreground">Favorites</h2>
+								<h2 className="text-xl md:text-2xl font-bold text-foreground">
+									Favorites
+								</h2>
 							</div>
 							<div className="space-y-3 md:space-y-4">
-								{loadingFavoritesMovies || loadingFavoritesTV || isLoadingDetails ? (
+								{loadingFavoritesMovies ||
+								loadingFavoritesTV ||
+								isLoadingDetails ? (
 									<WatchlistLoader />
 								) : (
 									<>
@@ -532,7 +572,9 @@ export default function ProfilePage() {
 								<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
 									<Eye className="h-5 w-5 text-foreground" />
 								</div>
-								<h2 className="text-xl md:text-2xl font-bold text-foreground">Recently Watched</h2>
+								<h2 className="text-xl md:text-2xl font-bold text-foreground">
+									Recently Watched
+								</h2>
 							</div>
 							<div className="space-y-3 md:space-y-4">
 								{loadingRecentlyWatched ? (
@@ -548,7 +590,8 @@ export default function ProfilePage() {
 													<Clock className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 opacity-50" />
 													<p className="text-sm">No recent activity</p>
 													<p className="text-xs mt-2">
-														Start watching to see your recent activity here!
+														Start watching to see your recent activity
+														here!
 													</p>
 												</div>
 											)}

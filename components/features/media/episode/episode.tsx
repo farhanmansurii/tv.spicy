@@ -173,9 +173,9 @@ export default function Episode(props: EpisodeProps) {
 						<Button
 							variant="ghost"
 							onClick={getNextEp}
-							className="h-11 rounded-xl px-6 transition-all gap-2 group/next bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
+							className="h-10 md:h-11 rounded-xl px-3 md:px-6 transition-all gap-2 group/next bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
 						>
-							<span className="text-xs font-bold uppercase tracking-wider">
+							<span className="text-[10px] md:text-xs font-bold uppercase tracking-wider hidden sm:inline">
 								Next Episode
 							</span>
 							<ChevronRight className="w-4 h-4 transition-transform group-hover/next:translate-x-1" />
@@ -185,7 +185,7 @@ export default function Episode(props: EpisodeProps) {
 								variant="ghost"
 								size="icon"
 								onClick={onCloseSticky}
-								className="h-11 w-11 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
+								className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
 								aria-label="Hide sticky player"
 								title="Hide sticky player"
 							>
