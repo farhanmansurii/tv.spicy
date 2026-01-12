@@ -44,6 +44,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 	const { activeEP, setActiveEP } = useEpisodeStore();
 	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
 	const [listDensity, setListDensity] = useState<'comfortable' | 'compact'>('comfortable');
+	const hasActiveEpisode = !!activeEP;
 	const { addRecentlyWatched } = useTVShowStore();
 	const playerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
@@ -53,7 +54,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 		threshold: 0,
 		rootMargin: '-72px 0px 0px 0px',
 	});
-	const isSticky = stickyEnabled && !stickySentinelInView;
+	const isSticky = hasActiveEpisode && stickyEnabled && !stickySentinelInView;
 
 	// 1. STABLE STATE LOGIC
 	const validSeasons = useMemo(
@@ -299,31 +300,35 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 	return (
 		<div className="w-full flex flex-col gap-10 md:gap-16">
 			{/* PLAYER COMPONENT */}
-			<div ref={stickySentinelRef} className="h-px w-full" />
-			<div
-				ref={playerRef}
-				data-player-container
-				className={cn(
-					'w-full transition-all duration-200',
-					stickyEnabled
-						? 'sticky top-16 z-30 bg-black/80 backdrop-blur-xl rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.45)]'
-						: 'relative z-10',
-					'md:static md:top-auto md:bg-transparent md:backdrop-blur-0 md:p-0 md:shadow-none',
-					isSticky &&
-						isStickyDismissed &&
-						'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
-				)}
-			>
-				<div ref={stickyRef} className="relative">
-					<TVContainer
-						key={`${activeEP?.id}-${activeSeason}`}
-						showId={showId}
-						getNextEp={handleNextEpisode}
-						isSticky={isSticky && !isStickyDismissed}
-						onCloseSticky={handleStickyClose}
-					/>
-				</div>
-			</div>
+			{hasActiveEpisode && (
+				<>
+					<div ref={stickySentinelRef} className="h-px w-full" />
+					<div
+						ref={playerRef}
+						data-player-container
+						className={cn(
+							'w-full transition-all duration-200',
+							stickyEnabled
+								? 'sticky top-16 z-30 bg-zinc-900/60 backdrop-blur-xl rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/5'
+								: 'relative z-10',
+							'md:static md:top-auto md:bg-transparent md:backdrop-blur-0 md:p-0 md:shadow-none md:border-0',
+							isSticky &&
+								isStickyDismissed &&
+								'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
+						)}
+					>
+						<div ref={stickyRef} className="relative">
+							<TVContainer
+								key={`${activeEP?.id}-${activeSeason}`}
+								showId={showId}
+								getNextEp={handleNextEpisode}
+								isSticky={isSticky && !isStickyDismissed}
+								onCloseSticky={handleStickyClose}
+							/>
+						</div>
+					</div>
+				</>
+			)}
 
 			{/* NAVIGATION CONTROLS */}
 			<div className="space-y-4">
@@ -389,6 +394,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 								{ value: 'comfortable', label: 'Comfort' },
 								{ value: 'compact', label: 'Compact' },
 							]}
+							className="hidden sm:inline-flex"
 						/>
 					)}
 				</div>
