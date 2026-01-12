@@ -9,7 +9,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Settings, ChevronRight } from 'lucide-react';
+import { Settings, ChevronRight, X } from 'lucide-react';
 import useProviderStore from '@/store/providerStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 
@@ -21,10 +21,12 @@ interface EpisodeProps {
 	episodeNumber?: any;
 	seasonNumber?: any;
 	getNextEp?: () => void;
+	isSticky?: boolean;
+	onCloseSticky?: () => void;
 }
 
 export default function Episode(props: EpisodeProps) {
-	const { id, type, seasonNumber, episodeNumber, getNextEp } = props;
+	const { id, type, seasonNumber, episodeNumber, getNextEp, isSticky, onCloseSticky } = props;
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const { selectedProvider, setProvider } = useProviderStore();
 	const { setIsPlaying } = useEpisodeStore();
@@ -167,16 +169,30 @@ export default function Episode(props: EpisodeProps) {
 				</div>
 
 				{getNextEp && type === 'tv' && (
-					<Button
-						variant="ghost"
-						onClick={getNextEp}
-						className="h-11 rounded-xl px-6 transition-all gap-2 group/next bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
-					>
-						<span className="text-xs font-bold uppercase tracking-wider">
-							Next Episode
-						</span>
-						<ChevronRight className="w-4 h-4 transition-transform group-hover/next:translate-x-1" />
-					</Button>
+					<div className="flex items-center gap-2">
+						<Button
+							variant="ghost"
+							onClick={getNextEp}
+							className="h-11 rounded-xl px-6 transition-all gap-2 group/next bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
+						>
+							<span className="text-xs font-bold uppercase tracking-wider">
+								Next Episode
+							</span>
+							<ChevronRight className="w-4 h-4 transition-transform group-hover/next:translate-x-1" />
+						</Button>
+						{isSticky && onCloseSticky && (
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={onCloseSticky}
+								className="h-11 w-11 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
+								aria-label="Hide sticky player"
+								title="Hide sticky player"
+							>
+								<X className="w-4 h-4" />
+							</Button>
+						)}
+					</div>
 				)}
 			</div>
 

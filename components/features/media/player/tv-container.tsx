@@ -7,9 +7,16 @@ import Episode from '@/components/features/media/episode/episode';
 interface TVContainerProps {
 	showId: string;
 	getNextEp: any;
+	isSticky?: boolean;
+	onCloseSticky?: () => void;
 }
 
-export const TVContainer: React.FC<TVContainerProps> = ({ showId, getNextEp }) => {
+export const TVContainer: React.FC<TVContainerProps> = ({
+	showId,
+	getNextEp,
+	isSticky,
+	onCloseSticky,
+}) => {
 	const searchParams = useSearchParams();
 	const season = searchParams.get('season');
 	const episode = searchParams.get('episode');
@@ -22,6 +29,8 @@ export const TVContainer: React.FC<TVContainerProps> = ({ showId, getNextEp }) =
 				episodeId={showId}
 				id={showId}
 				getNextEp={getNextEp}
+				isSticky={isSticky}
+				onCloseSticky={onCloseSticky}
 				key={`${season}-${episode}`}
 				type="tv"
 			/>

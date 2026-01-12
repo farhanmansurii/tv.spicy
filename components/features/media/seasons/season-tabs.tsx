@@ -12,7 +12,6 @@ import {
 	Loader2,
 	AlertCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
 	SelectTrigger,
 	Select,
@@ -23,9 +22,12 @@ import {
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useInView } from 'react-intersection-observer';
+import { toast } from 'sonner';
 import { fetchSeasonEpisodes } from '@/lib/api';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { useEpisodeViewStore } from '@/store/episodeViewStore';
+import { usePlayerPrefsStore } from '@/store/playerPrefsStore';
 import useTVShowStore from '@/store/recentsStore';
 import { TVContainer } from '@/components/features/media/player/tv-container';
 import { cn } from '@/lib/utils';
@@ -40,9 +42,18 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 
 	const { view, setView } = useEpisodeViewStore();
 	const { activeEP, setActiveEP } = useEpisodeStore();
+	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
+	const [listDensity, setListDensity] = useState<'comfortable' | 'compact'>('comfortable');
 	const { addRecentlyWatched } = useTVShowStore();
 	const playerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
+	const stickyRef = useRef<HTMLDivElement>(null);
+	const [isStickyDismissed, setIsStickyDismissed] = useState(false);
+	const { ref: stickySentinelRef, inView: stickySentinelInView } = useInView({
+		threshold: 0,
+		rootMargin: '-72px 0px 0px 0px',
+	});
+	const isSticky = stickyEnabled && !stickySentinelInView;
 
 	// 1. STABLE STATE LOGIC
 	const validSeasons = useMemo(
@@ -145,7 +156,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 			const params = new URLSearchParams(searchParams.toString());
 			params.set('season', String(episode.season_number));
 			params.set('episode', String(episode.episode_number));
-			router.replace(`${pathname}?${params.toString()}`);
+			router.replace(`${pathname}?${params.toString()}`, { scroll: false });
 		},
 		[router, pathname, searchParams, setActiveEP, addRecentlyWatched, showId, showData]
 	);
@@ -167,6 +178,49 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 
 		return () => ctx.revert();
 	}, [view, activeSeason, isLoading, episodes?.length]);
+
+	useEffect(() => {
+		if (!isSticky) {
+			setIsStickyDismissed(false);
+			if (stickyRef.current) {
+				gsap.set(stickyRef.current, { clearProps: 'opacity,transform' });
+			}
+			return;
+		}
+
+		if (isStickyDismissed || !stickyRef.current) return;
+		gsap.fromTo(
+			stickyRef.current,
+			{ opacity: 0, y: -6 },
+			{ opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }
+		);
+	}, [isSticky, isStickyDismissed]);
+
+	const handleStickyClose = useCallback(() => {
+		const onComplete = () => {
+			setIsStickyDismissed(true);
+			toast('Sticky player hidden', {
+				description: 'Turn off sticky player for this device?',
+				action: {
+					label: 'Disable',
+					onClick: () => setStickyEnabled(false),
+				},
+			});
+		};
+
+		if (!stickyRef.current) {
+			onComplete();
+			return;
+		}
+
+		gsap.to(stickyRef.current, {
+			opacity: 0,
+			y: -6,
+			duration: 0.18,
+			ease: 'power2.in',
+			onComplete,
+		});
+	}, [setStickyEnabled]);
 
 	// Handle next episode navigation
 	const handleNextEpisode = useCallback(() => {
@@ -221,7 +275,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 			const params = new URLSearchParams(searchParams.toString());
 			params.set('season', String(nextSeason.season_number));
 			params.set('episode', '1');
-			router.push(`${pathname}?${params.toString()}`);
+			router.push(`${pathname}?${params.toString()}`, { scroll: false });
 		}
 	}, [
 		activeEP,
@@ -245,12 +299,30 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 	return (
 		<div className="w-full flex flex-col gap-10 md:gap-16">
 			{/* PLAYER COMPONENT */}
-			<div ref={playerRef} className="w-full" data-player-container>
-				<TVContainer
-					key={`${activeEP?.id}-${activeSeason}`}
-					showId={showId}
-					getNextEp={handleNextEpisode}
-				/>
+			<div ref={stickySentinelRef} className="h-px w-full" />
+			<div
+				ref={playerRef}
+				data-player-container
+				className={cn(
+					'w-full transition-all duration-200',
+					stickyEnabled
+						? 'sticky top-16 z-30 bg-black/80 backdrop-blur-xl rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.45)]'
+						: 'relative z-10',
+					'md:static md:top-auto md:bg-transparent md:backdrop-blur-0 md:p-0 md:shadow-none',
+					isSticky &&
+						isStickyDismissed &&
+						'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
+				)}
+			>
+				<div ref={stickyRef} className="relative">
+					<TVContainer
+						key={`${activeEP?.id}-${activeSeason}`}
+						showId={showId}
+						getNextEp={handleNextEpisode}
+						isSticky={isSticky && !isStickyDismissed}
+						onCloseSticky={handleStickyClose}
+					/>
+				</div>
 			</div>
 
 			{/* NAVIGATION CONTROLS */}
@@ -281,7 +353,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 				</div>
 
 				{/* View Mode Toggle - Repositioned closer to content */}
-				<div className="flex items-center justify-between mb-4">
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 					<SegmentedControl
 						value={view}
 						onChange={(val) => setView(val as any)}
@@ -309,6 +381,16 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 							},
 						]}
 					/>
+					{view === 'list' && (
+						<SegmentedControl
+							value={listDensity}
+							onChange={(val) => setListDensity(val as 'comfortable' | 'compact')}
+							items={[
+								{ value: 'comfortable', label: 'Comfort' },
+								{ value: 'compact', label: 'Compact' },
+							]}
+						/>
+					)}
 				</div>
 
 				{/* CONTENT RENDERER */}
@@ -343,6 +425,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 												episode={ep}
 												active={activeEP?.id === ep.id}
 												toggle={onEpisodeClick}
+												density={listDensity}
 											/>
 										</div>
 									))}

@@ -127,7 +127,7 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 							</div>
 						</div>
 
-						<div className="flex flex-col items-center md:items-start">
+						<div className="flex flex-col items-center md:items-start gap-3 md:gap-4">
 							{logo ? (
 								<img
 									src={tmdbImage(logo, 'w500')}
@@ -144,7 +144,7 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 							</p>
 						</div>
 
-						<div className="max-w-2xl hidden md:block mt-6 md:mt-8">
+						<div className="max-w-2xl hidden md:block mt-7 md:mt-9">
 							{isDetailsPage &&
 							type === 'tv' &&
 							activeEP &&
@@ -201,7 +201,7 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 							)}
 						</div>
 
-						<div className="flex justify-center md:justify-start mt-8 md:mt-10">
+						<div className="flex justify-center md:justify-start mt-9 md:mt-12">
 							<ContinueWatchingButton
 								id={show.id}
 								show={show}
