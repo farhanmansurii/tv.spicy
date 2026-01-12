@@ -3,7 +3,8 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 
 // Get API credentials from environment variables
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || '';
-const TMDB_BEARER_TOKEN = process.env.NEXT_PUBLIC_TMDB_BEARER_TOKEN || process.env.TMDB_BEARER_TOKEN || '';
+const TMDB_BEARER_TOKEN =
+	process.env.NEXT_PUBLIC_TMDB_BEARER_TOKEN || process.env.TMDB_BEARER_TOKEN || '';
 
 // Validate API credentials
 if (!TMDB_BEARER_TOKEN && !TMDB_API_KEY) {
@@ -47,7 +48,7 @@ export async function fetchGenres(type: 'movie' | 'tv') {
 
 export async function searchTMDB(query: string, page: number = 1) {
 	const url = new URL(`${BASE_URL}/search/multi`);
-	url.searchParams.append('query', encodeURIComponent(query));
+	url.searchParams.append('query', query);
 	url.searchParams.append('page', page.toString());
 	url.searchParams.append('include_adult', 'false');
 

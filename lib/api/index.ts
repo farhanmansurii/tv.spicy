@@ -29,4 +29,3 @@ export { fetchDetails, fetchMovieLinks } from './consumet-client';
 
 // Streaming APIs
 export { fetchSusflixLinks, fetchVidSrc } from './streaming-client';
-

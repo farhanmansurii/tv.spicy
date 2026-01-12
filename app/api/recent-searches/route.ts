@@ -29,7 +29,15 @@ export async function POST(request: NextRequest) {
 
 		const body = await request.json();
 		const { query } = body;
-		const item = await addRecentSearch(session.user.id, query);
+
+		if (!query || typeof query !== 'string' || query.trim().length === 0) {
+			return NextResponse.json(
+				{ error: 'Invalid query: must be a non-empty string' },
+				{ status: 400 }
+			);
+		}
+
+		const item = await addRecentSearch(session.user.id, query.trim());
 		return NextResponse.json(item, { status: 201 });
 	} catch (error) {
 		console.error('Error adding recent search:', error);

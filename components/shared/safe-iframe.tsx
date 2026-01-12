@@ -17,18 +17,26 @@ const SafeIFrame: React.FC<SafeVideoFrameProps> = ({ url }) => {
 		};
 
 		const handleLoad = () => {
-			const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
-			if (!iframeDocument) return;
-			iframeDocument.addEventListener('click', handleNavigation, true);
+			try {
+				const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
+				if (!iframeDocument) return;
+				iframeDocument.addEventListener('click', handleNavigation, true);
+			} catch (e) {
+				// Cross-origin iframe, can't access content - this is expected
+			}
 		};
 
 		iframe.addEventListener('load', handleLoad);
 
 		return () => {
 			iframe.removeEventListener('load', handleLoad);
-			const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
-			if (!iframeDocument) return;
-			iframeDocument.removeEventListener('click', handleNavigation, true);
+			try {
+				const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
+				if (!iframeDocument) return;
+				iframeDocument.removeEventListener('click', handleNavigation, true);
+			} catch (e) {
+				// Cross-origin iframe, can't access content - this is expected
+			}
 		};
 	}, [url]);
 

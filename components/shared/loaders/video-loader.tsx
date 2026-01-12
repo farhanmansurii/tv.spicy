@@ -5,23 +5,29 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function VideoLoader() {
 	return (
-		<div className="w-full space-y-8">
+		<div className="w-full py-8 md:py-12">
 			<Tabs defaultValue="trailers" className="w-full">
 				<div className="space-y-2">
 					<CommonTitle text="Cinematic Media" variant="section" spacing="none" />
 					<CommonTitle text="Trailers & Extras" variant="small" spacing="medium">
 						<TabsList className="bg-white/[0.03] border border-white/5 rounded-full p-1 h-auto backdrop-blur-xl">
-							<TabsTrigger value="trailers" className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">
+							<TabsTrigger
+								value="trailers"
+								className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black"
+							>
 								Trailers (0)
 							</TabsTrigger>
-							<TabsTrigger value="teasers" className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black">
+							<TabsTrigger
+								value="teasers"
+								className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black"
+							>
 								Teasers (0)
 							</TabsTrigger>
 						</TabsList>
 					</CommonTitle>
 				</div>
 
-				<div className="mt-0">
+				<div className="mt-6 md:mt-8">
 					{/* Video Grid */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 						{Array.from({ length: 6 }).map((_, index) => (

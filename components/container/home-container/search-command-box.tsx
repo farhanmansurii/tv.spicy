@@ -7,8 +7,7 @@ import { debounce } from 'lodash';
 import { Command } from 'cmdk';
 import { Loader2 } from 'lucide-react';
 import useSearchStore from '@/store/recentsSearchStore';
-import { Show, Anime } from '@/lib/types';
-import { fetchData } from '@/lib/anime-helpers';
+import { Show } from '@/lib/types';
 import {
 	CommandDialog,
 	CommandGroup,
@@ -19,13 +18,7 @@ import {
 import { searchShows } from '@/lib/tmdb-fetch-helper';
 import CommandPalette from '@/components/ui/command-palette';
 
-export const SearchCommandBox = ({
-	children,
-	searchType = 'tvshow',
-}: {
-	children: any;
-	searchType: 'tvshow' | 'anime';
-}) => {
+export const SearchCommandBox = ({ children }: { children: any }) => {
 	const [open, setOpen] = React.useState(false);
 	const [inputValue, setInputValue] = useState('');
 	const [query, setQuery] = useState('');
@@ -36,16 +29,14 @@ export const SearchCommandBox = ({
 		isFetching,
 		error,
 	} = useQuery({
-		queryKey: ['search', query, searchType],
+		queryKey: ['search', query],
 		queryFn: () =>
-			searchType === 'tvshow'
-				? searchShows(query).then((results: any) => ({
-						...results,
-						results: results.results.filter(
-							(item: any) => item.media_type === 'tv' || item.media_type === 'movie'
-						),
-					}))
-				: fetchData(`advanced-search?query=${query}`),
+			searchShows(query).then((results: any) => ({
+				...results,
+				results: results.results.filter(
+					(item: any) => item.media_type === 'tv' || item.media_type === 'movie'
+				),
+			})),
 		enabled: query.trim().length > 0,
 	});
 
@@ -61,7 +52,7 @@ export const SearchCommandBox = ({
 		debouncedSearch(value);
 	};
 
-	const handleSelectShow = (show: Show | Anime) => {
+	const handleSelectShow = (show: Show) => {
 		addToRecentlySearched(show);
 		setOpen((open) => !open);
 		setQuery('');
@@ -100,7 +91,7 @@ export const SearchCommandBox = ({
 									item.title?.english ||
 									item.title?.romaji ||
 									'Unknown Title',
-						type: item.media_type || 'anime',
+						type: item.media_type || 'tv',
 						date: getFormattedDate(item),
 					};
 
@@ -140,7 +131,7 @@ export const SearchCommandBox = ({
 									item.title?.english ||
 									item.title?.romaji ||
 									'Unknown Title',
-						type: item.media_type || 'anime',
+						type: item.media_type || 'tv',
 						date: getFormattedDate(item),
 					};
 					return (
@@ -182,8 +173,7 @@ export const SearchCommandBox = ({
 	}, []);
 	return (
 		<>
-			 <CommandPalette open={open} setOpen={setOpen} />
-
+			<CommandPalette open={open} setOpen={setOpen} />
 		</>
 	);
 };

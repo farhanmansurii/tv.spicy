@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/auth-server';
-import { getWatchlist, addToWatchlist, removeFromWatchlist, clearWatchlist } from '@/lib/db/watchlist';
+import {
+	getWatchlist,
+	addToWatchlist,
+	removeFromWatchlist,
+	clearWatchlist,
+} from '@/lib/db/watchlist';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -67,7 +72,11 @@ export async function DELETE(request: NextRequest) {
 		const mediaType = searchParams.get('mediaType') as 'movie' | 'tv' | null;
 
 		if (mediaId && mediaType) {
-			await removeFromWatchlist(session.user.id, parseInt(mediaId), mediaType);
+			const parsedMediaId = parseInt(mediaId, 10);
+			if (isNaN(parsedMediaId)) {
+				return NextResponse.json({ error: 'Invalid mediaId' }, { status: 400 });
+			}
+			await removeFromWatchlist(session.user.id, parsedMediaId, mediaType);
 		} else {
 			await clearWatchlist(session.user.id, mediaType || undefined);
 		}

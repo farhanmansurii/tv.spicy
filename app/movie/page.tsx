@@ -10,7 +10,18 @@ import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
 
 export const metadata: Metadata = {
 	title: 'Movies | Spicy TV',
-	description: 'Watch any TV / Movies / Anime with Spicy TV',
+	description: 'Watch any TV or Movies with Spicy TV',
+	openGraph: {
+		title: 'Movies | Spicy TV',
+		description: 'Watch any TV or Movies with Spicy TV',
+		images: [{ url: '/icon-512x512.png', width: 512, height: 512, alt: 'Spicy TV' }],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'Movies | Spicy TV',
+		description: 'Watch any TV or Movies with Spicy TV',
+		images: ['/icon-512x512.png'],
+	},
 };
 
 export const revalidate = 604800;
@@ -31,7 +42,7 @@ export default async function Page() {
 		<>
 			<HeroCarousel shows={heroShows} type="movie" />
 			<Container>
-			<div className="flex flex-col space-y-4 md:space-y-6">
+				<div className="flex flex-col space-y-4 md:space-y-6">
 					<Suspense fallback={<WatchlistLoader />}>
 						<WatchList type="movie" />
 					</Suspense>

@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { Show, Anime } from '@/lib/types';
+import { Show } from '@/lib/types';
 
 interface SearchState {
-	recentlySearched: (Show | Anime)[];
-	addToRecentlySearched: (show: Show | Anime) => void;
+	recentlySearched: Show[];
+	addToRecentlySearched: (show: Show) => void;
 	removeFromRecentlySearched: (id: number | string) => void;
 	clearRecentlySearched: () => void;
 }

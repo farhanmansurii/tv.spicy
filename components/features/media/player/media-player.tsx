@@ -27,7 +27,7 @@ export default function MediaPlayer({
 	provider: string;
 	source?: any;
 }) {
-	const { activeEP } = useEpisodeStore();
+	const { activeEP, setIsPlaying } = useEpisodeStore();
 	const { recentlyWatched } = useTVShowStore();
 	function calculateTimeFromPercentage(
 		percentage: number,
@@ -139,7 +139,17 @@ export default function MediaPlayer({
 
 	useEffect(() => {
 		playerRef.current = Player.make('#oplayer').use(plugins).create() as Player<Ctx>;
-		if (!playerRef) return;
+		if (!playerRef.current) return;
+
+		// Set up play/pause state handlers
+		const handlePlay = () => setIsPlaying(true);
+		const handlePause = () => setIsPlaying(false);
+		const handleEnded = () => setIsPlaying(false);
+
+		playerRef.current.on('play', handlePlay);
+		playerRef.current.on('pause', handlePause);
+		playerRef.current.on('ended', handleEnded);
+
 		var forward = document.createElement('button');
 		forward.className = 'forward';
 		forward.innerHTML =
@@ -160,6 +170,10 @@ export default function MediaPlayer({
 		playerRef.current.$root.appendChild(forward);
 
 		return () => {
+			setIsPlaying(false);
+			playerRef.current?.off('play', handlePlay);
+			playerRef.current?.off('pause', handlePause);
+			playerRef.current?.off('ended', handleEnded);
 			playerRef.current?.destroy();
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,7 +199,7 @@ export default function MediaPlayer({
 				epi?.episode_number === activeEP?.episode_number
 		);
 		if (type === 'tv' && ep && ep.time) {
-			oplayer.on('loadedmetadata', () => {
+			const handleLoadedMetadata = () => {
 				const calculatedTime = calculateTimeFromPercentage(ep.time, oplayer?.duration);
 				if (calculatedTime) {
 					oplayer.seek(calculatedTime);
@@ -196,9 +210,25 @@ export default function MediaPlayer({
 						},
 					]);
 				}
-			});
+			};
+			oplayer.on('loadedmetadata', handleLoadedMetadata);
+
+			return () => {
+				oplayer.off('loadedmetadata', handleLoadedMetadata);
+			};
 		}
-	}, [sources, subtitles, activeEP?.episode_number, activeEP?.season_number, activeEP?.tv_id, image, recentlyWatched, subtitlesList, title, type]);
+	}, [
+		sources,
+		subtitles,
+		activeEP?.episode_number,
+		activeEP?.season_number,
+		activeEP?.tv_id,
+		image,
+		recentlyWatched,
+		subtitlesList,
+		title,
+		type,
+	]);
 	const watchTimeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	useEffect(() => {
 		const handleTimeUpdate = () => {
@@ -225,5 +255,10 @@ export default function MediaPlayer({
 		};
 	}, [activeEP?.tv_id, updateTimeWatched]);
 
-	return <div id="oplayer" className="w-full aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-white/10 shadow-2xl" />;
+	return (
+		<div
+			id="oplayer"
+			className="w-full aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-white/10 shadow-2xl"
+		/>
+	);
 }

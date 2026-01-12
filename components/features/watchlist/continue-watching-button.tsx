@@ -1,350 +1,388 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import useTVShowStore from '@/store/recentsStore';
 import { Episode } from '@/lib/types';
 import useWatchListStore from '@/store/watchlistStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
+import { useEpisodeStore } from '@/store/episodeStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import {
-    Play,
-    Plus,
-    Check,
-    Info,
-    Share2,
-    ThumbsUp,
-    Loader2
-} from 'lucide-react';
+import { Play, Pause, Plus, Check, Info, Share2, Heart, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GlowingIconButton } from '@/components/ui/glowing-icon-button';
+import { GlowingButton } from '@/components/ui/glowing-button';
 
 interface ContinueWatchingButtonProps {
-    id: string | number;
-    show: any;
-    type: 'movie' | 'tv';
-    isDetailsPage?: boolean;
+	id: string | number;
+	show: any;
+	type: 'movie' | 'tv';
+	isDetailsPage?: boolean;
 }
 
 export default function ContinueWatchingButton({
-    id,
-    show,
-    type,
-    isDetailsPage = false
+	id,
+	show,
+	type,
+	isDetailsPage = false,
 }: ContinueWatchingButtonProps) {
-    const router = useRouter();
-    const { recentlyWatched, loadEpisodes } = useTVShowStore();
-    const {
-        addToWatchlist,
-        removeFromWatchList,
-        addToTvWatchlist,
-        removeFromTvWatchList,
-        watchlist,
-        tvwatchlist
-    } = useWatchListStore();
-    const {
-        favoriteMovies,
-        favoriteTV,
-        addFavorite,
-        removeFavorite
-    } = useFavoritesStore();
+	const router = useRouter();
+	const { recentlyWatched, loadEpisodes } = useTVShowStore();
+	const { activeEP, isPlaying } = useEpisodeStore();
+	const {
+		addToWatchlist,
+		removeFromWatchList,
+		addToTvWatchlist,
+		removeFromTvWatchList,
+		watchlist,
+		tvwatchlist,
+	} = useWatchListStore();
+	const { favoriteMovies, favoriteTV, addFavorite, removeFavorite } = useFavoritesStore();
 
-    const [isSharing, setIsSharing] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+	const [isSharing, setIsSharing] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
-    // Load episodes on mount
-    useEffect(() => {
-        loadEpisodes();
-    }, [loadEpisodes]);
+	// Load episodes on mount
+	useEffect(() => {
+		loadEpisodes();
+	}, [loadEpisodes]);
 
-    // Check if item is liked using the store
-    const isLiked = useMemo(() => {
-        const itemId = Number(id);
-        if (type === 'movie') {
-            return favoriteMovies.some((item: any) => item.id === itemId);
-        } else {
-            return favoriteTV.some((item: any) => item.id === itemId);
-        }
-    }, [id, type, favoriteMovies, favoriteTV]);
+	// Check if this show is currently playing (on details page)
+	const isCurrentlyPlaying = useMemo(() => {
+		if (!isDetailsPage || type !== 'tv' || !activeEP || !isPlaying) return false;
+		return String(activeEP.tv_id) === String(id);
+	}, [isDetailsPage, type, activeEP, isPlaying, id]);
 
-    // Memoize watchlist status
-    const isAdded = useMemo(() => {
-        return type === 'movie'
-            ? watchlist.some((s) => s?.id === id)
-            : tvwatchlist.some((s) => s?.id === id);
-    }, [type, watchlist, tvwatchlist, id]);
+	// Get the currently active episode for this show (even if not playing)
+	const currentActiveEpisode = useMemo(() => {
+		if (!isDetailsPage || type !== 'tv' || !activeEP) return null;
+		if (String(activeEP.tv_id) !== String(id)) return null;
+		return activeEP;
+	}, [isDetailsPage, type, activeEP, id]);
 
-    // Find most recent episode for this show
-    const recent = useMemo(() => {
-        return recentlyWatched
-            .filter((ep: Episode) => ep.tv_id === id)
-            .sort((a: Episode, b: Episode) => {
-                if (b.season_number !== a.season_number) {
-                    return b.season_number - a.season_number;
-                }
-                return b.episode_number - a.episode_number;
-            })[0];
-    }, [recentlyWatched, id]);
+	// Check if item is liked
+	const isLiked = useMemo(() => {
+		const itemId = Number(id);
+		if (type === 'movie') {
+			return favoriteMovies.some((item: any) => item.id === itemId);
+		} else {
+			return favoriteTV.some((item: any) => item.id === itemId);
+		}
+	}, [id, type, favoriteMovies, favoriteTV]);
 
-    // Handle add/remove from watchlist
-    const handleAddOrRemove = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+	// Memoize watchlist status
+	const isAdded = useMemo(() => {
+		const itemId = Number(id);
+		return type === 'movie'
+			? watchlist.some((s) => s?.id === itemId)
+			: tvwatchlist.some((s) => s?.id === itemId);
+	}, [type, watchlist, tvwatchlist, id]);
 
-        if (isAdded) {
-            type === 'movie'
-                ? removeFromWatchList(Number(id))
-                : removeFromTvWatchList(Number(id));
-            toast.info('Removed from watchlist', {
-                description: `${show?.name || show?.title || 'Item'} has been removed from your watchlist.`
-            });
-        } else {
-            type === 'movie' ? addToWatchlist(show) : addToTvWatchlist(show);
-            toast.success('Added to watchlist', {
-                description: `${show?.name || show?.title || 'Item'} has been added to your watchlist.`
-            });
-        }
-    }, [isAdded, type, id, show, addToWatchlist, addToTvWatchlist, removeFromWatchList, removeFromTvWatchList]);
+	// Find most recent episode from watch history
+	const recentFromHistory = useMemo(() => {
+		const showId = String(id);
+		return recentlyWatched
+			.filter((ep: Episode) => String(ep.tv_id) === showId)
+			.sort((a: Episode, b: Episode) => {
+				if (b.season_number !== a.season_number) {
+					return b.season_number - a.season_number;
+				}
+				return b.episode_number - a.episode_number;
+			})[0];
+	}, [recentlyWatched, id]);
 
-    // Handle like/unlike using the store
-    const handleLike = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+	// Handle add/remove from watchlist
+	const handleAddOrRemove = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
 
-        if (isLiked) {
-            removeFavorite(Number(id), type);
-            toast.info('Removed from favorites', {
-                description: `${show?.name || show?.title || 'Item'} has been removed from your favorites.`
-            });
-        } else {
-            addFavorite(show, type);
-            toast.success('Added to favorites', {
-                description: `${show?.name || show?.title || 'Item'} has been added to your favorites.`
-            });
-        }
-    }, [id, isLiked, show, type, addFavorite, removeFavorite]);
+			if (isAdded) {
+				type === 'movie'
+					? removeFromWatchList(Number(id))
+					: removeFromTvWatchList(Number(id));
+				toast.info('Removed from watchlist', {
+					description: `${show?.name || show?.title || 'Item'} has been removed from your watchlist.`,
+				});
+			} else {
+				type === 'movie' ? addToWatchlist(show) : addToTvWatchlist(show);
+				toast.success('Added to watchlist', {
+					description: `${show?.name || show?.title || 'Item'} has been added to your watchlist.`,
+				});
+			}
+		},
+		[
+			isAdded,
+			type,
+			id,
+			show,
+			addToWatchlist,
+			addToTvWatchlist,
+			removeFromWatchList,
+			removeFromTvWatchList,
+		]
+	);
 
-    // Handle share
-    const handleShare = useCallback(async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+	// Handle like/unlike
+	const handleLike = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
 
-        if (isSharing) return;
-        setIsSharing(true);
+			if (isLiked) {
+				removeFavorite(Number(id), type);
+				toast.info('Removed from favorites');
+			} else {
+				addFavorite(show, type);
+				toast.success('Added to favorites');
+			}
+		},
+		[id, isLiked, show, type, addFavorite, removeFavorite]
+	);
 
-        const title = show?.name || show?.title || 'Media';
-        const url = `${window.location.origin}/${type}/${id}`;
-        const text = `Check out ${title} on ${window.location.hostname}`;
+	// Handle share
+	const handleShare = useCallback(
+		async (e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
 
-        try {
-            // Try Web Share API first (mobile)
-            if (navigator.share) {
-                await navigator.share({
-                    title,
-                    text,
-                    url,
-                });
-                toast.success('Shared successfully!');
-            } else {
-                // Fallback: Copy to clipboard
-                await navigator.clipboard.writeText(url);
-                toast.success('Link copied!', {
-                    description: 'The link has been copied to your clipboard.'
-                });
-            }
-        } catch (error: any) {
-            // User cancelled or error occurred
-            if (error.name !== 'AbortError') {
-                // Fallback: Copy to clipboard
-                try {
-                    await navigator.clipboard.writeText(url);
-                    toast.success('Link copied!', {
-                        description: 'The link has been copied to your clipboard.'
-                    });
-                } catch (clipboardError) {
-                    toast.error('Failed to share', {
-                        description: 'Unable to copy link. Please try again.'
-                    });
-                }
-            }
-        } finally {
-            setIsSharing(false);
-        }
-    }, [id, type, show, isSharing]);
+			if (isSharing) return;
+			setIsSharing(true);
 
-    // Handle play/resume
-    const handlePlay = useCallback(async () => {
-        setIsLoading(true);
+			const title = show?.name || show?.title || 'Media';
+			const url = `${window.location.origin}/${type}/${id}`;
 
-        try {
-            if (type === 'tv') {
-                if (recent) {
-                    // Navigate to the specific episode
-                    const params = new URLSearchParams();
-                    params.set('season', String(recent.season_number));
-                    params.set('episode', String(recent.episode_number));
-                    router.push(`/${type}/${id}?${params.toString()}`);
-                } else {
-                    // No recent episode, go to first season/episode
-                    router.push(`/${type}/${id}?season=1&episode=1`);
-                }
-            } else {
-                // For movies, navigate to details page which will play automatically
-                router.push(`/${type}/${id}`);
-            }
-        } catch (error) {
-            toast.error('Navigation failed', {
-                description: 'Unable to navigate. Please try again.'
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [router, type, id, recent]);
+			try {
+				if (navigator.share) {
+					await navigator.share({ title, url });
+					toast.success('Shared successfully!');
+				} else {
+					await navigator.clipboard.writeText(url);
+					toast.success('Link copied!');
+				}
+			} catch (error: any) {
+				if (error.name !== 'AbortError') {
+					try {
+						await navigator.clipboard.writeText(url);
+						toast.success('Link copied!');
+					} catch {
+						toast.error('Failed to share');
+					}
+				}
+			} finally {
+				setIsSharing(false);
+			}
+		},
+		[id, type, show, isSharing]
+	);
 
-    // Handle info button (non-details page only)
-    const handleInfo = useCallback(() => {
-        if (!isDetailsPage) {
-            router.push(`/${type}/${id}`);
-        }
-    }, [router, type, id, isDetailsPage]);
+	// Handle scroll to player (when already playing)
+	const scrollToPlayer = useCallback(() => {
+		const playerElement = document.querySelector('[data-player-container]');
+		if (playerElement) {
+			playerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+	}, []);
 
-    // Determine play button text and label
-    const playButtonText = useMemo(() => {
-        if (type === 'tv' && recent) {
-            return `Resume S${recent.season_number}:E${recent.episode_number}`;
-        }
-        return 'Play Now';
-    }, [type, recent]);
+	// Handle play/resume
+	const handlePlay = useCallback(async () => {
+		// If currently playing this show, just scroll to player
+		if (isCurrentlyPlaying) {
+			scrollToPlayer();
+			return;
+		}
 
-    const playButtonLabel = useMemo(() => {
-        if (type === 'tv' && recent) {
-            return `Resume Season ${recent.season_number} Episode ${recent.episode_number}`;
-        }
-        return 'Play Now';
-    }, [type, recent]);
+		setIsLoading(true);
 
-    return (
-        <div className="flex flex-wrap items-center gap-2.5 md:gap-3">
-            {/* Play/Resume Button - Primary Action */}
-            <button
-                onClick={handlePlay}
-                disabled={isLoading}
-                className={cn(
-                    "relative h-[42px] md:h-[50px] px-6 md:px-8 rounded-full",
-                    "flex items-center justify-center gap-2.5 transition-all duration-300",
-                    "bg-white text-black hover:bg-zinc-200 active:scale-95",
-                    "group shadow-lg shadow-black/20",
-                    "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950",
-                    "disabled:opacity-70 disabled:cursor-wait",
-                    "min-w-[120px] md:min-w-[140px]"
-                )}
-                aria-label={playButtonLabel}
-                aria-busy={isLoading}
-            >
-                {isLoading ? (
-                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
-                ) : (
-                    <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current transition-transform group-hover:scale-110" />
-                )}
-                <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] whitespace-nowrap">
-                    {isLoading ? 'Loading...' : playButtonText}
-                </span>
-            </button>
+		try {
+			if (type === 'tv') {
+				// Use active episode if on details page, otherwise use history
+				const episodeToPlay = currentActiveEpisode || recentFromHistory;
 
-            {/* Add to Watchlist Button */}
-            <button
-                onClick={handleAddOrRemove}
-                className={cn(
-                    "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full",
-                    "flex items-center justify-center transition-all duration-300",
-                    "bg-white/10 hover:bg-white/15 active:scale-95",
-                    "border border-white/5 backdrop-blur-xl text-white group",
-                    "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950",
-                    isAdded && "bg-primary/20 border-primary/30 shadow-lg shadow-primary/10"
-                )}
-                aria-label={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
-                title={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
-            >
-                {isAdded ? (
-                    <Check className="w-4 h-4 md:w-5 md:h-5 text-primary transition-all duration-300" />
-                ) : (
-                    <Plus className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:rotate-90 duration-300" />
-                )}
-            </button>
+				if (episodeToPlay) {
+					const params = new URLSearchParams();
+					params.set('season', String(episodeToPlay.season_number));
+					params.set('episode', String(episodeToPlay.episode_number));
+					router.push(`/${type}/${id}?${params.toString()}`);
+				} else {
+					router.push(`/${type}/${id}?season=1&episode=1`);
+				}
+			} else {
+				router.push(`/${type}/${id}`);
+			}
+		} catch (error) {
+			toast.error('Navigation failed');
+		} finally {
+			setIsLoading(false);
+		}
+	}, [
+		router,
+		type,
+		id,
+		currentActiveEpisode,
+		recentFromHistory,
+		isCurrentlyPlaying,
+		scrollToPlayer,
+	]);
 
-            {/* Details Page Actions */}
-            {isDetailsPage && (
-                <div className="flex items-center gap-2.5">
-                    {/* Like/ThumbsUp Button */}
-                    <button
-                        onClick={handleLike}
-                        className={cn(
-                            "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full",
-                            "flex items-center justify-center transition-all duration-300",
-                            "bg-white/5 hover:bg-white/10 active:scale-95",
-                            "border border-white/5 backdrop-blur-xl group",
-                            "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950",
-                            isLiked
-                                ? "bg-primary/20 border-primary/30 text-white shadow-lg shadow-primary/10"
-                                : "text-zinc-300 hover:text-white"
-                        )}
-                        aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
-                        title={isLiked ? 'Remove from favorites' : 'Add to favorites'}
-                    >
-                        <ThumbsUp
-                            className={cn(
-                                "w-4 h-4 md:w-5 md:h-5 transition-all duration-300",
-                                isLiked
-                                    ? "fill-current scale-110"
-                                    : "group-hover:-translate-y-0.5"
-                            )}
-                        />
-                    </button>
+	// Handle info button
+	const handleInfo = useCallback(() => {
+		if (!isDetailsPage) {
+			router.push(`/${type}/${id}`);
+		}
+	}, [router, type, id, isDetailsPage]);
 
-                    {/* Share Button */}
-                    <button
-                        onClick={handleShare}
-                        disabled={isSharing}
-                        className={cn(
-                            "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full",
-                            "flex items-center justify-center transition-all duration-300",
-                            "bg-white/5 hover:bg-white/10 active:scale-95",
-                            "border border-white/5 backdrop-blur-xl",
-                            "text-zinc-300 hover:text-white group",
-                            "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950",
-                            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/5",
-                            isSharing && "animate-pulse"
-                        )}
-                        aria-label="Share"
-                        title="Share"
-                        aria-busy={isSharing}
-                    >
-                        {isSharing ? (
-                            <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
-                        ) : (
-                            <Share2 className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:scale-105" />
-                        )}
-                    </button>
-                </div>
-            )}
+	// Determine which episode to show in button (prioritize active over history)
+	const displayEpisode = currentActiveEpisode || recentFromHistory;
 
-            {/* Info Button (Non-Details Page) */}
-            {!isDetailsPage && (
-                <button
-                    onClick={handleInfo}
-                    className={cn(
-                        "h-[42px] w-[42px] md:h-[50px] md:w-[50px] rounded-full",
-                        "flex items-center justify-center transition-all duration-300",
-                        "bg-white/5 hover:bg-white/10 active:scale-95",
-                        "border border-white/5 backdrop-blur-xl",
-                        "text-zinc-300 hover:text-white group",
-                        "focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950"
-                    )}
-                    aria-label="View details"
-                    title="View details"
-                >
-                    <Info className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:scale-105" />
-                </button>
-            )}
-        </div>
-    );
+	// Determine button text based on state
+	const { buttonText, buttonLabel, ButtonIcon } = useMemo(() => {
+		if (type === 'movie') {
+			return {
+				buttonText: 'Play',
+				buttonLabel: 'Play Movie',
+				ButtonIcon: Play,
+			};
+		}
+
+		// TV Show logic
+		if (isCurrentlyPlaying && displayEpisode) {
+			// Currently playing - show "Playing" with Pause icon
+			return {
+				buttonText: `Playing S${displayEpisode.season_number} E${displayEpisode.episode_number}`,
+				buttonLabel: `Now playing Season ${displayEpisode.season_number} Episode ${displayEpisode.episode_number}`,
+				ButtonIcon: Pause,
+			};
+		}
+
+		if (displayEpisode) {
+			// Has active/recent episode - show "Resume"
+			return {
+				buttonText: `Resume S${displayEpisode.season_number} E${displayEpisode.episode_number}`,
+				buttonLabel: `Resume Season ${displayEpisode.season_number} Episode ${displayEpisode.episode_number}`,
+				ButtonIcon: Play,
+			};
+		}
+
+		// Fresh start
+		return {
+			buttonText: 'Start Watching',
+			buttonLabel: 'Start Watching from Episode 1',
+			ButtonIcon: Play,
+		};
+	}, [type, isCurrentlyPlaying, displayEpisode]);
+
+	// Button styles
+	const iconButtonBase = cn(
+		'bg-white/10 hover:bg-white/20',
+		'border border-white/10',
+		'text-white/90 hover:text-white'
+	);
+
+	return (
+		<div className="flex items-center gap-3">
+			{/* Play/Resume/Playing Button - Primary CTA */}
+			<GlowingButton
+				onClick={handlePlay}
+				disabled={isLoading}
+				glow
+				glowVariant={isCurrentlyPlaying ? 'primary' : 'light'}
+				className={cn(
+					'h-11 md:h-12 px-5 md:px-6',
+					'inline-flex items-center justify-center gap-2',
+					'font-semibold text-[13px] md:text-sm',
+					'transition-all duration-200 ease-out',
+					'active:scale-[0.98]',
+					'focus-visible:ring-offset-black',
+					'disabled:opacity-60 disabled:pointer-events-none',
+					isCurrentlyPlaying
+						? 'bg-primary text-primary-foreground hover:bg-primary/90'
+						: 'bg-white text-black hover:bg-white/90'
+				)}
+				aria-label={buttonLabel}
+				aria-busy={isLoading}
+			>
+				{isLoading ? (
+					<Loader2 className="w-[18px] h-[18px] animate-spin" />
+				) : isCurrentlyPlaying ? (
+					<Pause className="w-[18px] h-[18px] fill-current" strokeWidth={0} />
+				) : (
+					<ButtonIcon className="w-[18px] h-[18px] fill-current" />
+				)}
+				<span className="whitespace-nowrap">{isLoading ? 'Loading' : buttonText}</span>
+			</GlowingButton>
+
+			{/* Add to Watchlist Button */}
+			<GlowingIconButton
+				onClick={handleAddOrRemove}
+				glow={isAdded}
+				glowVariant="light"
+				className={cn(isAdded ? 'bg-white text-black hover:bg-white/90' : iconButtonBase)}
+				aria-label={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
+				title={isAdded ? 'In Watchlist' : 'Add to Watchlist'}
+			>
+				{isAdded ? (
+					<Check className="w-5 h-5" strokeWidth={2.5} />
+				) : (
+					<Plus className="w-5 h-5" strokeWidth={2} />
+				)}
+			</GlowingIconButton>
+
+			{/* Details Page Actions */}
+			{isDetailsPage && (
+				<>
+					{/* Favorite Button */}
+					<GlowingIconButton
+						onClick={handleLike}
+						glow={isLiked}
+						glowVariant="primary"
+						className={cn(
+							isLiked
+								? 'bg-red-500/20 border border-red-500/30 text-red-500 hover:bg-red-500/30'
+								: iconButtonBase
+						)}
+						aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
+						title={isLiked ? 'Favorited' : 'Add to Favorites'}
+					>
+						<Heart
+							className={cn('w-5 h-5', isLiked && 'fill-current')}
+							strokeWidth={2}
+						/>
+					</GlowingIconButton>
+
+					{/* Share Button */}
+					<GlowingIconButton
+						onClick={handleShare}
+						disabled={isSharing}
+						glow={false}
+						className={cn(
+							iconButtonBase,
+							'disabled:opacity-50 disabled:pointer-events-none'
+						)}
+						aria-label="Share"
+						title="Share"
+					>
+						{isSharing ? (
+							<Loader2 className="w-5 h-5 animate-spin" />
+						) : (
+							<Share2 className="w-5 h-5" strokeWidth={2} />
+						)}
+					</GlowingIconButton>
+				</>
+			)}
+
+			{/* Info Button (Non-Details Page) */}
+			{!isDetailsPage && (
+				<GlowingIconButton
+					onClick={handleInfo}
+					glow={false}
+					className={iconButtonBase}
+					aria-label="View details"
+					title="More Info"
+				>
+					<Info className="w-5 h-5" strokeWidth={2} />
+				</GlowingIconButton>
+			)}
+		</div>
+	);
 }

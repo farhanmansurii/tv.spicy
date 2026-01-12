@@ -41,7 +41,7 @@ const syncEpisodeToDatabase = async (episode: any, action: 'add' | 'update' | 'd
 
 const useTVShowStore = create<TVShowStore>((set, get) => ({
 	recentlyWatched: [],
-	addRecentlyWatched: async (episode) => {
+	addRecentlyWatched: (episode) => {
 		set((state) => {
 			const filteredEpisodes = state.recentlyWatched.filter((existingEpisode: any) => {
 				return existingEpisode.tv_id !== episode.tv_id;
@@ -50,7 +50,9 @@ const useTVShowStore = create<TVShowStore>((set, get) => ({
 			saveEpisodesToDB(updatedRecentlyWatched);
 			return { recentlyWatched: updatedRecentlyWatched };
 		});
-		await syncEpisodeToDatabase(episode, 'add');
+		syncEpisodeToDatabase(episode, 'add').catch((error) => {
+			console.error('Failed to sync episode to database:', error);
+		});
 	},
 	loadEpisodes: async () => {
 		try {
@@ -60,10 +62,12 @@ const useTVShowStore = create<TVShowStore>((set, get) => ({
 			console.error('Error loading episodes from IndexedDB:', error);
 		}
 	},
-	deleteRecentlyWatched: async () => {
+	deleteRecentlyWatched: () => {
 		set({ recentlyWatched: [] });
 		deleteAllEpisodesFromDB();
-		await syncEpisodeToDatabase(null, 'delete');
+		fetch('/api/recently-watched', { method: 'DELETE' }).catch((error) => {
+			console.error('Failed to delete from database:', error);
+		});
 	},
 	updateTimeWatched: async (episodeId, timeWatched) => {
 		const episode = get().recentlyWatched.find((ep: any) => ep.tv_id === episodeId);

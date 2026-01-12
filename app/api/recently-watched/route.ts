@@ -15,7 +15,11 @@ export async function GET(request: NextRequest) {
 		}
 
 		const searchParams = request.nextUrl.searchParams;
-		const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+		const limitParam = searchParams.get('limit');
+		const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+		if (limitParam && isNaN(limit!)) {
+			return NextResponse.json({ error: 'Invalid limit parameter' }, { status: 400 });
+		}
 
 		const episodes = await getRecentlyWatched(session.user.id, limit);
 		return NextResponse.json(episodes);

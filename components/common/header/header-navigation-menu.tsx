@@ -1,44 +1,31 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
-import { buildLanguageNavigation } from "./header-navigation-data";
-import { HeaderPopularMovie } from "./header-popular-movie";
-import { HeaderPopularTvSerie } from "./header-popular-tv-serie";
-import {
-  NavigationMenu,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
+import { buildLanguageNavigation } from './header-navigation-data';
+import { HeaderPopularMovie } from './header-popular-movie';
+import { HeaderPopularTvSerie } from './header-popular-tv-serie';
+import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
 // import { useAuth } from '@/context/auth'
 // import { Bell } from 'lucide-react'
 
 export const HeaderNavigationMenu = () => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+	const pathname = usePathname();
 
-  // const { user } = useAuth()
+	// const { user } = useAuth()
 
-  const getIsActive = (href: string) => {
-    const normalizedPath = pathname.replace(`/`, "");
+	const getIsActive = (href: string) => {
+		const normalizedPath = pathname.replace(`/`, '');
+		return normalizedPath.includes(href);
+	};
 
-    if (href.includes("animes")) {
-      const pathWithParams = `${normalizedPath}?type=${searchParams.get(
-        "type"
-      )}`;
-
-      return pathWithParams.includes(href);
-    }
-
-    return normalizedPath.includes(href);
-  };
-
-  return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        {/* {user && (
+	return (
+		<NavigationMenu>
+			<NavigationMenuList>
+				{/* {user && (
           <NavigationMenuItem
             className={cn(
               navigationMenuTriggerStyle(),
@@ -58,7 +45,7 @@ export const HeaderNavigationMenu = () => {
             </Link>
           </NavigationMenuItem>
         )} */}
-      </NavigationMenuList>
-    </NavigationMenu>
-  );
+			</NavigationMenuList>
+		</NavigationMenu>
+	);
 };

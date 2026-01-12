@@ -12,17 +12,20 @@ import CommonTitle from '@/components/shared/animated/common-title';
 
 export default function CastCrewLoader() {
 	return (
-		<div className="w-full space-y-10">
+		<div className="w-full py-8 md:py-12">
 			{/* Cast Section */}
 			<div>
-				<CommonTitle text="The Ensemble" variant="section" spacing="none" />
-				<CommonTitle text="Leading Cast" variant="small" spacing="medium">
+				<CommonTitle text="Cast & Crew" variant="section" spacing="none" />
+				<CommonTitle text="Meet the Cast" variant="small" spacing="medium">
 					<span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest tabular-nums">
 						Loading...
 					</span>
 				</CommonTitle>
 
-				<Carousel opts={{ align: 'start', dragFree: true }} className="w-full group/row relative">
+				<Carousel
+					opts={{ align: 'start', dragFree: true }}
+					className="w-full group/row relative"
+				>
 					<CarouselPrevious
 						className="hidden lg:flex absolute left-4 top-[40%] -translate-y-1/2 z-40 h-12 w-12 border-0 bg-black/50 backdrop-blur-md text-white hover:bg-black/70 hover:text-white opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 rounded-full"
 						icon={<ChevronLeft className="h-8 w-8" />}

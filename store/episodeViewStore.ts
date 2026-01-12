@@ -8,6 +8,12 @@ interface EpisodeViewStore {
 	setView: (view: EpisodeView) => void;
 }
 
+const noopStorage = {
+	getItem: () => null,
+	setItem: () => {},
+	removeItem: () => {},
+};
+
 export const useEpisodeViewStore = create<EpisodeViewStore>()(
 	persist(
 		(set) => ({
@@ -16,8 +22,9 @@ export const useEpisodeViewStore = create<EpisodeViewStore>()(
 		}),
 		{
 			name: 'episode-view-preference',
-			storage: createJSONStorage(() => localStorage),
+			storage: createJSONStorage(() =>
+				typeof window !== 'undefined' ? localStorage : noopStorage
+			),
 		}
 	)
 );
-

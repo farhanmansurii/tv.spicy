@@ -8,22 +8,44 @@ import { Toaster } from '@/components/ui/sonner';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://spicy-tv.vercel.app';
+
 export const generateMetadata = (): Metadata => ({
-	title: 'Spicy TV - Stream Movies, TV Shows, and Anime',
+	metadataBase: new URL(SITE_URL),
+	title: 'Spicy TV - Stream Movies and TV Shows',
 	description:
-		'Discover and stream your favorite movies, TV series, and anime on Spicy TV. Enjoy unlimited entertainment with our vast library of content.',
-	keywords: ['streaming', 'movies', 'TV shows', 'anime', 'entertainment', 'Spicy TV'],
+		'Discover and stream your favorite movies and TV series on Spicy TV. Enjoy unlimited entertainment with our vast library of content.',
+	applicationName: 'Spicy TV',
+	keywords: ['streaming', 'movies', 'TV shows', 'entertainment', 'Spicy TV'],
 	authors: [{ name: 'Spicy TV Team' }],
 	creator: 'Spicy TV',
 	publisher: 'Spicy TV',
+	alternates: {
+		canonical: '/',
+	},
 	openGraph: {
 		title: 'Spicy TV - Your Ultimate Streaming Destination',
 		description:
-			'Stream the latest movies, binge-worthy TV shows, and popular anime series on Spicy TV. Start watching now!',
-		url: 'https://www.spicy.tv',
+			'Stream the latest movies and binge-worthy TV shows on Spicy TV. Start watching now!',
+		url: SITE_URL,
 		siteName: 'Spicy TV',
 		locale: 'en_US',
 		type: 'website',
+		images: [
+			{
+				url: '/icon-512x512.png',
+				width: 512,
+				height: 512,
+				alt: 'Spicy TV',
+			},
+		],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'Spicy TV - Stream Movies and TV Shows',
+		description:
+			'Discover and stream your favorite movies and TV series on Spicy TV. Enjoy unlimited entertainment with our vast library of content.',
+		images: ['/icon-512x512.png'],
 	},
 	robots: {
 		index: true,

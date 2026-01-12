@@ -6,7 +6,7 @@ interface User {
 	id: string;
 	email: string;
 	name: string | null;
-	image: string | null;
+	image?: string | null;
 	emailVerified: boolean;
 	createdAt: Date | string;
 	updatedAt: Date | string;

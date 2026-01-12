@@ -4,12 +4,22 @@ import { prisma } from '@/lib/db/prisma';
 
 // Get baseURL from environment or auto-detect from request
 function getBaseURL(): string {
-	// Priority: BETTER_AUTH_URL > NEXTAUTH_URL > VERCEL_URL > localhost
-	if (process.env.BETTER_AUTH_URL) {
-		return process.env.BETTER_AUTH_URL.replace(/\/$/, '');
+	const isProduction = process.env.NODE_ENV === 'production';
+	const sanitize = (value: string) => value.replace(/\/$/, '');
+	const isLocalhost = (value: string) => value.includes('localhost');
+
+	// Priority: BETTER_AUTH_URL > NEXTAUTH_URL > NEXT_PUBLIC_SITE_URL > VERCEL_URL > localhost
+	if (
+		process.env.BETTER_AUTH_URL &&
+		(!isProduction || !isLocalhost(process.env.BETTER_AUTH_URL))
+	) {
+		return sanitize(process.env.BETTER_AUTH_URL);
 	}
-	if (process.env.NEXTAUTH_URL) {
-		return process.env.NEXTAUTH_URL.replace(/\/$/, '');
+	if (process.env.NEXTAUTH_URL && (!isProduction || !isLocalhost(process.env.NEXTAUTH_URL))) {
+		return sanitize(process.env.NEXTAUTH_URL);
+	}
+	if (process.env.NEXT_PUBLIC_SITE_URL) {
+		return sanitize(process.env.NEXT_PUBLIC_SITE_URL);
 	}
 	// Auto-detect from Vercel deployment
 	if (process.env.VERCEL_URL) {
@@ -25,11 +35,11 @@ function getBaseURL(): string {
 const baseURL = getBaseURL();
 
 // Configure trusted origins for development
-const trustedOrigins = process.env.NODE_ENV === 'development'
-	? ['http://localhost:3000', 'http://localhost']
-	: undefined;
+const trustedOrigins =
+	process.env.NODE_ENV === 'development'
+		? ['http://localhost:3000', 'http://localhost']
+		: undefined;
 
-// Validate required environment variables in production
 if (process.env.NODE_ENV === 'production') {
 	if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
 		console.error('⚠️  GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set in production');
@@ -38,7 +48,9 @@ if (process.env.NODE_ENV === 'production') {
 		console.error('⚠️  BETTER_AUTH_SECRET or NEXTAUTH_SECRET must be set in production');
 	}
 	if (baseURL.includes('localhost')) {
-		console.warn('⚠️  baseURL is set to localhost in production. Set BETTER_AUTH_URL or NEXTAUTH_URL environment variable.');
+		console.warn(
+			'⚠️  baseURL is set to localhost in production. Set BETTER_AUTH_URL or NEXTAUTH_URL environment variable.'
+		);
 	}
 }
 

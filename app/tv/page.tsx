@@ -11,7 +11,18 @@ import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
 
 export const metadata: Metadata = {
 	title: 'Spicy TV',
-	description: 'Watch any TV / Movies / Anime with Spicy TV',
+	description: 'Watch any TV or Movies with Spicy TV',
+	openGraph: {
+		title: 'Spicy TV',
+		description: 'Watch any TV or Movies with Spicy TV',
+		images: [{ url: '/icon-512x512.png', width: 512, height: 512, alt: 'Spicy TV' }],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'Spicy TV',
+		description: 'Watch any TV or Movies with Spicy TV',
+		images: ['/icon-512x512.png'],
+	},
 };
 
 export const revalidate = 604800;

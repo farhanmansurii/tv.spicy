@@ -13,14 +13,19 @@ interface UserData {
 	favoriteTV: any[];
 }
 
-const fetchUserData = async (userId: string): Promise<UserData> => {
-	const [recentlyWatched, watchlistMovies, watchlistTV, favoriteMovies, favoriteTV] = await Promise.all([
-		fetch('/api/recently-watched').then((res) => (res.ok ? res.json() : [])),
-		fetch('/api/watchlist?type=movie').then((res) => (res.ok ? res.json() : [])),
-		fetch('/api/watchlist?type=tv').then((res) => (res.ok ? res.json() : [])),
-		fetch('/api/favorites?type=movie').then((res) => (res.ok ? res.json() : [])),
-		fetch('/api/favorites?type=tv').then((res) => (res.ok ? res.json() : [])),
-	]);
+const fetchUserData = async (userId: string, signal?: AbortSignal): Promise<UserData> => {
+	const [recentlyWatched, watchlistMovies, watchlistTV, favoriteMovies, favoriteTV] =
+		await Promise.all([
+			fetch('/api/recently-watched', { signal }).then((res) => (res.ok ? res.json() : [])),
+			fetch('/api/watchlist?type=movie', { signal }).then((res) =>
+				res.ok ? res.json() : []
+			),
+			fetch('/api/watchlist?type=tv', { signal }).then((res) => (res.ok ? res.json() : [])),
+			fetch('/api/favorites?type=movie', { signal }).then((res) =>
+				res.ok ? res.json() : []
+			),
+			fetch('/api/favorites?type=tv', { signal }).then((res) => (res.ok ? res.json() : [])),
+		]);
 
 	return {
 		recentlyWatched,
@@ -38,21 +43,18 @@ export function useDatabaseSync() {
 
 	const queryKey = userId ? ['user', userId, 'home-data'] : null;
 
-	const {
-		data,
-		isLoading,
-		isError,
-		error,
-		refetch,
-	} = useQuery({
+	const { data, isLoading, isError, error, refetch } = useQuery({
 		queryKey: queryKey || ['user', 'home-data'],
-		queryFn: () => (userId ? fetchUserData(userId) : Promise.resolve({
-			recentlyWatched: [],
-			watchlistMovies: [],
-			watchlistTV: [],
-			favoriteMovies: [],
-			favoriteTV: [],
-		})),
+		queryFn: () =>
+			userId
+				? fetchUserData(userId)
+				: Promise.resolve({
+						recentlyWatched: [],
+						watchlistMovies: [],
+						watchlistTV: [],
+						favoriteMovies: [],
+						favoriteTV: [],
+					}),
 		enabled: !!userId,
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		gcTime: 30 * 60 * 1000, // 30 minutes

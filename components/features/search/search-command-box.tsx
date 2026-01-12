@@ -139,7 +139,9 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 
 	const results = React.useMemo(() => {
 		const raw = (data?.results as any[]) || [];
-		return raw.filter((i) => filter === 'all' || i.media_type === filter).slice(0, 8);
+		return raw
+			.filter((i) => i != null && (filter === 'all' || i.media_type === filter))
+			.slice(0, 8);
 	}, [data, filter]);
 
 	React.useLayoutEffect(() => {
@@ -406,6 +408,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 									{/* Go to Search Page Option */}
 									<CommandGroup>
 										<CommandItem
+											value="open-search-page"
 											onSelect={() => {
 												router.push('/search');
 												setOpen(false);
@@ -465,6 +468,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 											{/* Go to Search Page Option */}
 											<CommandGroup>
 												<CommandItem
+													value="view-all-results"
 													onSelect={() => {
 														router.push(
 															`/search?q=${encodeURIComponent(debouncedQuery)}`
@@ -521,14 +525,19 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 }
 
 function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
-	const year = (item.release_date || item.first_air_date || '').split('-')[0];
+	const dateStr = item.release_date || item.first_air_date || '';
+	const year = typeof dateStr === 'string' ? dateStr.split('-')[0] : '';
 	const title = item.title || item.name || 'Untitled';
 	const mediaType =
 		item.media_type === 'movie' ? 'Movie' : item.media_type === 'tv' ? 'TV Show' : 'Media';
+	const rating = typeof item.vote_average === 'number' ? item.vote_average : null;
+	// Create a safe value for CMDK that won't break CSS selectors
+	const safeValue = `${item.media_type || 'media'}-${item.id}`;
 
 	return (
 		<div className="px-1 py-1">
 			<CommandItem
+				value={safeValue}
 				onSelect={onSelect}
 				className="group relative flex items-center gap-3.5 p-1.5 rounded-2xl
 					bg-gradient-to-br from-white/[0.02] to-white/[0.01]
@@ -599,7 +608,7 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 						{year && <span className="text-white/30 font-semibold">{year}</span>}
 
 						{/* Rating */}
-						{item.vote_average > 0 && (
+						{rating != null && rating > 0 && (
 							<div className="flex items-center gap-1 ml-auto">
 								<div
 									className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md
@@ -611,7 +620,7 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 										strokeWidth={0}
 									/>
 									<span className="text-amber-400/90 font-bold text-[11px]">
-										{item.vote_average.toFixed(1)}
+										{rating.toFixed(1)}
 									</span>
 								</div>
 							</div>
