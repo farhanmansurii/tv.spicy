@@ -3,6 +3,19 @@
  * Optimized for Next.js 16 with proper caching, error handling, and environment variables
  */
 
+import type {
+	TMDBCreditsResponse,
+	TMDBEpisodeDetails,
+	TMDBImagesResponse,
+	TMDBListResponse,
+	TMDBMovie,
+	TMDBTVShow,
+	TMDBSeasonDetails,
+	TMDBVideosResponse,
+	TMDBBaseMedia,
+	Genre,
+} from '@/lib/types/tmdb';
+
 // ============================================================================
 // Configuration & Constants
 // ============================================================================
@@ -10,7 +23,8 @@
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || '';
-const TMDB_BEARER_TOKEN = process.env.NEXT_PUBLIC_TMDB_BEARER_TOKEN || process.env.TMDB_BEARER_TOKEN || '';
+const TMDB_BEARER_TOKEN =
+	process.env.NEXT_PUBLIC_TMDB_BEARER_TOKEN || process.env.TMDB_BEARER_TOKEN || '';
 
 // Validate API credentials
 if (!TMDB_BEARER_TOKEN && !TMDB_API_KEY) {
@@ -46,13 +60,6 @@ interface FetchOptions {
 	headers?: Record<string, string>;
 	timeout?: number;
 	retries?: number;
-}
-
-interface TMDBResponse<T> {
-	results: T[];
-	page: number;
-	total_pages: number;
-	total_results: number;
 }
 
 interface TMDBError {
@@ -108,10 +115,7 @@ function isRetryableError(error: any): boolean {
 /**
  * Base fetch function with error handling, caching, retries, and timeout
  */
-async function tmdbFetch<T>(
-	endpoint: string,
-	options: FetchOptions = {}
-): Promise<T> {
+async function tmdbFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
 	const {
 		revalidate = CACHE_DURATIONS.MEDIUM,
 		headers = {},
@@ -157,10 +161,10 @@ async function tmdbFetch<T>(
 				next: { revalidate },
 			});
 
-			const response = await Promise.race([
+			const response = (await Promise.race([
 				fetchPromise,
 				createTimeout(timeout),
-			]) as Response;
+			])) as Response;
 
 			if (!response.ok) {
 				let errorData: TMDBError | string;
@@ -198,7 +202,10 @@ async function tmdbFetch<T>(
 
 			// Don't retry on non-retryable errors
 			if (!isRetryableError(error) || attempt >= retries) {
-				console.error(`Error fetching ${cleanEndpoint} (attempt ${attempt + 1}/${retries + 1}):`, error);
+				console.error(
+					`Error fetching ${cleanEndpoint} (attempt ${attempt + 1}/${retries + 1}):`,
+					error
+				);
 				throw error;
 			}
 
@@ -218,7 +225,7 @@ async function tmdbFetch<T>(
 /**
  * Fetch list data (trending, popular, etc.)
  */
-export async function fetchRowData(endpoint: string): Promise<any[]> {
+export async function fetchRowData(endpoint: string): Promise<TMDBBaseMedia[]> {
 	try {
 		// Ensure endpoint starts with /
 		const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -234,7 +241,7 @@ export async function fetchRowData(endpoint: string): Promise<any[]> {
 		// Get the path and query string (without the dummy domain)
 		const fullEndpoint = url.pathname + url.search;
 
-		const data = await tmdbFetch<TMDBResponse<any>>(fullEndpoint, {
+		const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(fullEndpoint, {
 			revalidate: CACHE_DURATIONS.LONG,
 		});
 
@@ -251,7 +258,9 @@ export async function fetchRowData(endpoint: string): Promise<any[]> {
 export async function fetchDetailsTMDB(
 	id: string,
 	type: MediaType
-): Promise<any> {
+): Promise<
+	(TMDBMovie & TMDBTVShow & { images?: TMDBImagesResponse; videos?: TMDBVideosResponse }) | null
+> {
 	const appendToResponse = [
 		'images',
 		'videos',
@@ -263,7 +272,9 @@ export async function fetchDetailsTMDB(
 	const endpoint = `/${type}/${id}?append_to_response=${appendToResponse}&include_image_language=en,null`;
 
 	try {
-		return await tmdbFetch<any>(endpoint, {
+		return await tmdbFetch<
+			TMDBMovie & TMDBTVShow & { images?: TMDBImagesResponse; videos?: TMDBVideosResponse }
+		>(endpoint, {
 			revalidate: CACHE_DURATIONS.SHORT, // Details change more frequently
 		});
 	} catch (error) {
@@ -275,11 +286,14 @@ export async function fetchDetailsTMDB(
 /**
  * Fetch media images
  */
-export async function fetchTMDBImages(id: string, type: MediaType) {
+export async function fetchTMDBImages(
+	id: string,
+	type: MediaType
+): Promise<TMDBImagesResponse | null> {
 	const endpoint = `/${type}/${id}/images?include_image_language=en,null`;
 
 	try {
-		return await tmdbFetch<any>(endpoint, {
+		return await tmdbFetch<TMDBImagesResponse>(endpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 	} catch (error) {
@@ -295,11 +309,11 @@ export async function fetchRecommendations(
 	id: string,
 	type: MediaType,
 	recommendationType: 'recommendations' | 'similar' = 'recommendations'
-) {
+): Promise<TMDBListResponse<TMDBBaseMedia>> {
 	const endpoint = `/${type}/${id}/${recommendationType}?language=en-US&page=1`;
 
 	try {
-		return await tmdbFetch<TMDBResponse<any>>(endpoint, {
+		return await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 	} catch (error) {
@@ -311,11 +325,14 @@ export async function fetchRecommendations(
 /**
  * Fetch credits (cast & crew)
  */
-export async function fetchCredits(id: string, type: MediaType) {
+export async function fetchCredits(
+	id: string,
+	type: MediaType
+): Promise<TMDBCreditsResponse | null> {
 	const endpoint = `/${type}/${id}/credits?language=en-US`;
 
 	try {
-		return await tmdbFetch<any>(endpoint, {
+		return await tmdbFetch<TMDBCreditsResponse>(endpoint, {
 			revalidate: CACHE_DURATIONS.LONG, // Credits rarely change
 		});
 	} catch (error) {
@@ -327,11 +344,11 @@ export async function fetchCredits(id: string, type: MediaType) {
 /**
  * Fetch videos (trailers, teasers, etc.)
  */
-export async function fetchVideos(id: string, type: MediaType) {
+export async function fetchVideos(id: string, type: MediaType): Promise<TMDBVideosResponse | null> {
 	const endpoint = `/${type}/${id}/videos?language=en-US`;
 
 	try {
-		return await tmdbFetch<any>(endpoint, {
+		return await tmdbFetch<TMDBVideosResponse>(endpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 	} catch (error) {
@@ -343,11 +360,11 @@ export async function fetchVideos(id: string, type: MediaType) {
 /**
  * Fetch genres list
  */
-export async function fetchGenres(type: MediaType) {
+export async function fetchGenres(type: MediaType): Promise<Genre[]> {
 	const endpoint = `/genre/${type}/list?language=en`;
 
 	try {
-		const data = await tmdbFetch<{ genres: any[] }>(endpoint, {
+		const data = await tmdbFetch<{ genres: Genre[] }>(endpoint, {
 			revalidate: CACHE_DURATIONS.VERY_LONG, // Genres rarely change
 		});
 		return data.genres || [];
@@ -364,7 +381,7 @@ export async function fetchGenreById(
 	type: MediaType,
 	genreId: string,
 	page: number = 1
-): Promise<any[]> {
+): Promise<TMDBBaseMedia[]> {
 	const params = new URLSearchParams({
 		include_adult: 'false',
 		include_video: 'false',
@@ -377,7 +394,7 @@ export async function fetchGenreById(
 	const endpoint = `/discover/${type}?${params.toString()}`;
 
 	try {
-		const data = await tmdbFetch<TMDBResponse<any>>(endpoint, {
+		const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 		return data.results || [];
@@ -390,7 +407,10 @@ export async function fetchGenreById(
 /**
  * Search media
  */
-export async function searchTMDB(query: string, page: number = 1) {
+export async function searchTMDB(
+	query: string,
+	page: number = 1
+): Promise<TMDBListResponse<TMDBBaseMedia>> {
 	const params = new URLSearchParams({
 		query: encodeURIComponent(query),
 		page: page.toString(),
@@ -401,7 +421,7 @@ export async function searchTMDB(query: string, page: number = 1) {
 	const endpoint = `/search/multi?${params.toString()}`;
 
 	try {
-		const data = await tmdbFetch<TMDBResponse<any>>(endpoint, {
+		const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
 			revalidate: CACHE_DURATIONS.SHORT, // Search results change frequently
 		});
 
@@ -409,7 +429,7 @@ export async function searchTMDB(query: string, page: number = 1) {
 		return {
 			...data,
 			results: data.results.filter(
-				(item: any) => item.media_type === 'movie' || item.media_type === 'tv'
+				(item) => item.media_type === 'movie' || item.media_type === 'tv'
 			),
 		};
 	} catch (error) {
@@ -431,7 +451,9 @@ export interface DiscoverOptions {
 	page?: number;
 }
 
-export async function discoverMedia(options: DiscoverOptions = {}) {
+export async function discoverMedia(
+	options: DiscoverOptions = {}
+): Promise<TMDBListResponse<TMDBBaseMedia>> {
 	const {
 		type = 'movie',
 		genres = [],
@@ -473,7 +495,7 @@ export async function discoverMedia(options: DiscoverOptions = {}) {
 	const endpoint = `/discover/${type}?${params.toString()}`;
 
 	try {
-		return await tmdbFetch<TMDBResponse<any>>(endpoint, {
+		return await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 	} catch (error) {
@@ -488,7 +510,7 @@ export async function discoverMedia(options: DiscoverOptions = {}) {
 export async function fetchSeasonEpisodes(
 	showId: string,
 	seasonNumber: number
-): Promise<any> {
+): Promise<TMDBSeasonDetails> {
 	const endpoint = `/tv/${showId}/season/${seasonNumber}`;
 
 	try {
@@ -497,7 +519,7 @@ export async function fetchSeasonEpisodes(
 		url.searchParams.set('language', 'en-US');
 		const fullEndpoint = url.pathname + url.search;
 
-		return await tmdbFetch<any>(fullEndpoint, {
+		return await tmdbFetch<TMDBSeasonDetails>(fullEndpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 	} catch (error) {
@@ -513,7 +535,7 @@ export async function fetchEpisodeDetails(
 	showId: string,
 	seasonNumber: number,
 	episodeNumber: number
-) {
+): Promise<TMDBEpisodeDetails | null> {
 	const endpoint = `/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}`;
 
 	try {
@@ -523,7 +545,7 @@ export async function fetchEpisodeDetails(
 		url.searchParams.set('append_to_response', 'credits,images');
 		const fullEndpoint = url.pathname + url.search;
 
-		return await tmdbFetch<any>(fullEndpoint, {
+		return await tmdbFetch<TMDBEpisodeDetails>(fullEndpoint, {
 			revalidate: CACHE_DURATIONS.MEDIUM,
 		});
 	} catch (error) {
@@ -536,10 +558,10 @@ export async function fetchEpisodeDetails(
  * Fetch hero items with full details (optimized batch fetch)
  */
 export async function fetchHeroItemsWithDetails(
-	shows: any[],
+	shows: TMDBBaseMedia[],
 	type: MediaType,
 	maxItems: number = 10
-): Promise<any[]> {
+): Promise<TMDBBaseMedia[]> {
 	try {
 		const topShows = shows.slice(0, maxItems);
 
@@ -552,7 +574,7 @@ export async function fetchHeroItemsWithDetails(
 
 		const enhancedShows = detailsResults.map((result, index) => {
 			if (result.status === 'fulfilled' && result.value) {
-				return { ...topShows[index], ...result.value };
+				return { ...topShows[index], ...result.value } as TMDBBaseMedia;
 			}
 			return topShows[index];
 		});
@@ -582,8 +604,9 @@ export async function getNewAndPopularShows() {
 			trendingTv,
 			trendingMovie,
 		};
-	} catch (error: any) {
-		throw new Error('Failed to fetch shows: ' + error.message);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'Unknown error';
+		throw new Error('Failed to fetch shows: ' + message);
 	}
 }
 

@@ -1,7 +1,7 @@
-import { StateCreator, create } from "zustand";
-import { createJSONStorage, persist, PersistOptions } from "zustand/middleware";
-import { useAuthStore } from "@/store/authStore";
-import { invalidateUserQueries } from "@/lib/query-client";
+import { StateCreator, create } from 'zustand';
+import { createJSONStorage, persist, PersistOptions } from 'zustand/middleware';
+import { useAuthStore } from '@/store/authStore';
+import { invalidateUserQueries } from '@/lib/query-client';
 
 interface Show {
 	id: number;
@@ -11,7 +11,6 @@ interface Show {
 	backdrop_path?: string | null;
 	overview?: string | null;
 	media_type?: string;
-	[key: string]: any;
 }
 
 interface WatchlistState {
@@ -71,10 +70,13 @@ const syncToDatabase = (mediaType: 'movie' | 'tv', item: Show, action: 'add' | '
 					throw new Error(`Failed to sync: ${response.statusText}`);
 				}
 			} else {
-				const response = await fetch(`/api/watchlist?mediaId=${item.id}&mediaType=${mediaType}`, {
-					method: 'DELETE',
-					credentials: 'include',
-				});
+				const response = await fetch(
+					`/api/watchlist?mediaId=${item.id}&mediaType=${mediaType}`,
+					{
+						method: 'DELETE',
+						credentials: 'include',
+					}
+				);
 
 				if (!response.ok) {
 					throw new Error(`Failed to remove: ${response.statusText}`);
@@ -132,7 +134,10 @@ const useWatchListStore = create<WatchlistStore>()(
 				// Sync in background
 				const authState = useAuthStore.getState();
 				if (authState.isAuthenticated) {
-					fetch('/api/watchlist?mediaType=movie', { method: 'DELETE', credentials: 'include' }).catch(console.error);
+					fetch('/api/watchlist?mediaType=movie', {
+						method: 'DELETE',
+						credentials: 'include',
+					}).catch(console.error);
 				}
 			},
 
@@ -174,7 +179,10 @@ const useWatchListStore = create<WatchlistStore>()(
 				// Sync in background
 				const authState = useAuthStore.getState();
 				if (authState.isAuthenticated) {
-					fetch('/api/watchlist?mediaType=tv', { method: 'DELETE', credentials: 'include' }).catch(console.error);
+					fetch('/api/watchlist?mediaType=tv', {
+						method: 'DELETE',
+						credentials: 'include',
+					}).catch(console.error);
 				}
 			},
 
@@ -259,7 +267,7 @@ const useWatchListStore = create<WatchlistStore>()(
 			},
 		}),
 		{
-			name: "watchlist-storage",
+			name: 'watchlist-storage',
 			storage: createJSONStorage(() => localStorage),
 		}
 	)

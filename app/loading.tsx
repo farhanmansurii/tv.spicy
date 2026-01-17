@@ -1,6 +1,6 @@
 import React from 'react';
 import Container from '@/components/shared/containers/container';
-import RowLoader from '@/components/shared/loaders/row-loader';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 
 export default function Loading() {
 	return (
@@ -13,12 +13,12 @@ export default function Loading() {
 			<Container className="w-full">
 				<div className="space-y-4">
 					{/* First few rows that will be preloaded */}
-					<RowLoader withHeader />
-					<RowLoader withHeader />
-					<RowLoader withHeader />
+					<MediaLoader withHeader />
+					<MediaLoader withHeader />
+					<MediaLoader withHeader />
 					{/* Additional rows for better perceived loading */}
-					<RowLoader withHeader />
-					<RowLoader withHeader />
+					<MediaLoader withHeader />
+					<MediaLoader withHeader />
 				</div>
 			</Container>
 		</div>

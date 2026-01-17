@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Play, Pause, Plus, Check, Info, Share2, Heart, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { GlowingIconButton } from '@/components/ui/glowing-icon-button';
 import { GlowingButton } from '@/components/ui/glowing-button';
 
 interface ContinueWatchingButtonProps {
@@ -313,7 +312,8 @@ export default function ContinueWatchingButton({
 			</GlowingButton>
 
 			{/* Add to Watchlist Button */}
-			<GlowingIconButton
+			<GlowingButton
+				iconOnly
 				onClick={handleAddOrRemove}
 				glow={isAdded}
 				glowVariant="light"
@@ -326,13 +326,14 @@ export default function ContinueWatchingButton({
 				) : (
 					<Plus className="w-5 h-5" strokeWidth={2} />
 				)}
-			</GlowingIconButton>
+			</GlowingButton>
 
 			{/* Details Page Actions */}
 			{isDetailsPage && (
 				<>
 					{/* Favorite Button */}
-					<GlowingIconButton
+					<GlowingButton
+						iconOnly
 						onClick={handleLike}
 						glow={isLiked}
 						glowVariant="primary"
@@ -348,10 +349,11 @@ export default function ContinueWatchingButton({
 							className={cn('w-5 h-5', isLiked && 'fill-current')}
 							strokeWidth={2}
 						/>
-					</GlowingIconButton>
+					</GlowingButton>
 
 					{/* Share Button */}
-					<GlowingIconButton
+					<GlowingButton
+						iconOnly
 						onClick={handleShare}
 						disabled={isSharing}
 						glow={false}
@@ -367,13 +369,14 @@ export default function ContinueWatchingButton({
 						) : (
 							<Share2 className="w-5 h-5" strokeWidth={2} />
 						)}
-					</GlowingIconButton>
+					</GlowingButton>
 				</>
 			)}
 
 			{/* Info Button (Non-Details Page) */}
 			{!isDetailsPage && (
-				<GlowingIconButton
+				<GlowingButton
+					iconOnly
 					onClick={handleInfo}
 					glow={false}
 					className={iconButtonBase}
@@ -381,7 +384,7 @@ export default function ContinueWatchingButton({
 					title="More Info"
 				>
 					<Info className="w-5 h-5" strokeWidth={2} />
-				</GlowingIconButton>
+				</GlowingButton>
 			)}
 		</div>
 	);

@@ -1,5 +1,5 @@
 import './globals.css';
-import { ThemeProvider } from '@/components/providers/theme-provider';
+import { ThemeProvider } from '@/components/layout/providers/theme-provider';
 import TanstackQueryProvider from '@/components/providers/tanstack-query-provider';
 import SidebarProvider from '@/components/providers/sidebar-provider';
 import { AuthProvider } from '@/components/auth/auth-provider';

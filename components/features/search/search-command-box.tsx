@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { searchShows } from '@/lib/tmdb-fetch-helper';
 import { tmdbImage } from '@/lib/tmdb-image';
 import useSearchStore from '@/store/recentsSearchStore';
+import type { Show } from '@/lib/types';
 import {
 	Dialog,
 	DialogContent,
@@ -138,7 +139,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 	}, [isSearching, showLoader]);
 
 	const results = React.useMemo(() => {
-		const raw = (data?.results as any[]) || [];
+		const raw = (data?.results as Show[] | undefined) || [];
 		return raw
 			.filter((i) => i != null && (filter === 'all' || i.media_type === filter))
 			.slice(0, 8);
@@ -383,7 +384,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 										}
 									>
 										{recentlySearched.length > 0 ? (
-											recentlySearched.map((item: any) => (
+											recentlySearched.map((item) => (
 												<ResultItem
 													key={`recent-${item.id}`}
 													item={item}
@@ -451,7 +452,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 													</span>
 												}
 											>
-												{results.map((item: any) => (
+												{results.map((item) => (
 													<ResultItem
 														key={item.id}
 														item={item}
@@ -524,7 +525,14 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 	);
 }
 
-function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
+interface ResultItemProps {
+	item: Show;
+	isRecent?: boolean;
+	onRemove?: () => void;
+	onSelect: () => void;
+}
+
+function ResultItem({ item, isRecent, onRemove, onSelect }: ResultItemProps) {
 	const dateStr = item.release_date || item.first_air_date || '';
 	const year = typeof dateStr === 'string' ? dateStr.split('-')[0] : '';
 	const title = item.title || item.name || 'Untitled';
@@ -647,7 +655,7 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: any) {
 							onClick={(e) => {
 								e.stopPropagation();
 								e.preventDefault();
-								onRemove();
+								onRemove?.();
 							}}
 							className="opacity-0 group-hover:opacity-100
 								p-1.5 rounded-lg

@@ -6,11 +6,23 @@ import OHls from '@oplayer/hls';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { chromecast } from '@oplayer/plugins';
 import useTVShowStore from '@/store/recentsStore';
+import type { Episode } from '@/lib/types';
+import type { StreamingSource, StreamingSubtitle } from '@/lib/types/streaming';
+
 type Ctx = {
 	ui: ReturnType<typeof OUI>;
 	hls: ReturnType<typeof OHls>;
-	menu: any;
+	menu: unknown;
 };
+
+interface MediaPlayerProps {
+	sources: StreamingSource[];
+	subtitles: StreamingSubtitle[];
+	episode?: { image?: string | null };
+	type: 'movie' | 'tv';
+	provider: string;
+	source?: StreamingSource;
+}
 
 export default function MediaPlayer({
 	sources,
@@ -19,58 +31,42 @@ export default function MediaPlayer({
 	type,
 	provider,
 	source,
-}: {
-	sources: any;
-	subtitles: any[];
-	episode?: any;
-	type: string;
-	provider: string;
-	source?: any;
-}) {
+}: MediaPlayerProps) {
 	const { activeEP, setIsPlaying } = useEpisodeStore();
 	const { recentlyWatched } = useTVShowStore();
-	function calculateTimeFromPercentage(
-		percentage: number,
-		totalTime: number | undefined
-	): number | null {
+	function calculateTimeFromPercentage(percentage: number, totalTime: number): number | null {
 		if (totalTime && !isNaN(totalTime) && percentage >= 0 && percentage <= 100) {
 			return (percentage / 100) * totalTime;
-		} else {
-			return null; // Return null when totalTime is not available or percentage is invalid
 		}
+		return null; // Return null when totalTime is not available or percentage is invalid
 	}
 
 	const { updateTimeWatched } = useTVShowStore();
-	function findAutoQualityUrl(videoUrls: any) {
-		const autoQualityVideos = videoUrls.filter((video: any) => video.quality === 'auto');
-		return autoQualityVideos[0]?.src || videoUrls[0]?.src;
+	function findAutoQualityUrl(videoUrls: StreamingSource[]) {
+		const autoQualityVideos = videoUrls.filter((video) => video.quality === 'auto');
+		return autoQualityVideos[0]?.url || videoUrls[0]?.url;
 	}
 
 	const playerRef = useRef<Player<Ctx>>(undefined);
 	let image: string = '',
 		title: string = '';
 	if (type === 'tv' && activeEP) {
-		image = activeEP.img?.hd || '';
-		title = `S${activeEP.season}E${activeEP.episode}: ${activeEP.title}`;
+		image = typeof activeEP.img === 'string' ? activeEP.img : '';
+		title = activeEP.title
+			? `S${activeEP.season ?? ''}E${activeEP.episode ?? ''}: ${activeEP.title}`
+			: '';
 	} else {
 		title = '';
 		image = episode?.image || '';
 	}
 	const subtitlesList = useMemo(() => {
 		const includesEng = subtitles.filter((subtitle) => {
-			return (
-				subtitle.lang.toLowerCase().includes('english') ||
-				subtitle.lang.toLowerCase().includes('eng')
-			);
+			const lang = subtitle.lang?.toLowerCase() || '';
+			return lang.includes('english') || lang.includes('eng');
 		});
-		const firstEnglishSubtitleIndex = subtitles.findIndex(
-			(subtitle) =>
-				subtitle?.lang?.toLowerCase().includes('english') ||
-				subtitle?.lang?.toLowerCase() === 'eng'
-		);
 		const subtitleTracks =
 			includesEng
-				?.filter(
+				.filter(
 					(subtitle) =>
 						subtitle.url &&
 						(subtitle.url.endsWith('.vtt') || subtitle.url.endsWith('.srt'))
@@ -78,7 +74,7 @@ export default function MediaPlayer({
 				.map((subtitle, index) => ({
 					src: subtitle.url,
 					default: index === 0,
-					name: subtitle.lang,
+					name: subtitle.lang || 'Unknown',
 				})) || [];
 		return subtitleTracks;
 	}, [subtitles]);
@@ -118,10 +114,11 @@ export default function MediaPlayer({
           >
             <path d="M14.5 13.5h2v-3h-2M18 14a1 1 0 01-1 1h-.75v1.5h-1.5V15H14a1 1 0 01-1-1v-4a1 1 0 011-1h3a1 1 0 011 1m-7 5H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11m8-5H5c-1.11 0-2 .89-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z" />
           </svg>`,
-					children: sources.map((source: any, index: number) => ({
-						name: source.name,
-						value: source.src,
+					children: sources.map((source, index) => ({
+						name: source.name || source.quality || `Source ${index + 1}`,
+						value: source.url,
 						default: index === 0,
+						type: 'selector',
 					})),
 					onChange({ value }) {
 						const oplayer = playerRef.current;
@@ -190,18 +187,21 @@ export default function MediaPlayer({
 				title,
 			})
 			.then(() => oplayer.context.ui.subtitle?.changeSource(subtitlesList))
-			.catch((err) => console.log(err));
+			.catch((err) => console.error(err));
 
 		const ep = recentlyWatched.find(
-			(epi: any) =>
+			(epi) =>
 				epi?.tv_id === activeEP?.tv_id &&
 				epi?.season_number === activeEP?.season_number &&
 				epi?.episode_number === activeEP?.episode_number
 		);
-		if (type === 'tv' && ep && ep.time) {
+		if (type === 'tv' && ep && ep.time != null) {
 			const handleLoadedMetadata = () => {
-				const calculatedTime = calculateTimeFromPercentage(ep.time, oplayer?.duration);
-				if (calculatedTime) {
+				const calculatedTime = calculateTimeFromPercentage(
+					ep.time ?? 0,
+					oplayer?.duration ?? 0
+				);
+				if (calculatedTime != null) {
 					oplayer.seek(calculatedTime);
 					oplayer.context.ui.changHighlightSource([
 						{
@@ -232,7 +232,9 @@ export default function MediaPlayer({
 	const watchTimeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	useEffect(() => {
 		const handleTimeUpdate = () => {
-			clearTimeout(watchTimeTimeoutRef.current!); // Clear previous timeout (if any)
+			if (watchTimeTimeoutRef.current) {
+				clearTimeout(watchTimeTimeoutRef.current);
+			}
 			watchTimeTimeoutRef.current = setTimeout(() => {
 				if (playerRef.current) {
 					const currentTime = playerRef.current.currentTime;

@@ -1,19 +1,21 @@
+import type { Genre, SpokenLanguage } from './types/tmdb';
+
 export interface Show {
 	adult: boolean;
-	backdrop_path: string;
+	backdrop_path: string | null;
 	genre_ids: number[];
 	id: number;
 	original_language: string;
 	original_title: string;
 	original_name: string;
 	name: string;
-	genres: any;
+	genres: Genre[];
 	tagline: string;
 	media_type: string;
 	overview: string;
 	popularity: number;
 	first_air_date: string;
-	poster_path: string;
+	poster_path: string | null;
 	release_date: string;
 	title: string;
 	video: boolean;
@@ -27,7 +29,7 @@ export interface Show {
 	runtime?: number;
 	budget?: number;
 	revenue?: number;
-	spoken_languages: any;
+	spoken_languages: SpokenLanguage[];
 }
 
 export interface Season {
@@ -45,26 +47,43 @@ interface SeasonContentProps {
 
 export interface Episode {
 	show_name: string;
-	img: any;
-	season: any;
-	episode: any;
-	title: any;
-	air_date: string;
+	img?: string | null;
+	season?: number | null;
+	episode?: number | null;
+	title?: string | null;
+	air_date?: string;
 	episode_number: number;
 	id: number;
 	name: string;
-	overview: string;
-	production_code: string;
-	runtime: number;
+	overview?: string;
+	production_code?: string;
+	runtime?: number | null;
 	season_number: number;
-	show_id: number;
-	still_path: string | null;
-	vote_average: number;
-	vote_count: number;
-	crew: CrewMember[];
-	guest_stars: CastMember[];
+	show_id?: number;
+	still_path?: string | null;
+	vote_average?: number;
+	vote_count?: number;
+	crew?: Array<CrewMember | Record<string, unknown> | TMDBCrewMemberLike>;
+	guest_stars?: Array<CastMember | Record<string, unknown> | TMDBCastMemberLike>;
 	tv_id: string;
+	[meta: string]: unknown;
 }
+
+type TMDBCrewMemberLike = {
+	id: number;
+	name: string;
+	department?: string;
+	job?: string;
+	profile_path?: string | null;
+};
+
+type TMDBCastMemberLike = {
+	id: number;
+	name: string;
+	character?: string;
+	order?: number;
+	profile_path?: string | null;
+};
 
 interface CrewMember {
 	id: number;
@@ -85,7 +104,7 @@ interface CastMember {
 }
 
 export interface SeasonTabsProps {
-	seasons: any[];
+	seasons: Array<{ season_number: number } & Record<string, unknown>>;
 	showId: string;
 	showData: Show;
 }

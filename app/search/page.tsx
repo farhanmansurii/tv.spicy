@@ -29,7 +29,7 @@ import {
 	SelectItem,
 } from '@/components/ui/select';
 import MediaCard from '@/components/features/media/card/media-card';
-import GridLoader from '@/components/shared/loaders/grid-loader';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 
 import { Show } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -186,7 +186,7 @@ export default function SearchPageClient() {
 			<SectionWrapper spacing="medium">
 				<Container>
 					{isLoading ? (
-						<GridLoader />
+						<MediaLoader layout="grid" isVertical />
 					) : results.length > 0 ? (
 						<div
 							className="space-y-12 transition-all duration-500 ease-out"
@@ -196,7 +196,7 @@ export default function SearchPageClient() {
 							}}
 						>
 							<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 md:gap-x-6 gap-y-10">
-								{results.map((show: Show, index: number) => (
+								{(results as Show[]).map((show, index) => (
 									<MediaCard
 										key={show.id}
 										show={show}

@@ -1,14 +1,14 @@
 import React from 'react';
-import FetchAndRenderRow from '@/components/features/media/row/fetch-and-render-row';
+import DataRow from '@/components/features/media/row/data-row';
 
 export default function RelatedShowsContainer(props: {
-	show: any;
-	type: string;
+	show: { id: number };
+	type: 'movie' | 'tv';
 	relation: string;
 }) {
 	return (
-		<FetchAndRenderRow
-			apiEndpoint={`${props.type}/${props.show.id}/${props.relation}`}
+		<DataRow
+			endpoint={`${props.type}/${props.show.id}/${props.relation}`}
 			showRank={false}
 			type={props.type}
 			isVertical={true}

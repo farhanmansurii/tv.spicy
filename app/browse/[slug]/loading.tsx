@@ -1,5 +1,5 @@
 import Container from '@/components/shared/containers/container';
-import GridLoader from '@/components/shared/loaders/grid-loader';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
@@ -11,7 +11,7 @@ export default function Loading() {
 						<Skeleton className="h-12 w-64 md:h-16 md:w-80" />
 						<Skeleton className="h-6 w-96" />
 					</div>
-					<GridLoader isVertical={true} />
+					<MediaLoader layout="grid" isVertical />
 				</div>
 			</Container>
 		</div>

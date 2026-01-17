@@ -4,11 +4,37 @@ import { loadEpisodesFromDB, loadRecentlySearchedFromDB } from '@/lib/indexedDB'
 import useWatchListStore from '@/store/watchlistStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 
+interface SyncWatchlistItem {
+	mediaId: number;
+	mediaType: 'movie' | 'tv';
+	posterPath?: string | null;
+	backdropPath?: string | null;
+	title: string;
+	overview?: string | null;
+}
+
+interface SyncRecentlyWatchedItem {
+	mediaId: number;
+	mediaType: 'tv';
+	seasonNumber: number;
+	episodeNumber: number;
+	episodeId: number;
+	stillPath?: string | null;
+	episodeName: string;
+	showName?: string;
+	progress: number;
+}
+
+interface SyncFavoriteItem {
+	mediaId: number;
+	mediaType: 'movie' | 'tv';
+}
+
 interface SyncData {
-	watchlist: any[];
-	recentlyWatched: any[];
-	favorites: any[];
-	recentSearches: any[];
+	watchlist: SyncWatchlistItem[];
+	recentlyWatched: SyncRecentlyWatchedItem[];
+	favorites: SyncFavoriteItem[];
+	recentSearches: string[];
 }
 
 export async function collectLocalData(): Promise<SyncData> {
@@ -23,27 +49,29 @@ export async function collectLocalData(): Promise<SyncData> {
 		// Get watchlist from localStorage via Zustand
 		const watchlistStore = useWatchListStore.getState();
 		data.watchlist = [
-			...(watchlistStore.watchlist || []).map((item: any) => ({
-				mediaId: item.id || item.mediaId,
-				mediaType: 'movie',
-				posterPath: item.poster_path || item.posterPath,
-				backdropPath: item.backdrop_path || item.backdropPath,
-				title: item.title || item.name || '',
-				overview: item.overview || null,
+			...(watchlistStore.watchlist || []).map((item) => ({
+				mediaId: Number(item.id ?? (item as { mediaId?: number }).mediaId ?? 0),
+				mediaType: 'movie' as const,
+				posterPath: item.poster_path ?? (item as { posterPath?: string | null }).posterPath,
+				backdropPath:
+					item.backdrop_path ?? (item as { backdropPath?: string | null }).backdropPath,
+				title: item.title ?? item.name ?? '',
+				overview: item.overview ?? null,
 			})),
-			...(watchlistStore.tvwatchlist || []).map((item: any) => ({
-				mediaId: item.id || item.mediaId,
-				mediaType: 'tv',
-				posterPath: item.poster_path || item.posterPath,
-				backdropPath: item.backdrop_path || item.backdropPath,
-				title: item.title || item.name || '',
-				overview: item.overview || null,
+			...(watchlistStore.tvwatchlist || []).map((item) => ({
+				mediaId: Number(item.id ?? (item as { mediaId?: number }).mediaId ?? 0),
+				mediaType: 'tv' as const,
+				posterPath: item.poster_path ?? (item as { posterPath?: string | null }).posterPath,
+				backdropPath:
+					item.backdrop_path ?? (item as { backdropPath?: string | null }).backdropPath,
+				title: item.title ?? item.name ?? '',
+				overview: item.overview ?? null,
 			})),
 		];
 
 		// Get recently watched from IndexedDB
 		const episodes = await loadEpisodesFromDB();
-		data.recentlyWatched = episodes.map((ep: any) => ({
+		data.recentlyWatched = episodes.map((ep) => ({
 			mediaId: parseInt(ep.tv_id),
 			mediaType: 'tv',
 			seasonNumber: ep.season_number,
@@ -58,12 +86,12 @@ export async function collectLocalData(): Promise<SyncData> {
 		// Get favorites from Zustand store
 		const favoritesStore = useFavoritesStore.getState();
 		const allFavorites = [
-			...(favoritesStore.favoriteMovies || []).map((item: any) => ({
-				mediaId: item.id || item.mediaId,
+			...(favoritesStore.favoriteMovies || []).map((item) => ({
+				mediaId: Number(item.id ?? (item as { mediaId?: number }).mediaId ?? 0),
 				mediaType: 'movie' as const,
 			})),
-			...(favoritesStore.favoriteTV || []).map((item: any) => ({
-				mediaId: item.id || item.mediaId,
+			...(favoritesStore.favoriteTV || []).map((item) => ({
+				mediaId: Number(item.id ?? (item as { mediaId?: number }).mediaId ?? 0),
 				mediaType: 'tv' as const,
 			})),
 		];
@@ -71,7 +99,13 @@ export async function collectLocalData(): Promise<SyncData> {
 
 		// Get recent searches from IndexedDB
 		const searches = await loadRecentlySearchedFromDB();
-		data.recentSearches = searches.map((search: any) => search.query || search);
+		data.recentSearches = searches.map((search) => {
+			if (typeof search === 'string') return search;
+			if (typeof search === 'object' && search && 'query' in search) {
+				return String((search as { query?: string }).query || '');
+			}
+			return '';
+		});
 	} catch (error) {
 		console.error('Error collecting local data:', error);
 	}
@@ -79,7 +113,9 @@ export async function collectLocalData(): Promise<SyncData> {
 	return data;
 }
 
-export async function syncLocalToDatabase(userId: string): Promise<{ success: boolean; results?: any }> {
+export async function syncLocalToDatabase(
+	userId: string
+): Promise<{ success: boolean; results?: unknown }> {
 	try {
 		const localData = await collectLocalData();
 

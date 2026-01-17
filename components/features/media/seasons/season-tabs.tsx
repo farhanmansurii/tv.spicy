@@ -32,10 +32,28 @@ import useTVShowStore from '@/store/recentsStore';
 import { TVContainer } from '@/components/features/media/player/tv-container';
 import { cn } from '@/lib/utils';
 import SegmentedControl from '@/components/shared/segmented-control';
-import { EpisodeCard } from '../card/episode-card';
-import { EpisodeListRow } from '../card/episode-list-card';
+import type { Episode as EpisodeType, SeasonTabsProps } from '@/lib/types';
+import type { TMDBEpisode, TMDBSeasonDetails } from '@/lib/types/tmdb';
+import { EpisodeItem } from '../card/episode-item';
 
-const SeasonTabs = ({ seasons, showId, showData }: any) => {
+const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
+	const hydrateEpisode = useCallback(
+		(episode: TMDBEpisode): EpisodeType => ({
+			...episode,
+			show_id: showData?.id,
+			tv_id: String(showId),
+			show_name: showData?.name || showData?.title || '',
+			production_code: '',
+			air_date: episode.air_date ?? '',
+			overview: episode.overview ?? '',
+			runtime: episode.runtime ?? 0,
+			still_path: episode.still_path ?? null,
+			crew: episode.crew ?? [],
+			guest_stars: episode.guest_stars ?? [],
+		}),
+		[showData, showId]
+	);
+
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -97,7 +115,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 
 	// 1. STABLE STATE LOGIC
 	const validSeasons = useMemo(
-		() => seasons?.filter((s: any) => s.season_number > 0) || seasons || [],
+		() => seasons?.filter((s) => s.season_number > 0) || seasons || [],
 		[seasons]
 	);
 	const [activeSeason, setActiveSeason] = useState<number | null>(null);
@@ -107,7 +125,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 		data: seasonData,
 		isLoading,
 		isError,
-	} = useQuery({
+	} = useQuery<TMDBSeasonDetails>({
 		queryKey: ['episodes', showId, activeSeason],
 		queryFn: () => fetchSeasonEpisodes(showId, activeSeason as number),
 		enabled: !!showId && activeSeason !== null,
@@ -134,16 +152,12 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 
 		if (episodes && eParam && sParam && parseInt(sParam) === activeSeason) {
 			const episode = episodes.find(
-				(ep: any) =>
+				(ep) =>
 					ep.season_number === parseInt(sParam) && ep.episode_number === parseInt(eParam)
 			);
 			if (episode && activeEP?.id !== episode.id) {
 				// Ensure tv_id and show_name are set for cross-show validation and recently watched
-				const enrichedEpisode = {
-					...episode,
-					tv_id: String(showId),
-					show_name: showData?.name || showData?.title || '',
-				};
+				const enrichedEpisode = hydrateEpisode(episode);
 				setActiveEP(enrichedEpisode);
 
 				// Add to recently watched for Continue Watching functionality
@@ -172,7 +186,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 	};
 
 	const onEpisodeClick = useCallback(
-		(episode: any, event?: React.MouseEvent) => {
+		(episode: EpisodeType, event?: React.MouseEvent) => {
 			// Immediate visual feedback
 			if (event?.currentTarget) {
 				const target = event.currentTarget as HTMLElement;
@@ -183,11 +197,19 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 			}
 
 			// Ensure tv_id is set for cross-show validation (tv_id should be string for consistency)
-			const enrichedEpisode = {
+			const enrichedEpisode: EpisodeType = {
 				...episode,
+				show_id: showData?.id,
 				tv_id: String(showId),
 				show_name: showData?.name || showData?.title || '',
-			};
+				production_code: '',
+				air_date: episode.air_date ?? '',
+				overview: episode.overview ?? '',
+				runtime: episode.runtime ?? 0,
+				still_path: episode.still_path ?? null,
+				crew: episode.crew ?? [],
+				guest_stars: episode.guest_stars ?? [],
+			} as EpisodeType;
 			setActiveEP(enrichedEpisode);
 
 			// Add to recently watched for Continue Watching functionality
@@ -265,17 +287,20 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 	// Handle next episode navigation
 	const handleNextEpisode = useCallback(() => {
 		// First, try to get current episode from activeEP or URL params
-		let currentEpisode = activeEP;
+		let currentEpisode: EpisodeType | null = activeEP;
 
 		if (!currentEpisode && episodes && episodes.length > 0) {
 			const sParam = searchParams.get('season');
 			const eParam = searchParams.get('episode');
 			if (sParam && eParam) {
-				currentEpisode = episodes.find(
-					(ep: any) =>
+				const found = episodes.find(
+					(ep) =>
 						ep.season_number === parseInt(sParam) &&
 						ep.episode_number === parseInt(eParam)
 				);
+				if (found) {
+					currentEpisode = hydrateEpisode(found);
+				}
 			}
 		}
 
@@ -288,7 +313,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 
 		// Find current episode index
 		const currentIndex = episodes.findIndex(
-			(ep: any) =>
+			(ep) =>
 				ep.id === episode.id ||
 				(ep.season_number === episode.season_number &&
 					ep.episode_number === episode.episode_number)
@@ -300,15 +325,13 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 
 		// Check if there's a next episode in the current season
 		if (currentIndex < episodes.length - 1) {
-			const nextEpisode = episodes[currentIndex + 1];
+			const nextEpisode = hydrateEpisode(episodes[currentIndex + 1]);
 			onEpisodeClick(nextEpisode);
 			return;
 		}
 
 		// If at the end of current season, try to move to next season
-		const currentSeasonIndex = validSeasons.findIndex(
-			(s: any) => s.season_number === activeSeason
-		);
+		const currentSeasonIndex = validSeasons.findIndex((s) => s.season_number === activeSeason);
 
 		if (currentSeasonIndex < validSeasons.length - 1) {
 			const nextSeason = validSeasons[currentSeasonIndex + 1];
@@ -378,7 +401,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 									<SelectValue placeholder="Select Season" />
 								</SelectTrigger>
 								<SelectContent className="bg-zinc-950 border-white/10">
-									{validSeasons.map((s: any) => (
+									{validSeasons.map((s) => (
 										<SelectItem
 											key={s.season_number}
 											value={String(s.season_number)}
@@ -399,7 +422,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 					<SegmentedControl
 						value={view}
-						onChange={(val) => setView(val as any)}
+						onChange={(val) => setView(val as 'grid' | 'list' | 'carousel')}
 						items={[
 							{
 								value: 'list',
@@ -450,12 +473,13 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 						<>
 							{view === 'grid' && (
 								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-									{episodes?.map((ep: any) => (
+									{episodes?.map((ep) => (
 										<div key={ep.id} data-episode-item>
-											<EpisodeCard
-												episode={ep}
+											<EpisodeItem
+												episode={hydrateEpisode(ep)}
 												active={activeEP?.id === ep.id}
 												toggle={onEpisodeClick}
+												variant="card"
 											/>
 										</div>
 									))}
@@ -463,12 +487,13 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 							)}
 							{view === 'list' && (
 								<div className="flex flex-col gap-2">
-									{episodes?.map((ep: any) => (
+									{episodes?.map((ep) => (
 										<div key={ep.id} data-episode-item>
-											<EpisodeListRow
-												episode={ep}
+											<EpisodeItem
+												episode={hydrateEpisode(ep)}
 												active={activeEP?.id === ep.id}
 												toggle={onEpisodeClick}
+												variant="list"
 												density={listDensity}
 											/>
 										</div>
@@ -478,16 +503,17 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 							{view === 'carousel' && (
 								<Carousel opts={{ align: 'start', dragFree: true }}>
 									<CarouselContent className="-ml-2 py-2">
-										{episodes?.map((ep: any) => (
+										{episodes?.map((ep) => (
 											<CarouselItem
 												key={ep.id}
 												className="pl-4 basis-[85%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/3"
 											>
 												<div data-episode-item>
-													<EpisodeCard
-														episode={ep}
+													<EpisodeItem
+														episode={hydrateEpisode(ep)}
 														active={activeEP?.id === ep.id}
 														toggle={onEpisodeClick}
+														variant="card"
 													/>
 												</div>
 											</CarouselItem>

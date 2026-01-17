@@ -12,9 +12,13 @@ import {
 import { Show } from '@/lib/types';
 import { HeroBanner } from '@/components/features/media/hero-banner';
 import { cn } from '@/lib/utils';
+import type { TMDBImagesResponse, TMDBMovie, TMDBTVShow } from '@/lib/types/tmdb';
 
-interface HeroCarouselProps {
-	shows: Show[];
+export interface HeroCarouselProps {
+	shows: Array<
+		Show & { media_type?: 'movie' | 'tv' } & (TMDBMovie &
+				TMDBTVShow & { images?: TMDBImagesResponse })
+	>;
 	type: 'movie' | 'tv';
 }
 

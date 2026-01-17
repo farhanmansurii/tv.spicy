@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { GlowingIconButton } from '@/components/ui/glowing-icon-button';
+import { GlowingButton } from '@/components/ui/glowing-button';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -198,7 +198,7 @@ const CarouselPrevious = React.forwardRef<
 		},
 		ref
 	) => {
-		const ButtonComponent = glow ? GlowingIconButton : Button;
+		const ButtonComponent = glow ? GlowingButton : Button;
 		const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
 		return (
@@ -246,7 +246,7 @@ const CarouselNext = React.forwardRef<
 		},
 		ref
 	) => {
-		const ButtonComponent = glow ? GlowingIconButton : Button;
+		const ButtonComponent = glow ? GlowingButton : Button;
 		const { orientation, scrollNext, canScrollNext } = useCarousel();
 
 		return (

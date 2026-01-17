@@ -1,7 +1,6 @@
 import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
 import CommonTitle from '@/components/shared/animated/common-title';
-import GridLoader from './grid-loader';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 
 export default function MoreDetailsLoader() {
 	return (
@@ -22,7 +21,7 @@ export default function MoreDetailsLoader() {
 			</div>
 
 			<div className="w-full relative mt-6 md:mt-8">
-				<GridLoader isVertical={true} />
+				<MediaLoader layout="grid" isVertical />
 			</div>
 		</div>
 	);

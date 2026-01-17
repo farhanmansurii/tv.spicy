@@ -11,7 +11,6 @@ interface FavoriteItem {
 	backdrop_path?: string | null;
 	overview?: string | null;
 	media_type?: string;
-	[key: string]: any;
 }
 
 interface FavoritesState {
@@ -33,7 +32,11 @@ interface FavoritesActions {
 type FavoritesStore = FavoritesState & FavoritesActions;
 
 // Background sync - fire and forget
-const syncFavoriteToDatabase = (mediaId: number, mediaType: 'movie' | 'tv', action: 'add' | 'remove') => {
+const syncFavoriteToDatabase = (
+	mediaId: number,
+	mediaType: 'movie' | 'tv',
+	action: 'add' | 'remove'
+) => {
 	// Run in background, don't block
 	setTimeout(async () => {
 		try {
@@ -54,10 +57,13 @@ const syncFavoriteToDatabase = (mediaId: number, mediaType: 'movie' | 'tv', acti
 					throw new Error(`Failed to sync: ${response.statusText}`);
 				}
 			} else {
-				const response = await fetch(`/api/favorites?mediaId=${mediaId}&mediaType=${mediaType}`, {
-					method: 'DELETE',
-					credentials: 'include',
-				});
+				const response = await fetch(
+					`/api/favorites?mediaId=${mediaId}&mediaType=${mediaType}`,
+					{
+						method: 'DELETE',
+						credentials: 'include',
+					}
+				);
 
 				if (!response.ok) {
 					throw new Error(`Failed to remove: ${response.statusText}`);
@@ -82,7 +88,12 @@ export const useFavoritesStore = create<FavoritesStore>()(
 				const authState = useAuthStore.getState();
 				// Optimistic update - instant UI feedback
 				set((state) => ({
-					[key]: [item, ...(state[key as keyof FavoritesState] as FavoriteItem[]).filter((i) => i.id !== item.id)],
+					[key]: [
+						item,
+						...(state[key as keyof FavoritesState] as FavoriteItem[]).filter(
+							(i) => i.id !== item.id
+						),
+					],
 				}));
 				// Invalidate React Query cache
 				if (authState.userId) {
@@ -97,7 +108,9 @@ export const useFavoritesStore = create<FavoritesStore>()(
 				const authState = useAuthStore.getState();
 				// Optimistic update - instant UI feedback
 				set((state) => ({
-					[key]: (state[key as keyof FavoritesStore] as FavoriteItem[]).filter((i) => i.id !== mediaId),
+					[key]: (state[key as keyof FavoritesStore] as FavoriteItem[]).filter(
+						(i) => i.id !== mediaId
+					),
 				}));
 				// Invalidate React Query cache
 				if (authState.userId) {
@@ -115,15 +128,24 @@ export const useFavoritesStore = create<FavoritesStore>()(
 					set({ [key]: [] });
 					// Sync in background
 					if (authState.isAuthenticated) {
-						fetch(`/api/favorites?mediaType=${mediaType}`, { method: 'DELETE', credentials: 'include' }).catch(console.error);
+						fetch(`/api/favorites?mediaType=${mediaType}`, {
+							method: 'DELETE',
+							credentials: 'include',
+						}).catch(console.error);
 					}
 				} else {
 					set({ favoriteMovies: [], favoriteTV: [] });
 					// Sync in background
 					if (authState.isAuthenticated) {
 						Promise.all([
-							fetch('/api/favorites?mediaType=movie', { method: 'DELETE', credentials: 'include' }),
-							fetch('/api/favorites?mediaType=tv', { method: 'DELETE', credentials: 'include' }),
+							fetch('/api/favorites?mediaType=movie', {
+								method: 'DELETE',
+								credentials: 'include',
+							}),
+							fetch('/api/favorites?mediaType=tv', {
+								method: 'DELETE',
+								credentials: 'include',
+							}),
 						]).catch(console.error);
 					}
 				}

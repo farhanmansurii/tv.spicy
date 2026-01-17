@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { fetchGenreById } from '@/lib/api';
 import { Show } from '@/lib/types';
 import MediaRow from './row/media-row';
-import GridLoader from '@/components/shared/loaders/grid-loader';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 
 function LoadMore(props: { params: any }) {
 	const { params } = props;
@@ -44,9 +44,10 @@ function LoadMore(props: { params: any }) {
 			const fetchFirstPage = async () => {
 				try {
 					// Normalize type to 'movie' or 'tv'
-					const normalizedType = searchParams.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
+					const normalizedType =
+						searchParams.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
 					const res = await fetchGenreById(normalizedType, searchParams.id!, 1);
-					setData(res || []);
+					setData((res as Show[]) || []);
 				} catch (error) {
 					console.error('Error loading genre data:', error);
 				} finally {
@@ -60,17 +61,26 @@ function LoadMore(props: { params: any }) {
 
 	// Load more pages when in view
 	useEffect(() => {
-		if (inView && searchParams?.type && searchParams?.id && hasInitialLoad && !isLoadingMore && data.length > 0) {
+		if (
+			inView &&
+			searchParams?.type &&
+			searchParams?.id &&
+			hasInitialLoad &&
+			!isLoadingMore &&
+			data.length > 0
+		) {
 			setIsLoadingMore(true);
 			const nextPage = currentPage + 1;
 
 			const timeoutId = setTimeout(async () => {
 				try {
 					// Normalize type to 'movie' or 'tv'
-					const normalizedType = searchParams.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
+					const normalizedType =
+						searchParams.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
 					const res = await fetchGenreById(normalizedType, searchParams.id!, nextPage);
-					if (res && res.length > 0) {
-						setData((prev) => [...prev, ...res]);
+					const nextBatch = (res as Show[]) || [];
+					if (nextBatch.length > 0) {
+						setData((prev) => [...prev, ...nextBatch]);
 						setCurrentPage(nextPage);
 					}
 				} catch (error) {
@@ -93,11 +103,11 @@ function LoadMore(props: { params: any }) {
 	}, [searchParams?.id, searchParams?.type]);
 
 	if (!searchParams?.type || !searchParams?.id) {
-		return <GridLoader isVertical={true} />;
+		return <MediaLoader layout="grid" isVertical />;
 	}
 
 	if (isLoading) {
-		return <GridLoader isVertical={true} />;
+		return <MediaLoader layout="grid" isVertical />;
 	}
 
 	// Normalize type for MediaRow
@@ -112,7 +122,9 @@ function LoadMore(props: { params: any }) {
 				gridLayout={true}
 				type={normalizedType}
 			/>
-			<div ref={ref}>{inView && isLoadingMore && <GridLoader isVertical={true} />}</div>
+			<div ref={ref}>
+				{inView && isLoadingMore && <MediaLoader layout="grid" isVertical />}
+			</div>
 		</div>
 	);
 }

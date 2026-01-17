@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils';
 import { fetchDetailsTMDB } from '@/lib/api';
 import { Show } from '@/lib/types';
 import MediaRow from '@/components/features/media/row/media-row';
-import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { usePlayerPrefsStore } from '@/store/playerPrefsStore';
@@ -94,7 +94,7 @@ function ProfileContentSection({
 				<h3 className="text-lg md:text-xl font-bold text-foreground mb-2 md:mb-3 lg:mb-4">
 					{title}
 				</h3>
-				<WatchlistLoader />
+				<MediaLoader withHeader className="min-h-[280px]" />
 			</div>
 		);
 	}
@@ -475,7 +475,7 @@ export default function ProfilePage() {
 								{loadingWatchlistMovies ||
 								loadingWatchlistTV ||
 								isLoadingDetails ? (
-									<WatchlistLoader />
+									<MediaLoader withHeader className="min-h-[280px]" />
 								) : (
 									<>
 										{filteredWatchlistMovies.length > 0 && (
@@ -529,7 +529,7 @@ export default function ProfilePage() {
 								{loadingFavoritesMovies ||
 								loadingFavoritesTV ||
 								isLoadingDetails ? (
-									<WatchlistLoader />
+									<MediaLoader withHeader className="min-h-[280px]" />
 								) : (
 									<>
 										{filteredFavoritesMovies.length > 0 && (
@@ -578,7 +578,7 @@ export default function ProfilePage() {
 							</div>
 							<div className="space-y-3 md:space-y-4">
 								{loadingRecentlyWatched ? (
-									<WatchlistLoader />
+									<MediaLoader withHeader className="min-h-[280px]" />
 								) : (
 									<>
 										{recentlyWatched && recentlyWatched.length > 0 && (

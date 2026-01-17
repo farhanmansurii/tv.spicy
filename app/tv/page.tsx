@@ -1,13 +1,15 @@
 import dynamic from 'next/dynamic';
 import Container from '@/components/shared/containers/container';
-import FetchAndRenderRow from '@/components/features/media/row/fetch-and-render-row';
-import RowLoader from '@/components/shared/loaders/row-loader';
-import { WatchlistLoader } from '@/components/shared/loaders/watchlist-loader';
-import { ContinueWatchingLoader } from '@/components/shared/loaders/continue-watching-loader';
+import DataRow from '@/components/features/media/row/data-row';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { fetchGenres, fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
 import { Metadata } from 'next';
 import React, { Suspense } from 'react';
-import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
+import HeroCarousel, {
+	type HeroCarouselProps,
+} from '@/components/features/media/carousel/hero-carousel';
+import type { Genre } from '@/lib/types/tmdb';
+import type { Show } from '@/lib/types';
 
 export const metadata: Metadata = {
 	title: 'Spicy TV',
@@ -34,45 +36,62 @@ const GenreGrid = dynamic(() => import('@/components/features/media/genre/genre-
 });
 
 export default async function Page() {
-	const genres = await fetchGenres('tv');
-	const topRatedTV = await fetchRowData('tv/top_rated');
+	let genres: Genre[] = [];
+	let topRatedTV = [];
+	let heroShows: Array<Show & { media_type?: 'movie' | 'tv' }> = [];
 
-	// Fetch full details (with logos) for hero items
-	const heroShows = await fetchHeroItemsWithDetails(topRatedTV, 'tv', 10);
+	try {
+		genres = await fetchGenres('tv');
+		topRatedTV = await fetchRowData('tv/top_rated');
+		// Fetch full details (with logos) for hero items
+		heroShows = (await fetchHeroItemsWithDetails(topRatedTV, 'tv', 10)) as Array<
+			Show & { media_type?: 'movie' | 'tv' }
+		>;
+	} catch (error) {
+		console.error('Failed to load TV page data:', error);
+	}
 
 	return (
 		<>
-			<HeroCarousel shows={heroShows} type="tv" />
+			<HeroCarousel shows={heroShows as unknown as HeroCarouselProps['shows']} type="tv" />
+
 			<Container>
 				<div className="flex flex-col space-y-4 md:space-y-6">
-					<Suspense fallback={<ContinueWatchingLoader />}>
+					<Suspense
+						fallback={
+							<MediaLoader withHeader withHeaderAction className="min-h-[280px]" />
+						}
+					>
 						<RecentlyWatched />
 					</Suspense>
 
-					<Suspense fallback={<WatchlistLoader />}>
+					<Suspense fallback={<MediaLoader withHeader className="min-h-[280px]" />}>
 						<WatchList type="tv" />
 					</Suspense>
 
-					<FetchAndRenderRow
-						apiEndpoint="trending/tv/week"
+					<DataRow
+						endpoint="trending/tv/week"
 						text="Top TV Shows"
 						showRank={false}
 						type="tv"
 					/>
 
-					<FetchAndRenderRow
-						apiEndpoint="tv/top_rated"
+					<DataRow
+						endpoint="tv/top_rated"
 						text="Top Rated TV Shows"
 						showRank={true}
 						type="tv"
 					/>
 
-					{genres?.map((genre: any) => (
-						<Suspense key={genre.id} fallback={<RowLoader withHeader key={genre.id} />}>
-							<FetchAndRenderRow
+					{genres?.map((genre) => (
+						<Suspense
+							key={genre.id}
+							fallback={<MediaLoader withHeader key={genre.id} />}
+						>
+							<DataRow
 								showRank={false}
 								type="tv"
-								apiEndpoint={{ id: genre.id, type: 'tv' }}
+								endpoint={{ id: genre.id, type: 'tv' }}
 								text={genre.name}
 								isGenre={true}
 							/>

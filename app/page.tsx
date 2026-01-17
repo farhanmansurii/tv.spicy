@@ -1,41 +1,41 @@
-import RecentlyWatched from '@/components/features/watchlist/recently-watched';
 import { fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
 import Container from '@/components/shared/containers/container';
 import { Show } from '@/lib/types';
-import HeroCarousel from '@/components/features/media/carousel/hero-carousel';
-import { HomeRow } from '@/components/features/media/row/home-row';
-import RowLoader from '@/components/shared/loaders/row-loader';
+import HeroCarousel, {
+	type HeroCarouselProps,
+} from '@/components/features/media/carousel/hero-carousel';
+import DataRow from '@/components/features/media/row/data-row';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { Suspense } from 'react';
-import { PersonalizedGreeting } from '@/components/features/home/personalized-greeting';
-import { UserWatchlistAll } from '@/components/features/home/user-watchlist-all';
-import { UserFavoritesAll } from '@/components/features/home/user-favorites-all';
+import { HomePersonalizedRows } from '@/components/features/home/home-personalized-rows';
 
 export const revalidate = 604800;
 
 async function fetchHomePageData() {
 	// Phase 1: Fetch hero data and first 2-3 rows server-side for instant loading
-	const [trendingTV, trendingMovies, tvPopular, tvOnTheAir, movieNowPlaying] =
-		await Promise.all([
-			fetchRowData('trending/tv/week'),
-			fetchRowData('trending/movie/week'),
-			fetchRowData('tv/popular'),
-			fetchRowData('tv/on_the_air'),
-			fetchRowData('movie/now_playing'),
-		]);
+	const [trendingTV, trendingMovies, tvPopular, tvOnTheAir, movieNowPlaying] = await Promise.all([
+		fetchRowData('trending/tv/week'),
+		fetchRowData('trending/movie/week'),
+		fetchRowData('tv/popular'),
+		fetchRowData('tv/on_the_air'),
+		fetchRowData('movie/now_playing'),
+	]);
 
 	const allTrending = [...(trendingTV || []), ...(trendingMovies || [])].filter(Boolean);
-	const basicHeroShows = allTrending.filter((show: Show) => show?.backdrop_path).slice(0, 10);
+	const basicHeroShows = allTrending.filter((show) => show?.backdrop_path).slice(0, 10);
 
 	// Fetch full details (with logos) for hero items
-	const heroShows = await fetchHeroItemsWithDetails(basicHeroShows, 'tv', 10);
+	const heroShows = (await fetchHeroItemsWithDetails(basicHeroShows, 'tv', 10)) as Array<
+		Show & { media_type?: 'movie' | 'tv' }
+	>;
 
 	return {
 		heroShows,
-		trendingTV,
-		trendingMovies,
-		tvPopular,
-		tvOnTheAir,
-		movieNowPlaying,
+		trendingTV: trendingTV as Array<Show | { id: number }>,
+		trendingMovies: trendingMovies as Array<Show | { id: number }>,
+		tvPopular: tvPopular as Array<Show | { id: number }>,
+		tvOnTheAir: tvOnTheAir as Array<Show | { id: number }>,
+		movieNowPlaying: movieNowPlaying as Array<Show | { id: number }>,
 	};
 }
 
@@ -47,49 +47,47 @@ function HomePageContent({
 	tvOnTheAir,
 	movieNowPlaying,
 }: {
-	heroShows: Show[];
-	trendingTV: Show[];
-	trendingMovies: Show[];
-	tvPopular: Show[];
-	tvOnTheAir: Show[];
-	movieNowPlaying: Show[];
+	heroShows: Array<Show & { media_type?: 'movie' | 'tv' }>;
+	trendingTV: Array<Show | { id: number }>;
+	trendingMovies: Array<Show | { id: number }>;
+	tvPopular: Array<Show | { id: number }>;
+	tvOnTheAir: Array<Show | { id: number }>;
+	movieNowPlaying: Array<Show | { id: number }>;
 }) {
 	return (
 		<div className="min-h-screen bg-background text-foreground pb-20">
-			<HeroCarousel shows={heroShows} type="tv" />
+			<HeroCarousel shows={heroShows as unknown as HeroCarouselProps['shows']} type="tv" />
 			<Container className="w-full">
 				<div className="flex flex-col space-y-4 md:space-y-6">
-					<RecentlyWatched />
-					<UserWatchlistAll />
-					<UserFavoritesAll />
+					<HomePersonalizedRows />
 
 					{/* Pre-fetched rows - no Suspense needed since data is already available */}
-					<HomeRow
+					<DataRow
 						endpoint="trending/tv/week"
 						text="Binge-Worthy Series"
 						type="tv"
 						viewAllLink="/browse/binge-worthy-series"
-						initialData={trendingTV}
+						initialData={trendingTV as unknown as Show[]}
 					/>
 
-					<HomeRow
+					<DataRow
 						endpoint="tv/popular"
 						text="Crowd Favorites: TV"
 						type="tv"
 						viewAllLink="/browse/crowd-favorites-tv"
-						initialData={tvPopular}
+						initialData={tvPopular as unknown as Show[]}
 					/>
 
-					<HomeRow
+					<DataRow
 						endpoint="tv/on_the_air"
 						text="Airing This Week"
 						type="tv"
 						viewAllLink="/browse/airing-this-week"
-						initialData={tvOnTheAir}
+						initialData={tvOnTheAir as unknown as Show[]}
 					/>
 
-					<Suspense fallback={<RowLoader withHeader />}>
-						<HomeRow
+					<Suspense fallback={<MediaLoader withHeader />}>
+						<DataRow
 							endpoint="tv/top_rated"
 							text="Critically Acclaimed TV"
 							type="tv"
@@ -98,24 +96,24 @@ function HomePageContent({
 					</Suspense>
 
 					{/* Pre-fetched rows - no Suspense needed since data is already available */}
-					<HomeRow
+					<DataRow
 						endpoint="trending/movie/week"
 						text="Blockbuster Hits"
 						type="movie"
 						viewAllLink="/browse/blockbuster-hits"
-						initialData={trendingMovies}
+						initialData={trendingMovies as unknown as Show[]}
 					/>
 
-					<HomeRow
+					<DataRow
 						endpoint="movie/now_playing"
 						text="Fresh in Theaters"
 						type="movie"
 						viewAllLink="/browse/fresh-in-theaters"
-						initialData={movieNowPlaying}
+						initialData={movieNowPlaying as unknown as Show[]}
 					/>
 
-					<Suspense fallback={<RowLoader withHeader />}>
-						<HomeRow
+					<Suspense fallback={<MediaLoader withHeader />}>
+						<DataRow
 							endpoint="movie/popular"
 							text="Cult Classics & Fan Favorites"
 							type="movie"
@@ -123,8 +121,8 @@ function HomePageContent({
 						/>
 					</Suspense>
 
-					<Suspense fallback={<RowLoader withHeader />}>
-						<HomeRow
+					<Suspense fallback={<MediaLoader withHeader />}>
+						<DataRow
 							endpoint="movie/top_rated"
 							text="Cinema Hall of Fame"
 							type="movie"

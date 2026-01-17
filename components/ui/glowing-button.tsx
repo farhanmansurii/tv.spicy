@@ -3,11 +3,12 @@ import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@/lib/utils';
 import { buttonVariants, type ButtonProps } from '@/components/ui/button';
 
-type GlowVariant = 'light' | 'primary';
+export type GlowVariant = 'light' | 'primary';
 
 interface GlowingButtonProps extends ButtonProps {
 	glow?: boolean;
 	glowVariant?: GlowVariant;
+	iconOnly?: boolean;
 }
 
 const glowStyles: Record<GlowVariant, string> = {
@@ -24,6 +25,7 @@ const GlowingButton = React.forwardRef<HTMLButtonElement, GlowingButtonProps>(
 			asChild = false,
 			glow = true,
 			glowVariant = 'light',
+			iconOnly = false,
 			...props
 		},
 		ref
@@ -35,6 +37,7 @@ const GlowingButton = React.forwardRef<HTMLButtonElement, GlowingButtonProps>(
 				className={cn(
 					buttonVariants({ variant, size }),
 					'rounded-full',
+					iconOnly && 'h-11 w-11 md:h-12 md:w-12',
 					glow && glowStyles[glowVariant],
 					className
 				)}

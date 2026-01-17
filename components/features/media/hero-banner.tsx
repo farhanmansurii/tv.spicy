@@ -10,8 +10,30 @@ import { useEpisodeStore } from '@/store/episodeStore';
 import { Badge } from '@/components/ui/badge';
 import Container from '@/components/shared/containers/container';
 import ContinueWatchingButton from '../watchlist/continue-watching-button';
+import type { TMDBImagesResponse, TMDBMovie, TMDBTVShow } from '@/lib/types/tmdb';
 
-export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager' }: any) {
+interface HeroBannerProps {
+	show: (TMDBMovie & TMDBTVShow & { images?: TMDBImagesResponse }) & {
+		media_type?: 'movie' | 'tv';
+		content_ratings?: { results?: Array<{ iso_3166_1?: string; rating?: string }> };
+		release_dates?: {
+			results?: Array<{
+				iso_3166_1?: string;
+				release_dates?: Array<{ certification?: string }>;
+			}>;
+		};
+	};
+	type: 'movie' | 'tv';
+	isDetailsPage?: boolean;
+	loading?: 'eager' | 'lazy';
+}
+
+export function HeroBanner({
+	show,
+	type,
+	isDetailsPage = false,
+	loading = 'eager',
+}: HeroBannerProps) {
 	const isMobile = useMediaQuery();
 	const { activeEP, isPlaying } = useEpisodeStore();
 	const [imageLoaded, setImageLoaded] = useState(false);
@@ -20,20 +42,18 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 	const contentRef = useRef<HTMLDivElement>(null);
 
 	const title = show.title || show.name || 'Untitled';
-	const releaseYear =
-		show.first_air_date || show.release_date
-			? new Date(show.first_air_date || show.release_date).getFullYear()
-			: null;
+	const releaseDate = show.first_air_date || show.release_date;
+	const releaseYear = releaseDate ? new Date(releaseDate).getFullYear() : null;
 
 	const rating =
 		type === 'tv'
-			? show.content_ratings?.results?.find((r: any) => r.iso_3166_1 === 'US')?.rating
-			: show.release_dates?.results?.find((r: any) => r.iso_3166_1 === 'US')
-					?.release_dates?.[0]?.certification;
+			? show.content_ratings?.results?.find((r) => r.iso_3166_1 === 'US')?.rating
+			: show.release_dates?.results?.find((r) => r.iso_3166_1 === 'US')?.release_dates?.[0]
+					?.certification;
 
-	const runtime = show.episode_run_time?.[0] || show.runtime;
+	const runtime = show.episode_run_time?.[0] ?? show.runtime ?? null;
 	const genres = show.genres
-		?.map((g: any) => g.name)
+		?.map((g) => g.name)
 		.slice(0, 2)
 		.join(' • ');
 
@@ -42,12 +62,11 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 	const logos = show.images?.logos || [];
 
 	const backdrop =
-		backdrops.find((img: any) => img.iso_639_1 === null)?.file_path || show.backdrop_path;
-	const poster =
-		posters.find((img: any) => img.iso_639_1 === null)?.file_path || show.poster_path;
-	const logo = logos.find((img: any) => img.iso_639_1 === 'en')?.file_path || logos[0]?.file_path;
+		backdrops.find((img) => img.iso_639_1 === null)?.file_path || show.backdrop_path;
+	const poster = posters.find((img) => img.iso_639_1 === null)?.file_path || show.poster_path;
+	const logo = logos.find((img) => img.iso_639_1 === 'en')?.file_path || logos[0]?.file_path;
 
-	const currentImage = isMobile ? poster : backdrop;
+	const currentImage = (isMobile ? poster : backdrop) || '';
 
 	// Reset image loaded state when image changes
 	useEffect(() => {
@@ -118,10 +137,10 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 										{rating}
 									</span>
 								)}
-								{show.vote_average > 0 && (
+								{(show.vote_average ?? 0) > 0 && (
 									<div className="flex items-center gap-1 text-yellow-500">
 										<Star className="w-3.5 h-3.5 fill-current" />
-										<span>{show.vote_average.toFixed(1)}</span>
+										<span>{(show.vote_average ?? 0).toFixed(1)}</span>
 									</div>
 								)}
 							</div>
@@ -140,7 +159,7 @@ export function HeroBanner({ show, type, isDetailsPage = false, loading = 'eager
 								</h1>
 							)}
 							<p className="mt-3 md:mt-4 text-[10px] md:text-xs font-black text-zinc-500 tracking-[0.3em] uppercase">
-								{genres} {runtime > 0 && ` • ${runtime}m`}
+								{genres} {runtime != null && runtime > 0 && ` • ${runtime}m`}
 							</p>
 						</div>
 

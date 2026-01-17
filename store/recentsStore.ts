@@ -1,19 +1,30 @@
 // useTVShowStore.ts
 
 import { create } from 'zustand';
-import { saveEpisodesToDB, loadEpisodesFromDB, deleteAllEpisodesFromDB } from '../lib/indexedDB';
+import {
+	deleteAllEpisodesFromDB,
+	loadEpisodesFromDB,
+	saveEpisodesToDB,
+	type Episode as IndexedDBEpisode,
+} from '../lib/indexedDB';
+import type { Episode } from '@/lib/types';
+
+type RecentsEpisode = Episode & { time?: number };
 
 interface TVShowStore {
-	recentlyWatched: any;
-	addRecentlyWatched: (episode: any) => void;
+	recentlyWatched: RecentsEpisode[];
+	addRecentlyWatched: (episode: RecentsEpisode) => void;
 	loadEpisodes: () => Promise<void>;
 	updateTimeWatched: (episodeId: string, timeWatched: number) => void;
-	deleteRecentlyWatched: () => any;
+	deleteRecentlyWatched: () => void;
 	syncWithDatabase: () => Promise<void>;
 	loadFromDatabase: () => Promise<void>;
 }
 
-const syncEpisodeToDatabase = async (episode: any, action: 'add' | 'update' | 'delete') => {
+const syncEpisodeToDatabase = async (
+	episode: RecentsEpisode,
+	action: 'add' | 'update' | 'delete'
+) => {
 	try {
 		if (action === 'add' || action === 'update') {
 			await fetch('/api/recently-watched', {
@@ -43,11 +54,24 @@ const useTVShowStore = create<TVShowStore>((set, get) => ({
 	recentlyWatched: [],
 	addRecentlyWatched: (episode) => {
 		set((state) => {
-			const filteredEpisodes = state.recentlyWatched.filter((existingEpisode: any) => {
+			const filteredEpisodes = state.recentlyWatched.filter((existingEpisode) => {
 				return existingEpisode.tv_id !== episode.tv_id;
 			});
 			const updatedRecentlyWatched = [episode, ...filteredEpisodes];
-			saveEpisodesToDB(updatedRecentlyWatched);
+			const dbEpisodes: IndexedDBEpisode[] = updatedRecentlyWatched.map((item) => ({
+				tv_id: item.tv_id,
+				name: item.name,
+				id: item.id,
+				episode_number: item.episode_number,
+				season_number: item.season_number,
+				air_date: item.air_date ?? '',
+				overview: item.overview ?? '',
+				runtime: item.runtime ?? 0,
+				still_path: item.still_path ?? null,
+				time: item.time ?? 0,
+				show_name: item.show_name,
+			}));
+			saveEpisodesToDB(dbEpisodes);
 			return { recentlyWatched: updatedRecentlyWatched };
 		});
 		syncEpisodeToDatabase(episode, 'add').catch((error) => {
@@ -57,7 +81,18 @@ const useTVShowStore = create<TVShowStore>((set, get) => ({
 	loadEpisodes: async () => {
 		try {
 			const episodes = await loadEpisodesFromDB();
-			set({ recentlyWatched: episodes });
+			const hydratedEpisodes: RecentsEpisode[] = episodes.map((episode) => ({
+				...episode,
+				show_name: episode.show_name ?? '',
+				show_id: 0,
+				production_code: '',
+				vote_average: 0,
+				vote_count: 0,
+				crew: [],
+				guest_stars: [],
+				tv_id: episode.tv_id,
+			}));
+			set({ recentlyWatched: hydratedEpisodes });
 		} catch (error) {
 			console.error('Error loading episodes from IndexedDB:', error);
 		}
@@ -70,15 +105,28 @@ const useTVShowStore = create<TVShowStore>((set, get) => ({
 		});
 	},
 	updateTimeWatched: async (episodeId, timeWatched) => {
-		const episode = get().recentlyWatched.find((ep: any) => ep.tv_id === episodeId);
+		const episode = get().recentlyWatched.find((ep) => ep.tv_id === episodeId);
 		set((state) => {
-			const updatedRecentlyWatched = state.recentlyWatched.map((episode: any) => {
-				if (episode.tv_id === episodeId) {
-					return { ...episode, time: timeWatched };
+			const updatedRecentlyWatched = state.recentlyWatched.map((item) => {
+				if (item.tv_id === episodeId) {
+					return { ...item, time: timeWatched };
 				}
-				return episode;
+				return item;
 			});
-			saveEpisodesToDB(updatedRecentlyWatched);
+			const dbEpisodes: IndexedDBEpisode[] = updatedRecentlyWatched.map((item) => ({
+				tv_id: item.tv_id,
+				name: item.name,
+				id: item.id,
+				episode_number: item.episode_number,
+				season_number: item.season_number,
+				air_date: item.air_date ?? '',
+				overview: item.overview ?? '',
+				runtime: item.runtime ?? 0,
+				still_path: item.still_path ?? null,
+				time: item.time ?? 0,
+				show_name: item.show_name,
+			}));
+			saveEpisodesToDB(dbEpisodes);
 			return { recentlyWatched: updatedRecentlyWatched };
 		});
 		if (episode) {
@@ -106,7 +154,7 @@ const useTVShowStore = create<TVShowStore>((set, get) => ({
 			if (response.ok) {
 				const episodes = await response.json();
 				// Convert database format to local format
-				const localEpisodes = episodes.map((ep: any) => ({
+				const localEpisodes: RecentsEpisode[] = episodes.map((ep: any) => ({
 					tv_id: String(ep.mediaId),
 					name: ep.episodeName || `Episode ${ep.episodeNumber}`,
 					id: ep.episodeId || 0,
@@ -115,9 +163,31 @@ const useTVShowStore = create<TVShowStore>((set, get) => ({
 					still_path: ep.stillPath,
 					time: ep.progress,
 					show_name: ep.showName,
+					air_date: '',
+					overview: '',
+					runtime: 0,
+					production_code: '',
+					show_id: 0,
+					vote_average: 0,
+					vote_count: 0,
+					crew: [],
+					guest_stars: [],
 				}));
 				set({ recentlyWatched: localEpisodes });
-				saveEpisodesToDB(localEpisodes);
+				const dbEpisodes: IndexedDBEpisode[] = localEpisodes.map((item) => ({
+					tv_id: item.tv_id,
+					name: item.name,
+					id: item.id,
+					episode_number: item.episode_number,
+					season_number: item.season_number,
+					air_date: item.air_date ?? '',
+					overview: item.overview ?? '',
+					runtime: item.runtime ?? 0,
+					still_path: item.still_path ?? null,
+					time: item.time ?? 0,
+					show_name: item.show_name,
+				}));
+				saveEpisodesToDB(dbEpisodes);
 			}
 		} catch (error) {
 			console.error('Error loading from database:', error);

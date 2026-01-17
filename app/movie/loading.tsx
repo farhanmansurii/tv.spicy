@@ -1,4 +1,4 @@
-import RowLoader from '@/components/shared/loaders/row-loader';
+import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import ShowDetailsLoader from '@/components/shared/loaders/show-details-loader';
 import Container from '@/components/shared/containers/container';
 import React from 'react';
@@ -10,10 +10,10 @@ export default function Loading() {
 				<ShowDetailsLoader />
 			</Container>
 			<Container className="w-full">
-				<RowLoader withHeader />
-				<RowLoader withHeader />
-				<RowLoader withHeader />
-				<RowLoader withHeader />
+				<MediaLoader withHeader />
+				<MediaLoader withHeader />
+				<MediaLoader withHeader />
+				<MediaLoader withHeader />
 			</Container>
 		</>
 	);
