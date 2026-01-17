@@ -144,17 +144,17 @@ export default function Episode(props: EpisodeProps) {
 	const currentSource = sourcesMap.find((s) => s.name === selectedProvider) || sourcesMap[0];
 
 	return (
-		<div className="group relative w-full flex flex-col gap-4">
-			<div className="flex items-center justify-between px-1">
+		<div className="group relative w-full flex flex-col gap-2">
+			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-4">
 					<Select value={selectedProvider} onValueChange={setProvider}>
-						<SelectTrigger className="h-11 w-fit bg-zinc-900/80 border-white/10 rounded-xl px-4 hover:bg-zinc-800/80 transition-all gap-3 shadow-lg backdrop-blur-sm">
+						<SelectTrigger className="h-9 md:h-11 w-fit bg-zinc-900/80 border-white/10 rounded-lg  hover:bg-zinc-800/80 transition-all gap-3 shadow-lg backdrop-blur-sm">
 							<Settings className="w-4 h-4 text-primary" />
 							<SelectValue className="text-xs font-bold uppercase tracking-wider text-zinc-300">
 								{currentSource.label}
 							</SelectValue>
 						</SelectTrigger>
-						<SelectContent className="bg-zinc-950 border-white/10 rounded-xl backdrop-blur-xl p-1.5 shadow-2xl max-h-[300px]">
+						<SelectContent className="bg-zinc-950 border-white/10 rounded-lg backdrop-blur-xl p-1.5 shadow-2xl max-h-[300px]">
 							{sourcesMap.map((source) => (
 								<SelectItem
 									value={source.name}
@@ -173,7 +173,7 @@ export default function Episode(props: EpisodeProps) {
 						<Button
 							variant="ghost"
 							onClick={getNextEp}
-							className="h-10 md:h-11 rounded-xl px-3 md:px-6 transition-all gap-2 group/next bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
+							className="h-9 md:h-11 rounded-xl px-3 md:px-6 transition-all gap-2 group/next bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
 						>
 							<span className="text-[10px] md:text-xs font-bold uppercase tracking-wider hidden sm:inline">
 								Next Episode
@@ -185,7 +185,7 @@ export default function Episode(props: EpisodeProps) {
 								variant="ghost"
 								size="icon"
 								onClick={onCloseSticky}
-								className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
+								className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
 								aria-label="Hide sticky player"
 								title="Hide sticky player"
 							>

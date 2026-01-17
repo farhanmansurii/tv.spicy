@@ -12,6 +12,7 @@ import { HeaderActions } from './header-actions';
 import { HeaderNavigation } from './header-navigation';
 import { navigationItems } from './navigation-data';
 import { cn } from '@/lib/utils';
+import { useEpisodeStore } from '@/store/episodeStore';
 
 interface HeaderProps {
 	className?: string;
@@ -34,6 +35,7 @@ export function Header({ className }: HeaderProps) {
 	const [scrolled, setScrolled] = React.useState(false);
 	const pathname = usePathname();
 	const { toggleSidebar, openMobile } = useSidebar();
+	const isPlayerSticky = useEpisodeStore((state) => state.isPlayerSticky);
 
 	// Apple-style scroll detection with passive listener and hysteresis
 	React.useEffect(() => {
@@ -63,7 +65,8 @@ export function Header({ className }: HeaderProps) {
 	return (
 		<header
 			className={cn(
-				'sticky top-0 z-50 w-full',
+				'z-50 w-full',
+				isPlayerSticky ? 'relative' : 'sticky top-0',
 				'transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]',
 				className
 			)}

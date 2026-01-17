@@ -206,8 +206,7 @@ const CarouselPrevious = React.forwardRef<
 				ref={ref}
 				variant={variant}
 				size={size}
-				glow={glow}
-				glowVariant={glowVariant}
+				{...(glow ? { glow, glowVariant } : {})}
 				className={cn(
 					'absolute h-8 w-8 rounded-full',
 					orientation === 'horizontal'
@@ -255,8 +254,7 @@ const CarouselNext = React.forwardRef<
 				ref={ref}
 				variant={variant}
 				size={size}
-				glow={glow}
-				glowVariant={glowVariant}
+				{...(glow ? { glow, glowVariant } : {})}
 				className={cn(
 					'absolute h-8 w-8 rounded-full',
 					orientation === 'horizontal'

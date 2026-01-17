@@ -41,7 +41,7 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 	const searchParams = useSearchParams();
 
 	const { view, setView } = useEpisodeViewStore();
-	const { activeEP, setActiveEP } = useEpisodeStore();
+	const { activeEP, setActiveEP, setIsPlayerSticky } = useEpisodeStore();
 	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
 	const [listDensity, setListDensity] = useState<'comfortable' | 'compact'>('comfortable');
 	const hasActiveEpisode = !!activeEP;
@@ -50,11 +50,50 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 	const contentRef = useRef<HTMLDivElement>(null);
 	const stickyRef = useRef<HTMLDivElement>(null);
 	const [isStickyDismissed, setIsStickyDismissed] = useState(false);
+	const [isPortrait, setIsPortrait] = useState(true);
+	const [isMobile, setIsMobile] = useState(false);
+
+	// Detect mobile device and portrait orientation
+	useEffect(() => {
+		const checkMobileAndOrientation = () => {
+			const mobile = window.innerWidth < 768;
+			const portrait = window.matchMedia('(orientation: portrait)').matches;
+			setIsMobile(mobile);
+			setIsPortrait(portrait);
+		};
+
+		checkMobileAndOrientation();
+
+		const orientationQuery = window.matchMedia('(orientation: portrait)');
+		const handleOrientationChange = (e: MediaQueryListEvent) => {
+			setIsPortrait(e.matches);
+		};
+
+		const handleResize = () => {
+			setIsMobile(window.innerWidth < 768);
+		};
+
+		orientationQuery.addEventListener('change', handleOrientationChange);
+		window.addEventListener('resize', handleResize);
+
+		return () => {
+			orientationQuery.removeEventListener('change', handleOrientationChange);
+			window.removeEventListener('resize', handleResize);
+		};
+	}, []);
+
 	const { ref: stickySentinelRef, inView: stickySentinelInView } = useInView({
 		threshold: 0,
 		rootMargin: '-72px 0px 0px 0px',
 	});
-	const isSticky = hasActiveEpisode && stickyEnabled && !stickySentinelInView;
+	// Sticky only on mobile phones in portrait orientation
+	const isSticky =
+		hasActiveEpisode && stickyEnabled && !stickySentinelInView && isMobile && isPortrait;
+
+	// Sync sticky state to store so header can react
+	useEffect(() => {
+		setIsPlayerSticky(isSticky && !isStickyDismissed);
+	}, [isSticky, isStickyDismissed, setIsPlayerSticky]);
 
 	// 1. STABLE STATE LOGIC
 	const validSeasons = useMemo(
@@ -308,10 +347,9 @@ const SeasonTabs = ({ seasons, showId, showData }: any) => {
 						data-player-container
 						className={cn(
 							'w-full transition-all duration-200',
-							stickyEnabled
-								? 'sticky top-16 z-30 bg-zinc-900/60 backdrop-blur-xl rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/5'
+							stickyEnabled && isMobile && isPortrait
+								? 'sticky top-2 z-30 bg-zinc-900/60 backdrop-blur-xl rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/5'
 								: 'relative z-10',
-							'md:static md:top-auto md:bg-transparent md:backdrop-blur-0 md:p-0 md:shadow-none md:border-0',
 							isSticky &&
 								isStickyDismissed &&
 								'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
