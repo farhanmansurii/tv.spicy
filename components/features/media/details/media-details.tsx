@@ -26,8 +26,8 @@ const MediaDetails = (props: any) => {
 		// 2. Haven't scrolled yet for this page load
 		if (!isHighIntent && !hasScrolledRef.current) {
 			hasScrolledRef.current = true;
-			// Gentle scroll to top for general navigation
-			window.scrollTo({ top: 0, behavior: 'smooth' });
+			// Immediate scroll to top for general navigation
+			window.scrollTo(0, 0);
 		} else if (isHighIntent) {
 			// High-intent: let season-tabs handle scrolling to player
 			hasScrolledRef.current = true;
@@ -37,16 +37,23 @@ const MediaDetails = (props: any) => {
 	return (
 		<div className="w-full">
 			{/* Hero Banner - Full width on mobile, contained on desktop */}
-			<div className={cn(
-				"w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]",
-				"md:w-full md:left-auto md:right-auto md:ml-0 md:mr-0",
-			)}>
+			<div
+				className={cn(
+					'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]',
+					'md:w-full md:left-auto md:right-auto md:ml-0 md:mr-0'
+				)}
+			>
 				<ShowDetails id={data?.id} show={data} type={type} />
 			</div>
 			{/* Rest of content in container */}
 			<Container className="w-full mt-4 py-6 md:py-8">
 				<div className="space-y-10 md:space-y-12">
-					<ShowContainer showData={data} id={data?.id} type={type} seasons={data.seasons} />
+					<ShowContainer
+						showData={data}
+						id={data?.id}
+						type={type}
+						seasons={data.seasons}
+					/>
 					{mediaId && <CastCrewSection id={mediaId} type={type} />}
 					{mediaId && <VideoSection id={mediaId} type={type} />}
 					<MoreDetailsContainer type={type} show={data} />

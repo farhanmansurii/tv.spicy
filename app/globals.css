@@ -419,6 +419,17 @@
 	}
 }
 
+/* Now Playing equalizer bars animation */
+@keyframes equalize {
+	0%,
+	100% {
+		height: 40%;
+	}
+	50% {
+		height: 100%;
+	}
+}
+
 /* Mobile sidebar fixed width override */
 [data-mobile="true"][data-sidebar="sidebar"] {
 	width: 80vw !important;

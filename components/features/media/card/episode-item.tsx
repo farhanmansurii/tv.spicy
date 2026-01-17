@@ -1,8 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useState } from 'react';
-import { Play, ImageOff, Lock, Star } from 'lucide-react';
+import { Play, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 import type { Episode } from '@/lib/types';
@@ -21,272 +20,310 @@ export function EpisodeItem({
 	active = false,
 	toggle,
 	variant = 'card',
-	watched,
-	density = 'comfortable',
 }: EpisodeItemProps) {
 	if (!episode) return null;
 
-	const isCompact = density === 'compact';
 	const isReleased = episode.air_date ? new Date(episode.air_date) <= new Date() : true;
-	const stillUrl = episode.still_path
-		? tmdbImage(episode.still_path, variant === 'card' ? 'original' : 'w500')
-		: null;
-	const rating = episode.vote_average ? episode.vote_average.toFixed(1) : null;
-	const hasGoodRating = episode.vote_average ? episode.vote_average >= 8.0 : false;
+	const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w780') : null;
 
-	const [isClicked, setIsClicked] = useState(false);
+	const [isPressed, setIsPressed] = useState(false);
 
 	const handleClick = (e: React.MouseEvent) => {
 		if (!isReleased) return;
-		setIsClicked(true);
-		setTimeout(() => setIsClicked(false), 150);
 		toggle(episode, e);
 	};
 
+	const handlePressStart = () => {
+		if (!isReleased) return;
+		setIsPressed(true);
+	};
+
+	const handlePressEnd = () => {
+		setIsPressed(false);
+	};
+
+	// ============================================
+	// LIST VARIANT - Streaming Luxury Aesthetic
+	// ============================================
 	if (variant === 'list') {
 		return (
-			<div
+			<button
+				type="button"
 				onClick={handleClick}
+				onMouseDown={handlePressStart}
+				onMouseUp={handlePressEnd}
+				onMouseLeave={handlePressEnd}
+				onTouchStart={handlePressStart}
+				onTouchEnd={handlePressEnd}
+				disabled={!isReleased}
 				className={cn(
-					'group relative flex items-center transition-all duration-300 rounded-xl select-none',
-					isCompact ? 'gap-3 md:gap-4 p-2.5 md:p-3' : 'gap-4 md:gap-6 p-3 md:p-4',
-					active
-						? 'bg-zinc-900/80 border border-white/20 shadow-xl shadow-black/50 backdrop-blur-sm'
-						: 'hover:bg-zinc-900/40 cursor-pointer border border-white/5 hover:border-white/10',
-					!isReleased && 'opacity-40 cursor-not-allowed',
-					isClicked && 'scale-[0.98]'
+					// Base layout
+					'group relative w-full flex items-center gap-4 p-2',
+					'rounded-2xl text-left',
+					// Smooth spring-like transitions
+					'transition-all duration-200 ease-out',
+					// Focus states for accessibility
+					'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950',
+					// Active vs default states
+					active ? 'bg-white/[0.07] shadow-lg shadow-black/20' : 'hover:bg-white/[0.04]',
+					// Press animation
+					isPressed && 'scale-[0.98] transition-transform duration-100',
+					// Disabled state
+					!isReleased && 'opacity-40 pointer-events-none'
 				)}
 			>
 				<div
 					className={cn(
-						'relative flex-shrink-0 aspect-video rounded-lg overflow-hidden bg-zinc-950 ring-1 ring-white/10 shadow-lg',
-						isCompact ? 'w-28 md:w-36' : 'w-36 md:w-48'
+						'relative flex-shrink-0 w-32 sm:w-36 aspect-video',
+						'rounded-xl overflow-hidden',
+						'bg-zinc-900',
+						// Subtle border that glows when active
+						'ring-1 transition-all duration-300',
+						active
+							? 'ring-white/25 shadow-lg shadow-white/[0.03]'
+							: 'ring-white/[0.08] group-hover:ring-white/15'
 					)}
 				>
 					{stillUrl ? (
 						<img
 							src={stillUrl}
 							alt=""
+							loading="lazy"
 							className={cn(
-								'h-full w-full object-cover transition-transform duration-500 ease-out',
-								active
-									? 'scale-105 brightness-110'
-									: 'group-hover:scale-105 group-hover:brightness-110'
+								'w-full h-full object-cover',
+								'transition-transform duration-500 ease-out',
+								active ? 'scale-105' : 'group-hover:scale-105'
 							)}
 						/>
 					) : (
-						<div className="w-full h-full flex items-center justify-center bg-zinc-900">
-							<ImageOff className="w-6 h-6 text-zinc-600" />
-						</div>
+						<div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900" />
 					)}
 
-					{active ? (
-						<div className="absolute inset-0 bg-black/50 flex items-center justify-center animate-in fade-in duration-300">
-							<div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-2xl">
-								<Play className="w-5 h-5 fill-black text-black ml-0.5" />
-							</div>
+					{/* Play overlay - visible on hover/active */}
+					<div
+						className={cn(
+							'absolute inset-0 flex items-center justify-center',
+							'bg-black/30 backdrop-blur-[1px]',
+							'transition-all duration-200',
+							active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+						)}
+					>
+						<div
+							className={cn(
+								'w-10 h-10 rounded-full flex items-center justify-center',
+								'bg-white shadow-xl',
+								'transition-transform duration-200',
+								active ? 'scale-100' : 'scale-90 group-hover:scale-100'
+							)}
+						>
+							<Play className="w-4 h-4 text-zinc-900 fill-zinc-900 ml-0.5" />
 						</div>
-					) : (
-						isReleased && (
-							<div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-								<div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/30 flex items-center justify-center">
-									<Play className="w-4 h-4 fill-white text-white ml-0.5" />
-								</div>
-							</div>
-						)
-					)}
+					</div>
 
+					{/* Lock overlay for unreleased episodes */}
 					{!isReleased && (
-						<div className="absolute inset-0 bg-zinc-950/80 flex items-center justify-center backdrop-blur-sm">
-							<Lock className="w-5 h-5 text-white/50" />
+						<div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+							<Lock className="w-5 h-5 text-white/40" />
 						</div>
 					)}
 				</div>
 
-				<div
-					className={cn(
-						'flex-1 min-w-0 flex flex-col justify-center',
-						isCompact ? 'gap-1' : 'gap-1.5'
-					)}
-				>
-					<div
-						className={cn(
-							'flex items-center flex-wrap',
-							isCompact ? 'gap-1.5 md:gap-2' : 'gap-2 md:gap-3'
-						)}
-					>
+				{/* ===== CONTENT ===== */}
+				<div className="flex-1 min-w-0 py-1">
+					{/* Episode number + runtime */}
+					<div className="flex items-center gap-2 mb-1.5">
 						<span
 							className={cn(
-								isCompact ? 'text-[10px] px-1.5 py-0.5' : 'text-xs px-2 py-0.5',
-								'font-bold tracking-wider uppercase rounded-md whitespace-nowrap flex-shrink-0',
-								active ? 'text-white bg-white/10' : 'text-zinc-400 bg-zinc-800/50'
+								'text-xs font-semibold tracking-wider uppercase',
+								'transition-colors duration-200',
+								active ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-400'
 							)}
 						>
-							EP {episode.episode_number}
+							Episode {episode.episode_number}
 						</span>
 						{episode.runtime && (
-							<span
-								className={cn(
-									isCompact ? 'text-[10px]' : 'text-xs',
-									'font-medium text-zinc-500 tabular-nums whitespace-nowrap flex-shrink-0'
-								)}
-							>
-								{episode.runtime} MIN
+							<span className="text-xs text-zinc-600 tabular-nums">
+								{episode.runtime} min
 							</span>
-						)}
-						{rating && (
-							<div
-								className={cn(
-									isCompact ? 'text-[10px]' : 'text-xs',
-									'flex items-center gap-1 font-bold tabular-nums whitespace-nowrap flex-shrink-0',
-									hasGoodRating ? 'text-yellow-500' : 'text-zinc-400'
-								)}
-							>
-								<Star
-									className={cn(
-										isCompact ? 'w-2.5 h-2.5' : 'w-3 h-3',
-										'flex-shrink-0',
-										hasGoodRating && 'fill-current'
-									)}
-								/>
-								<span>{rating}</span>
-							</div>
 						)}
 					</div>
 
-					<h4
+					{/* Episode title */}
+					<h3
 						className={cn(
-							isCompact ? 'text-sm md:text-base' : 'text-base md:text-lg',
-							'font-semibold leading-tight transition-colors min-w-0',
-							active ? 'text-white font-bold' : 'text-zinc-200 group-hover:text-white'
+							'text-[15px] sm:text-base font-medium leading-snug',
+							'truncate',
+							'transition-colors duration-200',
+							active ? 'text-white' : 'text-zinc-200 group-hover:text-white'
 						)}
 					>
-						<span
-							className="block truncate"
-							title={episode.name || `Episode ${episode.episode_number}`}
-						>
-							{episode.name || `Episode ${episode.episode_number}`}
-						</span>
-					</h4>
-
-					<p
-						className={cn(
-							isCompact ? 'text-[11px] leading-snug' : 'text-sm leading-relaxed',
-							'transition-colors min-w-0 line-clamp-2',
-							active ? 'text-zinc-400' : 'text-zinc-500 group-hover:text-zinc-400'
-						)}
-						title={episode.overview || 'No description available for this episode.'}
-					>
-						{episode.overview || 'No description available for this episode.'}
-					</p>
+						{episode.name || `Episode ${episode.episode_number}`}
+					</h3>
 				</div>
-			</div>
+
+				{/* ===== NOW PLAYING INDICATOR ===== */}
+				{active && (
+					<div className="flex-shrink-0 flex items-end gap-[3px] h-4 mr-1">
+						<span
+							className="w-[3px] rounded-full bg-white animate-[equalize_0.8s_ease-in-out_infinite]"
+							style={{ height: '60%' }}
+						/>
+						<span
+							className="w-[3px] rounded-full bg-white animate-[equalize_0.8s_ease-in-out_infinite]"
+							style={{ height: '100%', animationDelay: '0.2s' }}
+						/>
+						<span
+							className="w-[3px] rounded-full bg-white animate-[equalize_0.8s_ease-in-out_infinite]"
+							style={{ height: '40%', animationDelay: '0.4s' }}
+						/>
+					</div>
+				)}
+
+				{/* Ambient glow effect for active state */}
+				{active && (
+					<div
+						className="absolute inset-0 rounded-2xl pointer-events-none"
+						style={{
+							background:
+								'radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)',
+						}}
+					/>
+				)}
+			</button>
 		);
 	}
 
+	// ============================================
+	// CARD VARIANT - Cinematic Grid Layout
+	// ============================================
 	return (
-		<div
+		<button
+			type="button"
 			onClick={handleClick}
+			onMouseDown={handlePressStart}
+			onMouseUp={handlePressEnd}
+			onMouseLeave={handlePressEnd}
+			onTouchStart={handlePressStart}
+			onTouchEnd={handlePressEnd}
+			disabled={!isReleased}
 			className={cn(
-				'group relative aspect-video w-full overflow-hidden select-none transition-all duration-500 ease-out',
-				'rounded-2xl border bg-black shadow-sm',
+				'group relative w-full aspect-[16/10] rounded-2xl overflow-hidden',
+				'bg-zinc-900 text-left',
+				'transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+				'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 				active
-					? 'ring-[3px] ring-primary ring-offset-2 ring-offset-background scale-[0.97] shadow-xl'
-					: 'border-white/5 hover:scale-[1.02] hover:shadow-2xl',
-				!isReleased && 'opacity-60 cursor-not-allowed',
-				isClicked && 'scale-[0.98]'
+					? 'ring-2 ring-white/30 shadow-2xl shadow-white/[0.04]'
+					: 'ring-1 ring-white/[0.06] hover:ring-white/10',
+				isPressed && 'scale-[0.97]',
+				!isReleased && 'opacity-50 cursor-not-allowed'
 			)}
 		>
-			<div className="absolute inset-0 z-0">
+			{/* Background image */}
+			<div className="absolute inset-0">
 				{stillUrl ? (
 					<img
 						src={stillUrl}
 						alt=""
+						loading="lazy"
 						className={cn(
-							'h-full w-full object-cover transition-transform duration-[2000ms] ease-out',
-							active ? 'scale-105' : 'scale-100 group-hover:scale-105'
+							'w-full h-full object-cover',
+							'transition-all duration-700 ease-out',
+							active
+								? 'scale-105 brightness-90'
+								: 'scale-100 group-hover:scale-[1.03]'
 						)}
 					/>
 				) : (
-					<div className="h-full w-full flex items-center justify-center bg-neutral-900">
-						<ImageOff className="w-8 h-8 text-neutral-700" />
-					</div>
+					<div className="w-full h-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black" />
 				)}
 			</div>
 
+			{/* Gradient overlay */}
 			<div
 				className={cn(
-					'absolute inset-0 z-10 transition-opacity duration-500 bg-gradient-to-t from-black/90 via-black/20 to-transparent',
-					active ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'
+					'absolute inset-0',
+					'bg-gradient-to-t from-black via-black/20 to-transparent',
+					'transition-opacity duration-300',
+					active ? 'opacity-90' : 'opacity-70 group-hover:opacity-85'
 				)}
 			/>
 
-			<div className="absolute top-3 left-3 z-30 flex gap-2">
-				{episode.runtime && (
-					<div className="px-2 py-0.5 rounded-md bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/90 uppercase tracking-tight">
-						{episode.runtime} min
-					</div>
-				)}
-			</div>
-
-			<div className="relative z-20 h-full w-full flex flex-col justify-end p-4 md:p-5">
-				<div className="space-y-1">
-					<div className="flex items-center gap-2">
-						<span className="text-[10px] font-bold text-primary tracking-widest uppercase">
-							E{episode.episode_number}
-						</span>
-						{rating && (
-							<div className="flex items-center gap-0.5 text-[10px] font-medium text-white/60">
-								<Star className="w-2.5 h-2.5 fill-current text-yellow-500/80" />
-								{rating}
-							</div>
-						)}
-					</div>
-
-					<h3 className="text-[14px] md:text-xl font-semibold text-white leading-tight tracking-tight">
-						{episode.name || `Episode ${episode.episode_number}`}
-					</h3>
-
-					<div
+			{/* Content */}
+			<div className="absolute inset-0 flex flex-col justify-end p-4">
+				<div
+					className={cn(
+						'inline-flex items-center gap-1.5 mb-2',
+						'transition-transform duration-300',
+						active ? 'translate-y-0' : 'translate-y-1 group-hover:translate-y-0'
+					)}
+				>
+					<span
 						className={cn(
-							'grid transition-all duration-500 ease-in-out',
-							active || 'group-hover:grid-rows-[1fr] grid-rows-[0fr]'
+							'text-[11px] font-semibold tracking-wide uppercase',
+							active ? 'text-white' : 'text-white/70'
 						)}
 					>
-						<p
-							style={{ lineHeight: '1.4' }}
-							className={cn(
-								'overflow-hidden text-[10px] md:text-sm text-white/60 leading-relaxed  line-clamp-2 font-normal',
-								active
-									? 'opacity-100 mt-1'
-									: 'opacity-0 group-hover:opacity-100 group-hover:mt-1'
-							)}
-						>
-							{episode.overview || 'No description available.'}
-						</p>
-					</div>
+						EP {episode.episode_number}
+					</span>
+					{episode.runtime && (
+						<>
+							<span className="text-white/30">·</span>
+							<span className="text-[11px] text-white/50">{episode.runtime} min</span>
+						</>
+					)}
 				</div>
 
-				{!active && isReleased && (
-					<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-						<div className="h-12 w-12 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white">
-							<Play className="w-5 h-5 fill-current ml-1" />
-						</div>
-					</div>
-				)}
-
-				{active && (
-					<div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-300">
-						<div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_12px_rgba(var(--primary),0.8)]" />
-					</div>
-				)}
-
-				{!isReleased && (
-					<div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-						<Lock className="w-5 h-5 text-white/30" />
-					</div>
-				)}
+				<h3
+					className={cn(
+						'text-base sm:text-lg font-semibold leading-tight',
+						'line-clamp-2',
+						'transition-all duration-300',
+						active
+							? 'text-white translate-y-0'
+							: 'text-white/90 translate-y-1 group-hover:translate-y-0 group-hover:text-white'
+					)}
+				>
+					{episode.name || `Episode ${episode.episode_number}`}
+				</h3>
 			</div>
-		</div>
+
+			{/* Center play button */}
+			<div
+				className={cn(
+					'absolute inset-0 flex items-center justify-center',
+					'transition-opacity duration-300',
+					active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+				)}
+			>
+				<div
+					className={cn(
+						'w-14 h-14 rounded-full flex items-center justify-center',
+						'bg-white/95 shadow-2xl shadow-black/40',
+						'transition-all duration-300 ease-out',
+						active ? 'scale-100' : 'scale-75 group-hover:scale-100',
+						isPressed && 'scale-90'
+					)}
+				>
+					<Play className="w-6 h-6 text-black fill-black ml-1" />
+				</div>
+			</div>
+
+			{/* Now playing pulse */}
+			{active && (
+				<div className="absolute top-3 right-3">
+					<div className="relative">
+						<div className="w-2.5 h-2.5 rounded-full bg-white" />
+						<div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-white animate-ping opacity-75" />
+					</div>
+				</div>
+			)}
+
+			{/* Lock overlay */}
+			{!isReleased && (
+				<div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+					<Lock className="w-5 h-5 text-white/30" />
+				</div>
+			)}
+		</button>
 	);
 }
