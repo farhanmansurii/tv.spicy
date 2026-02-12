@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -135,10 +134,10 @@ export function HeroBanner({
 						style={{ willChange: 'opacity, transform' }}
 					>
 						<div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-3 md:mb-5">
-							<Badge className="bg-white/10 text-white border-none backdrop-blur-xl px-2 py-0.5 uppercase text-[10px] font-black tracking-widest">
+							<Badge className="bg-white/10 text-white border-none backdrop-blur-xl px-2 py-0.5 text-[10px] font-semibold">
 								{type === 'tv' ? 'Series' : 'Movie'}
 							</Badge>
-							<div className="flex items-center gap-2.5 text-[12px] font-bold text-zinc-400 tabular-nums">
+							<div className="flex items-center gap-2.5 text-[12px] font-semibold text-zinc-300 tabular-nums">
 								{releaseYear && <span>{releaseYear}</span>}
 								{rating && (
 									<span className="border border-white/20 px-1.5 py-0.5 rounded-sm text-[10px] text-white leading-none">
@@ -166,13 +165,13 @@ export function HeroBanner({
 									{title}
 								</h1>
 							)}
-							<p className="mt-3 md:mt-4 text-[10px] md:text-xs font-black text-zinc-500 tracking-[0.3em] uppercase">
+							<p className="mt-3 md:mt-4 text-[11px] md:text-xs font-medium text-zinc-300/90">
 								{genres} {runtime != null && runtime > 0 && ` • ${runtime}m`}
 							</p>
 							{shouldShowHeroRunStatus && (
 								<div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md">
 									<span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-									<p className="text-[10px] font-black uppercase tracking-[0.14em] text-white/95">
+									<p className="text-[11px] font-medium text-white/95">
 										{nextEpisodeLabel
 											? `Running • Next Episode ${nextEpisodeLabel}`
 											: 'Running • Next Episode TBA'}

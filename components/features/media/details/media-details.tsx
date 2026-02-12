@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { isHighIntentNavigation } from '@/lib/utils/scroll-context';
 import { ChevronDown, ChevronUp, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { DetailHeader, DetailPill, DetailShell } from './detail-primitives';
 
 const MediaDetails = (props: any) => {
 	const { data, type, id } = props;
@@ -86,8 +87,8 @@ const MediaDetails = (props: any) => {
 				<ShowDetails id={data?.id} show={data} type={type} />
 			</div>
 			{/* Rest of content in container */}
-			<Container className="w-full mt-4 py-6 md:py-8">
-				<div className="space-y-10 md:space-y-12">
+			<Container className="w-full mt-4 px-3 sm:px-4 py-5 md:py-8">
+				<div className="space-y-8 md:space-y-10">
 					<ShowContainer
 						showData={data}
 						id={data?.id}
@@ -97,15 +98,10 @@ const MediaDetails = (props: any) => {
 					{mediaId && <CastCrewSection id={mediaId} type={type} />}
 					{mediaId && <VideoSection id={mediaId} type={type} />}
 					{synopsis && (
-						<section
-							id="show-details-info"
-							className="scroll-mt-24 rounded-[28px] border border-white/10 bg-zinc-950/55 p-5 md:p-7 backdrop-blur-xl"
-						>
-							<div className="mb-4 flex items-center justify-between">
-								<h2 className="text-[12px] font-semibold uppercase tracking-[0.24em] text-zinc-300/90">
-									Storyline
-								</h2>
-								<div className="flex items-center gap-2">
+						<DetailShell id="show-details-info" className="scroll-mt-24">
+							<DetailHeader
+								title="Storyline"
+								action={
 									<button
 										onClick={handleShare}
 										className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-zinc-200 transition-colors hover:bg-white/[0.12] hover:text-white"
@@ -114,12 +110,12 @@ const MediaDetails = (props: any) => {
 									>
 										<Share2 className="w-4 h-4" strokeWidth={1.8} />
 									</button>
-								</div>
-							</div>
+								}
+							/>
 							<div className="relative transition-all duration-300 ease-out">
 								<p
 									className={cn(
-										'text-[17px] leading-[1.55] text-zinc-200/95',
+										'text-[18px] leading-[1.62] text-zinc-200/95',
 										!isSynopsisExpanded && 'line-clamp-4'
 									)}
 								>
@@ -129,37 +125,27 @@ const MediaDetails = (props: any) => {
 									<div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-zinc-950/95 to-transparent" />
 								)}
 							</div>
-							<div className="mt-5 mb-3 flex flex-wrap gap-2 text-[11px] font-semibold text-zinc-200/90">
+							<div className="mt-5 mb-3 flex flex-wrap gap-2">
 								{data?.status && (
-									<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-										{data.status}
-									</span>
+									<DetailPill label={data.status} />
 								)}
 								{releaseLabel && (
-									<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-										{releaseLabel}
-									</span>
+									<DetailPill label={releaseLabel} />
 								)}
 								{typeof data?.number_of_seasons === 'number' && data.number_of_seasons > 0 && (
-									<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-										{data.number_of_seasons} Seasons
-									</span>
+									<DetailPill label={`${data.number_of_seasons} Seasons`} />
 								)}
 								{typeof data?.number_of_episodes === 'number' && data.number_of_episodes > 0 && (
-									<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-										{data.number_of_episodes} Episodes
-									</span>
+									<DetailPill label={`${data.number_of_episodes} Episodes`} />
 								)}
 								{languages.length > 0 && (
-									<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-										{languages.join(', ')}
-									</span>
+									<DetailPill label={languages.join(', ')} />
 								)}
 							</div>
 							{synopsis.length > 180 && (
 								<button
 									onClick={() => setIsSynopsisExpanded((prev) => !prev)}
-									className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-zinc-300 hover:text-white transition-colors"
+									className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-300 hover:text-white transition-colors"
 								>
 									{isSynopsisExpanded ? 'Show less' : 'Read more'}
 									{isSynopsisExpanded ? (
@@ -169,7 +155,7 @@ const MediaDetails = (props: any) => {
 									)}
 								</button>
 							)}
-						</section>
+						</DetailShell>
 					)}
 					<MoreDetailsContainer type={type} show={data} />
 				</div>

@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -7,7 +6,6 @@ import {
 	GalleryVerticalEnd,
 	Grid,
 	List,
-	Sparkles,
 	LayoutDashboard,
 	Loader2,
 	AlertCircle,
@@ -36,6 +34,7 @@ import type { Episode as EpisodeType, SeasonTabsProps } from '@/lib/types';
 import type { TMDBEpisode, TMDBSeasonDetails } from '@/lib/types/tmdb';
 import { EpisodeItem } from '../card/episode-item';
 import { ActiveEpisodeDetails } from './active-episode-details';
+import { DetailHeader, DetailShell } from '../details/detail-primitives';
 
 const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 	const hydrateEpisode = useCallback(
@@ -135,6 +134,7 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 	});
 
 	const episodes = seasonData?.episodes;
+	const activeViewLabel = view === 'list' ? 'List View' : view === 'grid' ? 'Grid View' : 'Carousel View';
 
 	// 3. HYDRATION & INITIALIZATION
 	useEffect(() => {
@@ -405,11 +405,13 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 
 			{/* NAVIGATION CONTROLS */}
 			<div className="space-y-4">
-				<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-4">
-					<div className="space-y-4">
-						<div className="flex items-center gap-4">
+				<DetailShell>
+					<DetailHeader
+						title={`Season ${activeSeason ?? validSeasons[0]?.season_number ?? 1}`}
+						subtitle={`${episodes?.length || 0} Episodes • ${activeViewLabel}`}
+						action={
 							<Select value={String(activeSeason)} onValueChange={handleSeasonChange}>
-								<SelectTrigger className="h-10 w-40 bg-zinc-900 border-white/10 rounded-xl text-xs font-bold">
+								<SelectTrigger className="h-10 w-36 bg-zinc-900/80 border-white/10 rounded-xl text-xs font-semibold">
 									<SelectValue placeholder="Select Season" />
 								</SelectTrigger>
 								<SelectContent className="bg-zinc-950 border-white/10">
@@ -423,54 +425,50 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 									))}
 								</SelectContent>
 							</Select>
-							<span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
-								{episodes?.length || 0} Episodes
-							</span>
-						</div>
-					</div>
-				</div>
-
-				{/* View Mode Toggle - Repositioned closer to content */}
-				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-					<SegmentedControl
-						value={view}
-						onChange={(val) => setView(val as 'grid' | 'list' | 'carousel')}
-						items={[
-							{
-								value: 'list',
-								icon: List,
-								label: 'List',
-								showLabelOnMobile: false,
-								tooltip: 'Compact list with episode details',
-							},
-							{
-								value: 'grid',
-								icon: LayoutDashboard,
-								label: 'Grid',
-								showLabelOnMobile: false,
-								tooltip: 'Visual grid with thumbnails',
-							},
-							{
-								value: 'carousel',
-								icon: GalleryVerticalEnd,
-								label: 'Carousel',
-								showLabelOnMobile: false,
-								tooltip: 'Swipeable horizontal view',
-							},
-						]}
+						}
 					/>
-					{view === 'list' && (
+
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 						<SegmentedControl
-							value={listDensity}
-							onChange={(val) => setListDensity(val as 'comfortable' | 'compact')}
+							value={view}
+							onChange={(val) => setView(val as 'grid' | 'list' | 'carousel')}
 							items={[
-								{ value: 'comfortable', label: 'Comfort' },
-								{ value: 'compact', label: 'Compact' },
+								{
+									value: 'list',
+									icon: List,
+									label: 'List',
+									showLabelOnMobile: false,
+									tooltip: 'Compact list with episode details',
+								},
+								{
+									value: 'grid',
+									icon: LayoutDashboard,
+									label: 'Grid',
+									showLabelOnMobile: false,
+									tooltip: 'Visual grid with thumbnails',
+								},
+								{
+									value: 'carousel',
+									icon: GalleryVerticalEnd,
+									label: 'Carousel',
+									showLabelOnMobile: false,
+									tooltip: 'Swipeable horizontal view',
+								},
 							]}
-							className="hidden sm:inline-flex"
 						/>
-					)}
-				</div>
+						{view === 'list' && (
+							<SegmentedControl
+								value={listDensity}
+								onChange={(val) => setListDensity(val as 'comfortable' | 'compact')}
+								items={[
+									{ value: 'comfortable', label: 'Comfort' },
+									{ value: 'compact', label: 'Compact' },
+								]}
+								className="hidden sm:inline-flex"
+							/>
+						)}
+					</div>
+				</DetailShell>
 
 				{/* CONTENT RENDERER */}
 				<div

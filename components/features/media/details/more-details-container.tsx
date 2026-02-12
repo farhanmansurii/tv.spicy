@@ -5,9 +5,10 @@ import { Show } from '@/lib/types';
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shapes, Star } from 'lucide-react';
+import { Compass, Shapes } from 'lucide-react';
 import MoreDetailsLoader from '@/components/shared/loaders/more-details-loader';
 import SegmentedControl from '@/components/shared/segmented-control';
+import { DetailHeader, DetailShell } from './detail-primitives';
 
 const RelatedShowsContainer = dynamic(() => import('./related-shows-container'), {
 	ssr: false,
@@ -26,26 +27,24 @@ export default function MoreDetailsContainer({ show, type }: { show: Show; type:
 	const activeLabel = selected === 'related' ? 'Similar' : 'For You';
 
 	return (
-		<section className="w-full rounded-[28px] border border-white/10 bg-zinc-950/55 p-5 md:p-7 backdrop-blur-xl">
-			<div className="mb-4 flex items-start justify-between gap-4">
-				<div>
-					<h2 className="text-sm font-semibold text-zinc-200">
-						More to Watch
-					</h2>
-					<p className="mt-1 text-xs text-zinc-400">{activeLabel}</p>
-				</div>
+		<DetailShell>
+			<DetailHeader
+				title="More to Watch"
+				subtitle={activeLabel}
+				action={
 				<SegmentedControl
 					value={selected}
 					onChange={(val) => setSelected(val as TabType)}
 					items={TABS.map((tab) => ({
 						value: tab.value,
 						label: tab.value === 'related' ? 'Similar' : 'For You',
-						icon: tab.value === 'related' ? Shapes : Star,
+						icon: tab.value === 'related' ? Shapes : Compass,
 						showLabelOnMobile: false,
 						tooltip: tab.label,
 					}))}
 				/>
-			</div>
+				}
+			/>
 
 			<div className="w-full relative mt-2">
 				<AnimatePresence mode="wait">
@@ -68,6 +67,6 @@ export default function MoreDetailsContainer({ show, type }: { show: Show; type:
 					</motion.div>
 				</AnimatePresence>
 			</div>
-		</section>
+		</DetailShell>
 	);
 }

@@ -63,8 +63,9 @@ export default function SegmentedControl({
 						onClick={() => onChange(item.value)}
 						title={item.tooltip}
 						aria-pressed={isActive}
+						aria-label={item.label}
 						className={cn(
-							'rounded-full px-3.5 py-2 text-xs font-semibold',
+							'rounded-full px-3 py-1.5 text-xs font-medium',
 							'focus-visible:ring-white/50 focus-visible:ring-offset-black',
 							isActive
 								? 'bg-white text-black hover:bg-white hover:text-black'

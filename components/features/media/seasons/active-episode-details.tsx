@@ -6,6 +6,8 @@ import { fetchEpisodeDetails } from '@/lib/api';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CalendarDays, Clock3, Star } from 'lucide-react';
+import { DetailHeader, DetailPill, DetailShell } from '../details/detail-primitives';
 
 interface ActiveEpisodeDetailsProps {
 	showId: string | number;
@@ -55,52 +57,37 @@ export const ActiveEpisodeDetails = ({
 			: 'In Progress';
 
 	return (
-		<section
+		<DetailShell
 			className={cn(
-				'w-full rounded-[28px] border p-5 md:p-7 backdrop-blur-xl transition-all duration-300 ease-out',
+				'transition-all duration-300 ease-out',
 				isPlaying
 					? 'border-white/20 bg-zinc-950/65 shadow-[0_14px_32px_rgba(0,0,0,0.28)]'
 					: 'border-white/10 bg-zinc-950/55 shadow-[0_10px_24px_rgba(0,0,0,0.22)]'
 			)}
 		>
-			<div className="flex items-center justify-between gap-3">
-				<h2 className="text-[12px] font-semibold uppercase tracking-[0.24em] text-zinc-300/90">
-					Active Episode
-				</h2>
-				<span className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
-					S{seasonNumber}E{episodeNumber}
-				</span>
-			</div>
+			<DetailHeader
+				title={title}
+				subtitle={`${isPlaying ? 'Now playing' : 'Upcoming'} • S${seasonNumber}E${episodeNumber}`}
+			/>
 
-			<h3 className="mt-3 text-[18px] md:text-xl font-semibold tracking-tight text-white leading-tight line-clamp-2">
-				{title}
-			</h3>
-
-			<div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-zinc-200/90">
-				<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-					{isPlaying ? 'Now Playing' : 'Upcoming'}
-				</span>
-				<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-					{normalizedStatus}
-				</span>
+			<div className="mt-4 flex flex-wrap items-center gap-2">
+				<DetailPill label={isPlaying ? 'Playing' : 'Upcoming'} />
+				<DetailPill label={normalizedStatus} />
 				{typeof episode.vote_average === 'number' && episode.vote_average > 0 && (
-					<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-						★ {episode.vote_average.toFixed(1)}
-					</span>
+					<DetailPill label={episode.vote_average.toFixed(1)} icon={Star} />
 				)}
 				{releaseLabel && (
-					<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-						{isReleased ? 'Aired' : 'Airs'} {releaseLabel}
-					</span>
+					<DetailPill
+						label={`${isReleased ? 'Aired' : 'Airs'} ${releaseLabel}`}
+						icon={CalendarDays}
+					/>
 				)}
 				{typeof episode.runtime === 'number' && episode.runtime > 0 && (
-					<span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
-						{episode.runtime} min
-					</span>
+					<DetailPill label={`${episode.runtime} min`} icon={Clock3} />
 				)}
 			</div>
 
 			<p className="mt-4 text-[16px] leading-[1.55] text-zinc-200/90 line-clamp-3">{overview}</p>
-		</section>
+		</DetailShell>
 	);
 };

@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useState } from 'react';
@@ -8,6 +7,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { ChevronDown, ChevronUp, User } from 'lucide-react';
 import { MediaType, fetchCredits } from '@/lib/api';
 import CastCrewLoader from '@/components/shared/loaders/cast-crew-loader';
+import { DetailHeader, DetailShell } from './detail-primitives';
 
 export default function CastCrewSection({ id, type }: { id: string; type: string }) {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -22,28 +22,29 @@ export default function CastCrewSection({ id, type }: { id: string; type: string
     const displayedCast = isExpanded ? data.cast : data.cast.slice(0, 8);
 
     return (
-        <section className="w-full rounded-[28px] border border-white/10 bg-zinc-950/55 p-5 md:p-7 backdrop-blur-xl">
+        <DetailShell>
             <div>
-                <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-[12px] font-semibold uppercase tracking-[0.24em] text-zinc-300/90">
-                        Cast & Crew
-                    </h2>
-                    <button
-                        onClick={() => setIsExpanded(!isExpanded)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[10px] font-semibold tracking-wide text-zinc-200 transition-colors hover:bg-white/[0.12]"
-                        aria-expanded={isExpanded}
-                        aria-label={isExpanded ? 'Show less cast members' : `View all ${data.cast.length} cast members`}
-                    >
-                        <span suppressHydrationWarning>
-                            {isExpanded ? 'Show less' : `All ${data.cast.length}`}
-                        </span>
-                        {isExpanded ? (
-                            <ChevronUp className="w-3.5 h-3.5" />
-                        ) : (
-                            <ChevronDown className="w-3.5 h-3.5" />
-                        )}
-                    </button>
-                </div>
+                <DetailHeader
+                    title="Cast & Crew"
+                    subtitle={isExpanded ? 'Full cast list' : 'Top billed cast'}
+                    action={
+                        <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-medium text-zinc-200 transition-colors hover:bg-white/[0.12]"
+                            aria-expanded={isExpanded}
+                            aria-label={isExpanded ? 'Show less cast members' : `View all ${data.cast.length} cast members`}
+                        >
+                            <span suppressHydrationWarning>
+                                {isExpanded ? 'Show less' : `All ${data.cast.length}`}
+                            </span>
+                            {isExpanded ? (
+                                <ChevronUp className="w-3.5 h-3.5" />
+                            ) : (
+                                <ChevronDown className="w-3.5 h-3.5" />
+                            )}
+                        </button>
+                    }
+                />
 
                 <div className="mt-2">
                     <Carousel opts={{ align: 'start', dragFree: true }} className="w-full group/row relative">
@@ -79,6 +80,6 @@ export default function CastCrewSection({ id, type }: { id: string; type: string
                     </Carousel>
                 </div>
             </div>
-	        </section>
+	        </DetailShell>
     );
 }
