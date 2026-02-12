@@ -74,7 +74,7 @@ const RecentlyWatchedComponent = () => {
 					variant="small"
 					as="h2"
 					spacing="none"
-					className="text-lg md:text-xl font-bold tracking-tight text-white/90"
+					className="text-lg md:text-xl font-semibold text-white/90"
 				/>
 				<div
 					className="flex items-center transition-all duration-300 ease-out"

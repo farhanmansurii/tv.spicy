@@ -87,7 +87,9 @@ export const ActiveEpisodeDetails = ({
 				)}
 			</div>
 
-			<p className="mt-4 text-[16px] leading-[1.55] text-zinc-200/90 line-clamp-3">{overview}</p>
+			<p className="mt-4 text-sm md:text-base leading-[1.55] text-zinc-200/90 line-clamp-3">
+				{overview}
+			</p>
 		</DetailShell>
 	);
 };

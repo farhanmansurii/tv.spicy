@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import {
@@ -41,7 +40,7 @@ export default function BentoGrid({ title, shows, type, noPadding }: Props) {
 					{/* Title with Apple-style typography */}
 					<CommonTitle
 						text={title}
-						className="text-xl md:text-2xl font-semibold tracking-tight text-foreground/90"
+						className="text-xl md:text-2xl font-semibold text-foreground/90"
 					/>
 
 					{/* Navigation Controls - Minimalist Circular */}

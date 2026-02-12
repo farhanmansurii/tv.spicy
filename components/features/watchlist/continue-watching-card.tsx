@@ -62,24 +62,24 @@ function ContinueWatchingCardComponent({ episode, index }: ContinueWatchingCardP
                             {/* Episode Info Overlay */}
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4">
                                 <div className="flex items-center gap-2 text-white">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                                    <span className="text-xs font-medium text-primary">
                                         S{episode.season_number} E{episode.episode_number}
                                     </span>
                                 </div>
                             </div>
                         </BlurFade>
                     ) : (
-                        <div className="flex items-center justify-center w-full h-full text-[10px] font-bold text-zinc-800 uppercase tracking-widest">
+                        <div className="flex items-center justify-center w-full h-full text-xs font-medium text-zinc-700">
                             No Image
                         </div>
                     )}
                 </div>
 
                 <div className="flex flex-col gap-0.5 px-1">
-                    <h3 className="text-[14px] font-semibold text-zinc-300 truncate group-hover:text-white transition-colors duration-300">
+                    <h3 className="text-sm md:text-base font-semibold text-zinc-300 truncate group-hover:text-white transition-colors duration-300">
                         {episode.show_name || episode.name}
                     </h3>
-                    <p className="text-[12px] text-zinc-500 font-medium line-clamp-1">
+                    <p className="text-xs md:text-sm text-zinc-500 font-medium line-clamp-1">
                         {episode.name || `Episode ${episode.episode_number}`}
                     </p>
                 </div>

@@ -79,7 +79,7 @@ export default function SegmentedControl({
 							{item.label}
 						</span>
 						{typeof item.count === 'number' && (
-							<span className="text-[9px] font-bold text-current/60">
+							<span className="text-xs font-medium text-current/60">
 								{item.count}
 							</span>
 						)}

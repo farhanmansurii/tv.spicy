@@ -132,7 +132,7 @@ export function EpisodeItem({
 					<div className="flex items-center gap-2 mb-1.5">
 						<span
 							className={cn(
-								'text-xs font-semibold tracking-wider uppercase',
+								'text-xs md:text-sm font-medium',
 								'transition-colors duration-200',
 								active ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-400'
 							)}
@@ -154,7 +154,7 @@ export function EpisodeItem({
 					{/* Episode title */}
 					<h3
 						className={cn(
-							'text-[15px] sm:text-base font-medium leading-snug',
+							'text-sm sm:text-base font-medium leading-snug',
 							'truncate',
 							'transition-colors duration-200',
 							active ? 'text-white' : 'text-zinc-200 group-hover:text-white'
@@ -260,18 +260,18 @@ export function EpisodeItem({
 						active ? 'translate-y-0' : 'translate-y-1 group-hover:translate-y-0'
 					)}
 				>
-					<span
-						className={cn(
-							'text-[11px] font-semibold tracking-wide uppercase',
-							active ? 'text-white' : 'text-white/70'
-						)}
-					>
-						EP {episode.episode_number}
-					</span>
+						<span
+							className={cn(
+								'text-xs font-medium',
+								active ? 'text-white' : 'text-white/70'
+							)}
+						>
+							Episode {episode.episode_number}
+						</span>
 					{episode.runtime && (
 						<>
 							<span className="text-white/30">·</span>
-							<span className="text-[11px] text-white/50">{episode.runtime} min</span>
+							<span className="text-xs text-white/50">{episode.runtime} min</span>
 						</>
 					)}
 				</div>
@@ -289,7 +289,7 @@ export function EpisodeItem({
 					{episode.name || `Episode ${episode.episode_number}`}
 				</h3>
 
-				<div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-zinc-300/90">
+				<div className="flex flex-wrap items-center gap-2 text-xs font-medium text-zinc-300/90">
 					{typeof episode.vote_average === 'number' && episode.vote_average > 0 && (
 						<span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5">
 							<Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
@@ -314,7 +314,7 @@ export function EpisodeItem({
 				</div>
 
 				{episode.overview && (
-					<p className="mt-2 text-[11px] leading-relaxed text-zinc-200/80 line-clamp-2">
+					<p className="mt-2 text-xs md:text-sm leading-relaxed text-zinc-200/80 line-clamp-2">
 						{episode.overview}
 					</p>
 				)}

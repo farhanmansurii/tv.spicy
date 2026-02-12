@@ -107,7 +107,7 @@ function MediaRowComponent({
               <div className="relative aspect-video md:h-full w-full flex items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] transition-colors hover:bg-white">
                   <div className="flex flex-col items-center gap-2">
                       <Plus className="w-5 h-5 text-zinc-500 group-hover/all:text-black transition-colors" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600 group-hover/all:text-black transition-colors">More</span>
+                      <span className="text-xs font-medium text-zinc-600 group-hover/all:text-black transition-colors">More</span>
                   </div>
               </div>
             </Link>
@@ -139,7 +139,7 @@ function MediaRowComponent({
             variant="small"
             as="h2"
             spacing="none"
-            className="text-lg md:text-xl font-bold tracking-tight text-white/90"
+            className="text-lg md:text-xl font-semibold text-white/90"
           />
           {headerAction && (
             <div className="flex items-center transition-all duration-300 ease-out" style={{ willChange: 'opacity, transform' }}>

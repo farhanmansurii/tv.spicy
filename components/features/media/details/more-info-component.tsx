@@ -38,7 +38,7 @@ const MoreInfoComponent: React.FC<{ show: Show; type: string }> = ({ show, type 
 			{show?.origin_country?.length! > 0 && (
 				<>
 					<div className="font-bold">Origin:</div>
-					<div className="font-normal uppercase">{show?.origin_country?.join(', ')}</div>
+					<div className="font-normal">{show?.origin_country?.join(', ')}</div>
 					<Separator /> <Separator />{' '}
 				</>
 			)}

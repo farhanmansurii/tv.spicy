@@ -15,7 +15,7 @@ export const SeasonInfo = ({ seasonData }: SeasonInfoProps) => {
         <div className="w-full px-4 md:px-10 md:py-6 flex flex-col justify-center text-left">
           <div className="flex items-start justify-start gap-2 mb-2">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Season Overview</span>
+            <span className="text-xs font-medium text-zinc-400">Season Overview</span>
           </div>
           <CommonTitle
             text={seasonData.name}
@@ -23,12 +23,12 @@ export const SeasonInfo = ({ seasonData }: SeasonInfoProps) => {
             as="h2"
             className="text-white mb-3"
           />
-          <div className="flex items-center justify-center md:justify-start gap-4 mb-4 text-[11px] font-black text-zinc-500 uppercase tracking-widest">
+          <div className="flex items-center justify-center md:justify-start gap-4 mb-4 text-xs md:text-sm font-medium text-zinc-400">
             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">{new Date(seasonData.air_date).getFullYear()}</span>
             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">{seasonData.episodes?.length} Episodes</span>
           </div>
 
-          <p className="max-w-5xl text-zinc-400 text-sm md:text-base leading-relaxed line-clamp-3 italic opacity-70">{seasonData.overview}</p>
+          <p className="max-w-5xl text-zinc-400 text-sm md:text-base leading-relaxed line-clamp-3 opacity-80">{seasonData.overview}</p>
         </div>
       </div>
     </div>

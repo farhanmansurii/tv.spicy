@@ -71,7 +71,7 @@ export default function VideoSection({ id, type }: { id: string; type: string })
 									</div>
 								</div>
 								<div className="absolute bottom-4 left-4 right-4 text-left">
-									<p className="text-sm font-bold text-white line-clamp-1">
+									<p className="text-sm md:text-base font-semibold text-white line-clamp-1">
 										{video.name}
 									</p>
 								</div>

@@ -150,7 +150,7 @@ export default function Episode(props: EpisodeProps) {
 					<Select value={selectedProvider} onValueChange={setProvider}>
 						<SelectTrigger className="h-9 md:h-11 w-fit bg-zinc-900/80 border-white/10 rounded-lg  hover:bg-zinc-800/80 transition-all gap-3 shadow-lg backdrop-blur-sm">
 							<Settings className="w-4 h-4 text-primary" />
-							<SelectValue className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+							<SelectValue className="text-xs md:text-sm font-medium text-zinc-300">
 								{currentSource.label}
 							</SelectValue>
 						</SelectTrigger>
@@ -175,7 +175,7 @@ export default function Episode(props: EpisodeProps) {
 							onClick={getNextEp}
 							className="h-9 md:h-11 rounded-xl px-3 md:px-6 transition-all gap-2 group/next bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
 						>
-							<span className="text-[10px] md:text-xs font-bold uppercase tracking-wider hidden sm:inline">
+							<span className="text-xs md:text-sm font-medium hidden sm:inline">
 								Next Episode
 							</span>
 							<ChevronRight className="w-4 h-4 transition-transform group-hover/next:translate-x-1" />

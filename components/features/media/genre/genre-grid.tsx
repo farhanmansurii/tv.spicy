@@ -13,7 +13,7 @@ interface ColorMapEntry {
 }
 const Genre = ({ name }: { name: string }) => {
 	return (
-		<div className="w-full gap-2  flex-col h-full uppercase p-2 text-3xl truncate rounded-lg flex items-center justify-center">
+		<div className="w-full gap-2 flex-col h-full p-2 text-3xl truncate rounded-lg flex items-center justify-center">
 			{name?.split(' ')[0]}
 			<ArrowRight className="w-12 h-12 rounded" />
 		</div>

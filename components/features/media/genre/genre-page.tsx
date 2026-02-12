@@ -23,7 +23,7 @@ async function GenreList({ type }: { type: 'movie' | 'tv' }) {
 			<Container className="relative pt-12 md:pt-16 pb-8">
                     <div className="space-y-4">
                         <div>
-                            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-foreground">
+                            <h1 className="text-4xl md:text-6xl font-bold text-foreground">
                                 ${type.charAt(0).toUpperCase() + type.slice(1)} Genres
                             </h1>
                             <p className="text-muted-foreground text-sm md:text-base mt-1.5">

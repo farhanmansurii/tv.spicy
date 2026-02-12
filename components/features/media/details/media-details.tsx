@@ -115,7 +115,7 @@ const MediaDetails = (props: any) => {
 							<div className="relative transition-all duration-300 ease-out">
 								<p
 									className={cn(
-										'text-[18px] leading-[1.62] text-zinc-200/95',
+										'text-base md:text-lg leading-[1.62] text-zinc-200/95',
 										!isSynopsisExpanded && 'line-clamp-4'
 									)}
 								>
@@ -145,7 +145,7 @@ const MediaDetails = (props: any) => {
 							{synopsis.length > 180 && (
 								<button
 									onClick={() => setIsSynopsisExpanded((prev) => !prev)}
-									className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-300 hover:text-white transition-colors"
+									className="inline-flex items-center gap-1.5 text-xs md:text-sm font-medium text-zinc-300 hover:text-white transition-colors"
 								>
 									{isSynopsisExpanded ? 'Show less' : 'Read more'}
 									{isSynopsisExpanded ? (

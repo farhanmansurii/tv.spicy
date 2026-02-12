@@ -134,13 +134,13 @@ export function HeroBanner({
 						style={{ willChange: 'opacity, transform' }}
 					>
 						<div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-3 md:mb-5">
-							<Badge className="bg-white/10 text-white border-none backdrop-blur-xl px-2 py-0.5 text-[10px] font-semibold">
+							<Badge className="bg-white/10 text-white border-none backdrop-blur-xl px-2 py-0.5 text-xs font-semibold">
 								{type === 'tv' ? 'Series' : 'Movie'}
 							</Badge>
-							<div className="flex items-center gap-2.5 text-[12px] font-semibold text-zinc-300 tabular-nums">
+							<div className="flex items-center gap-2.5 text-xs md:text-sm font-medium text-zinc-300 tabular-nums">
 								{releaseYear && <span>{releaseYear}</span>}
 								{rating && (
-									<span className="border border-white/20 px-1.5 py-0.5 rounded-sm text-[10px] text-white leading-none">
+									<span className="border border-white/20 px-1.5 py-0.5 rounded-sm text-xs text-white leading-none">
 										{rating}
 									</span>
 								)}
@@ -161,17 +161,17 @@ export function HeroBanner({
 									className="h-auto max-h-[70px] md:max-h-[160px] max-w-[70%] md:max-w-md object-contain object-center md:object-left drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
 								/>
 							) : (
-								<h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] text-center md:text-left">
+								<h1 className="text-4xl md:text-7xl font-bold text-white leading-[0.9] text-center md:text-left">
 									{title}
 								</h1>
 							)}
-							<p className="mt-3 md:mt-4 text-[11px] md:text-xs font-medium text-zinc-300/90">
+							<p className="mt-3 md:mt-4 text-xs md:text-sm font-medium text-zinc-300/90">
 								{genres} {runtime != null && runtime > 0 && ` • ${runtime}m`}
 							</p>
 							{shouldShowHeroRunStatus && (
 								<div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md">
 									<span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-									<p className="text-[11px] font-medium text-white/95">
+									<p className="text-xs md:text-sm font-medium text-white/95">
 										{nextEpisodeLabel
 											? `Running • Next Episode ${nextEpisodeLabel}`
 											: 'Running • Next Episode TBA'}

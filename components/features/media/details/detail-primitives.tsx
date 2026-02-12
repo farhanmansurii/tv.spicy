@@ -38,8 +38,8 @@ export function DetailHeader({ title, subtitle, action, className }: DetailHeade
 	return (
 		<div className={cn('mb-3.5 flex items-start justify-between gap-3', className)}>
 			<div>
-				<p className="text-[15px] md:text-base font-semibold text-zinc-100">{title}</p>
-				{subtitle && <p className="mt-1 text-[12px] text-zinc-400">{subtitle}</p>}
+				<p className="text-base md:text-lg font-semibold text-zinc-100">{title}</p>
+				{subtitle && <p className="mt-1 text-xs md:text-sm text-zinc-400">{subtitle}</p>}
 			</div>
 			{action && <div className="shrink-0">{action}</div>}
 		</div>
@@ -56,7 +56,7 @@ export function DetailPill({ label, icon: Icon, className }: DetailPillProps) {
 	return (
 		<span
 			className={cn(
-				'inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-[11px] font-medium text-zinc-200/95',
+				'inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-xs font-medium text-zinc-200/95',
 				className
 			)}
 		>

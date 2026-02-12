@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import React, { memo } from 'react';
 import Link from 'next/link';
 import { Show } from '@/lib/types';
@@ -61,17 +60,17 @@ function MediaCardComponent({ index, show, isVertical = false, type, onClick }: 
 							</div>
 						</BlurFade>
 					) : (
-						<div className="flex items-center justify-center w-full h-full text-[10px] font-bold text-zinc-800 uppercase tracking-widest">
+						<div className="flex items-center justify-center w-full h-full text-xs font-medium text-zinc-700">
 							No Image
 						</div>
 					)}
 				</div>
 
 				<div className="flex flex-col gap-0.5 px-1">
-					<h3 className="text-[14px] font-semibold text-zinc-300 line-clamp-2 leading-snug supports-[hover:hover]:group-hover:text-white transition-colors duration-300">
+					<h3 className="text-sm md:text-base font-semibold text-zinc-300 line-clamp-2 leading-snug supports-[hover:hover]:group-hover:text-white transition-colors duration-300">
 						{show.title || show.name}
 					</h3>
-					<div className="flex items-center gap-2 text-[12px] text-zinc-500 font-medium tabular-nums">
+					<div className="flex items-center gap-2 text-xs md:text-sm text-zinc-500 font-medium tabular-nums">
 						<span>{(show.first_air_date || show.release_date)?.split('-')[0]}</span>
 						{show.vote_average > 0 && (
 							<>

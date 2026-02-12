@@ -30,7 +30,7 @@ export default function CastCrewSection({ id, type }: { id: string; type: string
                     action={
                         <button
                             onClick={() => setIsExpanded(!isExpanded)}
-                            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-medium text-zinc-200 transition-colors hover:bg-white/[0.12]"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-white/[0.12]"
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? 'Show less cast members' : `View all ${data.cast.length} cast members`}
                         >
@@ -68,7 +68,7 @@ export default function CastCrewSection({ id, type }: { id: string; type: string
                                         <h3 className="text-xs md:text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors line-clamp-1">
                                             {actor.name}
                                         </h3>
-                                        <p className="text-[9px] md:text-[10px] font-medium text-zinc-500 tracking-wide line-clamp-1">
+                                        <p className="text-xs font-medium text-zinc-500 line-clamp-1">
                                             {actor.character}
                                         </p>
                                     </div>

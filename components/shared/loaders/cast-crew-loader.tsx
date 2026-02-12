@@ -17,7 +17,7 @@ export default function CastCrewLoader() {
 			<div>
 				<CommonTitle text="Cast & Crew" variant="section" spacing="none" />
 				<CommonTitle text="Meet the Cast" variant="small" spacing="medium">
-					<span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest tabular-nums">
+					<span className="text-xs font-medium text-zinc-500 tabular-nums">
 						Loading...
 					</span>
 				</CommonTitle>

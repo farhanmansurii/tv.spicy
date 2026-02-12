@@ -252,7 +252,7 @@ export default function ContinueWatchingButton({
 				className={cn(
 					'h-11 md:h-12 px-5 md:px-6',
 					'inline-flex items-center justify-center gap-2',
-					'font-semibold text-[13px] md:text-sm',
+					'font-semibold text-sm',
 					'transition-all duration-200 ease-out',
 					'active:scale-[0.98]',
 					'focus-visible:ring-offset-black',

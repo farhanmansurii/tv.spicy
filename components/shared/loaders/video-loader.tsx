@@ -13,13 +13,13 @@ export default function VideoLoader() {
 						<TabsList className="bg-white/[0.03] border border-white/5 rounded-full p-1 h-auto backdrop-blur-xl">
 							<TabsTrigger
 								value="trailers"
-								className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black"
+								className="px-4 py-1.5 rounded-full text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-black"
 							>
 								Trailers (0)
 							</TabsTrigger>
 							<TabsTrigger
 								value="teasers"
-								className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-black"
+								className="px-4 py-1.5 rounded-full text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-black"
 							>
 								Teasers (0)
 							</TabsTrigger>
