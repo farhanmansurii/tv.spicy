@@ -40,7 +40,6 @@ export default function BentoGrid({ title, shows, type, noPadding }: Props) {
 				<div className="flex items-end justify-between px-4 mb-4 md:px-0 md:mb-6">
 					{/* Title with Apple-style typography */}
 					<CommonTitle
-						shouldWrap={false}
 						text={title}
 						className="text-xl md:text-2xl font-semibold tracking-tight text-foreground/90"
 					/>

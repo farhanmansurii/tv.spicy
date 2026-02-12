@@ -8,7 +8,7 @@ import { useFavoritesStore } from '@/store/favoritesStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Play, Pause, Plus, Check, Info, Share2, Heart, Loader2 } from 'lucide-react';
+import { Play, Pause, Plus, Check, Info, Heart, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GlowingButton } from '@/components/ui/glowing-button';
 
@@ -38,7 +38,6 @@ export default function ContinueWatchingButton({
 	} = useWatchListStore();
 	const { favoriteMovies, favoriteTV, addFavorite, removeFavorite } = useFavoritesStore();
 
-	const [isSharing, setIsSharing] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
 	// Load episodes on mount
@@ -137,42 +136,6 @@ export default function ContinueWatchingButton({
 			}
 		},
 		[id, isLiked, show, type, addFavorite, removeFavorite]
-	);
-
-	// Handle share
-	const handleShare = useCallback(
-		async (e: React.MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-
-			if (isSharing) return;
-			setIsSharing(true);
-
-			const title = show?.name || show?.title || 'Media';
-			const url = `${window.location.origin}/${type}/${id}`;
-
-			try {
-				if (navigator.share) {
-					await navigator.share({ title, url });
-					toast.success('Shared successfully!');
-				} else {
-					await navigator.clipboard.writeText(url);
-					toast.success('Link copied!');
-				}
-			} catch (error: any) {
-				if (error.name !== 'AbortError') {
-					try {
-						await navigator.clipboard.writeText(url);
-						toast.success('Link copied!');
-					} catch {
-						toast.error('Failed to share');
-					}
-				}
-			} finally {
-				setIsSharing(false);
-			}
-		},
-		[id, type, show, isSharing]
 	);
 
 	// Handle scroll to player (when already playing)
@@ -351,25 +314,6 @@ export default function ContinueWatchingButton({
 						/>
 					</GlowingButton>
 
-					{/* Share Button */}
-					<GlowingButton
-						iconOnly
-						onClick={handleShare}
-						disabled={isSharing}
-						glow={false}
-						className={cn(
-							iconButtonBase,
-							'disabled:opacity-50 disabled:pointer-events-none'
-						)}
-						aria-label="Share"
-						title="Share"
-					>
-						{isSharing ? (
-							<Loader2 className="w-5 h-5 animate-spin" />
-						) : (
-							<Share2 className="w-5 h-5" strokeWidth={2} />
-						)}
-					</GlowingButton>
 				</>
 			)}
 

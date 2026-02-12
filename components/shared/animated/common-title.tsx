@@ -9,11 +9,11 @@ const titleVariants = cva(
     {
         variants: {
             variant: {
-                default: 'text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight',
-                large: 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter',
+                default: 'text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-zinc-100',
+                large: 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-100',
                 hero: 'text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase italic leading-[0.9]',
-                section: 'text-[9px] sm:text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-primary/80',
-                small: 'text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white',
+                section: 'text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-zinc-300/90',
+                small: 'text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-zinc-100',
             },
             spacing: {
                 none: 'mb-0',

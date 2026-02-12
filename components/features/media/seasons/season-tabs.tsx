@@ -35,6 +35,7 @@ import SegmentedControl from '@/components/shared/segmented-control';
 import type { Episode as EpisodeType, SeasonTabsProps } from '@/lib/types';
 import type { TMDBEpisode, TMDBSeasonDetails } from '@/lib/types/tmdb';
 import { EpisodeItem } from '../card/episode-item';
+import { ActiveEpisodeDetails } from './active-episode-details';
 
 const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 	const hydrateEpisode = useCallback(
@@ -62,7 +63,9 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 	const { activeEP, setActiveEP, setIsPlayerSticky } = useEpisodeStore();
 	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
 	const [listDensity, setListDensity] = useState<'comfortable' | 'compact'>('comfortable');
-	const hasActiveEpisode = !!activeEP;
+	const activeEpisodeForShow =
+		activeEP && String(activeEP.tv_id) === String(showId) ? activeEP : null;
+	const hasActiveEpisode = !!activeEpisodeForShow;
 	const { addRecentlyWatched } = useTVShowStore();
 	const playerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
@@ -171,8 +174,7 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 		activeEP,
 		setActiveEP,
 		addRecentlyWatched,
-		showId,
-		showData,
+		hydrateEpisode,
 	]);
 
 	// 4. ACTION HANDLERS (Functional Fixes)
@@ -349,6 +351,7 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 		pathname,
 		searchParams,
 		onEpisodeClick,
+		hydrateEpisode,
 	]);
 
 	if (isError)
@@ -360,7 +363,7 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 		);
 
 	return (
-		<div className="w-full flex flex-col gap-10 md:gap-16">
+		<div className="w-full flex flex-col gap-6 md:gap-12">
 			{/* PLAYER COMPONENT */}
 			{hasActiveEpisode && (
 				<>
@@ -389,6 +392,15 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 						</div>
 					</div>
 				</>
+			)}
+
+			{activeEpisodeForShow && (
+				<ActiveEpisodeDetails
+					showId={showId}
+					seasonNumber={activeEpisodeForShow.season_number}
+					episodeNumber={activeEpisodeForShow.episode_number}
+					showStatus={showData?.status ?? null}
+				/>
 			)}
 
 			{/* NAVIGATION CONTROLS */}

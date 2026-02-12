@@ -1,6 +1,5 @@
 import MediaDetails from '@/components/features/media/details/media-details';
-import Footer from '@/components/layout/footer/footer';
-import { fetchDetails, fetchDetailsTMDB } from '@/lib/api';
+import { fetchDetailsTMDB } from '@/lib/api';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -12,17 +11,23 @@ export const generateMetadata = async (props: any): Promise<Metadata> => {
 
 	try {
 		const data = await fetchDetailsTMDB(movie, 'movie');
+		if (!data) {
+			return {
+				title: 'Movie',
+				description: 'Movie details',
+			};
+		}
 		const imagePath = data?.backdrop_path || data?.poster_path;
 		const imageUrl = imagePath ? tmdbImage(imagePath, 'w1280') : '/icon-512x512.png';
 		return {
 			title: `${data?.name || data?.title}`,
-			description: data.overview,
+			description: data.overview || undefined,
 			alternates: {
 				canonical: `/movie/${movie}`,
 			},
 			openGraph: {
 				title: `${data?.name || data?.title}`,
-				description: data.overview,
+				description: data.overview || undefined,
 				type: 'video.movie',
 				images: [
 					{
@@ -34,7 +39,7 @@ export const generateMetadata = async (props: any): Promise<Metadata> => {
 			twitter: {
 				card: 'summary_large_image',
 				title: `${data?.name || data?.title}`,
-				description: data.overview,
+				description: data.overview || undefined,
 				images: [imageUrl],
 			},
 		};

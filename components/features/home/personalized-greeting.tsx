@@ -10,21 +10,14 @@ interface PersonalizedGreetingProps {
 }
 
 function PersonalizedGreetingComponent({ className }: PersonalizedGreetingProps) {
-	const { message, isAuthenticated, observerRef } = usePersonalizedGreeting();
+	const { message, isAuthenticated } = usePersonalizedGreeting();
 
 	if (!isAuthenticated || !message) {
 		return null;
 	}
 
 	return (
-		<div
-			ref={(node) => {
-				if (node && observerRef.current) {
-					observerRef.current.observe(node);
-				}
-			}}
-			className={cn('relative w-full', className)}
-		>
+		<div className={cn('relative w-full', className)}>
 			<AnimatePresence mode="wait">
 				<motion.h1
 					key={message}

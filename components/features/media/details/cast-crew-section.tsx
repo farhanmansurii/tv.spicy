@@ -7,9 +7,7 @@ import { tmdbImage } from '@/lib/tmdb-image';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ChevronDown, ChevronUp, User } from 'lucide-react';
 import { MediaType, fetchCredits } from '@/lib/api';
-import CommonTitle from '@/components/shared/animated/common-title';
 import CastCrewLoader from '@/components/shared/loaders/cast-crew-loader';
-import { cn } from '@/lib/utils';
 
 export default function CastCrewSection({ id, type }: { id: string; type: string }) {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -24,33 +22,35 @@ export default function CastCrewSection({ id, type }: { id: string; type: string
     const displayedCast = isExpanded ? data.cast : data.cast.slice(0, 8);
 
     return (
-        <div className="w-full py-8 md:py-12">
+        <section className="w-full rounded-[28px] border border-white/10 bg-zinc-950/55 p-5 md:p-7 backdrop-blur-xl">
             <div>
-                <CommonTitle text="Cast & Crew" variant="section" spacing="none" />
-                <CommonTitle text="Meet the Cast" variant="small" spacing="medium">
+                <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-[12px] font-semibold uppercase tracking-[0.24em] text-zinc-300/90">
+                        Cast & Crew
+                    </h2>
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[10px] font-semibold tracking-wide text-zinc-200 transition-colors hover:bg-white/[0.12]"
                         aria-expanded={isExpanded}
                         aria-label={isExpanded ? 'Show less cast members' : `View all ${data.cast.length} cast members`}
                     >
-                        <span className="text-[10px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest tabular-nums group-hover:text-white transition-colors" suppressHydrationWarning>
-                            {isExpanded ? 'Show Less' : `View All ${data.cast.length} Members`}
+                        <span suppressHydrationWarning>
+                            {isExpanded ? 'Show less' : `All ${data.cast.length}`}
                         </span>
                         {isExpanded ? (
-                            <ChevronUp className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                            <ChevronUp className="w-3.5 h-3.5" />
                         ) : (
-                            <ChevronDown className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                            <ChevronDown className="w-3.5 h-3.5" />
                         )}
                     </button>
-                </CommonTitle>
+                </div>
 
-                <div className="mt-6 md:mt-8">
+                <div className="mt-2">
                     <Carousel opts={{ align: 'start', dragFree: true }} className="w-full group/row relative">
                         <CarouselContent className="-ml-4 md:-ml-6">
                             {displayedCast.map((actor: any) => (
                                 <CarouselItem key={actor.id} className="pl-4 md:pl-6 basis-[35%] gap-4 flex flex-col sm:basis-[22%] lg:basis-[15%] xl:basis-[12.5%]">
-                                    <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-zinc-900 ring-1 ring-white/10 transition-all duration-500 group-hover:ring-primary/50 group-hover:scale-105">
+                                    <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 ring-1 ring-white/10 transition-all duration-500 group-hover:ring-white/20 group-hover:scale-[1.02]">
                                         {actor.profile_path ? (
                                             <img
                                                 src={tmdbImage(actor.profile_path, 'w500')}
@@ -64,10 +64,10 @@ export default function CastCrewSection({ id, type }: { id: string; type: string
                                         )}
                                     </div>
                                     <div className="text-center space-y-0.5 w-full mt-2">
-                                        <h3 className="text-xs md:text-sm font-bold text-zinc-100 group-hover:text-primary transition-colors line-clamp-1">
+                                        <h3 className="text-xs md:text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors line-clamp-1">
                                             {actor.name}
                                         </h3>
-                                        <p className="text-[9px] md:text-[10px] font-medium text-zinc-500 uppercase tracking-wider line-clamp-1">
+                                        <p className="text-[9px] md:text-[10px] font-medium text-zinc-500 tracking-wide line-clamp-1">
                                             {actor.character}
                                         </p>
                                     </div>
@@ -79,6 +79,6 @@ export default function CastCrewSection({ id, type }: { id: string; type: string
                     </Carousel>
                 </div>
             </div>
-        </div>
+	        </section>
     );
 }

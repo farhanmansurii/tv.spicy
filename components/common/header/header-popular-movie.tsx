@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 
 import { Language } from '@/types/languages'

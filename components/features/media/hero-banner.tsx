@@ -3,13 +3,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { tmdbImage } from '@/lib/tmdb-image';
-import { Star, Play, Pause } from 'lucide-react';
+import { Info, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/store/mediaQueryStore';
-import { useEpisodeStore } from '@/store/episodeStore';
 import { Badge } from '@/components/ui/badge';
 import Container from '@/components/shared/containers/container';
 import ContinueWatchingButton from '../watchlist/continue-watching-button';
+import { GlowingButton } from '@/components/ui/glowing-button';
 import type { TMDBImagesResponse, TMDBMovie, TMDBTVShow } from '@/lib/types/tmdb';
 
 interface HeroBannerProps {
@@ -35,7 +35,6 @@ export function HeroBanner({
 	loading = 'eager',
 }: HeroBannerProps) {
 	const isMobile = useMediaQuery();
-	const { activeEP, isPlaying } = useEpisodeStore();
 	const [imageLoaded, setImageLoaded] = useState(false);
 	const [shouldAnimate, setShouldAnimate] = useState(false);
 	const imageRef = useRef<HTMLImageElement>(null);
@@ -67,6 +66,15 @@ export function HeroBanner({
 	const logo = logos.find((img) => img.iso_639_1 === 'en')?.file_path || logos[0]?.file_path;
 
 	const currentImage = (isMobile ? poster : backdrop) || '';
+	const nextEpisodeDate = show.next_episode_to_air?.air_date;
+	const nextEpisodeLabel = nextEpisodeDate
+		? new Date(nextEpisodeDate).toLocaleDateString('en-US', {
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric',
+		  })
+		: null;
+	const shouldShowHeroRunStatus = isDetailsPage && type === 'tv' && show.status === 'Returning Series';
 
 	// Reset image loaded state when image changes
 	useEffect(() => {
@@ -94,7 +102,7 @@ export function HeroBanner({
 		<section
 			className={cn(
 				'relative w-full overflow-hidden bg-background',
-				'h-[75vh] md:h-[80vh] lg:h-[85vh]'
+				'h-[68vh] md:h-[80vh] lg:h-[85vh]'
 			)}
 		>
 			<div className="absolute inset-0 z-0">
@@ -117,7 +125,7 @@ export function HeroBanner({
 			</div>
 
 			<div className="relative z-10 h-full flex flex-col justify-end">
-				<Container className="pb-10 md:pb-20">
+				<Container className="pb-6 md:pb-20">
 					<div
 						ref={contentRef}
 						className={cn(
@@ -161,72 +169,37 @@ export function HeroBanner({
 							<p className="mt-3 md:mt-4 text-[10px] md:text-xs font-black text-zinc-500 tracking-[0.3em] uppercase">
 								{genres} {runtime != null && runtime > 0 && ` • ${runtime}m`}
 							</p>
-						</div>
-
-						<div className="max-w-2xl hidden md:block mt-7 md:mt-9">
-							{isDetailsPage &&
-							type === 'tv' &&
-							activeEP &&
-							String(activeEP.tv_id) === String(show.id) ? (
-								<div
-									className={cn(
-										'inline-flex items-center gap-5 rounded-2xl border p-4 pr-10 backdrop-blur-3xl transition-all duration-300',
-										isPlaying
-											? 'bg-primary/[0.08] border-primary/20 hover:bg-primary/[0.12]'
-											: 'bg-white/[0.03] border-white/10 hover:bg-white/[0.05]'
-									)}
-								>
-									<div
-										className={cn(
-											'p-3 rounded-full shadow-lg transition-all duration-300',
-											isPlaying
-												? 'bg-primary shadow-primary/30'
-												: 'bg-white/10 shadow-white/5'
-										)}
-									>
-										{isPlaying ? (
-											<Pause className="w-4 h-4 fill-black text-black" />
-										) : (
-											<Play className="w-4 h-4 fill-white text-white" />
-										)}
-									</div>
-									<div className="text-left">
-										<div className="flex items-center gap-2">
-											{isPlaying && (
-												<span className="relative flex h-2 w-2">
-													<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-													<span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-												</span>
-											)}
-											<h4
-												className={cn(
-													'text-[10px] font-black uppercase tracking-widest transition-colors duration-300',
-													isPlaying ? 'text-primary' : 'text-zinc-500'
-												)}
-											>
-												{isPlaying ? 'Now Playing' : 'Up Next'}
-											</h4>
-										</div>
-										<p className="text-white font-bold text-base leading-tight">
-											S{activeEP.season_number} E{activeEP.episode_number}:{' '}
-											{activeEP.name}
-										</p>
-									</div>
+							{shouldShowHeroRunStatus && (
+								<div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md">
+									<span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+									<p className="text-[10px] font-black uppercase tracking-[0.14em] text-white/95">
+										{nextEpisodeLabel
+											? `Running • Next Episode ${nextEpisodeLabel}`
+											: 'Running • Next Episode TBA'}
+									</p>
 								</div>
-							) : (
-								<p className="text-zinc-300 text-base md:text-lg leading-relaxed line-clamp-3 font-medium opacity-90 text-balance">
-									{show.overview}
-								</p>
 							)}
 						</div>
 
-						<div className="flex justify-center md:justify-start mt-9 md:mt-12">
+						<div className="flex items-center justify-center md:justify-start gap-3 mt-6 md:mt-12">
 							<ContinueWatchingButton
 								id={show.id}
 								show={show}
 								type={type}
 								isDetailsPage={isDetailsPage}
 							/>
+							<GlowingButton
+								asChild
+								iconOnly
+								glow={false}
+								className="bg-white/10 hover:bg-white/20 border border-white/10 text-white/90 hover:text-white"
+								aria-label="Info"
+								title="Info"
+							>
+								<a href="#show-details-info">
+									<Info className="w-5 h-5" strokeWidth={2} />
+								</a>
+							</GlowingButton>
 						</div>
 					</div>
 				</Container>

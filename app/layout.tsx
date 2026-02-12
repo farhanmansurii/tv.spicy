@@ -6,7 +6,6 @@ import { AuthProvider } from '@/components/auth/auth-provider';
 import { AuthSync } from '@/components/auth/auth-sync';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://spicy-tv.vercel.app';
 
@@ -57,18 +56,7 @@ export const generateMetadata = (): Metadata => ({
 			'max-image-preview': 'large',
 			'max-snippet': -1,
 		},
-	},
-	other: {
-		'google-fonts':
-			'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-	},
-});
-
-const inter = Inter({
-	subsets: ['latin'],
-	weight: ['300', '400', '500', '600', '700'],
-	display: 'swap',
-	variable: '--font-inter',
+	}
 });
 
 export const generateViewport = (): Viewport => ({
@@ -79,7 +67,7 @@ export const generateViewport = (): Viewport => ({
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" suppressHydrationWarning className={inter.variable}>
+		<html lang="en" suppressHydrationWarning>
 			<body className="antialiased selection:bg-primary/30">
 				<ThemeProvider
 					attribute="class"

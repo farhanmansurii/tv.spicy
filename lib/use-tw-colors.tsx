@@ -1,5 +1,5 @@
 "use client";
-const tailwindColors = [
+const tailwindColors: string[] = [
   "black",
   "white",
   "gray-50",
@@ -102,7 +102,7 @@ const useRandomColor = () => {
     setTextColor(getContrastingTextColor(colorClass));
   };
 
-  const getContrastingTextColor = (colorClass) => {
+  const getContrastingTextColor = (colorClass: string) => {
     const color = colorClass.split("-")[0];
     const shade = colorClass.split("-")[1];
 

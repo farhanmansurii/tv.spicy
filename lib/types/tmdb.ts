@@ -105,6 +105,13 @@ export interface TMDBTVShow extends TMDBBaseMedia {
 	number_of_seasons?: number;
 	number_of_episodes?: number;
 	status?: string;
+	next_episode_to_air?: {
+		air_date?: string;
+		episode_number?: number;
+		season_number?: number;
+		name?: string;
+		id?: number;
+	} | null;
 	tagline?: string;
 	genres?: Genre[];
 	spoken_languages?: SpokenLanguage[];

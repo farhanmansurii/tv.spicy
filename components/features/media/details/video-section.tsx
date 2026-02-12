@@ -3,9 +3,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Play } from 'lucide-react';
+import { Play, MonitorPlay, Sparkles } from 'lucide-react';
 import { fetchVideos } from '@/lib/api';
-import CommonTitle from '@/components/shared/animated/common-title';
 import VideoLoader from '@/components/shared/loaders/video-loader';
 import SegmentedControl from '@/components/shared/segmented-control';
 
@@ -20,27 +19,46 @@ export default function VideoSection({ id, type }: { id: string; type: string })
 	const trailers = videos.filter((v: any) => v.type === 'Trailer');
 	const teasers = videos.filter((v: any) => v.type === 'Teaser');
 	const activeVideos = activeTab === 'trailers' ? trailers : teasers;
+	const activeLabel = activeTab === 'trailers' ? 'Trailers' : 'Teasers';
+	const activeCount = activeVideos.length;
 
 	if (isLoading) return <VideoLoader />;
 	if (!videos.length) return null;
 
 	return (
-		<div className="w-full py-8 md:py-12">
-			<div className="space-y-2">
-				<CommonTitle text="Cinematic Media" variant="section" spacing="none" />
-				<CommonTitle text="Trailers & Extras" variant="small" spacing="medium">
-					<SegmentedControl
-						value={activeTab}
-						onChange={(value) => setActiveTab(value as 'trailers' | 'teasers')}
-						items={[
-							{ value: 'trailers', label: `Trailers`, count: trailers.length },
-							{ value: 'teasers', label: `Teasers`, count: teasers.length },
-						]}
-					/>
-				</CommonTitle>
+		<section className="w-full rounded-[28px] border border-white/10 bg-zinc-950/55 p-5 md:p-7 backdrop-blur-xl">
+			<div className="mb-4 flex items-start justify-between gap-4">
+				<div>
+					<h2 className="text-sm font-semibold text-zinc-200">
+						Cinematic Media
+					</h2>
+					<p className="mt-1 text-xs text-zinc-400">
+						{activeLabel} ({activeCount})
+					</p>
+				</div>
+				<SegmentedControl
+					value={activeTab}
+					onChange={(value) => setActiveTab(value as 'trailers' | 'teasers')}
+					items={[
+						{
+							value: 'trailers',
+							label: 'Trailers',
+							icon: MonitorPlay,
+							showLabelOnMobile: false,
+							tooltip: `${trailers.length} trailers`,
+						},
+						{
+							value: 'teasers',
+							label: 'Teasers',
+							icon: Sparkles,
+							showLabelOnMobile: false,
+							tooltip: `${teasers.length} teasers`,
+						},
+					]}
+				/>
 			</div>
 
-			<div className="mt-6 md:mt-8">
+			<div className="mt-2">
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 					{activeVideos.slice(0, 6).map((video: any) => (
 						<Dialog key={video.id}>
@@ -75,6 +93,6 @@ export default function VideoSection({ id, type }: { id: string; type: string })
 					))}
 				</div>
 			</div>
-		</div>
+		</section>
 	);
 }

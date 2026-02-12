@@ -75,59 +75,17 @@ export default async function BrowsePage({ params }: PageProps) {
 
     if (!category) return notFound();
 
+    let shows: unknown[] = [];
+    let hasFetchError = false;
+
     try {
-        const shows = await fetchRowData(category.endpoint);
+        const data = await fetchRowData(category.endpoint);
+        shows = Array.isArray(data) ? data : [];
+    } catch {
+        hasFetchError = true;
+    }
 
-        if (!shows || shows.length === 0) {
-            return (
-                <div className="min-h-screen bg-black flex items-center justify-center">
-                    <div className="text-center space-y-4">
-                        <CommonTitle text="No Content Found" variant="small" />
-                        <p className="text-zinc-500 uppercase tracking-widest text-[10px] font-black">Archive Empty</p>
-                    </div>
-                </div>
-            );
-        }
-
-        return (
-            <div className="min-h-screen bg-black">
-                {/* 1. HERO HEADER SECTION */}
-                <SectionWrapper spacing="large" className="pb-0">
-                    <Container>
-                        <div className="max-w-4xl space-y-4">
-                            <CommonTitle
-                                text={category.label}
-                                variant="section"
-                                spacing="none"
-                            />
-                            <CommonTitle
-                                text={category.title}
-                                variant="large"
-                                as="h1"
-                                className="text-white"
-                            />
-                            <p className="text-lg md:text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl">
-                                {category.description}
-                            </p>
-                        </div>
-                    </Container>
-                </SectionWrapper>
-
-                {/* 2. GRID CONTENT SECTION */}
-                <SectionWrapper spacing="medium">
-                    <Container>
-                        <MediaRow
-                            shows={shows as Show[]}
-                            type={category.type}
-                            isVertical={true}
-                            gridLayout={true} // Switched to Grid for Browse Page
-                            hideHeader={true} // Wrapper handles the editorial feel
-                        />
-                    </Container>
-                </SectionWrapper>
-            </div>
-        );
-    } catch (error) {
+    if (hasFetchError) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center px-4">
                 <div className="text-center space-y-6">
@@ -144,4 +102,54 @@ export default async function BrowsePage({ params }: PageProps) {
             </div>
         );
     }
+
+    if (shows.length === 0) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <CommonTitle text="No Content Found" variant="small" />
+                    <p className="text-zinc-500 uppercase tracking-widest text-[10px] font-black">Archive Empty</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-black">
+            {/* 1. HERO HEADER SECTION */}
+            <SectionWrapper spacing="large" className="pb-0">
+                <Container>
+                    <div className="max-w-4xl space-y-4">
+                        <CommonTitle
+                            text={category.label}
+                            variant="section"
+                            spacing="none"
+                        />
+                        <CommonTitle
+                            text={category.title}
+                            variant="large"
+                            as="h1"
+                            className="text-white"
+                        />
+                        <p className="text-lg md:text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl">
+                            {category.description}
+                        </p>
+                    </div>
+                </Container>
+            </SectionWrapper>
+
+            {/* 2. GRID CONTENT SECTION */}
+            <SectionWrapper spacing="medium">
+                <Container>
+                    <MediaRow
+                        shows={shows as Show[]}
+                        type={category.type}
+                        isVertical={true}
+                        gridLayout={true}
+                        hideHeader={true}
+                    />
+                </Container>
+            </SectionWrapper>
+        </div>
+    );
 }

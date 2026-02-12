@@ -18,8 +18,8 @@ export default function NotFound() {
 							<CommonTitle text="404" variant="large" as="h1" className="text-white" />
 						</div>
 						<p className="text-lg md:text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl">
-							The page you're looking for doesn't exist or has been moved.
-							Let's get you back on track.
+							The page you&apos;re looking for doesn&apos;t exist or has been moved.
+							Let&apos;s get you back on track.
 						</p>
 					</div>
 				</SectionWrapper>

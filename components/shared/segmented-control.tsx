@@ -64,7 +64,7 @@ export default function SegmentedControl({
 						title={item.tooltip}
 						aria-pressed={isActive}
 						className={cn(
-							'rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest',
+							'rounded-full px-3.5 py-2 text-xs font-semibold',
 							'focus-visible:ring-white/50 focus-visible:ring-offset-black',
 							isActive
 								? 'bg-white text-black hover:bg-white hover:text-black'

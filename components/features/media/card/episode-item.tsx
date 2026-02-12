@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Lock } from 'lucide-react';
+import { Play, Lock, Star, CalendarDays, Clock3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 import type { Episode } from '@/lib/types';
@@ -21,8 +21,6 @@ export function EpisodeItem({
 	toggle,
 	variant = 'card',
 }: EpisodeItemProps) {
-	if (!episode) return null;
-
 	const isReleased = episode.air_date ? new Date(episode.air_date) <= new Date() : true;
 	const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w780') : null;
 
@@ -130,7 +128,7 @@ export function EpisodeItem({
 
 				{/* ===== CONTENT ===== */}
 				<div className="flex-1 min-w-0 py-1">
-					{/* Episode number + runtime */}
+					{/* Episode number + meta */}
 					<div className="flex items-center gap-2 mb-1.5">
 						<span
 							className={cn(
@@ -141,9 +139,14 @@ export function EpisodeItem({
 						>
 							Episode {episode.episode_number}
 						</span>
-						{episode.runtime && (
+						{typeof episode.runtime === 'number' && episode.runtime > 0 && (
 							<span className="text-xs text-zinc-600 tabular-nums">
-								{episode.runtime} min
+								{episode.runtime}m
+							</span>
+						)}
+						{episode.air_date && (
+							<span className="text-xs text-zinc-600">
+								{new Date(episode.air_date).getFullYear()}
 							</span>
 						)}
 					</div>
@@ -275,7 +278,7 @@ export function EpisodeItem({
 
 				<h3
 					className={cn(
-						'text-base sm:text-lg font-semibold leading-tight',
+						'text-base sm:text-lg font-semibold leading-tight mb-2',
 						'line-clamp-2',
 						'transition-all duration-300',
 						active
@@ -285,6 +288,36 @@ export function EpisodeItem({
 				>
 					{episode.name || `Episode ${episode.episode_number}`}
 				</h3>
+
+				<div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-zinc-300/90">
+					{typeof episode.vote_average === 'number' && episode.vote_average > 0 && (
+						<span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5">
+							<Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+							{episode.vote_average.toFixed(1)}
+						</span>
+					)}
+					{episode.air_date && (
+						<span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5">
+							<CalendarDays className="w-3 h-3" />
+							{new Date(episode.air_date).toLocaleDateString('en-US', {
+								month: 'short',
+								day: 'numeric',
+							})}
+						</span>
+					)}
+					{typeof episode.runtime === 'number' && episode.runtime > 0 && (
+						<span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5">
+							<Clock3 className="w-3 h-3" />
+							{episode.runtime}m
+						</span>
+					)}
+				</div>
+
+				{episode.overview && (
+					<p className="mt-2 text-[11px] leading-relaxed text-zinc-200/80 line-clamp-2">
+						{episode.overview}
+					</p>
+				)}
 			</div>
 
 			{/* Center play button */}

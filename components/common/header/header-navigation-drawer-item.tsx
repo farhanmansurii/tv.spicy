@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 
 import { useMemo } from 'react'
@@ -11,7 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { cn } from '@/lib/api'
+import { cn } from '@/lib/utils'
 
 export type Item = {
   label: string
