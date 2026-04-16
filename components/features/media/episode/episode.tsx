@@ -1,38 +1,39 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef } from 'react';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Settings, ChevronRight, X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useProviderStore from '@/store/providerStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import useTVShowStore from '@/store/recentsStore';
 
+import { PROVIDERS, getProvider } from './providers';
+import { usePlaybackProgress } from './use-playback-progress';
+import { PlayerControls } from './player-controls';
+
 interface EpisodeProps {
 	episodeId: string;
 	id: string;
-	movieID?: any;
+	movieID?: unknown;
 	type: string;
-	episodeNumber?: any;
-	seasonNumber?: any;
+	episodeNumber?: number | string;
+	seasonNumber?: number | string;
 	getNextEp?: () => void;
 	isSticky?: boolean;
 	onCloseSticky?: () => void;
 }
 
-export default function Episode(props: EpisodeProps) {
-	const { id, type, seasonNumber, episodeNumber, getNextEp, isSticky, onCloseSticky } = props;
+export default function Episode({
+	id,
+	type,
+	seasonNumber,
+	episodeNumber,
+	getNextEp,
+	isSticky,
+	onCloseSticky,
+}: EpisodeProps) {
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const { selectedProvider, setProvider } = useProviderStore();
 	const { setIsPlaying } = useEpisodeStore();
 	const { recentlyWatched, updatePlaybackProgress } = useTVShowStore();
-	const progressUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	const numericMediaId = Number(id);
 	const numericSeasonNumber =
@@ -40,39 +41,35 @@ export default function Episode(props: EpisodeProps) {
 	const numericEpisodeNumber =
 		typeof episodeNumber === 'number' ? episodeNumber : Number(episodeNumber ?? 0);
 
-	// Set playing state when iframe is visible (user is watching)
-	useEffect(() => {
-		// Small delay to ensure component is fully mounted
-		const timer = setTimeout(() => {
-			setIsPlaying(true);
-		}, 100);
+	// ── Resume state ─────────────────────────────────────────────────────────
+	// `iframeKey` forces the iframe to fully remount when incremented (e.g. on
+	// explicit resume or provider switch). `activeResumeSeconds` is the position
+	// baked into the URL at the time of the remount.
+	const [iframeKey, setIframeKey] = useState(0);
+	const [activeResumeSeconds, setActiveResumeSeconds] = useState(0);
+	const [hasResumed, setHasResumed] = useState(false);
 
+	// Reset resume chip whenever the user switches providers so they can choose
+	// to resume on the new provider too.
+	useEffect(() => {
+		setHasResumed(false);
+	}, [selectedProvider]);
+
+	// Mark playing state so other parts of the UI can react
+	useEffect(() => {
+		const timer = setTimeout(() => setIsPlaying(true), 100);
 		return () => {
 			clearTimeout(timer);
 			setIsPlaying(false);
 		};
 	}, [setIsPlaying]);
 
-	const generateUrl = (domain: string, t: string, i: string, s: string, e: string) => {
-		const safeId = encodeURIComponent(i);
-		const safeSeason = encodeURIComponent(s);
-		const safeEpisode = encodeURIComponent(e);
-		return t === 'movie'
-			? `https://${domain}/embed/${t}/${safeId}`
-			: `https://${domain}/embed/tv/${safeId}/${safeSeason}/${safeEpisode}`;
-	};
-
+	// ── Watch item ───────────────────────────────────────────────────────────
 	const currentWatchItem = useMemo(
 		() =>
 			recentlyWatched.find((item) => {
-				if (item.mediaId !== numericMediaId || item.mediaType !== type) {
-					return false;
-				}
-
-				if (type === 'movie') {
-					return true;
-				}
-
+				if (item.mediaId !== numericMediaId || item.mediaType !== type) return false;
+				if (type === 'movie') return true;
 				return (
 					item.seasonNumber === numericSeasonNumber &&
 					item.episodeNumber === numericEpisodeNumber
@@ -81,251 +78,85 @@ export default function Episode(props: EpisodeProps) {
 		[recentlyWatched, numericMediaId, type, numericSeasonNumber, numericEpisodeNumber]
 	);
 
-	const generateVidkingUrl = () => {
-		const baseUrl =
-			type === 'movie'
-				? `https://www.vidking.net/embed/movie/${encodeURIComponent(id)}`
-				: `https://www.vidking.net/embed/tv/${encodeURIComponent(id)}/${encodeURIComponent(
-						String(seasonNumber ?? 1)
-					)}/${encodeURIComponent(String(episodeNumber ?? 1))}`;
-		const searchParams = new URLSearchParams({
-			color: 'ef4444',
-			nextEpisode: 'true',
-			episodeSelector: 'false',
-			autoplay: 'true',
-		});
-		return `${baseUrl}?${searchParams.toString()}`;
-	};
+	// The saved position shown in the resume chip (latest from the store)
+	const savedPositionSeconds = Math.floor(currentWatchItem?.lastPositionSeconds ?? 0);
 
-	const sourcesMap = [
-		{
-			name: 'vidking',
-			label: 'Vidking',
-			url: generateVidkingUrl(),
-		},
-		{
-			name: 'rivestream',
-			label: 'Rivestream',
-			url:
-				type === 'movie'
-					? `https://rivestream.org/embed?type=movie&id=${encodeURIComponent(id)}`
-					: `https://rivestream.org/embed?type=tv&id=${encodeURIComponent(id)}&season=${encodeURIComponent(String(seasonNumber ?? 1))}&episode=${encodeURIComponent(String(episodeNumber ?? 1))}`,
-		},
-		{
-			name: 'vidstream',
-			label: 'Vidstream',
-			docs: 'https://vidzen.fun/',
-			url:
-				type === 'movie'
-					? `https://vidzen.fun/movie/${id}`
-					: `https://vidzen.fun/tv/${id}/${seasonNumber}/${episodeNumber}`,
-		},
-		{
-			name: '111movies',
-			label: '111Movies',
-			url:
-				type === 'movie'
-					? `https://111movies.com/movie/${id}`
-					: `https://111movies.com/tv/${id}/${seasonNumber}/${episodeNumber}?title=true`,
-		},
-		{
-			name: 'vidsrc',
-			label: 'Vidsrc',
-			url: generateUrl('vidsrc.pro', type, id, seasonNumber, episodeNumber),
-		},
-		{
-			name: 'vidlink',
-			label: 'VidLink',
-			url:
-				type === 'movie'
-					? `https://vidlink.pro/movie/${id}`
-					: `https://vidlink.pro/tv/${id}/${seasonNumber}/${episodeNumber}`,
-		},
-		{
-			name: 'embed.su',
-			label: 'Embed SU',
-			url:
-				type === 'movie'
-					? `https://embed.su/embed/movie/${id}`
-					: `https://embed.su/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
-		},
-		{
-			name: 'autoembed',
-			label: 'AutoEmbed',
-			url:
-				type === 'movie'
-					? `https://player.autoembed.cc/embed/movie/${id}`
-					: `https://player.autoembed.cc/embed/tv/${id}/${seasonNumber}/${episodeNumber}`,
-		},
-		{
-			name: 'videasy',
-			label: 'VidEasy',
-			url:
-				type === 'movie'
-					? `https://player.videasy.net/movie/${id}`
-					: `https://player.videasy.net/tv/${id}/${seasonNumber}/${episodeNumber}`,
-		},
-	];
+	// ── Resume handler ───────────────────────────────────────────────────────
+	const handleResume = useCallback(() => {
+		if (savedPositionSeconds <= 30) return;
+		setActiveResumeSeconds(savedPositionSeconds);
+		setHasResumed(true);
+		// Increment key → iframe remounts with the new URL containing the resume param
+		setIframeKey((k) => k + 1);
+	}, [savedPositionSeconds]);
 
-	const currentSource = sourcesMap.find((s) => s.name === selectedProvider) || sourcesMap[0];
+	// ── Build provider URLs ──────────────────────────────────────────────────
+	// `activeResumeSeconds` and `iframeKey` are intentionally in deps here so
+	// URLs only rebuild (and the iframe only remounts) on an explicit user action.
+	const sources = useMemo(
+		() =>
+			PROVIDERS.map((provider) => ({
+				name: provider.name,
+				label: provider.label,
+				url: provider.buildUrl({
+					type: type as 'movie' | 'tv',
+					id,
+					seasonNumber: numericSeasonNumber,
+					episodeNumber: numericEpisodeNumber,
+					resumeSeconds: activeResumeSeconds,
+				}),
+			})),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[type, id, numericSeasonNumber, numericEpisodeNumber, activeResumeSeconds, iframeKey]
+	);
 
-	useEffect(() => {
-		if (selectedProvider !== 'vidking') {
-			return;
-		}
+	const currentSource = sources.find((s) => s.name === selectedProvider) ?? sources[0];
+	const currentProvider = getProvider(selectedProvider);
 
-		const handleVidkingMessage = (event: MessageEvent) => {
-			if (event.origin !== 'https://www.vidking.net') {
-				return;
-			}
-
-			let payload = event.data;
-			if (typeof payload === 'string') {
-				try {
-					payload = JSON.parse(payload);
-				} catch {
-					return;
-				}
-			}
-
-			if (
-				!payload ||
-				typeof payload !== 'object' ||
-				(payload as { type?: string }).type !== 'PLAYER_EVENT'
-			) {
-				return;
-			}
-
-			const playerEvent = (payload as { data?: Record<string, unknown> }).data;
-			if (!playerEvent) {
-				return;
-			}
-
-			const eventName = String(playerEvent.event ?? '');
-			if (!['timeupdate', 'pause', 'seeked', 'ended', 'play'].includes(eventName)) {
-				return;
-			}
-
-			const messageMediaId = Number(playerEvent.id ?? id);
-			if (!Number.isFinite(messageMediaId) || messageMediaId !== numericMediaId) {
-				return;
-			}
-
-			const currentTime = Number(playerEvent.currentTime ?? 0);
-			const duration = Number(playerEvent.duration ?? 0);
-			const progress = Number(playerEvent.progress ?? 0);
-			const messageSeason =
-				type === 'tv' ? Number(playerEvent.season ?? numericSeasonNumber) : null;
-			const messageEpisode =
-				type === 'tv' ? Number(playerEvent.episode ?? numericEpisodeNumber) : null;
-
-			if (progressUpdateTimeoutRef.current) {
-				clearTimeout(progressUpdateTimeoutRef.current);
-			}
-
-			progressUpdateTimeoutRef.current = setTimeout(
-				() => {
-					void updatePlaybackProgress({
-						mediaId: String(messageMediaId),
-						mediaType: type as 'movie' | 'tv',
-						progressPercent: Number.isFinite(progress) ? progress : null,
-						lastPositionSeconds: Number.isFinite(currentTime) ? currentTime : null,
-						durationSeconds: Number.isFinite(duration) ? duration : null,
-						seasonNumber:
-							type === 'tv' && Number.isFinite(messageSeason) ? messageSeason : null,
-						episodeNumber:
-							type === 'tv' && Number.isFinite(messageEpisode)
-								? messageEpisode
-								: null,
-					});
-				},
-				eventName === 'timeupdate' ? 1000 : 150
-			);
-		};
-
-		window.addEventListener('message', handleVidkingMessage);
-
-		return () => {
-			window.removeEventListener('message', handleVidkingMessage);
-			if (progressUpdateTimeoutRef.current) {
-				clearTimeout(progressUpdateTimeoutRef.current);
-				progressUpdateTimeoutRef.current = null;
-			}
-		};
-	}, [
+	// ── Progress tracking ────────────────────────────────────────────────────
+	usePlaybackProgress({
 		id,
-		numericEpisodeNumber,
+		type,
 		numericMediaId,
 		numericSeasonNumber,
+		numericEpisodeNumber,
 		selectedProvider,
-		type,
+		currentWatchItem,
 		updatePlaybackProgress,
-	]);
+	});
 
 	return (
 		<div className="group relative w-full flex flex-col gap-2">
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-4">
-					<Select value={selectedProvider} onValueChange={setProvider}>
-						<SelectTrigger className="h-9 md:h-11 w-fit bg-white/[0.06] border-white/10 rounded-full px-4 hover:bg-white/[0.10] transition-[background-color,box-shadow] duration-200 gap-3 shadow-lg backdrop-blur-sm ring-1 ring-white/[0.08]">
-							<Settings className="w-3.5 h-3.5 text-zinc-400" />
-							<SelectValue className="text-xs md:text-sm font-medium text-zinc-200">
-								{currentSource.label}
-							</SelectValue>
-						</SelectTrigger>
-						<SelectContent className="bg-zinc-950/95 border-white/10 rounded-xl backdrop-blur-xl p-1.5 shadow-2xl max-h-[300px]">
-							{sourcesMap.map((source) => (
-								<SelectItem
-									value={source.name}
-									key={source.name}
-									className="text-xs rounded-lg"
-								>
-									{source.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-
-				{getNextEp && type === 'tv' && (
-					<div className="flex items-center gap-2">
-						<Button
-							variant="ghost"
-							onClick={getNextEp}
-							className="h-9 md:h-11 rounded-full px-4 md:px-6 transition-[background-color,box-shadow] duration-200 gap-2 group/next bg-white text-black hover:bg-white/90 font-semibold shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_28px_rgba(255,255,255,0.25)]"
-						>
-							<span className="text-xs md:text-sm font-semibold hidden sm:inline">
-								Next Episode
-							</span>
-							<ChevronRight className="w-4 h-4 transition-transform group-hover/next:translate-x-0.5" />
-						</Button>
-						{isSticky && onCloseSticky && (
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={onCloseSticky}
-								className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
-								aria-label="Hide sticky player"
-								title="Hide sticky player"
-							>
-								<X className="w-4 h-4" />
-							</Button>
-						)}
-					</div>
-				)}
-			</div>
+			<PlayerControls
+				providers={PROVIDERS}
+				selectedProvider={selectedProvider}
+				currentLabel={currentProvider.label}
+				onProviderChange={setProvider}
+				savedPositionSeconds={savedPositionSeconds}
+				onResume={handleResume}
+				hasResumed={hasResumed}
+				onNextEpisode={getNextEp}
+				mediaType={type}
+				isSticky={isSticky}
+				onCloseSticky={onCloseSticky}
+			/>
 
 			<div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-white/10 shadow-2xl group-hover:ring-white/20 transition-[box-shadow,border-color] duration-300">
 				<iframe
+					key={iframeKey}
 					ref={iframeRef}
+					// `allowFullScreen` is the legacy boolean attribute.
+					// `allow="fullscreen"` is the modern Permissions Policy — both are
+					// required for mobile browsers (iOS Safari, Android Chrome) to grant
+					// the embedded player permission to enter fullscreen.
 					allowFullScreen
+					allow="autoplay; fullscreen; picture-in-picture"
 					className="w-full h-full"
 					src={currentSource.url}
 					title="Media Player"
 					loading="eager"
 				/>
-
-				{/* Visual Depth Overlay */}
+				{/* Inset ring for depth */}
 				<div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/5 rounded-xl" />
 			</div>
 		</div>
