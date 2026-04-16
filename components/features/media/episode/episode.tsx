@@ -145,12 +145,8 @@ export default function Episode({
 				<iframe
 					key={iframeKey}
 					ref={iframeRef}
-					// `allowFullScreen` is the legacy boolean attribute.
-					// `allow="fullscreen"` is the modern Permissions Policy — both are
-					// required for mobile browsers (iOS Safari, Android Chrome) to grant
-					// the embedded player permission to enter fullscreen.
 					allowFullScreen
-					allow="autoplay; fullscreen; picture-in-picture"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
 					className="w-full h-full"
 					src={currentSource.url}
 					title="Media Player"

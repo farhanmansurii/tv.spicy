@@ -69,7 +69,8 @@ function embedUrl(domain: string, params: ProviderUrlParams): string {
 function appendResume(url: string, seconds: number, param: string): string {
 	if (seconds <= 0) return url;
 	const separator = url.includes('?') ? '&' : '?';
-	return `${url}${separator}${param}=${seconds}`;
+	// add 2980B9 as ?theme=2980B9"
+	return `${url}${separator}${param}=${seconds}&theme=2980B9`;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,64 +144,6 @@ function parseSuFamily(
 // ---------------------------------------------------------------------------
 
 export const PROVIDERS: ProviderConfig[] = [
-	// ── Vidking ──────────────────────────────────────────────────────────────
-	// Most accurate: emits postMessage PLAYER_EVENT with currentTime, duration,
-	// progress, and episode metadata. Treated as the source of truth.
-	{
-		name: 'vidking',
-		label: 'Vidking',
-		buildUrl({ type, id, seasonNumber, episodeNumber }) {
-			const base =
-				type === 'movie'
-					? `https://www.vidking.net/embed/movie/${encodeURIComponent(id)}`
-					: `https://www.vidking.net/embed/tv/${encodeURIComponent(id)}/${encodeURIComponent(String(seasonNumber))}/${encodeURIComponent(String(episodeNumber))}`;
-			const qs = new URLSearchParams({
-				color: 'ef4444',
-				nextEpisode: 'true',
-				episodeSelector: 'false',
-				autoplay: 'true',
-			});
-			return `${base}?${qs.toString()}`;
-		},
-		postMessageOrigin: 'https://www.vidking.net',
-		parseProgressMessage(data, { id, numericMediaId, type, season, episode }) {
-			let payload = data;
-			if (typeof payload === 'string') {
-				try {
-					payload = JSON.parse(payload);
-				} catch {
-					return null;
-				}
-			}
-			if (
-				!payload ||
-				typeof payload !== 'object' ||
-				(payload as Record<string, unknown>).type !== 'PLAYER_EVENT'
-			) {
-				return null;
-			}
-			const evt = (payload as { data?: Record<string, unknown> }).data;
-			if (!evt) return null;
-
-			const eventName = String(evt.event ?? '');
-			if (!['timeupdate', 'pause', 'seeked', 'ended', 'play'].includes(eventName))
-				return null;
-
-			const messageMediaId = Number(evt.id ?? id);
-			if (!Number.isFinite(messageMediaId) || messageMediaId !== numericMediaId) return null;
-
-			return {
-				eventName,
-				mediaId: messageMediaId,
-				currentTime: Number(evt.currentTime ?? 0),
-				duration: Number(evt.duration ?? 0),
-				progress: Number(evt.progress ?? 0),
-				season: type === 'tv' ? Number(evt.season ?? season) : null,
-				episode: type === 'tv' ? Number(evt.episode ?? episode) : null,
-			};
-		},
-	},
-
 	// ── Vidfast ──────────────────────────────────────────────────────────────
 	// Emits PLAYER_EVENT postMessage — same envelope as Vidking/VidLink but
 	// uses `tmdbId` for the media ID. Does not include season/episode in events
@@ -257,6 +200,64 @@ export const PROVIDERS: ProviderConfig[] = [
 				// Vidfast events don't include season/episode — use context values
 				season: type === 'tv' ? season : null,
 				episode: type === 'tv' ? episode : null,
+			};
+		},
+	},
+
+	// ── Vidking ──────────────────────────────────────────────────────────────
+	// Most accurate: emits postMessage PLAYER_EVENT with currentTime, duration,
+	// progress, and episode metadata. Treated as the source of truth.
+	{
+		name: 'vidking',
+		label: 'Vidking',
+		buildUrl({ type, id, seasonNumber, episodeNumber }) {
+			const base =
+				type === 'movie'
+					? `https://www.vidking.net/embed/movie/${encodeURIComponent(id)}`
+					: `https://www.vidking.net/embed/tv/${encodeURIComponent(id)}/${encodeURIComponent(String(seasonNumber))}/${encodeURIComponent(String(episodeNumber))}`;
+			const qs = new URLSearchParams({
+				color: 'ef4444',
+				nextEpisode: 'true',
+				episodeSelector: 'false',
+				autoplay: 'true',
+			});
+			return `${base}?${qs.toString()}`;
+		},
+		postMessageOrigin: 'https://www.vidking.net',
+		parseProgressMessage(data, { id, numericMediaId, type, season, episode }) {
+			let payload = data;
+			if (typeof payload === 'string') {
+				try {
+					payload = JSON.parse(payload);
+				} catch {
+					return null;
+				}
+			}
+			if (
+				!payload ||
+				typeof payload !== 'object' ||
+				(payload as Record<string, unknown>).type !== 'PLAYER_EVENT'
+			) {
+				return null;
+			}
+			const evt = (payload as { data?: Record<string, unknown> }).data;
+			if (!evt) return null;
+
+			const eventName = String(evt.event ?? '');
+			if (!['timeupdate', 'pause', 'seeked', 'ended', 'play'].includes(eventName))
+				return null;
+
+			const messageMediaId = Number(evt.id ?? id);
+			if (!Number.isFinite(messageMediaId) || messageMediaId !== numericMediaId) return null;
+
+			return {
+				eventName,
+				mediaId: messageMediaId,
+				currentTime: Number(evt.currentTime ?? 0),
+				duration: Number(evt.duration ?? 0),
+				progress: Number(evt.progress ?? 0),
+				season: type === 'tv' ? Number(evt.season ?? season) : null,
+				episode: type === 'tv' ? Number(evt.episode ?? episode) : null,
 			};
 		},
 	},
@@ -398,8 +399,8 @@ export const PROVIDERS: ProviderConfig[] = [
 	//  • TV shows    : per-episode progress in `show_progress["s{N}e{N}"]`
 	//  • Resume param: ?startAt=<seconds>
 	{
-		name: 'vidstream',
-		label: 'Vidstream',
+		name: 'vidzen',
+		label: 'VidZen',
 		buildUrl({ type, id, seasonNumber, episodeNumber, resumeSeconds }) {
 			const base =
 				type === 'movie'

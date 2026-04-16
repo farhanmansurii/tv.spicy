@@ -83,6 +83,7 @@ export default function VideoSection({ id, type }: { id: string; type: string })
 										src={`https://www.youtube.com/embed/${video.key}?autoplay=1`}
 										className="w-full h-full"
 										allowFullScreen
+										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
 										title={video.name || 'Video player'}
 									/>
 								</div>
