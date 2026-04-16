@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
+import { formatDistanceToNow } from 'date-fns';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { Info, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/store/mediaQueryStore';
-import { Badge } from '@/components/ui/badge';
 import Container from '@/components/shared/containers/container';
 import ContinueWatchingButton from '../watchlist/continue-watching-button';
 import { GlowingButton } from '@/components/ui/glowing-button';
@@ -25,18 +26,19 @@ interface HeroBannerProps {
 	type: 'movie' | 'tv';
 	isDetailsPage?: boolean;
 	loading?: 'eager' | 'lazy';
+	priority?: boolean;
 }
 
 export function HeroBanner({
 	show,
 	type,
 	isDetailsPage = false,
-	loading = 'eager',
+	loading = 'lazy',
+	priority = false,
 }: HeroBannerProps) {
 	const isMobile = useMediaQuery();
 	const [imageLoaded, setImageLoaded] = useState(false);
 	const [shouldAnimate, setShouldAnimate] = useState(false);
-	const imageRef = useRef<HTMLImageElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
 
 	const title = show.title || show.name || 'Untitled';
@@ -50,10 +52,7 @@ export function HeroBanner({
 					?.certification;
 
 	const runtime = show.episode_run_time?.[0] ?? show.runtime ?? null;
-	const genres = show.genres
-		?.map((g) => g.name)
-		.slice(0, 2)
-		.join(' • ');
+	const genreList = show.genres?.slice(0, 2).map((g) => g.name) ?? [];
 
 	const backdrops = show.images?.backdrops || [];
 	const posters = show.images?.posters || [];
@@ -66,14 +65,15 @@ export function HeroBanner({
 
 	const currentImage = (isMobile ? poster : backdrop) || '';
 	const nextEpisodeDate = show.next_episode_to_air?.air_date;
-	const nextEpisodeLabel = nextEpisodeDate
-		? new Date(nextEpisodeDate).toLocaleDateString('en-US', {
-				month: 'short',
-				day: 'numeric',
-				year: 'numeric',
-		  })
-		: null;
-	const shouldShowHeroRunStatus = isDetailsPage && type === 'tv' && show.status === 'Returning Series';
+	const nextEpisodeLabel = (() => {
+		if (!nextEpisodeDate) return null;
+		const d = new Date(nextEpisodeDate);
+		return d > new Date()
+			? `in ${formatDistanceToNow(d)}`
+			: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+	})();
+	const shouldShowHeroRunStatus =
+		isDetailsPage && type === 'tv' && show.status === 'Returning Series';
 
 	// Reset image loaded state when image changes
 	useEffect(() => {
@@ -81,21 +81,12 @@ export function HeroBanner({
 		setShouldAnimate(false);
 	}, [currentImage]);
 
-	// Handle image load
-	const handleImageLoad = () => {
+	// Handle image load — useCallback so ref stays stable
+	const handleImageLoad = useCallback(() => {
 		setImageLoaded(true);
-		// Small delay to ensure image is fully rendered before animating
-		setTimeout(() => {
-			setShouldAnimate(true);
-		}, 50);
-	};
-
-	// Check if image is already loaded (cached)
-	useEffect(() => {
-		if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) {
-			handleImageLoad();
-		}
-	}, [currentImage]);
+		// One rAF ensures the image is painted before the content fades in
+		requestAnimationFrame(() => setShouldAnimate(true));
+	}, []);
 
 	return (
 		<section
@@ -105,22 +96,28 @@ export function HeroBanner({
 			)}
 		>
 			<div className="absolute inset-0 z-0">
-				<img
-					ref={imageRef}
-					key={currentImage}
-					src={tmdbImage(currentImage, 'original')}
-					alt=""
-					className={cn(
-						'w-full h-full object-cover transition-opacity duration-700 ease-out',
-						imageLoaded ? 'opacity-100' : 'opacity-0',
-						isMobile ? 'object-top' : 'object-center'
-					)}
-					style={{ willChange: 'opacity' }}
-					onLoad={handleImageLoad}
-					loading={loading}
-				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-				<div className="absolute inset-0 hidden md:block bg-[radial-gradient(circle_at_left_center,rgba(9,9,11,0.8)_0%,transparent_75%)]" />
+				{currentImage ? (
+					<Image
+						key={currentImage}
+						src={tmdbImage(currentImage, isMobile ? 'w780' : 'w1280')}
+						alt=""
+						fill
+						priority={priority}
+						sizes="100vw"
+						className={cn(
+							'w-full h-full object-cover transition-opacity duration-700 ease-out',
+							imageLoaded ? 'opacity-100' : 'opacity-0',
+							isMobile ? 'object-top' : 'object-center'
+						)}
+						onLoad={handleImageLoad}
+					/>
+				) : null}
+				{/* Cinematic bottom scrim — stronger base, fades cleanly */}
+				<div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 via-[35%] to-transparent" />
+				{/* Left-side vignette keeps text legible on any image */}
+				<div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/10 to-transparent" />
+				{/* Top fade so bright images don't bleed into header */}
+				<div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-transparent" />
 			</div>
 
 			<div className="relative z-10 h-full flex flex-col justify-end">
@@ -128,53 +125,80 @@ export function HeroBanner({
 					<div
 						ref={contentRef}
 						className={cn(
-							'max-w-4xl flex flex-col transition-all duration-500 ease-out',
+							'max-w-4xl flex flex-col transition-[opacity,transform] duration-500 ease-out',
 							shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
 						)}
-						style={{ willChange: 'opacity, transform' }}
 					>
-						<div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-3 md:mb-5">
-							<Badge className="bg-white/10 text-white border-none backdrop-blur-xl px-2 py-0.5 text-xs font-semibold">
+						{/* Unified metadata chips — all same pill style */}
+						<div className="flex flex-wrap items-center gap-2 justify-center md:justify-start mb-3 md:mb-5 text-xs font-medium">
+							{/* Type */}
+							<span className="bg-white/[0.08] backdrop-blur-sm ring-1 ring-white/12 rounded-full px-2.5 py-0.5 text-zinc-300">
 								{type === 'tv' ? 'Series' : 'Movie'}
-							</Badge>
-							<div className="flex items-center gap-2.5 text-xs md:text-sm font-medium text-zinc-300 tabular-nums">
-								{releaseYear && <span>{releaseYear}</span>}
-								{rating && (
-									<span className="border border-white/20 px-1.5 py-0.5 rounded-sm text-xs text-white leading-none">
-										{rating}
-									</span>
-								)}
-								{(show.vote_average ?? 0) > 0 && (
-									<div className="flex items-center gap-1 text-yellow-500">
-										<Star className="w-3.5 h-3.5 fill-current" />
-										<span>{(show.vote_average ?? 0).toFixed(1)}</span>
-									</div>
-								)}
-							</div>
+							</span>
+
+							{/* Genres */}
+							{genreList.map((g) => (
+								<span
+									key={g}
+									className="bg-white/[0.06] backdrop-blur-sm ring-1 ring-white/10 rounded-full px-2.5 py-0.5 text-zinc-400"
+								>
+									{g}
+								</span>
+							))}
+
+							{/* Year */}
+							{releaseYear && (
+								<span className="bg-white/[0.06] backdrop-blur-sm ring-1 ring-white/10 rounded-full px-2.5 py-0.5 text-zinc-400 tabular-nums">
+									{releaseYear}
+								</span>
+							)}
+
+							{/* Runtime */}
+							{runtime != null && runtime > 0 && (
+								<span className="bg-white/[0.06] backdrop-blur-sm ring-1 ring-white/10 rounded-full px-2.5 py-0.5 text-zinc-400 tabular-nums">
+									{runtime}m
+								</span>
+							)}
+
+							{/* Age rating */}
+							{rating && (
+								<span className="bg-white/[0.08] backdrop-blur-sm ring-1 ring-white/15 rounded-full px-2.5 py-0.5 text-white/80 font-semibold tracking-wide">
+									{rating}
+								</span>
+							)}
+
+							{/* Score */}
+							{(show.vote_average ?? 0) > 0 && (
+								<span className="flex items-center gap-1 bg-yellow-500/10 backdrop-blur-sm ring-1 ring-yellow-500/20 rounded-full px-2.5 py-0.5 text-yellow-400 tabular-nums">
+									<Star className="w-3 h-3 fill-current flex-shrink-0" />
+									{(show.vote_average ?? 0).toFixed(1)}
+								</span>
+							)}
 						</div>
 
 						<div className="flex flex-col items-center md:items-start gap-3 md:gap-4">
 							{logo ? (
-								<img
-									src={tmdbImage(logo, 'w500')}
+								<Image
+									src={tmdbImage(logo, 'w300')}
 									alt={title}
-									className="h-auto max-h-[70px] md:max-h-[160px] max-w-[70%] md:max-w-md object-contain object-center md:object-left drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
+									width={300}
+									height={160}
+									loading={loading}
+									sizes="(max-width: 768px) 70vw, 300px"
+									className="w-auto h-auto max-h-[70px] md:max-h-[160px] max-w-[70%] md:max-w-md object-contain object-center md:object-left drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
 								/>
 							) : (
 								<h1 className="text-4xl md:text-7xl font-bold text-white leading-[0.9] text-center md:text-left">
 									{title}
 								</h1>
 							)}
-							<p className="mt-3 md:mt-4 text-xs md:text-sm font-medium text-zinc-300/90">
-								{genres} {runtime != null && runtime > 0 && ` • ${runtime}m`}
-							</p>
 							{shouldShowHeroRunStatus && (
 								<div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md">
 									<span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
 									<p className="text-xs md:text-sm font-medium text-white/95">
 										{nextEpisodeLabel
-											? `Running • Next Episode ${nextEpisodeLabel}`
-											: 'Running • Next Episode TBA'}
+											? `Running · Next episode ${nextEpisodeLabel}`
+											: 'Running · Next episode TBA'}
 									</p>
 								</div>
 							)}
@@ -195,7 +219,11 @@ export function HeroBanner({
 								aria-label="Info"
 								title="Info"
 							>
-								<a href="#show-details-info">
+								<a
+									href={
+										isDetailsPage ? '#show-details-info' : `/${type}/${show.id}`
+									}
+								>
 									<Info className="w-5 h-5" strokeWidth={2} />
 								</a>
 							</GlowingButton>

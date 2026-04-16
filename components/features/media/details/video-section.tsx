@@ -32,26 +32,26 @@ export default function VideoSection({ id, type }: { id: string; type: string })
 				title="Trailers & Clips"
 				subtitle={`${activeLabel} (${activeCount})`}
 				action={
-				<SegmentedControl
-					value={activeTab}
-					onChange={(value) => setActiveTab(value as 'trailers' | 'teasers')}
-					items={[
-						{
-							value: 'trailers',
-							label: 'Trailers',
-							icon: MonitorPlay,
-							showLabelOnMobile: false,
-							tooltip: `${trailers.length} trailers`,
-						},
-						{
-							value: 'teasers',
-							label: 'Teasers',
-							icon: Clapperboard,
-							showLabelOnMobile: false,
-							tooltip: `${teasers.length} teasers`,
-						},
-					]}
-				/>
+					<SegmentedControl
+						value={activeTab}
+						onChange={(value) => setActiveTab(value as 'trailers' | 'teasers')}
+						items={[
+							{
+								value: 'trailers',
+								label: 'Trailers',
+								icon: MonitorPlay,
+								showLabelOnMobile: false,
+								tooltip: `${trailers.length} trailers`,
+							},
+							{
+								value: 'teasers',
+								label: 'Teasers',
+								icon: Clapperboard,
+								showLabelOnMobile: false,
+								tooltip: `${teasers.length} teasers`,
+							},
+						]}
+					/>
 				}
 			/>
 
@@ -61,9 +61,10 @@ export default function VideoSection({ id, type }: { id: string; type: string })
 						<Dialog key={video.id}>
 							<DialogTrigger className="relative aspect-video rounded-2xl overflow-hidden group border border-white/5 shadow-2xl">
 								<img
-									src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
+									src={`https://img.youtube.com/vi/${video.key}/hqdefault.jpg`}
 									className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
 									alt={video.name || 'Trailer thumbnail'}
+									loading="lazy"
 								/>
 								<div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
 									<div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-2xl">

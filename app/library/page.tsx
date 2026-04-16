@@ -12,7 +12,7 @@ import { Bookmark, Heart, History, LogIn } from 'lucide-react'
 import { LibraryWatchlist } from '@/components/features/watchlist/library-watchlist'
 import { LibraryContinueWatching } from '@/components/features/watchlist/library-continue-watching'
 import { LibraryFavoritesSynced } from '@/components/features/watchlist/library-favorites-synced'
-import { useUserFavorites, useUserRecentlyWatched, useUserWatchlist } from '@/hooks/use-user-data'
+import { useUserFavorites, useUserWatchlist } from '@/hooks/use-user-data'
 import useWatchListStore from '@/store/watchlistStore'
 import useTVShowStore from '@/store/recentsStore'
 import { useFavoritesStore } from '@/store/favoritesStore'
@@ -53,7 +53,7 @@ export default function LibraryPage() {
 	const { data: session, isPending } = useSession()
 	const { watchlist, tvwatchlist } = useWatchListStore()
 	const { favoriteMovies, favoriteTV } = useFavoritesStore()
-	const { recentlyWatched } = useTVShowStore()
+	const { recentlyWatched, initialize: initializeContinueWatching } = useTVShowStore()
 	const { message: greetingMessage, isAuthenticated } = usePersonalizedGreeting()
 	const isSignedIn = Boolean(session?.user?.id)
 
@@ -62,7 +62,10 @@ export default function LibraryPage() {
 	const { data: dbWatchlistTV = [] } = useUserWatchlist('tv')
 	const { data: dbFavoritesMovies = [] } = useUserFavorites('movie')
 	const { data: dbFavoritesTV = [] } = useUserFavorites('tv')
-	const { data: dbRecentlyWatched = [] } = useUserRecentlyWatched()
+
+	React.useEffect(() => {
+		initializeContinueWatching()
+	}, [initializeContinueWatching])
 
 	const counts = React.useMemo(() => {
 		const localCounts = {
@@ -74,7 +77,7 @@ export default function LibraryPage() {
 		return {
 			watchlist: isSignedIn ? dbWatchlistMovies.length + dbWatchlistTV.length : localCounts.watchlist,
 			favorites: isSignedIn ? dbFavoritesMovies.length + dbFavoritesTV.length : localCounts.favorites,
-			recent: isSignedIn ? dbRecentlyWatched.length : localCounts.recent
+			recent: localCounts.recent
 		}
 	}, [
 		isSignedIn,
@@ -82,7 +85,6 @@ export default function LibraryPage() {
 		dbWatchlistTV.length,
 		dbFavoritesMovies.length,
 		dbFavoritesTV.length,
-		dbRecentlyWatched.length,
 		watchlist,
 		tvwatchlist,
 		favoriteMovies,
@@ -185,4 +187,3 @@ export default function LibraryPage() {
 		</div>
 	)
 }
-

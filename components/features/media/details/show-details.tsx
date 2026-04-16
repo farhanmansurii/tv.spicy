@@ -3,11 +3,10 @@
 import { HeroBanner } from '@/components/features/media/hero-banner';
 
 interface ShowDetailsProps {
-	id: number | string;
 	show: any;
-	type: string;
+	type: 'movie' | 'tv';
 }
 
-export default function ShowDetails({ id, show, type }: ShowDetailsProps) {
-	return <HeroBanner id={id} show={show} type={type} isDetailsPage={true} />;
+export default function ShowDetails({ show, type }: ShowDetailsProps) {
+	return <HeroBanner show={show} type={type} isDetailsPage={true} />;
 }

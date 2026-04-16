@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from '@/lib/auth-client';
+import type { ContinueWatchingItem } from '@/lib/continue-watching';
 
 interface WatchlistItem {
 	id: string;
@@ -11,18 +12,6 @@ interface WatchlistItem {
 	posterPath?: string | null;
 	backdropPath?: string | null;
 	overview?: string | null;
-}
-
-interface RecentlyWatchedItem {
-	id: string;
-	mediaId: number;
-	mediaType: 'MOVIE' | 'TV';
-	seasonNumber?: number | null;
-	episodeNumber?: number | null;
-	episodeName?: string | null;
-	showName?: string | null;
-	stillPath?: string | null;
-	progress: number;
 }
 
 interface FavoriteItem {
@@ -38,7 +27,7 @@ const fetchWatchlist = async (type?: 'movie' | 'tv'): Promise<WatchlistItem[]> =
 	return response.json();
 };
 
-const fetchRecentlyWatched = async (): Promise<RecentlyWatchedItem[]> => {
+const fetchRecentlyWatched = async (): Promise<ContinueWatchingItem[]> => {
 	const response = await fetch('/api/recently-watched', { credentials: 'include' });
 	if (!response.ok) throw new Error('Failed to fetch recently watched');
 	return response.json();
@@ -73,7 +62,7 @@ export function useUserRecentlyWatched() {
 		queryKey: ['user', userId, 'recently-watched'],
 		queryFn: fetchRecentlyWatched,
 		enabled: !!userId,
-		staleTime: 5 * 60 * 1000,
+		staleTime: 30 * 1000,
 		gcTime: 30 * 60 * 1000,
 		retry: 3,
 	});

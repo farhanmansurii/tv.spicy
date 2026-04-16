@@ -64,84 +64,34 @@ export function Header({ className }: HeaderProps) {
 
 	return (
 		<header
-			className={cn(
-				'z-50 w-full',
-				isPlayerSticky ? 'relative' : 'sticky top-0',
-				'transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]',
-				className
-			)}
+			className={cn('z-50 w-full', isPlayerSticky ? 'relative' : 'sticky top-0', className)}
 			role="banner"
 			aria-label="Main navigation"
 		>
-			{/* Liquid Glass Background Layer */}
+			{/* Single composited glass layer — two stacked backdrop-filter divs are extremely GPU-intensive */}
 			<div
 				className={cn(
-					'absolute inset-0 transition-all duration-500',
-					// Heavy blur + high saturation = picks up and intensifies background colors
-					'backdrop-blur-3xl backdrop-saturate-[2.5] backdrop-brightness-[1.02]',
-					scrolled ? 'bg-background/50' : 'bg-background/20'
-				)}
-			/>
-
-			{/* Color Vibrancy Layer - enhances color bleeding through */}
-			<div
-				className={cn(
-					'absolute inset-0 transition-all duration-500',
-					'backdrop-saturate-[160%] backdrop-brightness-[90%]',
-					scrolled ? 'opacity-100' : 'opacity-95'
+					'absolute inset-0 transition-[background-color,box-shadow,border-color] duration-500',
+					'backdrop-blur-2xl backdrop-saturate-[1.8]',
+					scrolled ? 'bg-background/60' : 'bg-background/25'
 				)}
 				style={{
-					backgroundColor: 'rgba(15, 15, 15, 0.7)',
-
-					boxShadow: `
-      inset 0 0.5px 0 0 rgba(255, 255, 255, 0.3),
-      inset 0 -0.5px 0 0 rgba(255, 255, 255, 0.1),
-      0 12px 40px rgba(0, 0, 0, 0.4)
-    `,
-
-					border: '0.5px solid rgba(255, 255, 255, 0.08)',
-
-					mixBlendMode: 'normal',
+					boxShadow: scrolled
+						? 'inset 0 0.5px 0 0 rgba(255,255,255,0.18), 0 8px 32px rgba(0,0,0,0.35)'
+						: 'inset 0 0.5px 0 0 rgba(255,255,255,0.08)',
+					borderBottom: '0.5px solid rgba(255,255,255,0.07)',
 				}}
-			>
-				<div
-					className="absolute inset-0 pointer-events-none"
-					style={{
-						background:
-							'linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, transparent 100%)',
-					}}
-				/>
-			</div>
+			/>
 
-			{/* Inner highlight - top edge glow */}
+			{/* Inner top-edge highlight */}
+			<div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.07] to-transparent pointer-events-none" />
+
+			{/* Bottom separator */}
 			<div
 				className={cn(
-					'absolute top-0 left-0 right-0 h-[1px]',
-					'bg-gradient-to-r from-transparent via-white/[0.07] to-transparent',
+					'absolute bottom-0 left-0 right-0 h-px',
+					'bg-gradient-to-r from-transparent via-foreground/10 to-transparent',
 					'transition-opacity duration-500',
-					scrolled ? 'opacity-100' : 'opacity-50'
-				)}
-			/>
-
-			{/* Bottom liquid edge - creates the dripping/leak effect */}
-			<div
-				className={cn(
-					'absolute bottom-0 left-0 right-0 h-[2px]',
-					'transition-all duration-500',
-					scrolled
-						? 'bg-gradient-to-r from-transparent via-foreground/10 to-transparent opacity-100'
-						: 'bg-gradient-to-r from-transparent via-foreground/5 to-transparent opacity-60'
-				)}
-			/>
-
-			{/* Color leak glow beneath header */}
-			<div
-				className={cn(
-					'absolute -bottom-6 left-[10%] right-[10%] h-12',
-					'bg-gradient-to-b from-foreground/[0.03] to-transparent',
-					'blur-xl',
-					'pointer-events-none',
-					'transition-opacity duration-700',
 					scrolled ? 'opacity-100' : 'opacity-0'
 				)}
 			/>

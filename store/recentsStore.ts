@@ -1,198 +1,364 @@
-// useTVShowStore.ts
-
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+
 import {
-	deleteAllEpisodesFromDB,
-	loadEpisodesFromDB,
-	saveEpisodesToDB,
-	type Episode as IndexedDBEpisode,
-} from '../lib/indexedDB';
+	clampProgress,
+	compareByUpdatedAtDesc,
+	episodeToContinueWatchingPayload,
+	getContinueWatchingId,
+	mergeContinueWatchingItems,
+	sanitizeContinueWatchingItems,
+	type ContinueWatchingItem,
+} from '@/lib/continue-watching';
 import type { Episode } from '@/lib/types';
+import { useAuthStore } from '@/store/authStore';
+import { invalidateUserQueries } from '@/lib/query-client';
 
 type RecentsEpisode = Episode & { time?: number };
 
 interface TVShowStore {
-	recentlyWatched: RecentsEpisode[];
-	addRecentlyWatched: (episode: RecentsEpisode) => void;
+	recentlyWatched: ContinueWatchingItem[];
+	isInitialized: boolean;
+	isLoading: boolean;
+	lastUserId: string | null;
+	addRecentlyWatched: (episode: RecentsEpisode) => Promise<void>;
 	loadEpisodes: () => Promise<void>;
-	updateTimeWatched: (episodeId: string, timeWatched: number) => void;
-	deleteRecentlyWatched: () => void;
+	updateTimeWatched: (
+		mediaId: string,
+		timeWatched: number,
+		mediaType?: 'movie' | 'tv'
+	) => Promise<void>;
+	updatePlaybackProgress: (input: {
+		mediaId: string;
+		mediaType?: 'movie' | 'tv';
+		progressPercent?: number | null;
+		lastPositionSeconds?: number | null;
+		durationSeconds?: number | null;
+		seasonNumber?: number | null;
+		episodeNumber?: number | null;
+	}) => Promise<void>;
+	deleteRecentlyWatched: (mediaId?: number, mediaType?: 'movie' | 'tv') => Promise<void>;
 	syncWithDatabase: () => Promise<void>;
 	loadFromDatabase: () => Promise<void>;
+	initialize: () => Promise<void>;
 }
 
-const syncEpisodeToDatabase = async (
-	episode: RecentsEpisode,
-	action: 'add' | 'update' | 'delete'
-) => {
-	try {
-		if (action === 'add' || action === 'update') {
-			await fetch('/api/recently-watched', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					mediaId: parseInt(episode.tv_id),
-					mediaType: 'tv',
-					seasonNumber: episode.season_number,
-					episodeNumber: episode.episode_number,
-					episodeId: episode.id,
-					stillPath: episode.still_path,
-					episodeName: episode.name,
-					showName: episode.show_name,
-					progress: episode.time || 0,
-				}),
-			});
-		} else if (action === 'delete') {
-			await fetch('/api/recently-watched', { method: 'DELETE' });
-		}
-	} catch (error) {
-		console.error('Error syncing episode to database:', error);
-	}
-};
+async function fetchRecentlyWatchedFromDatabase(): Promise<ContinueWatchingItem[]> {
+	const response = await fetch('/api/recently-watched', {
+		credentials: 'include',
+	});
 
-const useTVShowStore = create<TVShowStore>((set, get) => ({
-	recentlyWatched: [],
-	addRecentlyWatched: (episode) => {
-		set((state) => {
-			const filteredEpisodes = state.recentlyWatched.filter((existingEpisode) => {
-				return existingEpisode.tv_id !== episode.tv_id;
-			});
-			const updatedRecentlyWatched = [episode, ...filteredEpisodes];
-			const dbEpisodes: IndexedDBEpisode[] = updatedRecentlyWatched.map((item) => ({
-				tv_id: item.tv_id,
-				name: item.name,
-				id: item.id,
-				episode_number: item.episode_number,
-				season_number: item.season_number,
-				air_date: item.air_date ?? '',
-				overview: item.overview ?? '',
-				runtime: item.runtime ?? 0,
-				still_path: item.still_path ?? null,
-				time: item.time ?? 0,
-				show_name: item.show_name,
-			}));
-			saveEpisodesToDB(dbEpisodes);
-			return { recentlyWatched: updatedRecentlyWatched };
-		});
-		syncEpisodeToDatabase(episode, 'add').catch((error) => {
-			console.error('Failed to sync episode to database:', error);
-		});
-	},
-	loadEpisodes: async () => {
-		try {
-			const episodes = await loadEpisodesFromDB();
-			const hydratedEpisodes: RecentsEpisode[] = episodes.map((episode) => ({
-				...episode,
-				show_name: episode.show_name ?? '',
-				show_id: 0,
-				production_code: '',
-				vote_average: 0,
-				vote_count: 0,
-				crew: [],
-				guest_stars: [],
-				tv_id: episode.tv_id,
-			}));
-			set({ recentlyWatched: hydratedEpisodes });
-		} catch (error) {
-			console.error('Error loading episodes from IndexedDB:', error);
-		}
-	},
-	deleteRecentlyWatched: () => {
-		set({ recentlyWatched: [] });
-		deleteAllEpisodesFromDB();
-		fetch('/api/recently-watched', { method: 'DELETE' }).catch((error) => {
-			console.error('Failed to delete from database:', error);
-		});
-	},
-	updateTimeWatched: async (episodeId, timeWatched) => {
-		const episode = get().recentlyWatched.find((ep) => ep.tv_id === episodeId);
-		set((state) => {
-			const updatedRecentlyWatched = state.recentlyWatched.map((item) => {
-				if (item.tv_id === episodeId) {
-					return { ...item, time: timeWatched };
+	if (response.status === 401) {
+		return [];
+	}
+
+	if (!response.ok) {
+		throw new Error('Failed to fetch continue watching');
+	}
+
+	return sanitizeContinueWatchingItems(await response.json());
+}
+
+async function persistRecentlyWatchedItem(item: ContinueWatchingItem): Promise<void> {
+	const response = await fetch('/api/recently-watched', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify(item),
+	});
+
+	if (!response.ok) {
+		throw new Error('Failed to persist continue watching item');
+	}
+}
+
+async function persistProgress(
+	item: ContinueWatchingItem,
+	progressPercent: number
+): Promise<void> {
+	const response = await fetch('/api/recently-watched', {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify({
+			mediaId: item.mediaId,
+			mediaType: item.mediaType,
+			progressPercent,
+			seasonNumber: item.seasonNumber,
+			episodeNumber: item.episodeNumber,
+		}),
+	});
+
+	if (!response.ok) {
+		throw new Error('Failed to persist continue watching progress');
+	}
+}
+
+async function removeItemFromDatabase(mediaId?: number, mediaType?: 'movie' | 'tv') {
+	const searchParams = new URLSearchParams();
+	if (mediaId && mediaType) {
+		searchParams.set('mediaId', String(mediaId));
+		searchParams.set('mediaType', mediaType);
+	}
+
+	const suffix = searchParams.toString() ? `?${searchParams.toString()}` : '';
+	const response = await fetch(`/api/recently-watched${suffix}`, {
+		method: 'DELETE',
+		credentials: 'include',
+	});
+
+	if (!response.ok) {
+		throw new Error('Failed to remove continue watching item');
+	}
+}
+
+function mergeLocalAndRemote(
+	localItems: ContinueWatchingItem[],
+	remoteItems: ContinueWatchingItem[]
+): ContinueWatchingItem[] {
+	return mergeContinueWatchingItems(localItems, remoteItems).sort(compareByUpdatedAtDesc);
+}
+
+const useTVShowStore = create<TVShowStore>()(
+	persist(
+		(set, get) => ({
+			recentlyWatched: [],
+			isInitialized: false,
+			isLoading: false,
+			lastUserId: null,
+
+			addRecentlyWatched: async (episode) => {
+				const existing = get().recentlyWatched.find(
+					(item) => item.id === getContinueWatchingId('tv', Number(episode.tv_id))
+				);
+				const nextItem = episodeToContinueWatchingPayload(episode, existing);
+				const nextItems = mergeLocalAndRemote([nextItem], get().recentlyWatched);
+
+				set({ recentlyWatched: nextItems });
+
+				const authState = useAuthStore.getState();
+				if (authState.userId) {
+					invalidateUserQueries(authState.userId);
 				}
-				return item;
-			});
-			const dbEpisodes: IndexedDBEpisode[] = updatedRecentlyWatched.map((item) => ({
-				tv_id: item.tv_id,
-				name: item.name,
-				id: item.id,
-				episode_number: item.episode_number,
-				season_number: item.season_number,
-				air_date: item.air_date ?? '',
-				overview: item.overview ?? '',
-				runtime: item.runtime ?? 0,
-				still_path: item.still_path ?? null,
-				time: item.time ?? 0,
-				show_name: item.show_name,
-			}));
-			saveEpisodesToDB(dbEpisodes);
-			return { recentlyWatched: updatedRecentlyWatched };
-		});
-		if (episode) {
-			await fetch('/api/recently-watched', {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					mediaId: parseInt(episode.tv_id),
-					progress: timeWatched,
-					seasonNumber: episode.season_number,
-					episodeNumber: episode.episode_number,
-				}),
-			});
+
+				if (!authState.isAuthenticated) {
+					return;
+				}
+
+				try {
+					await persistRecentlyWatchedItem(nextItem);
+				} catch (error) {
+					console.error('Failed to persist continue watching item:', error);
+				}
+			},
+
+			loadEpisodes: async () => {
+				set({
+					recentlyWatched: sanitizeContinueWatchingItems(get().recentlyWatched),
+					isInitialized: true,
+				});
+			},
+
+			updateTimeWatched: async (mediaId, timeWatched, mediaType = 'tv') => {
+				await get().updatePlaybackProgress({
+					mediaId,
+					mediaType,
+					progressPercent: timeWatched,
+				});
+			},
+
+			updatePlaybackProgress: async ({
+				mediaId,
+				mediaType = 'tv',
+				progressPercent,
+				lastPositionSeconds,
+				durationSeconds,
+				seasonNumber,
+				episodeNumber,
+			}) => {
+				const targetId = getContinueWatchingId(mediaType, Number(mediaId));
+				const existingItem = get().recentlyWatched.find((item) => {
+					if (item.id !== targetId) {
+						return false;
+					}
+
+					if (mediaType !== 'tv') {
+						return true;
+					}
+
+					if (seasonNumber == null || episodeNumber == null) {
+						return true;
+					}
+
+					return (
+						item.seasonNumber === seasonNumber && item.episodeNumber === episodeNumber
+					);
+				});
+
+				if (!existingItem) {
+					return;
+				}
+
+				const nextProgressPercent =
+					progressPercent != null
+						? clampProgress(progressPercent)
+						: durationSeconds && lastPositionSeconds != null && durationSeconds > 0
+							? clampProgress((lastPositionSeconds / durationSeconds) * 100)
+							: existingItem.progressPercent;
+
+				const updatedItem: ContinueWatchingItem = {
+					...existingItem,
+					progressPercent: nextProgressPercent,
+					lastPositionSeconds:
+						lastPositionSeconds != null
+							? Math.max(0, lastPositionSeconds)
+							: existingItem.lastPositionSeconds ?? null,
+					durationSeconds:
+						durationSeconds != null
+							? Math.max(0, durationSeconds)
+							: existingItem.durationSeconds ?? null,
+					updatedAt: new Date().toISOString(),
+				};
+				const filteredItems = get().recentlyWatched.filter((item) => item !== existingItem);
+				const nextItems = sanitizeContinueWatchingItems([updatedItem, ...filteredItems]).sort(
+					compareByUpdatedAtDesc
+				);
+
+				set({ recentlyWatched: nextItems });
+
+				const authState = useAuthStore.getState();
+				if (authState.userId) {
+					invalidateUserQueries(authState.userId);
+				}
+
+				if (!authState.isAuthenticated) {
+					return;
+				}
+
+				try {
+					if (nextProgressPercent >= 95) {
+						await removeItemFromDatabase(updatedItem.mediaId, updatedItem.mediaType);
+						return;
+					}
+
+					await persistProgress(updatedItem, nextProgressPercent);
+				} catch (error) {
+					console.error('Failed to update continue watching progress:', error);
+				}
+			},
+
+			deleteRecentlyWatched: async (mediaId, mediaType = 'tv') => {
+				const nextItems = mediaId
+					? get().recentlyWatched.filter(
+							(item) =>
+								item.id !== getContinueWatchingId(mediaType, Number(mediaId))
+					  )
+					: [];
+
+				set({ recentlyWatched: nextItems });
+
+				const authState = useAuthStore.getState();
+				if (authState.userId) {
+					invalidateUserQueries(authState.userId);
+				}
+
+				if (!authState.isAuthenticated) {
+					return;
+				}
+
+				try {
+					await removeItemFromDatabase(mediaId, mediaType);
+				} catch (error) {
+					console.error('Failed to delete continue watching item:', error);
+				}
+			},
+
+			syncWithDatabase: async () => {
+				const authState = useAuthStore.getState();
+				if (!authState.isAuthenticated) {
+					return;
+				}
+
+				const response = await fetch('/api/sync', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
+					body: JSON.stringify({
+						recentlyWatched: get().recentlyWatched,
+					}),
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to sync continue watching');
+				}
+			},
+
+			loadFromDatabase: async () => {
+				const authState = useAuthStore.getState();
+				if (!authState.isAuthenticated) {
+					set({
+						recentlyWatched: sanitizeContinueWatchingItems(get().recentlyWatched),
+						isInitialized: true,
+						isLoading: false,
+						lastUserId: null,
+					});
+					return;
+				}
+
+				set({ isLoading: true });
+				try {
+					const remoteItems = await fetchRecentlyWatchedFromDatabase();
+					const mergedItems = mergeLocalAndRemote(get().recentlyWatched, remoteItems);
+
+					set({
+						recentlyWatched: mergedItems,
+						isInitialized: true,
+						isLoading: false,
+						lastUserId: authState.userId,
+					});
+
+					if (mergedItems.length > 0) {
+						await fetch('/api/sync', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							credentials: 'include',
+							body: JSON.stringify({
+								recentlyWatched: mergedItems,
+							}),
+						});
+					}
+				} catch (error) {
+					console.error('Error loading continue watching from database:', error);
+					set({
+						recentlyWatched: sanitizeContinueWatchingItems(get().recentlyWatched),
+						isInitialized: true,
+						isLoading: false,
+						lastUserId: authState.userId,
+					});
+				}
+			},
+
+			initialize: async () => {
+				const authState = useAuthStore.getState();
+				if (
+					get().isInitialized &&
+					(!authState.userId || authState.userId === get().lastUserId)
+				) {
+					return;
+				}
+
+				await get().loadFromDatabase();
+			},
+		}),
+		{
+			name: 'continue-watching-storage',
+			storage: createJSONStorage(() => localStorage),
+			partialize: (state) => ({
+				recentlyWatched: state.recentlyWatched,
+				lastUserId: state.lastUserId,
+			}),
 		}
-	},
-	syncWithDatabase: async () => {
-		const { recentlyWatched } = get();
-		for (const episode of recentlyWatched) {
-			await syncEpisodeToDatabase(episode, 'add');
-		}
-	},
-	loadFromDatabase: async () => {
-		try {
-			const response = await fetch('/api/recently-watched');
-			if (response.ok) {
-				const episodes = await response.json();
-				// Convert database format to local format
-				const localEpisodes: RecentsEpisode[] = episodes.map((ep: any) => ({
-					tv_id: String(ep.mediaId),
-					name: ep.episodeName || `Episode ${ep.episodeNumber}`,
-					id: ep.episodeId || 0,
-					episode_number: ep.episodeNumber,
-					season_number: ep.seasonNumber,
-					still_path: ep.stillPath,
-					time: ep.progress,
-					show_name: ep.showName,
-					air_date: '',
-					overview: '',
-					runtime: 0,
-					production_code: '',
-					show_id: 0,
-					vote_average: 0,
-					vote_count: 0,
-					crew: [],
-					guest_stars: [],
-				}));
-				set({ recentlyWatched: localEpisodes });
-				const dbEpisodes: IndexedDBEpisode[] = localEpisodes.map((item) => ({
-					tv_id: item.tv_id,
-					name: item.name,
-					id: item.id,
-					episode_number: item.episode_number,
-					season_number: item.season_number,
-					air_date: item.air_date ?? '',
-					overview: item.overview ?? '',
-					runtime: item.runtime ?? 0,
-					still_path: item.still_path ?? null,
-					time: item.time ?? 0,
-					show_name: item.show_name,
-				}));
-				saveEpisodesToDB(dbEpisodes);
-			}
-		} catch (error) {
-			console.error('Error loading from database:', error);
-		}
-	},
-}));
+	)
+);
 
 export default useTVShowStore;

@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useInView } from 'react-intersection-observer';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import type { UserMediaRowProps } from '@/components/features/home/user-media-row';
 
@@ -18,11 +19,26 @@ const UserFavoritesAll = dynamic<UserMediaRowProps>(
 );
 
 export function HomePersonalizedRows() {
+	const { ref, inView } = useInView({
+		triggerOnce: true,
+		rootMargin: '320px 0px',
+	});
+
 	return (
 		<>
 			<RecentlyWatched />
-			<UserWatchlistAll variant="watchlist" scope="all" />
-			<UserFavoritesAll variant="favorites" scope="all" />
+			<div ref={ref} className="h-1 w-full" />
+			{inView ? (
+				<>
+					<UserWatchlistAll variant="watchlist" scope="all" />
+					<UserFavoritesAll variant="favorites" scope="all" />
+				</>
+			) : (
+				<>
+					<MediaLoader withHeader className="min-h-[280px]" />
+					<MediaLoader withHeader className="min-h-[280px]" />
+				</>
+			)}
 		</>
 	);
 }

@@ -17,7 +17,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 type Props = {
 	title: string;
 	shows: Show[];
-	type: string;
+	type: 'movie' | 'tv';
 	noPadding?: boolean;
 };
 
@@ -82,8 +82,7 @@ export default function BentoGrid({ title, shows, type, noPadding }: Props) {
 									show={show}
 									index={index}
 									type={type}
-									isVertical={false} // Ensures landscape "Apple TV" card style
-									showRank={false}
+									isVertical={false}
 								/>
 							</CarouselItem>
 						);

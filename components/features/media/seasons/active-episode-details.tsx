@@ -49,17 +49,15 @@ export const ActiveEpisodeDetails = ({
 				month: 'short',
 				day: 'numeric',
 				year: 'numeric',
-		  })
+			})
 		: null;
 	const normalizedStatus =
-		typeof showStatus === 'string' && showStatus.trim().length > 0
-			? showStatus
-			: 'In Progress';
+		typeof showStatus === 'string' && showStatus.trim().length > 0 ? showStatus : 'In Progress';
 
 	return (
 		<DetailShell
 			className={cn(
-				'transition-all duration-300 ease-out',
+				'transition-[border-color,box-shadow,background-color] duration-300 ease-out',
 				isPlaying
 					? 'border-white/20 bg-zinc-950/65 shadow-[0_14px_32px_rgba(0,0,0,0.28)]'
 					: 'border-white/10 bg-zinc-950/55 shadow-[0_10px_24px_rgba(0,0,0,0.22)]'

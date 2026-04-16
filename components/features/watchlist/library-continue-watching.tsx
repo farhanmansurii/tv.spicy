@@ -4,7 +4,6 @@ import React, { useEffect, useMemo } from 'react';
 import useTVShowStore from '@/store/recentsStore';
 import { Button } from '@/components/ui/button';
 import { Trash2, History, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Episode } from '@/lib/types';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { ContinueWatchingCard } from './continue-watching-card';
 import {
@@ -17,11 +16,11 @@ import {
 
 export function LibraryContinueWatching() {
     const hasMounted = useHasMounted();
-    const { recentlyWatched, loadEpisodes, deleteRecentlyWatched } = useTVShowStore();
+    const { recentlyWatched, initialize, isLoading } = useTVShowStore();
 
     useEffect(() => {
-        loadEpisodes();
-    }, [loadEpisodes]);
+        initialize();
+    }, [initialize]);
 
     function clearRecentlyWatched() {
         const store = useTVShowStore.getState();
@@ -30,10 +29,10 @@ export function LibraryContinueWatching() {
 
     const episodes = useMemo(() => {
         if (!hasMounted || recentlyWatched.length === 0) return [];
-        return recentlyWatched.filter((ep: Episode) => ep.still_path || ep.tv_id);
+        return recentlyWatched;
     }, [hasMounted, recentlyWatched]);
 
-    if (!hasMounted) {
+    if (!hasMounted || isLoading) {
         return (
             <div className="flex items-center justify-center py-20">
                 <div className="text-center space-y-4">
@@ -89,12 +88,12 @@ export function LibraryContinueWatching() {
                 className="w-full relative group/row"
             >
                 <CarouselContent className="-ml-4 md:-ml-6 overflow-visible cursor-grab active:cursor-grabbing">
-                    {episodes.map((episode: Episode, index: number) => (
+                    {episodes.map((item, index: number) => (
                         <CarouselItem
-                            key={`${episode.tv_id}-${episode.season_number}-${episode.episode_number}`}
-                            className="pl-4 md:pl-6 basis-[85%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
+                            key={item.id}
+                            className="pl-4 md:pl-6 basis-[90%] sm:basis-[58%] lg:basis-[42%] xl:basis-[34%]"
                         >
-                            <ContinueWatchingCard episode={episode} index={index} />
+                            <ContinueWatchingCard item={item} index={index} />
                         </CarouselItem>
                     ))}
                 </CarouselContent>

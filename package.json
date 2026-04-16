@@ -97,6 +97,7 @@
 		"tailwind-variants": "^0.2.1",
 		"tailwindcss-animate": "^1.0.7",
 		"vaul": "^0.9.9",
+		"web-haptics": "^0.0.6",
 		"zod": "^3.25.76",
 		"zustand": "^4.4.1"
 	},
@@ -105,6 +106,7 @@
 		"@types/react": "19.1.3",
 		"@types/react-dom": "19.1.3",
 		"autoprefixer": "latest",
+		"babel-plugin-react-compiler": "^1.0.0",
 		"dotenv": "^17.2.3",
 		"eslint": "^9.26.0",
 		"eslint-config-next": "^16.0.0",

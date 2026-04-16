@@ -7,6 +7,6 @@ interface MovieListProps {
 }
 
 export default async function MovieList(props: MovieListProps) {
-	const data = await fetchRowData('discover');
-	return <MediaRow text={props.text} type={data} />;
+	const data = await fetchRowData(props.endpoint);
+	return <MediaRow text={props.text} type="movie" shows={data as any} />;
 }

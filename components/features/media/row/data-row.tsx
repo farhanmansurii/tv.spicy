@@ -68,8 +68,13 @@ export default function DataRow({
 
 	const displayData = (initialData ?? data) as unknown[] | undefined;
 	const mediaData = (displayData || []) as unknown as Show[];
+	const hasResolvedQuery = displayData !== undefined;
 	const hasData = Array.isArray(displayData) && displayData.length > 0;
-	const shouldShowLoader = isLoading || isFetching || (!initialData && !hasMounted) || !hasData;
+	const shouldShowLoader =
+		isLoading ||
+		isFetching ||
+		(!initialData && !hasResolvedQuery) ||
+		(!initialData && !hasMounted);
 
 	if (shouldShowLoader) {
 		return (
@@ -89,15 +94,20 @@ export default function DataRow({
 	}
 
 	if (!hasData) {
-		return (
-			<div ref={ref}>
-				<MediaLoader
-					withHeader={!hideHeader}
-					layout={gridLayout ? 'grid' : 'carousel'}
-					isVertical={isVertical}
-				/>
-			</div>
-		);
+		// If the query has finished and returned an empty array, don't keep showing the loader.
+		if (!hasResolvedQuery) {
+			return (
+				<div ref={ref}>
+					<MediaLoader
+						withHeader={!hideHeader}
+						layout={gridLayout ? 'grid' : 'carousel'}
+						isVertical={isVertical}
+					/>
+				</div>
+			);
+		}
+
+		return showError ? <div ref={ref}>No results.</div> : null;
 	}
 
 	return (
@@ -110,6 +120,7 @@ export default function DataRow({
 				type={type}
 				hideHeader={hideHeader}
 				viewAllLink={viewAllLink}
+				ranked={showRank}
 			/>
 		</div>
 	);

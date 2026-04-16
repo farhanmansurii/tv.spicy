@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { Bookmark } from 'lucide-react'
 
-import type { Show } from '@/lib/types'
+import type { Show as MediaShow } from '@/lib/types'
 import useWatchListStore from '@/store/watchlistStore'
 import MediaCard from '@/components/features/media/card/media-card'
 import { useHasMounted } from '@/hooks/use-has-mounted'
@@ -14,11 +14,11 @@ export function LibraryWatchlist() {
 	const { watchlist, tvwatchlist } = useWatchListStore()
 
 	const filteredMovieWatchlist = React.useMemo(() => {
-		return watchlist?.filter((show: Show) => show.poster_path || show.backdrop_path) || []
+		return watchlist?.filter((show) => show.poster_path || show.backdrop_path) || []
 	}, [watchlist])
 
 	const filteredTVWatchlist = React.useMemo(() => {
-		return tvwatchlist?.filter((show: Show) => show.poster_path || show.backdrop_path) || []
+		return tvwatchlist?.filter((show) => show.poster_path || show.backdrop_path) || []
 	}, [tvwatchlist])
 
 	const totalCount = filteredMovieWatchlist.length + filteredTVWatchlist.length
@@ -72,13 +72,13 @@ export function LibraryWatchlist() {
 						)}
 					>
 						{filteredMovieWatchlist.map((show, index) => (
-							<MediaCard
-								key={show.id}
-								type="movie"
-								show={show}
-								index={index}
-								isVertical
-							/>
+								<MediaCard
+									key={show.id}
+									type="movie"
+									show={show as unknown as MediaShow}
+									index={index}
+									isVertical
+								/>
 						))}
 					</div>
 				</div>
@@ -96,9 +96,15 @@ export function LibraryWatchlist() {
 							'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
 						)}
 					>
-						{filteredTVWatchlist.map((show, index) => (
-							<MediaCard key={show.id} type="tv" show={show} index={index} isVertical />
-						))}
+							{filteredTVWatchlist.map((show, index) => (
+								<MediaCard
+									key={show.id}
+									type="tv"
+									show={show as unknown as MediaShow}
+									index={index}
+									isVertical
+								/>
+							))}
 					</div>
 				</div>
 			)}

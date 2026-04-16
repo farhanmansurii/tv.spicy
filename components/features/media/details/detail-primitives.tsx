@@ -17,7 +17,7 @@ export function DetailShell({
 	return (
 		<Component
 			className={cn(
-				'w-full rounded-[24px] border border-white/10 bg-zinc-950/55 p-4 md:p-6 backdrop-blur-xl shadow-[0_10px_26px_rgba(0,0,0,0.2)]',
+				'w-full rounded-[24px] border border-white/10 bg-zinc-950/70 p-4 md:p-6 backdrop-blur-sm shadow-[0_10px_26px_rgba(0,0,0,0.2)]',
 				className
 			)}
 			{...props}

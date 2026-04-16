@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import useTVShowStore from '@/store/recentsStore';
-import { Episode } from '@/lib/types';
 import useWatchListStore from '@/store/watchlistStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import { useEpisodeStore } from '@/store/episodeStore';
@@ -11,6 +10,7 @@ import { toast } from 'sonner';
 import { Play, Pause, Plus, Check, Info, Heart, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GlowingButton } from '@/components/ui/glowing-button';
+import { useHaptics } from '@/hooks/use-haptics';
 
 interface ContinueWatchingButtonProps {
 	id: string | number;
@@ -26,7 +26,7 @@ export default function ContinueWatchingButton({
 	isDetailsPage = false,
 }: ContinueWatchingButtonProps) {
 	const router = useRouter();
-	const { recentlyWatched, loadEpisodes } = useTVShowStore();
+	const { recentlyWatched, initialize } = useTVShowStore();
 	const { activeEP, isPlaying } = useEpisodeStore();
 	const {
 		addToWatchlist,
@@ -39,11 +39,12 @@ export default function ContinueWatchingButton({
 	const { favoriteMovies, favoriteTV, addFavorite, removeFavorite } = useFavoritesStore();
 
 	const [isLoading, setIsLoading] = useState(false);
+	const haptic = useHaptics();
 
 	// Load episodes on mount
 	useEffect(() => {
-		loadEpisodes();
-	}, [loadEpisodes]);
+		initialize();
+	}, [initialize]);
 
 	// Check if this show is currently playing (on details page)
 	const isCurrentlyPlaying = useMemo(() => {
@@ -80,13 +81,8 @@ export default function ContinueWatchingButton({
 	const recentFromHistory = useMemo(() => {
 		const showId = String(id);
 		return recentlyWatched
-			.filter((ep: Episode) => String(ep.tv_id) === showId)
-			.sort((a: Episode, b: Episode) => {
-				if (b.season_number !== a.season_number) {
-					return b.season_number - a.season_number;
-				}
-				return b.episode_number - a.episode_number;
-			})[0];
+			.filter((item) => String(item.mediaId) === showId && item.mediaType === 'tv')
+			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0];
 	}, [recentlyWatched, id]);
 
 	// Handle add/remove from watchlist
@@ -96,6 +92,7 @@ export default function ContinueWatchingButton({
 			e.stopPropagation();
 
 			if (isAdded) {
+				haptic('soft');
 				type === 'movie'
 					? removeFromWatchList(Number(id))
 					: removeFromTvWatchList(Number(id));
@@ -103,6 +100,7 @@ export default function ContinueWatchingButton({
 					description: `${show?.name || show?.title || 'Item'} has been removed from your watchlist.`,
 				});
 			} else {
+				haptic('success');
 				type === 'movie' ? addToWatchlist(show) : addToTvWatchlist(show);
 				toast.success('Added to watchlist', {
 					description: `${show?.name || show?.title || 'Item'} has been added to your watchlist.`,
@@ -114,6 +112,7 @@ export default function ContinueWatchingButton({
 			type,
 			id,
 			show,
+			haptic,
 			addToWatchlist,
 			addToTvWatchlist,
 			removeFromWatchList,
@@ -128,14 +127,16 @@ export default function ContinueWatchingButton({
 			e.stopPropagation();
 
 			if (isLiked) {
+				haptic('soft');
 				removeFavorite(Number(id), type);
 				toast.info('Removed from favorites');
 			} else {
+				haptic('success');
 				addFavorite(show, type);
 				toast.success('Added to favorites');
 			}
 		},
-		[id, isLiked, show, type, addFavorite, removeFavorite]
+		[id, isLiked, show, type, haptic, addFavorite, removeFavorite]
 	);
 
 	// Handle scroll to player (when already playing)
@@ -148,6 +149,7 @@ export default function ContinueWatchingButton({
 
 	// Handle play/resume
 	const handlePlay = useCallback(async () => {
+		haptic('medium');
 		// If currently playing this show, just scroll to player
 		if (isCurrentlyPlaying) {
 			scrollToPlayer();
@@ -162,9 +164,17 @@ export default function ContinueWatchingButton({
 				const episodeToPlay = currentActiveEpisode || recentFromHistory;
 
 				if (episodeToPlay) {
+					const seasonNumber =
+						'season_number' in episodeToPlay
+							? episodeToPlay.season_number
+							: episodeToPlay.seasonNumber;
+					const episodeNumber =
+						'episode_number' in episodeToPlay
+							? episodeToPlay.episode_number
+							: episodeToPlay.episodeNumber;
 					const params = new URLSearchParams();
-					params.set('season', String(episodeToPlay.season_number));
-					params.set('episode', String(episodeToPlay.episode_number));
+					params.set('season', String(seasonNumber || 1));
+					params.set('episode', String(episodeNumber || 1));
 					router.push(`/${type}/${id}?${params.toString()}`);
 				} else {
 					router.push(`/${type}/${id}?season=1&episode=1`);
@@ -184,6 +194,7 @@ export default function ContinueWatchingButton({
 		currentActiveEpisode,
 		recentFromHistory,
 		isCurrentlyPlaying,
+		haptic,
 		scrollToPlayer,
 	]);
 
@@ -196,6 +207,18 @@ export default function ContinueWatchingButton({
 
 	// Determine which episode to show in button (prioritize active over history)
 	const displayEpisode = currentActiveEpisode || recentFromHistory;
+	const displaySeasonNumber =
+		(displayEpisode &&
+			('season_number' in displayEpisode
+				? displayEpisode.season_number
+				: displayEpisode.seasonNumber)) ||
+		1;
+	const displayEpisodeNumber =
+		(displayEpisode &&
+			('episode_number' in displayEpisode
+				? displayEpisode.episode_number
+				: displayEpisode.episodeNumber)) ||
+		1;
 
 	// Determine button text based on state
 	const { buttonText, buttonLabel, ButtonIcon } = useMemo(() => {
@@ -211,8 +234,8 @@ export default function ContinueWatchingButton({
 		if (isCurrentlyPlaying && displayEpisode) {
 			// Currently playing - show "Playing" with Pause icon
 			return {
-				buttonText: `Playing S${displayEpisode.season_number} E${displayEpisode.episode_number}`,
-				buttonLabel: `Now playing Season ${displayEpisode.season_number} Episode ${displayEpisode.episode_number}`,
+				buttonText: `Playing S${displaySeasonNumber} E${displayEpisodeNumber}`,
+				buttonLabel: `Now playing Season ${displaySeasonNumber} Episode ${displayEpisodeNumber}`,
 				ButtonIcon: Pause,
 			};
 		}
@@ -220,8 +243,8 @@ export default function ContinueWatchingButton({
 		if (displayEpisode) {
 			// Has active/recent episode - show "Resume"
 			return {
-				buttonText: `Resume S${displayEpisode.season_number} E${displayEpisode.episode_number}`,
-				buttonLabel: `Resume Season ${displayEpisode.season_number} Episode ${displayEpisode.episode_number}`,
+				buttonText: `Resume S${displaySeasonNumber} E${displayEpisodeNumber}`,
+				buttonLabel: `Resume S${displaySeasonNumber} E${displayEpisodeNumber}`,
 				ButtonIcon: Play,
 			};
 		}
@@ -232,7 +255,7 @@ export default function ContinueWatchingButton({
 			buttonLabel: 'Start Watching from Episode 1',
 			ButtonIcon: Play,
 		};
-	}, [type, isCurrentlyPlaying, displayEpisode]);
+	}, [type, isCurrentlyPlaying, displayEpisode, displaySeasonNumber, displayEpisodeNumber]);
 
 	// Button styles
 	const iconButtonBase = cn(
@@ -313,7 +336,6 @@ export default function ContinueWatchingButton({
 							strokeWidth={2}
 						/>
 					</GlowingButton>
-
 				</>
 			)}
 

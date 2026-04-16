@@ -111,7 +111,7 @@ interface CastMember {
 }
 
 export interface SeasonTabsProps {
-	seasons: Array<{ season_number: number } & Record<string, unknown>>;
+	seasons: Array<{ season_number: number }>;
 	showId: string;
 	showData: Show;
 }

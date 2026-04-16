@@ -27,12 +27,15 @@ const MediaDetails = (props: any) => {
 				month: 'short',
 				day: 'numeric',
 				year: 'numeric',
-		  })
+			})
 		: null;
 	const languages = Array.isArray(data?.spoken_languages)
 		? data.spoken_languages
 				.slice(0, 2)
-				.map((lang: { english_name?: string; name?: string }) => lang.english_name || lang.name)
+				.map(
+					(lang: { english_name?: string; name?: string }) =>
+						lang.english_name || lang.name
+				)
 				.filter(Boolean)
 		: [];
 
@@ -84,10 +87,10 @@ const MediaDetails = (props: any) => {
 					'md:w-full md:left-auto md:right-auto md:ml-0 md:mr-0'
 				)}
 			>
-				<ShowDetails id={data?.id} show={data} type={type} />
+				<ShowDetails show={data} type={type} />
 			</div>
-			{/* Rest of content in container */}
-			<Container className="w-full mt-4 px-3 sm:px-4 py-5 md:py-8">
+			{/* Rest of content — no top gap, hero gradient bleeds directly into this */}
+			<Container className="w-full px-3 sm:px-4 pb-8 md:pb-12">
 				<div className="space-y-8 md:space-y-10">
 					<ShowContainer
 						showData={data}
@@ -126,18 +129,38 @@ const MediaDetails = (props: any) => {
 								)}
 							</div>
 							<div className="mt-5 mb-3 flex flex-wrap gap-2">
-								{data?.status && (
-									<DetailPill label={data.status} />
+								{/* Creator (TV) or Director (movie from credits) */}
+								{Array.isArray(data?.created_by) && data.created_by.length > 0 && (
+									<DetailPill
+										label={`Created by ${data.created_by
+											.slice(0, 2)
+											.map((c: { name: string }) => c.name)
+											.join(' & ')}`}
+									/>
 								)}
-								{releaseLabel && (
-									<DetailPill label={releaseLabel} />
-								)}
-								{typeof data?.number_of_seasons === 'number' && data.number_of_seasons > 0 && (
-									<DetailPill label={`${data.number_of_seasons} Seasons`} />
-								)}
-								{typeof data?.number_of_episodes === 'number' && data.number_of_episodes > 0 && (
-									<DetailPill label={`${data.number_of_episodes} Episodes`} />
-								)}
+								{/* Movie director from credits.crew */}
+								{type === 'movie' &&
+									!data?.created_by?.length &&
+									Array.isArray(data?.credits?.crew) &&
+									(() => {
+										const director = data.credits.crew.find(
+											(c: { job: string; name: string }) =>
+												c.job === 'Director'
+										);
+										return director ? (
+											<DetailPill label={`Directed by ${director.name}`} />
+										) : null;
+									})()}
+								{data?.status && <DetailPill label={data.status} />}
+								{releaseLabel && <DetailPill label={releaseLabel} />}
+								{typeof data?.number_of_seasons === 'number' &&
+									data.number_of_seasons > 0 && (
+										<DetailPill label={`${data.number_of_seasons} Seasons`} />
+									)}
+								{typeof data?.number_of_episodes === 'number' &&
+									data.number_of_episodes > 0 && (
+										<DetailPill label={`${data.number_of_episodes} Episodes`} />
+									)}
 								{languages.length > 0 && (
 									<DetailPill label={languages.join(', ')} />
 								)}

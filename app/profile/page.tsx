@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card';
 import useWatchListStore from '@/store/watchlistStore';
 import useTVShowStore from '@/store/recentsStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
-import { useUserWatchlist, useUserFavorites, useUserRecentlyWatched } from '@/hooks/use-user-data';
+import { useUserWatchlist, useUserFavorites } from '@/hooks/use-user-data';
 import {
 	Calendar,
 	Clock,
@@ -117,7 +117,7 @@ export default function ProfilePage() {
 	const { data: session, isPending } = useSession();
 	const router = useRouter();
 	const { watchlist, tvwatchlist } = useWatchListStore();
-	const { recentlyWatched } = useTVShowStore();
+	const { recentlyWatched, initialize: initializeContinueWatching } = useTVShowStore();
 	const { favoriteMovies, favoriteTV } = useFavoritesStore();
 	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
 
@@ -128,8 +128,6 @@ export default function ProfilePage() {
 	const { data: dbFavoritesMovies = [], isLoading: loadingFavoritesMovies } =
 		useUserFavorites('movie');
 	const { data: dbFavoritesTV = [], isLoading: loadingFavoritesTV } = useUserFavorites('tv');
-	const { data: dbRecentlyWatched = [], isLoading: loadingRecentlyWatched } =
-		useUserRecentlyWatched();
 
 	const [watchlistMovies, setWatchlistMovies] = useState<Show[]>([]);
 	const [watchlistTV, setWatchlistTV] = useState<Show[]>([]);
@@ -142,6 +140,10 @@ export default function ProfilePage() {
 			router.push('/auth/signin?callbackUrl=/profile');
 		}
 	}, [isPending, session, router]);
+
+	useEffect(() => {
+		initializeContinueWatching();
+	}, [initializeContinueWatching]);
 
 	// Fetch details for watchlist items
 	useEffect(() => {
@@ -249,7 +251,7 @@ export default function ProfilePage() {
 		(tvwatchlist?.length || 0) +
 		dbWatchlistMovies.length +
 		dbWatchlistTV.length;
-	const totalWatched = (recentlyWatched?.length || 0) + dbRecentlyWatched.length;
+	const totalWatched = recentlyWatched?.length || 0;
 	const totalFavorites =
 		(favoriteMovies?.length || 0) +
 		(favoriteTV?.length || 0) +
@@ -577,26 +579,21 @@ export default function ProfilePage() {
 								</h2>
 							</div>
 							<div className="space-y-3 md:space-y-4">
-								{loadingRecentlyWatched ? (
-									<MediaLoader withHeader className="min-h-[280px]" />
-								) : (
 									<>
 										{recentlyWatched && recentlyWatched.length > 0 && (
 											<RecentlyWatchedComponent />
 										)}
-										{(!recentlyWatched || recentlyWatched.length === 0) &&
-											!loadingRecentlyWatched && (
-												<div className="text-center py-6 md:py-8 text-muted-foreground">
-													<Clock className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 opacity-50" />
-													<p className="text-sm">No recent activity</p>
-													<p className="text-xs mt-2">
-														Start watching to see your recent activity
-														here!
-													</p>
-												</div>
-											)}
+										{(!recentlyWatched || recentlyWatched.length === 0) && (
+											<div className="text-center py-6 md:py-8 text-muted-foreground">
+												<Clock className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 opacity-50" />
+												<p className="text-sm">No recent activity</p>
+												<p className="text-xs mt-2">
+													Start watching to see your recent activity
+													here!
+												</p>
+											</div>
+										)}
 									</>
-								)}
 							</div>
 						</div>
 					</div>

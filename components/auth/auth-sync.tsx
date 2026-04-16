@@ -16,7 +16,7 @@ export function AuthSync() {
 	const hasSyncedRef = useRef(false);
 	const hasLoadedRef = useRef(false);
 	const { initialize: initializeWatchlist } = useWatchListStore();
-	const { loadFromDatabase: loadRecentsFromDB } = useTVShowStore();
+	const { initialize: initializeRecents } = useTVShowStore();
 	const { initialize: initializeFavorites } = useFavoritesStore();
 
 	useEffect(() => {
@@ -27,7 +27,7 @@ export function AuthSync() {
 				// Load from database first
 				Promise.all([
 					initializeWatchlist(),
-					loadRecentsFromDB(),
+					initializeRecents(),
 					initializeFavorites(),
 				]).then(() => {
 					// After loading, sync local data to database in background
@@ -49,7 +49,7 @@ export function AuthSync() {
 			useWatchListStore.setState({ isInitialized: false });
 			useFavoritesStore.setState({ isInitialized: false });
 		}
-	}, [user, userId, initializeWatchlist, loadRecentsFromDB, initializeFavorites]);
+	}, [user, userId, initializeWatchlist, initializeRecents, initializeFavorites]);
 
 	return null;
 }

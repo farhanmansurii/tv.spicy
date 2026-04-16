@@ -62,7 +62,6 @@ export const generateMetadata = (): Metadata => ({
 export const generateViewport = (): Viewport => ({
 	width: 'device-width',
 	initialScale: 1,
-	maximumScale: 1,
 });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

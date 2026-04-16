@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useHaptics } from '@/hooks/use-haptics';
 import gsap from 'gsap';
 import {
 	GalleryVerticalEnd,
@@ -37,6 +38,7 @@ import { ActiveEpisodeDetails } from './active-episode-details';
 import { DetailHeader, DetailShell } from '../details/detail-primitives';
 
 const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
+	const haptic = useHaptics();
 	const hydrateEpisode = useCallback(
 		(episode: TMDBEpisode): EpisodeType => ({
 			...episode,
@@ -89,14 +91,19 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 			setIsPortrait(e.matches);
 		};
 
+		let resizeTimer: ReturnType<typeof setTimeout>;
 		const handleResize = () => {
-			setIsMobile(window.innerWidth < 768);
+			clearTimeout(resizeTimer);
+			resizeTimer = setTimeout(() => {
+				setIsMobile(window.innerWidth < 768);
+			}, 150);
 		};
 
 		orientationQuery.addEventListener('change', handleOrientationChange);
-		window.addEventListener('resize', handleResize);
+		window.addEventListener('resize', handleResize, { passive: true });
 
 		return () => {
+			clearTimeout(resizeTimer);
 			orientationQuery.removeEventListener('change', handleOrientationChange);
 			window.removeEventListener('resize', handleResize);
 		};
@@ -134,7 +141,8 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 	});
 
 	const episodes = seasonData?.episodes;
-	const activeViewLabel = view === 'list' ? 'List View' : view === 'grid' ? 'Grid View' : 'Carousel View';
+	const activeViewLabel =
+		view === 'list' ? 'List View' : view === 'grid' ? 'Grid View' : 'Carousel View';
 
 	// 3. HYDRATION & INITIALIZATION
 	useEffect(() => {
@@ -179,6 +187,7 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 
 	// 4. ACTION HANDLERS (Functional Fixes)
 	const handleSeasonChange = (value: string) => {
+		haptic('selection');
 		const sNum = Number(value);
 		setActiveSeason(sNum);
 		const params = new URLSearchParams(searchParams.toString());
@@ -233,10 +242,12 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 				contentRef.current
 			);
 			if (!items.length) return;
+			// Cap stagger so large episode lists (20+) don't feel sluggish
+			const stagger = Math.min(0.025, 0.5 / items.length);
 			gsap.fromTo(
 				items,
-				{ opacity: 0, y: 10, scale: 0.98 },
-				{ opacity: 1, y: 0, scale: 1, duration: 0.32, ease: 'power2.out', stagger: 0.04 }
+				{ opacity: 0, y: 8 },
+				{ opacity: 1, y: 0, duration: 0.28, ease: 'power2.out', stagger }
 			);
 		}, contentRef);
 
@@ -374,7 +385,7 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 						className={cn(
 							'w-full transition-all duration-200',
 							stickyEnabled && isMobile && isPortrait
-								? 'sticky top-2 z-30 bg-zinc-900/60 backdrop-blur-xl rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/5'
+								? 'sticky top-2 z-30 bg-zinc-900/85 backdrop-blur-md rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/5'
 								: 'relative z-10',
 							isSticky &&
 								isStickyDismissed &&
@@ -431,7 +442,10 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 						<SegmentedControl
 							value={view}
-							onChange={(val) => setView(val as 'grid' | 'list' | 'carousel')}
+							onChange={(val) => {
+								haptic('selection');
+								setView(val as 'grid' | 'list' | 'carousel');
+							}}
 							items={[
 								{
 									value: 'list',

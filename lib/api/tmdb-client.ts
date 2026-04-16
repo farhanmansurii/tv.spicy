@@ -560,14 +560,17 @@ export async function fetchEpisodeDetails(
 export async function fetchHeroItemsWithDetails(
 	shows: TMDBBaseMedia[],
 	type: MediaType,
-	maxItems: number = 10
+	maxItems: number = 4
 ): Promise<TMDBBaseMedia[]> {
 	try {
 		const topShows = shows.slice(0, maxItems);
 
 		// Fetch details in parallel with error handling
 		const detailsPromises = topShows.map((show) =>
-			fetchDetailsTMDB(show.id.toString(), type).catch(() => show)
+			fetchDetailsTMDB(
+				show.id.toString(),
+				(show.media_type === 'movie' || show.media_type === 'tv' ? show.media_type : type) as MediaType
+			).catch(() => show)
 		);
 
 		const detailsResults = await Promise.allSettled(detailsPromises);

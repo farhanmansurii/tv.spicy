@@ -5,6 +5,7 @@ import { Play, Lock, Star, CalendarDays, Clock3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 import type { Episode } from '@/lib/types';
+import { useHaptics } from '@/hooks/use-haptics';
 
 export interface EpisodeItemProps {
 	episode: Episode;
@@ -22,12 +23,14 @@ export function EpisodeItem({
 	variant = 'card',
 }: EpisodeItemProps) {
 	const isReleased = episode.air_date ? new Date(episode.air_date) <= new Date() : true;
-	const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w780') : null;
+	const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w300') : null;
 
 	const [isPressed, setIsPressed] = useState(false);
+	const haptic = useHaptics();
 
 	const handleClick = (e: React.MouseEvent) => {
 		if (!isReleased) return;
+		haptic('light');
 		toggle(episode, e);
 	};
 
@@ -61,9 +64,9 @@ export function EpisodeItem({
 					// Smooth spring-like transitions
 					'transition-all duration-200 ease-out',
 					// Focus states for accessibility
-					'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950',
+					'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950',
 					// Active vs default states
-					active ? 'bg-white/[0.07] shadow-lg shadow-black/20' : 'hover:bg-white/[0.04]',
+					active ? 'bg-white/[0.07]' : 'hover:bg-white/[0.04]',
 					// Press animation
 					isPressed && 'scale-[0.98] transition-transform duration-100',
 					// Disabled state
@@ -76,10 +79,10 @@ export function EpisodeItem({
 						'rounded-xl overflow-hidden',
 						'bg-zinc-900',
 						// Subtle border that glows when active
-						'ring-1 transition-all duration-300',
+						'transition-all duration-300',
 						active
-							? 'ring-white/25 shadow-lg shadow-white/[0.03]'
-							: 'ring-white/[0.08] group-hover:ring-white/15'
+							? 'ring-2 ring-white/40 shadow-[0_0_12px_rgba(255,255,255,0.08)]'
+							: 'ring-1 ring-white/[0.08] group-hover:ring-white/20'
 					)}
 				>
 					{stillUrl ? (
@@ -87,6 +90,7 @@ export function EpisodeItem({
 							src={stillUrl}
 							alt=""
 							loading="lazy"
+							decoding="async"
 							className={cn(
 								'w-full h-full object-cover',
 								'transition-transform duration-500 ease-out',
@@ -260,14 +264,14 @@ export function EpisodeItem({
 						active ? 'translate-y-0' : 'translate-y-1 group-hover:translate-y-0'
 					)}
 				>
-						<span
-							className={cn(
-								'text-xs font-medium',
-								active ? 'text-white' : 'text-white/70'
-							)}
-						>
-							Episode {episode.episode_number}
-						</span>
+					<span
+						className={cn(
+							'text-xs font-medium',
+							active ? 'text-white' : 'text-white/70'
+						)}
+					>
+						Episode {episode.episode_number}
+					</span>
 					{episode.runtime && (
 						<>
 							<span className="text-white/30">·</span>
@@ -344,10 +348,7 @@ export function EpisodeItem({
 			{/* Now playing pulse */}
 			{active && (
 				<div className="absolute top-3 right-3">
-					<div className="relative">
-						<div className="w-2.5 h-2.5 rounded-full bg-white" />
-						<div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-white animate-ping opacity-75" />
-					</div>
+					<div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
 				</div>
 			)}
 

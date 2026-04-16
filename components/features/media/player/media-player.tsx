@@ -78,8 +78,8 @@ export default function MediaPlayer({
 				})) || [];
 		return subtitleTracks;
 	}, [subtitles]);
-	const plugins = [
-		OUI({
+		const plugins = [
+			OUI({
 			fullscreen: true,
 			coverButton: true,
 			miniProgressBar: true,
@@ -132,7 +132,7 @@ export default function MediaPlayer({
 		}),
 		chromecast,
 		OHls(),
-	];
+		] as any;
 
 	useEffect(() => {
 		playerRef.current = Player.make('#oplayer').use(plugins).create() as Player<Ctx>;
@@ -189,18 +189,18 @@ export default function MediaPlayer({
 			.then(() => oplayer.context.ui.subtitle?.changeSource(subtitlesList))
 			.catch((err) => console.error(err));
 
-		const ep = recentlyWatched.find(
-			(epi) =>
-				epi?.tv_id === activeEP?.tv_id &&
-				epi?.season_number === activeEP?.season_number &&
-				epi?.episode_number === activeEP?.episode_number
-		);
-		if (type === 'tv' && ep && ep.time != null) {
-			const handleLoadedMetadata = () => {
-				const calculatedTime = calculateTimeFromPercentage(
-					ep.time ?? 0,
-					oplayer?.duration ?? 0
-				);
+			const ep = recentlyWatched.find(
+				(epi) =>
+					String(epi.mediaId) === activeEP?.tv_id &&
+					epi?.seasonNumber === activeEP?.season_number &&
+					epi?.episodeNumber === activeEP?.episode_number
+			);
+			if (type === 'tv' && ep && ep.progressPercent != null) {
+				const handleLoadedMetadata = () => {
+					const calculatedTime = calculateTimeFromPercentage(
+						ep.progressPercent ?? 0,
+						oplayer?.duration ?? 0
+					);
 				if (calculatedTime != null) {
 					oplayer.seek(calculatedTime);
 					oplayer.context.ui.changHighlightSource([
@@ -237,14 +237,14 @@ export default function MediaPlayer({
 			}
 			watchTimeTimeoutRef.current = setTimeout(() => {
 				if (playerRef.current) {
-					const currentTime = playerRef.current.currentTime;
-					const totalTime = playerRef.current.duration;
-					const watchTimePercent = Math.floor((currentTime / totalTime) * 100);
-					if (watchTimePercent > 3 && activeEP?.tv_id) {
-						updateTimeWatched(activeEP.tv_id, watchTimePercent);
+						const currentTime = playerRef.current.currentTime;
+						const totalTime = playerRef.current.duration;
+						const watchTimePercent = Math.floor((currentTime / totalTime) * 100);
+						if (watchTimePercent > 3 && activeEP?.tv_id) {
+							updateTimeWatched(activeEP.tv_id, watchTimePercent, 'tv');
+						}
 					}
-				}
-			}, 500);
+				}, 500);
 		};
 		if (playerRef.current) {
 			playerRef.current?.on('timeupdate', handleTimeUpdate);

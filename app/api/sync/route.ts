@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/auth-server';
 import { addToWatchlist } from '@/lib/db/watchlist';
-import { addRecentlyWatched } from '@/lib/db/recently-watched';
+import { mergeRecentlyWatchedBatch } from '@/lib/db/recently-watched';
 import { addFavorite } from '@/lib/db/favorites';
 import { addRecentSearch } from '@/lib/db/recent-searches';
 
@@ -55,13 +55,17 @@ export async function POST(request: NextRequest) {
 		// Sync recently watched
 		if (recentlyWatched && Array.isArray(recentlyWatched)) {
 			for (const item of recentlyWatched) {
-				try {
-					await addRecentlyWatched(session.user.id, item);
-					results.recentlyWatched.added++;
-				} catch (error) {
-					console.error('Error syncing recently watched:', error);
+				if (!item?.mediaId) {
 					results.recentlyWatched.errors++;
 				}
+			}
+
+			try {
+				const mergedItems = await mergeRecentlyWatchedBatch(session.user.id, recentlyWatched);
+				results.recentlyWatched.added = mergedItems.length;
+			} catch (error) {
+				console.error('Error syncing recently watched:', error);
+				results.recentlyWatched.errors = recentlyWatched.length;
 			}
 		}
 

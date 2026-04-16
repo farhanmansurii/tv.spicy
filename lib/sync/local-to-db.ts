@@ -1,8 +1,9 @@
 'use client';
 
-import { loadEpisodesFromDB, loadRecentlySearchedFromDB } from '@/lib/indexedDB';
+import { loadRecentlySearchedFromDB } from '@/lib/indexedDB';
 import useWatchListStore from '@/store/watchlistStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
+import useTVShowStore from '@/store/recentsStore';
 
 interface SyncWatchlistItem {
 	mediaId: number;
@@ -15,14 +16,17 @@ interface SyncWatchlistItem {
 
 interface SyncRecentlyWatchedItem {
 	mediaId: number;
-	mediaType: 'tv';
-	seasonNumber: number;
-	episodeNumber: number;
-	episodeId: number;
+	mediaType: 'tv' | 'movie';
+	seasonNumber?: number | null;
+	episodeNumber?: number | null;
+	episodeId?: number | null;
 	stillPath?: string | null;
-	episodeName: string;
+	episodeName?: string;
 	showName?: string;
-	progress: number;
+	title?: string;
+	progressPercent: number;
+	updatedAt: string;
+	createdAt: string;
 }
 
 interface SyncFavoriteItem {
@@ -69,18 +73,21 @@ export async function collectLocalData(): Promise<SyncData> {
 			})),
 		];
 
-		// Get recently watched from IndexedDB
-		const episodes = await loadEpisodesFromDB();
-		data.recentlyWatched = episodes.map((ep) => ({
-			mediaId: parseInt(ep.tv_id),
-			mediaType: 'tv',
-			seasonNumber: ep.season_number,
-			episodeNumber: ep.episode_number,
-			episodeId: ep.id,
-			stillPath: ep.still_path,
-			episodeName: ep.name,
-			showName: ep.show_name,
-			progress: ep.time || 0,
+		// Get recently watched from the unified persisted Zustand store
+		const recentsStore = useTVShowStore.getState();
+		data.recentlyWatched = (recentsStore.recentlyWatched || []).map((item) => ({
+			mediaId: item.mediaId,
+			mediaType: item.mediaType,
+			seasonNumber: item.seasonNumber,
+			episodeNumber: item.episodeNumber,
+			episodeId: item.episodeId,
+			stillPath: item.stillPath,
+			episodeName: item.episodeName,
+			showName: item.showName,
+			title: item.title,
+			progressPercent: item.progressPercent,
+			updatedAt: item.updatedAt,
+			createdAt: item.createdAt,
 		}));
 
 		// Get favorites from Zustand store

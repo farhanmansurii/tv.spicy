@@ -12,20 +12,20 @@ import { HomePersonalizedRows } from '@/components/features/home/home-personaliz
 export const revalidate = 604800;
 
 async function fetchHomePageData() {
-	// Phase 1: Fetch hero data and first 2-3 rows server-side for instant loading
-	const [trendingTV, trendingMovies, tvPopular, tvOnTheAir, movieNowPlaying] = await Promise.all([
+	// Keep first paint focused on hero plus a small set of immediately valuable rows.
+	const [trendingTV, trendingMovies, tvPopular] = await Promise.all([
 		fetchRowData('trending/tv/week'),
 		fetchRowData('trending/movie/week'),
 		fetchRowData('tv/popular'),
-		fetchRowData('tv/on_the_air'),
-		fetchRowData('movie/now_playing'),
 	]);
 
 	const allTrending = [...(trendingTV || []), ...(trendingMovies || [])].filter(Boolean);
-	const basicHeroShows = allTrending.filter((show) => show?.backdrop_path).slice(0, 10);
+	const basicHeroShows = allTrending
+		.filter((show) => show?.backdrop_path || show?.poster_path)
+		.slice(0, 4);
 
-	// Fetch full details (with logos) for hero items
-	const heroShows = (await fetchHeroItemsWithDetails(basicHeroShows, 'tv', 10)) as Array<
+	// Fetch details for a small hero set so the browser isn't decoding a whole billboard strip.
+	const heroShows = (await fetchHeroItemsWithDetails(basicHeroShows, 'tv', 4)) as Array<
 		Show & { media_type?: 'movie' | 'tv' }
 	>;
 
@@ -34,8 +34,6 @@ async function fetchHomePageData() {
 		trendingTV: trendingTV as Array<Show | { id: number }>,
 		trendingMovies: trendingMovies as Array<Show | { id: number }>,
 		tvPopular: tvPopular as Array<Show | { id: number }>,
-		tvOnTheAir: tvOnTheAir as Array<Show | { id: number }>,
-		movieNowPlaying: movieNowPlaying as Array<Show | { id: number }>,
 	};
 }
 
@@ -44,15 +42,11 @@ function HomePageContent({
 	trendingTV,
 	trendingMovies,
 	tvPopular,
-	tvOnTheAir,
-	movieNowPlaying,
 }: {
 	heroShows: Array<Show & { media_type?: 'movie' | 'tv' }>;
 	trendingTV: Array<Show | { id: number }>;
 	trendingMovies: Array<Show | { id: number }>;
 	tvPopular: Array<Show | { id: number }>;
-	tvOnTheAir: Array<Show | { id: number }>;
-	movieNowPlaying: Array<Show | { id: number }>;
 }) {
 	return (
 		<div className="min-h-screen bg-background text-foreground pb-20">
@@ -60,7 +54,6 @@ function HomePageContent({
 			<Container className="w-full">
 				<div className="flex flex-col space-y-4 md:space-y-6">
 					<HomePersonalizedRows />
-
 					{/* Pre-fetched rows - no Suspense needed since data is already available */}
 					<DataRow
 						endpoint="trending/tv/week"
@@ -78,13 +71,14 @@ function HomePageContent({
 						initialData={tvPopular as unknown as Show[]}
 					/>
 
-					<DataRow
-						endpoint="tv/on_the_air"
-						text="Airing This Week"
-						type="tv"
-						viewAllLink="/browse/airing-this-week"
-						initialData={tvOnTheAir as unknown as Show[]}
-					/>
+					<Suspense fallback={<MediaLoader withHeader />}>
+						<DataRow
+							endpoint="tv/on_the_air"
+							text="Airing This Week"
+							type="tv"
+							viewAllLink="/browse/airing-this-week"
+						/>
+					</Suspense>
 
 					<Suspense fallback={<MediaLoader withHeader />}>
 						<DataRow
@@ -100,17 +94,19 @@ function HomePageContent({
 						endpoint="trending/movie/week"
 						text="Blockbuster Hits"
 						type="movie"
+						showRank
 						viewAllLink="/browse/blockbuster-hits"
 						initialData={trendingMovies as unknown as Show[]}
 					/>
 
-					<DataRow
-						endpoint="movie/now_playing"
-						text="Fresh in Theaters"
-						type="movie"
-						viewAllLink="/browse/fresh-in-theaters"
-						initialData={movieNowPlaying as unknown as Show[]}
-					/>
+					<Suspense fallback={<MediaLoader withHeader />}>
+						<DataRow
+							endpoint="movie/now_playing"
+							text="Fresh in Theaters"
+							type="movie"
+							viewAllLink="/browse/fresh-in-theaters"
+						/>
+					</Suspense>
 
 					<Suspense fallback={<MediaLoader withHeader />}>
 						<DataRow

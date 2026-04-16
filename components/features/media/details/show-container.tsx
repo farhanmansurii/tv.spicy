@@ -15,7 +15,7 @@ interface TMDBSeason {
 }
 
 interface ShowContainerProps {
-	type: string;
+	type: 'movie' | 'tv';
 	id: string;
 	seasons: TMDBSeason[];
 	showData: Show;

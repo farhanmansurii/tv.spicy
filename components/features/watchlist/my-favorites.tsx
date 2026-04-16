@@ -64,7 +64,7 @@ function MyFavoritesComponent() {
                 });
 
                 const results = await Promise.all(promises);
-                const validFavorites = results.filter((item): item is Show => item !== null);
+                const validFavorites = results.filter(Boolean) as Show[];
                 setFavorites(validFavorites);
             } catch (error) {
                 console.error('Error fetching favorites:', error);

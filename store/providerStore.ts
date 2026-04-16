@@ -9,7 +9,7 @@ interface ProviderStore {
 const useProviderStore = create<ProviderStore>()(
 	persist(
 		(set) => ({
-			selectedProvider: '111movies',
+			selectedProvider: 'vidking',
 			setProvider: (provider: string) => set({ selectedProvider: provider }),
 		}),
 		{
