@@ -1,10 +1,11 @@
 'use client';
+
 import React from 'react';
-import { Separator } from '@/components/ui/separator';
-import Container from '@/components/shared/containers/container';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const GitHubIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => (
-	<svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
+	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" {...props}>
 		<path
 			fillRule="evenodd"
 			clipRule="evenodd"
@@ -14,84 +15,126 @@ const GitHubIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => (
 );
 
 const XIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => (
-	<svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+	<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
 		<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
 	</svg>
 );
 
-const SocialLink = ({
-	href,
-	icon: Icon,
-	children,
-}: {
-	href: string;
-	icon: React.ComponentType<{ className?: string }>;
-	children: React.ReactNode;
-}) => {
+const LEGAL_LINKS = [
+	{ label: 'Privacy', href: '#' },
+	{ label: 'Terms', href: '#' },
+	{ label: 'DMCA', href: '#' },
+];
+
+const NAV_LINKS = [
+	{ label: 'Home', href: '/' },
+	{ label: 'Movies', href: '/movie' },
+	{ label: 'TV Series', href: '/tv' },
+	{ label: 'Library', href: '/library' },
+];
+
+export default function Footer() {
 	return (
-		<a
-			href={href}
-			target="_blank"
-			rel="noreferrer"
-			className="group p-2 -m-2 rounded-full hover:bg-zinc-800 transition-colors"
-		>
-			<span className="sr-only">{children}</span>
-			{/* Changed fill colors to match dark theme better */}
-			<Icon className="h-5 w-5 fill-zinc-400 transition group-hover:fill-white" />
-		</a>
-	);
-};
+		<footer className="w-full mt-20 pb-8">
+			{/* Shared max-w-7xl container — identical to header and all page containers */}
+			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
 
-const Footer = () => {
-	return (
-		<footer className="w-full mt-16">
-			<div className="px-4 md:px-12">
-				<Separator className="bg-zinc-800/50" />
-			</div>
+				{/* Full-width rule */}
+				<div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.09] to-transparent" />
 
-			<Container className="py-12 flex flex-col gap-8">
-				<div className="flex flex-col md:flex-row justify-between items-center gap-6">
-					<div className="flex items-center gap-2">
-						<span className="text-xl font-bold tracking-tighter text-white">
-							Watch.
-						</span>
-					</div>
+				{/* Main footer body */}
+				<div className="pt-10 pb-6 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-start">
 
-					<div className="flex items-center gap-6">
-						<SocialLink href="https://github.com" icon={GitHubIcon}>
-							GitHub
-						</SocialLink>
-						<SocialLink href="https://twitter.com" icon={XIcon}>
-							X (Twitter)
-						</SocialLink>
-					</div>
-				</div>
+					{/* Left — brand block */}
+					<div className="flex flex-col gap-4 max-w-sm">
+						<Link href="/" className="flex items-center gap-2 w-fit group" aria-label="Spicy TV home">
+							<div className="relative h-7 w-7 flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
+								<Image src="/logo.webp" alt="" fill className="object-contain" sizes="28px" />
+							</div>
+							<span
+								className="text-[15px] font-semibold tracking-tight text-white/80 group-hover:text-white transition-colors duration-200"
+								style={{ fontFamily: 'var(--font-geist-sans), sans-serif' }}
+							>
+								Spicy TV
+							</span>
+						</Link>
 
-				<div className="max-w-3xl mx-auto text-center">
-					<p className="text-sm text-zinc-500 leading-relaxed">
-						Disclaimer: This site does not store any files on its server. All contents
-						are provided by non-affiliated third parties.
-						<br className="hidden md:block" />
-						<span className="text-zinc-600 italic">
+						<p className="text-[12px] leading-relaxed text-zinc-500 max-w-xs">
+							This site does not store any files on its server. All contents are provided
+							by non-affiliated third parties.
+						</p>
+
+						<p className="text-[11px] text-zinc-600 italic">
 							Don&apos;t forget to clear your browser history before you die.
-						</span>
-					</p>
-				</div>
+						</p>
+					</div>
 
-				<div className="flex flex-col md:flex-row justify-between items-center text-xs text-zinc-600 pt-8 mt-4 border-t border-zinc-900/50">
-					<p>Copyright © {new Date().getFullYear()} Watch. All rights reserved.</p>
-					<div className="flex gap-4 mt-2 md:mt-0">
-						<a href="#" className="hover:text-zinc-400 transition-colors">
-							Privacy Policy
-						</a>
-						<a href="#" className="hover:text-zinc-400 transition-colors">
-							Terms of Service
-						</a>
+					{/* Right — nav + socials stacked */}
+					<div className="flex flex-col gap-6 items-start md:items-end">
+						{/* Nav links */}
+						<nav aria-label="Footer navigation">
+							<ul className="flex flex-wrap gap-x-5 gap-y-2">
+								{NAV_LINKS.map((link) => (
+									<li key={link.href}>
+										<Link
+											href={link.href}
+											className="text-[13px] font-medium text-zinc-500 hover:text-white transition-colors duration-150"
+										>
+											{link.label}
+										</Link>
+									</li>
+								))}
+							</ul>
+						</nav>
+
+						{/* Social icons */}
+						<div className="flex items-center gap-3">
+							<a
+								href="https://github.com"
+								target="_blank"
+								rel="noreferrer"
+								aria-label="GitHub"
+								className="flex items-center justify-center w-8 h-8 rounded-full text-zinc-500 hover:text-white transition-all duration-150 hover:bg-white/[0.06]"
+							>
+								<GitHubIcon className="w-4 h-4" />
+							</a>
+							<a
+								href="https://twitter.com"
+								target="_blank"
+								rel="noreferrer"
+								aria-label="X (Twitter)"
+								className="flex items-center justify-center w-8 h-8 rounded-full text-zinc-500 hover:text-white transition-all duration-150 hover:bg-white/[0.06]"
+							>
+								<XIcon className="w-4 h-4" />
+							</a>
+						</div>
 					</div>
 				</div>
-			</Container>
+
+				{/* Bottom bar */}
+				<div
+					className="flex flex-col sm:flex-row justify-between items-center gap-2 pt-5"
+					style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+				>
+					<p className="text-[11px] text-zinc-600 tabular-nums">
+						© {new Date().getFullYear()} Spicy TV
+					</p>
+
+					<ul className="flex items-center gap-4">
+						{LEGAL_LINKS.map((link) => (
+							<li key={link.label}>
+								<a
+									href={link.href}
+									className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors duration-150"
+								>
+									{link.label}
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+
+			</div>
 		</footer>
 	);
-};
-
-export default Footer;
+}

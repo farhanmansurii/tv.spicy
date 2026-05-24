@@ -2,45 +2,45 @@
 
 import * as React from 'react';
 import {
-	Search,
-	Command as CommandIcon,
-	Sun,
-	Moon,
-	Monitor,
-	Home,
-	Settings,
-	User,
-	Mail,
-	Bell,
-	Copy,
-	Share2,
-	RefreshCw,
-	Trash2,
-	Clock,
-	Bookmark,
-	HelpCircle,
-	FileText,
-	Zap,
-	Palette,
-	Globe,
-	Lock,
-	Volume2,
-	Smartphone,
-	Printer,
-	Camera,
-	Wrench as ToolIcon,
-	Maximize,
-	Info,
-	GitBranch,
-	Twitter,
-	Play,
-	Terminal,
-	Smartphone as Phone,
-	Compass,
-	Film,
-	Tv,
-	Tags,
-} from 'lucide-react';
+	MagnifyingGlassIcon,
+	CommandIcon,
+	SunIcon,
+	MoonIcon,
+	MonitorIcon,
+	HouseIcon,
+	GearIcon,
+	UserIcon,
+	EnvelopeIcon,
+	BellIcon,
+	CopyIcon,
+	ShareNetworkIcon,
+	ArrowCounterClockwiseIcon,
+	TrashIcon,
+	ClockIcon,
+	BookmarkSimpleIcon,
+	QuestionIcon,
+	FileTextIcon,
+	LightningIcon,
+	PaletteIcon,
+	GlobeIcon,
+	LockIcon,
+	SpeakerHighIcon,
+	DeviceMobileIcon,
+	PrinterIcon,
+	CameraIcon,
+	WrenchIcon,
+	ArrowsOutIcon,
+	InfoIcon,
+	GitBranchIcon,
+	TwitterLogoIcon,
+	PlayIcon,
+	TerminalIcon,
+	PhoneIcon,
+	CompassIcon,
+	FilmSlateIcon,
+	TelevisionIcon,
+	TagIcon,
+} from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const { useState, useEffect, useRef, useCallback, useMemo } = React;
@@ -306,7 +306,7 @@ export default function CommandPalette({
 				description: 'Navigate to the home page',
 				category: 'Navigation',
 				section: 'all',
-				icon: <Home className="h-3 w-3" />,
+				icon: <HouseIcon className="h-3 w-3" />,
 				action: () => navigateTo('/'),
 				shortcut: 'Alt+H',
 				keywords: ['home', 'main', 'start', 'landing'],
@@ -317,7 +317,7 @@ export default function CommandPalette({
 				description: 'Learn more about us',
 				category: 'Navigation',
 				section: 'all',
-				icon: <Info className="h-3 w-3" />,
+				icon: <InfoIcon className="h-3 w-3" />,
 				action: () => navigateTo('/about'),
 				shortcut: 'Alt+A',
 				keywords: ['about', 'info', 'company', 'team'],
@@ -328,7 +328,7 @@ export default function CommandPalette({
 				description: 'Configure your preferences',
 				category: 'Navigation',
 				section: 'all',
-				icon: <Settings className="h-3 w-3" />,
+				icon: <GearIcon className="h-3 w-3" />,
 				action: () => navigateTo('/settings'),
 				shortcut: 'Alt+S',
 				keywords: ['settings', 'preferences', 'options', 'config'],
@@ -339,7 +339,7 @@ export default function CommandPalette({
 				description: 'View and edit your profile',
 				category: 'Navigation',
 				section: 'all',
-				icon: <User className="h-3 w-3" />,
+				icon: <UserIcon className="h-3 w-3" />,
 				action: () => navigateTo('/profile'),
 				shortcut: 'Alt+P',
 				keywords: ['profile', 'account', 'user', 'personal'],
@@ -350,7 +350,7 @@ export default function CommandPalette({
 				description: 'Check your messages and notifications',
 				category: 'Navigation',
 				section: 'all',
-				icon: <Mail className="h-3 w-3" />,
+				icon: <EnvelopeIcon className="h-3 w-3" />,
 				action: () => navigateTo('/messages'),
 				keywords: ['messages', 'inbox', 'mail', 'communication'],
 			},
@@ -362,7 +362,7 @@ export default function CommandPalette({
 				description: 'Switch between light, dark, and system themes',
 				category: 'System',
 				section: 'favorites',
-				icon: <Moon className="h-3 w-3" />, // sempre modo escuro
+				icon: <MoonIcon className="h-3 w-3" />, // sempre modo escuro
 				action: () => {
 					// Não faz nada, pois o tema é sempre escuro
 					setOpen(false);
@@ -376,7 +376,7 @@ export default function CommandPalette({
 				description: 'Enable or disable notifications',
 				category: 'System',
 				section: 'all',
-				icon: <Bell className="h-3 w-3" />,
+				icon: <BellIcon className="h-3 w-3" />,
 				action: () => {
 					// Implementation would depend on your notification system
 					showNotification('Notifications toggled', 'success');
@@ -391,7 +391,7 @@ export default function CommandPalette({
 				description: 'Enter or exit fullscreen mode',
 				category: 'System',
 				section: 'all',
-				icon: <Maximize className="h-3 w-3" />,
+				icon: <ArrowsOutIcon className="h-3 w-3" />,
 				action: () => {
 					toggleFullscreen();
 					recordCommandUsage('toggle-fullscreen');
@@ -407,7 +407,7 @@ export default function CommandPalette({
 				description: 'Copy the current page URL to clipboard',
 				category: 'Utility',
 				section: 'all',
-				icon: <Copy className="h-3 w-3" />,
+				icon: <CopyIcon className="h-3 w-3" />,
 				action: () => {
 					copyToClipboard(window.location.href);
 					recordCommandUsage('copy-url');
@@ -421,7 +421,7 @@ export default function CommandPalette({
 				description: 'Share the current page with others',
 				category: 'Utility',
 				section: 'all',
-				icon: <Share2 className="h-3 w-3" />,
+				icon: <ShareNetworkIcon className="h-3 w-3" />,
 				action: () => {
 					sharePage();
 					recordCommandUsage('share-page');
@@ -435,7 +435,7 @@ export default function CommandPalette({
 				description: 'Print the current page',
 				category: 'Utility',
 				section: 'all',
-				icon: <Printer className="h-3 w-3" />,
+				icon: <PrinterIcon className="h-3 w-3" />,
 				action: () => {
 					printPage();
 					recordCommandUsage('print-page');
@@ -449,7 +449,7 @@ export default function CommandPalette({
 				description: 'Capture the current page',
 				category: 'Utility',
 				section: 'all',
-				icon: <Camera className="h-3 w-3" />,
+				icon: <CameraIcon className="h-3 w-3" />,
 				action: () => {
 					showNotification('Screenshot functionality would be implemented here', 'info');
 					recordCommandUsage('take-screenshot');
@@ -466,7 +466,7 @@ export default function CommandPalette({
 				description: 'Reload the current page',
 				category: 'Application',
 				section: 'all',
-				icon: <RefreshCw className="h-3 w-3" />,
+				icon: <ArrowCounterClockwiseIcon className="h-3 w-3" />,
 				action: () => {
 					refreshPage();
 					recordCommandUsage('refresh-page');
@@ -480,7 +480,7 @@ export default function CommandPalette({
 				description: 'Clear browser cache and storage',
 				category: 'Application',
 				section: 'all',
-				icon: <Trash2 className="h-3 w-3" />,
+				icon: <TrashIcon className="h-3 w-3" />,
 				action: () => {
 					clearCache();
 					recordCommandUsage('clear-cache');
@@ -494,7 +494,7 @@ export default function CommandPalette({
 				description: 'See your browsing history',
 				category: 'Application',
 				section: 'all',
-				icon: <Clock className="h-3 w-3" />,
+				icon: <ClockIcon className="h-3 w-3" />,
 				action: () => {
 					navigateTo('/history');
 					recordCommandUsage('view-history');
@@ -508,7 +508,7 @@ export default function CommandPalette({
 				description: 'Add current page to bookmarks',
 				category: 'Application',
 				section: 'all',
-				icon: <Bookmark className="h-3 w-3" />,
+				icon: <BookmarkSimpleIcon className="h-3 w-3" />,
 				action: () => {
 					showNotification('Page bookmarked!', 'success');
 					recordCommandUsage('bookmark-page');
@@ -525,7 +525,7 @@ export default function CommandPalette({
 				description: 'Get help from the AI assistant',
 				category: 'Tools',
 				section: 'favorites',
-				icon: <Zap className="h-3 w-3" />,
+				icon: <LightningIcon className="h-3 w-3" />,
 				action: () => {
 					toggleAIPrompt();
 					recordCommandUsage('ask-ai');
@@ -539,7 +539,7 @@ export default function CommandPalette({
 				description: 'Visit the help center for assistance',
 				category: 'Tools',
 				section: 'all',
-				icon: <HelpCircle className="h-3 w-3" />,
+				icon: <QuestionIcon className="h-3 w-3" />,
 				action: () => {
 					navigateTo('/help');
 					recordCommandUsage('help-center');
@@ -553,7 +553,7 @@ export default function CommandPalette({
 				description: 'View all keyboard shortcuts',
 				category: 'Tools',
 				section: 'all',
-				icon: <FileText className="h-3 w-3" />,
+				icon: <FileTextIcon className="h-3 w-3" />,
 				action: () => {
 					navigateTo('/shortcuts');
 					recordCommandUsage('keyboard-shortcuts');
@@ -569,7 +569,7 @@ export default function CommandPalette({
 				description: 'Visit our Twitter page',
 				category: 'Social',
 				section: 'all',
-				icon: <Twitter className="h-3 w-3" />,
+				icon: <TwitterLogoIcon className="h-3 w-3" />,
 				action: () => {
 					window.open('https://twitter.com', '_blank');
 					recordCommandUsage('social-twitter');
@@ -583,7 +583,7 @@ export default function CommandPalette({
 				description: 'Visit our GitHub repository',
 				category: 'Social',
 				section: 'all',
-				icon: <GitBranch className="h-3 w-3" />,
+				icon: <GitBranchIcon className="h-3 w-3" />,
 				action: () => {
 					window.open('https://github.com', '_blank');
 					recordCommandUsage('social-github');
@@ -599,7 +599,7 @@ export default function CommandPalette({
 				description: 'Control media playback',
 				category: 'Media',
 				section: 'all',
-				icon: <Play className="h-3 w-3" />,
+				icon: <PlayIcon className="h-3 w-3" />,
 				action: () => {
 					// Implementation would depend on your media player
 					showNotification('Media playback toggled', 'success');
@@ -615,7 +615,7 @@ export default function CommandPalette({
 				description: 'Toggle audio mute',
 				category: 'Media',
 				section: 'all',
-				icon: <Volume2 className="h-3 w-3" />,
+				icon: <SpeakerHighIcon className="h-3 w-3" />,
 				action: () => {
 					showNotification('Audio mute toggled', 'success');
 					recordCommandUsage('media-mute');
@@ -632,7 +632,7 @@ export default function CommandPalette({
 				description: 'Open browser developer console',
 				category: 'Development',
 				section: 'all',
-				icon: <Terminal className="h-3 w-3" />,
+				icon: <TerminalIcon className="h-3 w-3" />,
 				action: () => {
 					console.log('Developer console command triggered');
 					showNotification(
@@ -651,7 +651,7 @@ export default function CommandPalette({
 				description: 'Test responsive layouts',
 				category: 'Development',
 				section: 'all',
-				icon: <Smartphone className="h-3 w-3" />,
+				icon: <DeviceMobileIcon className="h-3 w-3" />,
 				action: () => {
 					showNotification('Responsive design mode would be toggled here', 'info');
 					recordCommandUsage('dev-responsive');
@@ -668,7 +668,7 @@ export default function CommandPalette({
 				description: 'Customize the application appearance',
 				category: 'Settings',
 				section: 'all',
-				icon: <Palette className="h-3 w-3" />,
+				icon: <PaletteIcon className="h-3 w-3" />,
 				action: () => {
 					navigateTo('/settings/appearance');
 					recordCommandUsage('settings-appearance');
@@ -681,7 +681,7 @@ export default function CommandPalette({
 				description: 'Manage your privacy preferences',
 				category: 'Settings',
 				section: 'all',
-				icon: <Lock className="h-3 w-3" />,
+				icon: <LockIcon className="h-3 w-3" />,
 				action: () => {
 					navigateTo('/settings/privacy');
 					recordCommandUsage('settings-privacy');
@@ -694,7 +694,7 @@ export default function CommandPalette({
 				description: 'Change the application language',
 				category: 'Settings',
 				section: 'all',
-				icon: <Globe className="h-3 w-3" />,
+				icon: <GlobeIcon className="h-3 w-3" />,
 				action: () => {
 					navigateTo('/settings/language');
 					recordCommandUsage('settings-language');
@@ -864,8 +864,6 @@ export default function CommandPalette({
 				if (selectedCommand?.action) {
 					selectedCommand.action();
 					recordCommandUsage(selectedCommand.id);
-				} else {
-					console.log('Execute command:', selectedCommand);
 				}
 			} else if (e.key === 'Escape') {
 				e.preventDefault();
@@ -986,7 +984,7 @@ export default function CommandPalette({
 								<div className="flex w-full items-center">
 									{showAIPrompt ? (
 										<>
-											<Zap className="mr-2 h-4 w-4 shrink-0 text-blue-400" />
+											<LightningIcon className="mr-2 h-4 w-4 shrink-0 text-blue-400" />
 											<input
 												className="h-12 w-full border-0 bg-transparent text-[#181818] placeholder:text-[#181818]/50 focus:outline-none focus:ring-0 dark:text-[#f2f2f2] dark:placeholder:text-[#f2f2f2]/50"
 												value={aiPrompt}
@@ -1003,7 +1001,7 @@ export default function CommandPalette({
 										</>
 									) : (
 										<>
-											<Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+											<MagnifyingGlassIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
 											<input
 												className="h-12 w-full border-0 bg-transparent text-[#181818] placeholder:text-[#181818]/50 focus:outline-none focus:ring-0 dark:text-[#f2f2f2] dark:placeholder:text-[#f2f2f2]/50"
 												value={searchTerm}
@@ -1085,7 +1083,7 @@ export default function CommandPalette({
 										<div className="flex flex-col gap-2">
 											<div className="flex items-start gap-2">
 												<div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-500">
-													<Zap className="h-3 w-3" />
+													<LightningIcon className="h-3 w-3" />
 												</div>
 												<div className="text-xs">
 													<p className="font-medium">
@@ -1273,7 +1271,7 @@ export default function CommandPalette({
 										<div className="px-2 py-1">
 											{commandItems().length === 0 && (
 												<div className="mx-2 my-8 flex flex-col items-center justify-center text-center">
-													<Search className="mb-2 h-5 w-5 text-[#181818]/30 dark:text-[#f2f2f2]/30" />
+													<MagnifyingGlassIcon className="mb-2 h-5 w-5 text-[#181818]/30 dark:text-[#f2f2f2]/30" />
 													<p className="text-sm text-[#181818]/50 dark:text-[#f2f2f2]/50">
 														{searchTerm
 															? `No results found for "${searchTerm}"`
@@ -1318,7 +1316,7 @@ export default function CommandPalette({
 											{/* No results message */}
 											{getFilteredCommands().length === 0 && (
 												<div className="mx-2 my-8 flex flex-col items-center justify-center text-center">
-													<Search className="mb-2 h-5 w-5 text-[#181818]/30 dark:text-[#f2f2f2]/30" />
+													<MagnifyingGlassIcon className="mb-2 h-5 w-5 text-[#181818]/30 dark:text-[#f2f2f2]/30" />
 													<p className="text-sm text-[#181818]/50 dark:text-[#f2f2f2]/50">
 														No commands found for &quot;{searchTerm}
 														&quot;

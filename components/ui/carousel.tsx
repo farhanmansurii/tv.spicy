@@ -204,8 +204,8 @@ const CarouselPrevious = React.forwardRef<
 		return (
 			<ButtonComponent
 				ref={ref}
-				variant={variant}
-				size={size}
+				variant={variant ?? undefined}
+				size={size ?? undefined}
 				{...(glow ? { glow, glowVariant } : {})}
 				className={cn(
 					'absolute h-8 w-8 rounded-full',
@@ -252,8 +252,8 @@ const CarouselNext = React.forwardRef<
 		return (
 			<ButtonComponent
 				ref={ref}
-				variant={variant}
-				size={size}
+				variant={variant ?? undefined}
+				size={size ?? undefined}
 				{...(glow ? { glow, glowVariant } : {})}
 				className={cn(
 					'absolute h-8 w-8 rounded-full',

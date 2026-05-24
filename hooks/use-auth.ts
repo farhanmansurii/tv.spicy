@@ -1,18 +1,26 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSession } from '@/lib/auth-client';
 import { useAuthStore } from '@/store/authStore';
 
 /**
- * Hook that syncs Better Auth session to Zustand store and provides unified auth state
- * This reduces re-renders and provides a single source of truth for session data
+ * Centralized auth hook that syncs Better Auth session to Zustand.
+ *
+ * Benefits over raw useSession():
+ * - Single React subscriber to useSession (reduces re-renders)
+ * - Auth state accessible from Zustand without hook calls
+ * - Stable identity across renders via useMemo
+ *
+ * Usage:
+ *   const { user, isAuthenticated, isLoading } = useAuth();
  */
 export function useAuth() {
 	const { data: session, isPending } = useSession();
-	const { setSession, setLoading, ...authStore } = useAuthStore();
+	const setSession = useAuthStore((s) => s.setSession);
+	const setLoading = useAuthStore((s) => s.setLoading);
 
-	// Sync Better Auth session to Zustand store
+	// Sync Better Auth → Zustand once per session change
 	useEffect(() => {
 		setLoading(isPending);
 		if (!isPending) {
@@ -20,15 +28,20 @@ export function useAuth() {
 		}
 	}, [session, isPending, setSession, setLoading]);
 
-	// Return store state (which is synced from Better Auth)
-	return {
-		session: authStore.session,
-		user: authStore.user,
-		isAuthenticated: authStore.isAuthenticated,
-		isLoading: authStore.isLoading || isPending,
-		userId: authStore.userId,
-		userEmail: authStore.userEmail,
-		userName: authStore.userName,
-		userImage: authStore.userImage,
-	};
+	// Stable selectors — prevents re-renders when unrelated store fields change
+	const user = useAuthStore((s) => s.user);
+	const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+	const isLoading = useAuthStore((s) => s.isLoading);
+	const userId = useAuthStore((s) => s.userId);
+
+	return useMemo(
+		() => ({
+			session,
+			user,
+			isAuthenticated,
+			isLoading: isLoading || isPending,
+			userId,
+		}),
+		[session, user, isAuthenticated, isLoading, isPending, userId]
+	);
 }

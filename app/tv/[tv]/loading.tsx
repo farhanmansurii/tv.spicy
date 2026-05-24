@@ -1,19 +1,21 @@
-import React from 'react';
-import Container from '@/components/shared/containers/container';
-import ShowDetailsLoader from '@/components/shared/loaders/show-details-loader';
-import ShowContainerLoader from '@/components/shared/loaders/show-container-loader';
-import CastCrewLoader from '@/components/shared/loaders/cast-crew-loader';
-import VideoLoader from '@/components/shared/loaders/video-loader';
-import MoreDetailsLoader from '@/components/shared/loaders/more-details-loader';
+import {
+	HeroSkeleton,
+	ShowContainerSkeleton,
+	CastCrewSkeleton,
+	RelatedSkeleton,
+	StorylineSkeleton,
+	VideoSkeleton,
+} from '@/components/features/media/details/detail-skeletons';
 
-export default function Loading() {
+export default function TVDetailLoading() {
 	return (
-		<Container className="w-full space-y-8 md:space-y-12 py-6 md:py-8">
-			<ShowDetailsLoader />
-			<ShowContainerLoader />
-			<CastCrewLoader />
-			<VideoLoader />
-			<MoreDetailsLoader />
-		</Container>
+		<div className="min-h-screen bg-background">
+			<HeroSkeleton />
+			<ShowContainerSkeleton type="tv" />
+			<CastCrewSkeleton />
+			<VideoSkeleton />
+			<StorylineSkeleton />
+			<RelatedSkeleton />
+		</div>
 	);
 }

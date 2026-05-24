@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Home, Search, MenuSquare, User, Bookmark } from 'lucide-react';
+import { HouseIcon, MagnifyingGlassIcon, SquaresFourIcon, UserIcon, BookmarkSimpleIcon } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -102,11 +102,11 @@ export default function MobileHeader({ center }: MobileHeaderProps) {
 
 	const navItems = React.useMemo<MobileNavItem[]>(() => {
 		return [
-			{ id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, href: '/' },
-			{ id: 'search', label: 'Search', icon: <Search className="h-4 w-4" />, href: '/search' },
-			{ id: 'explore', label: 'Explore', icon: <MenuSquare className="h-4 w-4" />, onClick: toggleSidebar },
-			{ id: 'library', label: libraryLabel, icon: <Bookmark className="h-4 w-4" />, href: libraryHref },
-			{ id: 'account', label: 'Profile', icon: <User className="h-4 w-4" />, href: accountHref },
+			{ id: 'home', label: 'Home', icon: <HouseIcon size={16} />, href: '/' },
+			{ id: 'search', label: 'Search', icon: <MagnifyingGlassIcon size={16} />, href: '/search' },
+			{ id: 'explore', label: 'Explore', icon: <SquaresFourIcon size={16} />, onClick: toggleSidebar },
+			{ id: 'library', label: libraryLabel, icon: <BookmarkSimpleIcon size={16} />, href: libraryHref },
+			{ id: 'account', label: 'Profile', icon: <UserIcon size={16} />, href: accountHref },
 		];
 	}, [toggleSidebar, libraryLabel, libraryHref, accountHref]);
 

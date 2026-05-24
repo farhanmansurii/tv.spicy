@@ -27,11 +27,9 @@ export const metadata: Metadata = {
 	},
 };
 
-export const revalidate = 604800;
-
 const WatchList = dynamic(() => import('@/components/features/watchlist/watch-list'));
 const GenreGrid = dynamic(() => import('@/components/features/media/genre/genre-grid'), {
-	loading: () => <div className="h-96 bg-muted animate-pulse rounded-md" />,
+	loading: () => <div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />,
 });
 
 export default async function Page() {
@@ -92,7 +90,7 @@ export default async function Page() {
 				</div>
 
 				{genres.length > 0 && (
-					<Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-md" />}>
+					<Suspense fallback={<div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />}>
 						<GenreGrid genres={genres} type="movie" />
 					</Suspense>
 				)}

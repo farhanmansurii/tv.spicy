@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Heart } from 'lucide-react'
+import { HeartIcon } from '@phosphor-icons/react'
 
 import { useHasMounted } from '@/hooks/use-has-mounted'
 import { useFavoritesStore } from '@/store/favoritesStore'
@@ -131,7 +131,7 @@ export function LibraryFavoritesSynced() {
 		return (
 			<div className="flex flex-col items-center justify-center py-20 space-y-4">
 				<div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-					<Heart className="w-8 h-8 text-zinc-600" />
+					<HeartIcon size={32} className="text-zinc-600" />
 				</div>
 				<h3 className="text-xl font-bold text-foreground">No favorites yet</h3>
 				<p className="text-muted-foreground text-center max-w-md">

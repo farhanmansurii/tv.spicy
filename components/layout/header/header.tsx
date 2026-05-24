@@ -4,7 +4,6 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useSidebar } from '@/components/ui/sidebar';
@@ -18,183 +17,154 @@ interface HeaderProps {
 	className?: string;
 }
 
-/**
- * Header Component - Apple Human Interface Guidelines Compliant
- *
- * Design Principles:
- * - 44pt minimum touch targets (Apple HIG)
- * - SF Pro typography scale with -0.41 letter-spacing
- * - Frosted glass blur effects (backdrop-blur-2xl)
- * - Smooth spring animations with damping
- * - Layered depth with subtle shadows
- * - Accessibility first with proper ARIA
- * - Desktop: Inline navigation with refined dropdowns
- * - Mobile: Elegant sidebar with smooth hamburger animation
- */
 export function Header({ className }: HeaderProps) {
 	const [scrolled, setScrolled] = React.useState(false);
 	const pathname = usePathname();
 	const { toggleSidebar, openMobile } = useSidebar();
 	const isPlayerSticky = useEpisodeStore((state) => state.isPlayerSticky);
 
-	// Apple-style scroll detection with passive listener and hysteresis
 	React.useEffect(() => {
 		let ticking = false;
 		const handleScroll = () => {
 			if (!ticking) {
 				window.requestAnimationFrame(() => {
-					// Apple uses ~12px threshold for header state changes
-					setScrolled(window.scrollY > 12);
+					setScrolled(window.scrollY > 8);
 					ticking = false;
 				});
 				ticking = true;
 			}
 		};
-
 		window.addEventListener('scroll', handleScroll, { passive: true });
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, []);
 
-	const isActive = (href: string) => {
-		if (href === '/') {
-			return pathname === '/';
-		}
-		return pathname.startsWith(href);
-	};
+	const isActive = (href: string) =>
+		href === '/' ? pathname === '/' : pathname.startsWith(href);
 
 	return (
 		<header
-			className={cn('z-50 w-full', isPlayerSticky ? 'relative' : 'sticky top-0', className)}
+			className={cn(
+				'z-50 w-full',
+				isPlayerSticky ? 'relative' : 'sticky top-0',
+				className
+			)}
 			role="banner"
 			aria-label="Main navigation"
 		>
-			{/* Single composited glass layer — two stacked backdrop-filter divs are extremely GPU-intensive */}
+			{/* Glass background */}
 			<div
 				className={cn(
-					'absolute inset-0 transition-[background-color,box-shadow,border-color] duration-500',
-					'backdrop-blur-2xl backdrop-saturate-[1.8]',
-					scrolled ? 'bg-background/60' : 'bg-background/25'
+					'absolute inset-0 transition-all duration-400',
+					scrolled
+						? 'bg-zinc-950/80 backdrop-blur-2xl backdrop-saturate-[1.6]'
+						: 'bg-transparent'
 				)}
-				style={{
-					boxShadow: scrolled
-						? 'inset 0 0.5px 0 0 rgba(255,255,255,0.18), 0 8px 32px rgba(0,0,0,0.35)'
-						: 'inset 0 0.5px 0 0 rgba(255,255,255,0.08)',
-					borderBottom: '0.5px solid rgba(255,255,255,0.07)',
-				}}
+				style={
+					scrolled
+						? {
+								borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+								boxShadow:
+									'0 1px 0 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.4)',
+							}
+						: undefined
+				}
 			/>
 
-			{/* Inner top-edge highlight */}
-			<div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.07] to-transparent pointer-events-none" />
+			{/* Inner bar */}
+			<div className="relative mx-auto max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
+				<div className="flex h-[52px] sm:h-[56px] items-center justify-between gap-3">
 
-			{/* Bottom separator */}
-			<div
-				className={cn(
-					'absolute bottom-0 left-0 right-0 h-px',
-					'bg-gradient-to-r from-transparent via-foreground/10 to-transparent',
-					'transition-opacity duration-500',
-					scrolled ? 'opacity-100' : 'opacity-0'
-				)}
-			/>
-
-			{/* Main Header Bar */}
-			<div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-				<div className="flex h-[60px] sm:h-[64px] items-center justify-between gap-4">
-					{/* Left: Logo with refined hover state */}
-					<div className="flex items-center">
-						<Link
-							href="/"
-							className={cn(
-								'group flex items-center gap-2.5',
-								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-								'rounded-xl px-2 py-1.5 -ml-2',
-								'transition-all duration-300 ease-out',
-								'hover:bg-foreground/[0.03] active:bg-foreground/[0.05]',
-								'touch-manipulation'
-							)}
-							aria-label="Go to home page"
-						>
-							<div className="relative h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-[0.98]">
-								<Image
-									src="/logo.webp"
-									alt="Spicy TV"
-									fill
-									className="object-contain drop-shadow-sm"
-									priority
-									sizes="(max-width: 640px) 32px, 36px"
-								/>
-							</div>
-							<span className="hidden sm:inline-block text-[17px] font-semibold tracking-[-0.41px] text-foreground/90 transition-colors duration-300 group-hover:text-foreground">
-								Spicy TV
-							</span>
-							<span className="sm:hidden text-[17px] font-semibold tracking-[-0.41px] text-foreground/90 transition-colors duration-300 group-hover:text-foreground">
-								Spicy TV
-							</span>
-						</Link>
-					</div>
-
-					{/* Center: Desktop Navigation - Hidden on mobile */}
-					<nav
-						className="hidden lg:flex items-center flex-1 justify-center"
-						aria-label="Main navigation"
+					{/* Logo */}
+					<Link
+						href="/"
+						className={cn(
+							'group flex items-center gap-2 rounded-xl px-1.5 py-1 -ml-1.5',
+							'transition-all duration-200',
+							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25',
+							'touch-manipulation'
+						)}
+						aria-label="Go to home page"
 					>
+						<div className="relative h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 transition-transform duration-200 group-hover:scale-[1.04] group-active:scale-[0.96]">
+							<Image
+								src="/logo.webp"
+								alt="Spicy TV"
+								fill
+								className="object-contain"
+								priority
+								sizes="(max-width: 640px) 28px, 32px"
+							/>
+						</div>
+						<span
+							className="text-[15px] sm:text-[16px] font-semibold tracking-tight text-white/90 transition-colors duration-200 group-hover:text-white"
+							style={{ fontFamily: 'var(--font-geist-sans), sans-serif' }}
+						>
+							Spicy TV
+						</span>
+					</Link>
+
+					{/* Center nav — desktop only */}
+					<nav className="hidden lg:flex flex-1 items-center justify-center" aria-label="Primary">
 						<HeaderNavigation items={navigationItems} isActive={isActive} />
 					</nav>
 
-					{/* Right: Actions + Mobile Menu Trigger */}
-					<div className="flex items-center gap-1 sm:gap-2">
+					{/* Right: actions + mobile trigger */}
+					<div className="flex items-center gap-1.5 sm:gap-2">
 						<HeaderActions />
 
-						{/* Mobile only - Animated hamburger menu button */}
-						<div className="lg:hidden ml-1">
+						{/* Mobile hamburger */}
+						<div className="lg:hidden">
 							<button
 								onClick={toggleSidebar}
 								className={cn(
-									'relative flex items-center justify-center',
-									'h-11 w-11 rounded-full',
-									'bg-foreground/[0.03] hover:bg-foreground/[0.06] active:bg-foreground/[0.08]',
-									'border border-border/40 hover:border-border/60',
-									'transition-all duration-300 ease-out',
-									'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2',
-									'touch-manipulation',
-									'group'
+									'flex items-center justify-center w-9 h-9 rounded-full',
+									'transition-all duration-200',
+									scrolled
+										? 'bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08]'
+										: 'bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.07]',
+									'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25',
+									'touch-manipulation'
 								)}
 								aria-label={openMobile ? 'Close menu' : 'Open menu'}
 								aria-expanded={openMobile}
 							>
-								<div className="relative w-5 h-5 flex items-center justify-center">
+								<div className="relative w-4 h-4 flex items-center justify-center">
 									<AnimatePresence mode="wait" initial={false}>
 										{openMobile ? (
-											<motion.div
+											<motion.svg
 												key="close"
-												initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
-												animate={{ rotate: 0, opacity: 1, scale: 1 }}
-												exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
-												transition={{
-													duration: 0.2,
-													ease: [0.23, 1, 0.32, 1],
-												}}
+												viewBox="0 0 16 16"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth={2}
+												strokeLinecap="round"
+												className="w-4 h-4 text-white/75"
+												initial={{ rotate: -45, opacity: 0 }}
+												animate={{ rotate: 0, opacity: 1 }}
+												exit={{ rotate: 45, opacity: 0 }}
+												transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
 											>
-												<X
-													className="h-5 w-5 text-foreground/80"
-													strokeWidth={2}
-												/>
-											</motion.div>
+												<line x1="3" y1="3" x2="13" y2="13" />
+												<line x1="13" y1="3" x2="3" y2="13" />
+											</motion.svg>
 										) : (
-											<motion.div
-												key="menu"
-												initial={{ rotate: 90, opacity: 0, scale: 0.8 }}
-												animate={{ rotate: 0, opacity: 1, scale: 1 }}
-												exit={{ rotate: -90, opacity: 0, scale: 0.8 }}
-												transition={{
-													duration: 0.2,
-													ease: [0.23, 1, 0.32, 1],
-												}}
+											<motion.svg
+												key="open"
+												viewBox="0 0 16 16"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth={1.75}
+												strokeLinecap="round"
+												className="w-4 h-4 text-white/75"
+												initial={{ rotate: 45, opacity: 0 }}
+												animate={{ rotate: 0, opacity: 1 }}
+												exit={{ rotate: -45, opacity: 0 }}
+												transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
 											>
-												<Menu
-													className="h-5 w-5 text-foreground/80 group-hover:text-foreground transition-colors"
-													strokeWidth={2}
-												/>
-											</motion.div>
+												<line x1="2" y1="5" x2="14" y2="5" />
+												<line x1="2" y1="9" x2="14" y2="9" />
+												<line x1="2" y1="13" x2="14" y2="13" />
+											</motion.svg>
 										)}
 									</AnimatePresence>
 								</div>

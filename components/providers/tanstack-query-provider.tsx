@@ -8,30 +8,31 @@ import { useMediaQueryStore } from '@/store/mediaQueryStore';
 import { setQueryClient } from '@/lib/query-client';
 
 const QueryProvider = ({ children }: { children: React.ReactNode }) => {
-	const [queryClient] = useState(() => {
-		const client = new QueryClient({
-			defaultOptions: {
-				queries: {
-					staleTime: 1000 * 60 * 60 * 24, // 24 hours
-					gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
-					refetchOnWindowFocus: false,
-					refetchOnReconnect: false,
+	const [queryClient] = useState(
+		() =>
+			new QueryClient({
+				defaultOptions: {
+					queries: {
+						staleTime: 1000 * 60 * 60 * 24,
+						gcTime: 1000 * 60 * 60 * 24 * 7,
+						refetchOnWindowFocus: false,
+						refetchOnReconnect: false,
+					},
 				},
-			},
-		});
+			})
+	);
 
+	// Wire localStorage persistence only in the browser — never during SSR
+	useEffect(() => {
 		const localStoragePersistor = createSyncStoragePersister({
-			storage: typeof window !== 'undefined' ? window.localStorage : null,
+			storage: window.localStorage,
 		});
-
 		persistQueryClient({
-			queryClient: client,
+			queryClient,
 			persister: localStoragePersistor,
 			maxAge: 1000 * 60 * 60 * 24 * 7,
 		});
-
-		return client;
-	});
+	}, [queryClient]);
 
 	// Initialize media query store
 	const initMediaQuery = useMediaQueryStore((state) => state.init);

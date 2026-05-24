@@ -1,19 +1,15 @@
-import Container from '@/components/shared/containers/container';
+import { HeroSkeleton } from '@/components/features/media/details/detail-skeletons';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
-import { Skeleton } from '@/components/ui/skeleton';
 
-export default function Loading() {
+export default function BrowseLoading() {
 	return (
-		<div className="min-h-screen">
-			<Container className="w-full py-6 md:py-8">
-				<div className="space-y-6">
-					<div className="space-y-2">
-						<Skeleton className="h-12 w-64 md:h-16 md:w-80" />
-						<Skeleton className="h-6 w-96" />
-					</div>
-					<MediaLoader layout="grid" isVertical />
-				</div>
-			</Container>
+		<div className="min-h-screen bg-background">
+			<HeroSkeleton />
+			<div className="flex flex-col space-y-4 md:space-y-6 py-6">
+				<MediaLoader withHeader />
+				<MediaLoader withHeader />
+				<MediaLoader withHeader />
+			</div>
 		</div>
 	);
 }

@@ -1,19 +1,24 @@
-import React from 'react';
+import React, { memo } from 'react';
 import DataRow from '@/components/features/media/row/data-row';
+import type { Show } from '@/lib/types';
 
-export default function RelatedShowsContainer(props: {
-	show: { id: number };
+interface RelatedShowsContainerProps {
 	type: 'movie' | 'tv';
-	relation: string;
-}) {
+	items: Show[];
+}
+
+function RelatedShowsContainerComponent({ type, items }: RelatedShowsContainerProps) {
 	return (
 		<DataRow
-			endpoint={`${props.type}/${props.show.id}/${props.relation}`}
+			initialData={items}
 			showRank={false}
-			type={props.type}
+			type={type}
 			isVertical={true}
 			hideHeader={true}
 			gridLayout={true}
 		/>
 	);
 }
+
+export default memo(RelatedShowsContainerComponent);
+RelatedShowsContainerComponent.displayName = 'RelatedShowsContainer';

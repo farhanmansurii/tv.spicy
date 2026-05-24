@@ -1,44 +1,31 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import { useHaptics } from '@/hooks/use-haptics';
-import gsap from 'gsap';
-import {
-	GalleryVerticalEnd,
-	Grid,
-	List,
-	LayoutDashboard,
-	Loader2,
-	AlertCircle,
-} from 'lucide-react';
-import {
-	SelectTrigger,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectValue,
-} from '@/components/ui/select';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SquaresFourIcon, ListBulletsIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { toast } from 'sonner';
 import { fetchSeasonEpisodes } from '@/lib/api';
 import { useEpisodeStore } from '@/store/episodeStore';
-import { useEpisodeViewStore } from '@/store/episodeViewStore';
 import { usePlayerPrefsStore } from '@/store/playerPrefsStore';
 import useTVShowStore from '@/store/recentsStore';
 import { TVContainer } from '@/components/features/media/player/tv-container';
 import { cn } from '@/lib/utils';
-import SegmentedControl from '@/components/shared/segmented-control';
 import type { Episode as EpisodeType, SeasonTabsProps } from '@/lib/types';
 import type { TMDBEpisode, TMDBSeasonDetails } from '@/lib/types/tmdb';
-import { EpisodeItem } from '../card/episode-item';
-import { ActiveEpisodeDetails } from './active-episode-details';
-import { DetailHeader, DetailShell } from '../details/detail-primitives';
+import { SeasonSelector } from './season-selector';
+import { EpisodeStrip, type EpisodeViewMode } from './episode-strip';
+import { EpisodeDetailPanel } from './episode-detail-panel';
 
 const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 	const haptic = useHaptics();
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
 	const hydrateEpisode = useCallback(
 		(episode: TMDBEpisode): EpisodeType => ({
 			...episode,
@@ -56,56 +43,31 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 		[showData, showId]
 	);
 
-	const router = useRouter();
-	const pathname = usePathname();
-	const searchParams = useSearchParams();
-
-	const { view, setView } = useEpisodeViewStore();
 	const { activeEP, setActiveEP, setIsPlayerSticky } = useEpisodeStore();
 	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
-	const [listDensity, setListDensity] = useState<'comfortable' | 'compact'>('comfortable');
 	const activeEpisodeForShow =
 		activeEP && String(activeEP.tv_id) === String(showId) ? activeEP : null;
 	const hasActiveEpisode = !!activeEpisodeForShow;
 	const { addRecentlyWatched } = useTVShowStore();
+
 	const playerRef = useRef<HTMLDivElement>(null);
-	const contentRef = useRef<HTMLDivElement>(null);
-	const stickyRef = useRef<HTMLDivElement>(null);
 	const [isStickyDismissed, setIsStickyDismissed] = useState(false);
 	const [isPortrait, setIsPortrait] = useState(true);
 	const [isMobile, setIsMobile] = useState(false);
 
-	// Detect mobile device and portrait orientation
+	// Detect mobile + orientation
 	useEffect(() => {
-		const checkMobileAndOrientation = () => {
-			const mobile = window.innerWidth < 768;
-			const portrait = window.matchMedia('(orientation: portrait)').matches;
-			setIsMobile(mobile);
-			setIsPortrait(portrait);
+		const check = () => {
+			setIsMobile(window.innerWidth < 768);
+			setIsPortrait(window.matchMedia('(orientation: portrait)').matches);
 		};
-
-		checkMobileAndOrientation();
-
-		const orientationQuery = window.matchMedia('(orientation: portrait)');
-		const handleOrientationChange = (e: MediaQueryListEvent) => {
-			setIsPortrait(e.matches);
-		};
-
-		let resizeTimer: ReturnType<typeof setTimeout>;
-		const handleResize = () => {
-			clearTimeout(resizeTimer);
-			resizeTimer = setTimeout(() => {
-				setIsMobile(window.innerWidth < 768);
-			}, 150);
-		};
-
-		orientationQuery.addEventListener('change', handleOrientationChange);
-		window.addEventListener('resize', handleResize, { passive: true });
-
+		check();
+		const mq = window.matchMedia('(orientation: portrait)');
+		mq.addEventListener('change', (e) => setIsPortrait(e.matches));
+		window.addEventListener('resize', check, { passive: true });
 		return () => {
-			clearTimeout(resizeTimer);
-			orientationQuery.removeEventListener('change', handleOrientationChange);
-			window.removeEventListener('resize', handleResize);
+			mq.removeEventListener('change', (e) => setIsPortrait(e.matches));
+			window.removeEventListener('resize', check);
 		};
 	}, []);
 
@@ -113,42 +75,38 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 		threshold: 0,
 		rootMargin: '-72px 0px 0px 0px',
 	});
-	// Sticky only on mobile phones in portrait orientation
 	const isSticky =
 		hasActiveEpisode && stickyEnabled && !stickySentinelInView && isMobile && isPortrait;
 
-	// Sync sticky state to store so header can react
 	useEffect(() => {
 		setIsPlayerSticky(isSticky && !isStickyDismissed);
 	}, [isSticky, isStickyDismissed, setIsPlayerSticky]);
 
-	// 1. STABLE STATE LOGIC
+	// State
 	const validSeasons = useMemo(
 		() => seasons?.filter((s) => s.season_number > 0) || seasons || [],
 		[seasons]
 	);
 	const [activeSeason, setActiveSeason] = useState<number | null>(null);
+	const [viewMode, setViewMode] = useState<EpisodeViewMode>('grid');
 
-	// 2. DATA SYNC
-	const {
-		data: seasonData,
-		isLoading,
-		isError,
-	} = useQuery<TMDBSeasonDetails>({
+	// Data
+	const { data: seasonData, isFetching, isError } = useQuery<TMDBSeasonDetails>({
 		queryKey: ['episodes', showId, activeSeason],
 		queryFn: () => fetchSeasonEpisodes(showId, activeSeason as number),
 		enabled: !!showId && activeSeason !== null,
+		placeholderData: keepPreviousData,
+		staleTime: 5 * 60 * 1000,
 	});
 
-	const episodes = seasonData?.episodes;
-	const activeViewLabel =
-		view === 'list' ? 'List View' : view === 'grid' ? 'Grid View' : 'Carousel View';
+	const episodes = useMemo(
+		() => seasonData?.episodes?.map(hydrateEpisode) || [],
+		[seasonData, hydrateEpisode]
+	);
 
-	// 3. HYDRATION & INITIALIZATION
+	// Init from URL
 	useEffect(() => {
 		const sParam = searchParams.get('season');
-		const eParam = searchParams.get('episode');
-
 		if (sParam) {
 			setActiveSeason(parseInt(sParam));
 		} else if (validSeasons.length > 0) {
@@ -156,153 +114,61 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 		}
 	}, [validSeasons, searchParams]);
 
-	// Initialize active episode from URL params when episodes are loaded
+	// Init active episode from URL when episodes loaded
 	useEffect(() => {
 		const sParam = searchParams.get('season');
 		const eParam = searchParams.get('episode');
-
-		if (episodes && eParam && sParam && parseInt(sParam) === activeSeason) {
-			const episode = episodes.find(
+		if (episodes.length && eParam && sParam && parseInt(sParam) === activeSeason) {
+			const ep = episodes.find(
 				(ep) =>
 					ep.season_number === parseInt(sParam) && ep.episode_number === parseInt(eParam)
 			);
-			if (episode && activeEP?.id !== episode.id) {
-				// Ensure tv_id and show_name are set for cross-show validation and recently watched
-				const enrichedEpisode = hydrateEpisode(episode);
-				setActiveEP(enrichedEpisode);
-
-				// Add to recently watched for Continue Watching functionality
-				addRecentlyWatched(enrichedEpisode);
+			if (ep && activeEP?.id !== ep.id) {
+				setActiveEP(ep);
+				addRecentlyWatched(ep);
 			}
 		}
-	}, [
-		episodes,
-		searchParams,
-		activeSeason,
-		activeEP,
-		setActiveEP,
-		addRecentlyWatched,
-		hydrateEpisode,
-	]);
+	}, [episodes, searchParams, activeSeason, activeEP, setActiveEP, addRecentlyWatched]);
 
-	// 4. ACTION HANDLERS (Functional Fixes)
-	const handleSeasonChange = (value: string) => {
-		haptic('selection');
-		const sNum = Number(value);
-		setActiveSeason(sNum);
-		const params = new URLSearchParams(searchParams.toString());
-		params.set('season', value);
-		params.delete('episode'); // Clean episode state on season change
-		router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-	};
+	const handleSeasonChange = useCallback(
+		(sNum: number) => {
+			haptic('selection');
+			setActiveSeason(sNum);
+			const params = new URLSearchParams(searchParams.toString());
+			params.set('season', String(sNum));
+			params.delete('episode');
+			router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+		},
+		[haptic, router, pathname, searchParams]
+	);
 
 	const onEpisodeClick = useCallback(
-		(episode: EpisodeType, event?: React.MouseEvent) => {
-			// Immediate visual feedback
-			if (event?.currentTarget) {
-				const target = event.currentTarget as HTMLElement;
-				target.style.transform = 'scale(0.98)';
-				setTimeout(() => {
-					target.style.transform = '';
-				}, 150);
-			}
-
-			// Ensure tv_id is set for cross-show validation (tv_id should be string for consistency)
-			const enrichedEpisode: EpisodeType = {
-				...episode,
-				show_id: showData?.id,
-				tv_id: String(showId),
-				show_name: showData?.name || showData?.title || '',
-				production_code: '',
-				air_date: episode.air_date ?? '',
-				overview: episode.overview ?? '',
-				runtime: episode.runtime ?? 0,
-				still_path: episode.still_path ?? null,
-				crew: episode.crew ?? [],
-				guest_stars: episode.guest_stars ?? [],
-			} as EpisodeType;
-			setActiveEP(enrichedEpisode);
-
-			// Add to recently watched for Continue Watching functionality
-			addRecentlyWatched(enrichedEpisode);
-
+		(episode: EpisodeType, _event?: React.MouseEvent) => {
+			setActiveEP(episode);
+			addRecentlyWatched(episode);
 			const params = new URLSearchParams(searchParams.toString());
 			params.set('season', String(episode.season_number));
 			params.set('episode', String(episode.episode_number));
 			router.replace(`${pathname}?${params.toString()}`, { scroll: false });
 		},
-		[router, pathname, searchParams, setActiveEP, addRecentlyWatched, showId, showData]
+		[router, pathname, searchParams, setActiveEP, addRecentlyWatched]
 	);
 
-	useEffect(() => {
-		if (!contentRef.current || isLoading) return;
-		const ctx = gsap.context(() => {
-			const items = gsap.utils.toArray<HTMLElement>(
-				'[data-episode-item]',
-				contentRef.current
-			);
-			if (!items.length) return;
-			// Cap stagger so large episode lists (20+) don't feel sluggish
-			const stagger = Math.min(0.025, 0.5 / items.length);
-			gsap.fromTo(
-				items,
-				{ opacity: 0, y: 8 },
-				{ opacity: 1, y: 0, duration: 0.28, ease: 'power2.out', stagger }
-			);
-		}, contentRef);
-
-		return () => ctx.revert();
-	}, [view, activeSeason, isLoading, episodes?.length]);
-
-	useEffect(() => {
-		if (!isSticky) {
-			setIsStickyDismissed(false);
-			if (stickyRef.current) {
-				gsap.set(stickyRef.current, { clearProps: 'opacity,transform' });
-			}
-			return;
-		}
-
-		if (isStickyDismissed || !stickyRef.current) return;
-		gsap.fromTo(
-			stickyRef.current,
-			{ opacity: 0, y: -6 },
-			{ opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }
-		);
-	}, [isSticky, isStickyDismissed]);
-
 	const handleStickyClose = useCallback(() => {
-		const onComplete = () => {
-			setIsStickyDismissed(true);
-			toast('Sticky player hidden', {
-				description: 'Turn off sticky player for this device?',
-				action: {
-					label: 'Disable',
-					onClick: () => setStickyEnabled(false),
-				},
-			});
-		};
-
-		if (!stickyRef.current) {
-			onComplete();
-			return;
-		}
-
-		gsap.to(stickyRef.current, {
-			opacity: 0,
-			y: -6,
-			duration: 0.18,
-			ease: 'power2.in',
-			onComplete,
+		setIsStickyDismissed(true);
+		toast('Sticky player hidden', {
+			description: 'Turn off sticky player for this device?',
+			action: {
+				label: 'Disable',
+				onClick: () => setStickyEnabled(false),
+			},
 		});
 	}, [setStickyEnabled]);
 
-	// Handle next episode navigation
+	// Next episode
 	const handleNextEpisode = useCallback(() => {
-		// First, try to get current episode from activeEP or URL params
-		let currentEpisode: EpisodeType | null = activeEP;
-
-		if (!currentEpisode && episodes && episodes.length > 0) {
+		let current = activeEP;
+		if (!current && episodes.length > 0) {
 			const sParam = searchParams.get('season');
 			const eParam = searchParams.get('episode');
 			if (sParam && eParam) {
@@ -311,71 +177,42 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 						ep.season_number === parseInt(sParam) &&
 						ep.episode_number === parseInt(eParam)
 				);
-				if (found) {
-					currentEpisode = hydrateEpisode(found);
-				}
+				if (found) current = found;
 			}
 		}
-
-		if (!currentEpisode || !episodes || episodes.length === 0) {
-			return;
-		}
-
-		// TypeScript guard: currentEpisode is guaranteed to be non-null here
-		const episode = currentEpisode;
-
-		// Find current episode index
-		const currentIndex = episodes.findIndex(
+		if (!current || !episodes.length) return;
+		const idx = episodes.findIndex(
 			(ep) =>
-				ep.id === episode.id ||
-				(ep.season_number === episode.season_number &&
-					ep.episode_number === episode.episode_number)
+				ep.id === current!.id ||
+				(ep.season_number === current!.season_number &&
+					ep.episode_number === current!.episode_number)
 		);
-
-		if (currentIndex === -1) {
+		if (idx === -1) return;
+		if (idx < episodes.length - 1) {
+			onEpisodeClick(episodes[idx + 1]);
 			return;
 		}
-
-		// Check if there's a next episode in the current season
-		if (currentIndex < episodes.length - 1) {
-			const nextEpisode = hydrateEpisode(episodes[currentIndex + 1]);
-			onEpisodeClick(nextEpisode);
-			return;
-		}
-
-		// If at the end of current season, try to move to next season
-		const currentSeasonIndex = validSeasons.findIndex((s) => s.season_number === activeSeason);
-
-		if (currentSeasonIndex < validSeasons.length - 1) {
-			const nextSeason = validSeasons[currentSeasonIndex + 1];
+		const sIdx = validSeasons.findIndex((s) => s.season_number === activeSeason);
+		if (sIdx < validSeasons.length - 1) {
+			const nextSeason = validSeasons[sIdx + 1];
 			const params = new URLSearchParams(searchParams.toString());
 			params.set('season', String(nextSeason.season_number));
 			params.set('episode', '1');
 			router.push(`${pathname}?${params.toString()}`, { scroll: false });
 		}
-	}, [
-		activeEP,
-		episodes,
-		activeSeason,
-		validSeasons,
-		router,
-		pathname,
-		searchParams,
-		onEpisodeClick,
-		hydrateEpisode,
-	]);
+	}, [activeEP, episodes, activeSeason, validSeasons, router, pathname, searchParams, onEpisodeClick]);
 
 	if (isError)
 		return (
 			<div className="flex flex-col items-center py-20 gap-4 text-destructive">
-				<AlertCircle className="w-8 h-8" />
+				<WarningCircleIcon size={32} weight="fill" />
 				<p className="font-bold">Failed to load episodes. Please try again.</p>
 			</div>
 		);
 
 	return (
-		<div className="w-full flex flex-col gap-6 md:gap-12">
-			{/* PLAYER COMPONENT */}
+		<div className="w-full flex flex-col gap-6 md:gap-10">
+			{/* PLAYER */}
 			{hasActiveEpisode && (
 				<>
 					<div ref={stickySentinelRef} className="h-px w-full" />
@@ -387,170 +224,130 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 							stickyEnabled && isMobile && isPortrait
 								? 'sticky top-2 z-30 bg-zinc-900/85 backdrop-blur-md rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/5'
 								: 'relative z-10',
-							isSticky &&
-								isStickyDismissed &&
-								'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
+							isSticky && isStickyDismissed && 'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
 						)}
 					>
-						<div ref={stickyRef} className="relative">
-							<TVContainer
-								key={`${activeEP?.id}-${activeSeason}`}
-								showId={showId}
-								getNextEp={handleNextEpisode}
-								isSticky={isSticky && !isStickyDismissed}
-								onCloseSticky={handleStickyClose}
-							/>
-						</div>
+						<AnimatePresence>
+							{isSticky && !isStickyDismissed ? (
+								<motion.div
+									key="sticky-player"
+									initial={{ opacity: 0, y: -6 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -6 }}
+									transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+								>
+									<TVContainer
+										key={`${activeEP?.id}-${activeSeason}`}
+										showId={showId}
+										getNextEp={handleNextEpisode}
+										isSticky={true}
+										onCloseSticky={handleStickyClose}
+									/>
+								</motion.div>
+							) : (
+								<div key="inline-player">
+									<TVContainer
+										key={`${activeEP?.id}-${activeSeason}`}
+										showId={showId}
+										getNextEp={handleNextEpisode}
+										isSticky={false}
+										onCloseSticky={handleStickyClose}
+									/>
+								</div>
+							)}
+						</AnimatePresence>
 					</div>
 				</>
 			)}
 
-			{activeEpisodeForShow && (
-				<ActiveEpisodeDetails
-					showId={showId}
-					seasonNumber={activeEpisodeForShow.season_number}
-					episodeNumber={activeEpisodeForShow.episode_number}
-					showStatus={showData?.status ?? null}
-				/>
-			)}
-
-			{/* NAVIGATION CONTROLS */}
-			<div className="space-y-4">
-				<DetailShell>
-					<DetailHeader
-						title={`Season ${activeSeason ?? validSeasons[0]?.season_number ?? 1}`}
-						subtitle={`${episodes?.length || 0} Episodes • ${activeViewLabel}`}
-						action={
-							<Select value={String(activeSeason)} onValueChange={handleSeasonChange}>
-								<SelectTrigger className="h-10 w-36 bg-zinc-900/80 border-white/10 rounded-xl text-xs font-semibold">
-									<SelectValue placeholder="Select Season" />
-								</SelectTrigger>
-								<SelectContent className="bg-zinc-950 border-white/10">
-									{validSeasons.map((s) => (
-										<SelectItem
-											key={s.season_number}
-											value={String(s.season_number)}
-										>
-											Season {s.season_number}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						}
-					/>
-
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-						<SegmentedControl
-							value={view}
-							onChange={(val) => {
-								haptic('selection');
-								setView(val as 'grid' | 'list' | 'carousel');
+			{/* SEASON SELECTOR + EPISODES */}
+			<div className="space-y-4 md:space-y-5">
+				{/* Header row */}
+				<div className="flex items-center justify-between gap-3">
+					{/* Left: title + season info */}
+					<div className="flex items-baseline gap-3 min-w-0">
+						<h2
+							className="text-base md:text-lg font-bold text-white tracking-tight flex-shrink-0"
+							style={{
+								fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
 							}}
-							items={[
-								{
-									value: 'list',
-									icon: List,
-									label: 'List',
-									showLabelOnMobile: false,
-									tooltip: 'Compact list with episode details',
-								},
-								{
-									value: 'grid',
-									icon: LayoutDashboard,
-									label: 'Grid',
-									showLabelOnMobile: false,
-									tooltip: 'Visual grid with thumbnails',
-								},
-								{
-									value: 'carousel',
-									icon: GalleryVerticalEnd,
-									label: 'Carousel',
-									showLabelOnMobile: false,
-									tooltip: 'Swipeable horizontal view',
-								},
-							]}
-						/>
-						{view === 'list' && (
-							<SegmentedControl
-								value={listDensity}
-								onChange={(val) => setListDensity(val as 'comfortable' | 'compact')}
-								items={[
-									{ value: 'comfortable', label: 'Comfort' },
-									{ value: 'compact', label: 'Compact' },
-								]}
-								className="hidden sm:inline-flex"
-							/>
+						>
+							Episodes
+						</h2>
+						{seasonData?.episodes && (
+							<span className="text-[12px] text-white/28 tabular-nums font-medium truncate">
+								{seasonData.episodes.length} ep
+								{seasonData.episodes.length !== 1 ? 's' : ''}
+								{seasonData.name && seasonData.name !== `Season ${activeSeason}` && (
+									<span className="hidden sm:inline ml-1.5 text-white/20">
+										· {seasonData.name}
+									</span>
+								)}
+							</span>
 						)}
 					</div>
-				</DetailShell>
 
-				{/* CONTENT RENDERER */}
-				<div
-					ref={contentRef}
-					className={cn(isLoading ? 'opacity-50 pointer-events-none min-h-[400px]' : '')}
-				>
-					{isLoading ? (
-						<div className="flex items-center justify-center py-20">
-							<Loader2 className="w-8 h-8 animate-spin text-primary" />
-						</div>
-					) : (
-						<>
-							{view === 'grid' && (
-								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-									{episodes?.map((ep) => (
-										<div key={ep.id} data-episode-item>
-											<EpisodeItem
-												episode={hydrateEpisode(ep)}
-												active={activeEP?.id === ep.id}
-												toggle={onEpisodeClick}
-												variant="card"
-											/>
-										</div>
-									))}
-								</div>
-							)}
-							{view === 'list' && (
-								<div className="flex flex-col gap-2">
-									{episodes?.map((ep) => (
-										<div key={ep.id} data-episode-item>
-											<EpisodeItem
-												episode={hydrateEpisode(ep)}
-												active={activeEP?.id === ep.id}
-												toggle={onEpisodeClick}
-												variant="list"
-												density={listDensity}
-											/>
-										</div>
-									))}
-								</div>
-							)}
-							{view === 'carousel' && (
-								<Carousel opts={{ align: 'start', dragFree: true }}>
-									<CarouselContent className="-ml-2 py-2">
-										{episodes?.map((ep) => (
-											<CarouselItem
-												key={ep.id}
-												className="pl-4 basis-[85%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/3"
-											>
-												<div data-episode-item>
-													<EpisodeItem
-														episode={hydrateEpisode(ep)}
-														active={activeEP?.id === ep.id}
-														toggle={onEpisodeClick}
-														variant="card"
-													/>
-												</div>
-											</CarouselItem>
-										))}
-									</CarouselContent>
-								</Carousel>
-							)}
-						</>
-					)}
+					{/* Right: view mode toggle */}
+					<div
+						className="flex items-center gap-0.5 p-[3px] rounded-[10px] flex-shrink-0"
+						style={{
+							background: 'rgba(255,255,255,0.055)',
+							border: '1px solid rgba(255,255,255,0.07)',
+						}}
+					>
+						{(
+							[
+								{ mode: 'grid', icon: <SquaresFourIcon size={15} weight="bold" />, label: 'Grid' },
+								{ mode: 'list', icon: <ListBulletsIcon size={15} weight="bold" />, label: 'List' },
+							] as { mode: EpisodeViewMode; icon: React.ReactNode; label: string }[]
+						).map(({ mode, icon, label }) => (
+							<motion.button
+								key={mode}
+								onClick={() => setViewMode(mode)}
+								aria-label={label}
+								whileTap={{ scale: 0.92 }}
+								className={cn(
+									'flex items-center justify-center w-7 h-7 rounded-[7px] transition-all duration-200',
+									viewMode === mode
+										? 'bg-white text-zinc-900 shadow-[0_1px_4px_rgba(0,0,0,0.35)]'
+										: 'text-white/35 hover:text-white/65'
+								)}
+							>
+								{icon}
+							</motion.button>
+						))}
+					</div>
 				</div>
+
+				{/* Season pills */}
+				{validSeasons.length > 1 && (
+					<SeasonSelector
+						seasons={validSeasons}
+						activeSeason={activeSeason ?? validSeasons[0]?.season_number ?? 1}
+						onSeasonChange={handleSeasonChange}
+					/>
+				)}
+
+				{/* Episode strip — fades during season transition */}
+				<div
+					className="transition-opacity duration-300"
+					style={{ opacity: isFetching ? 0.45 : 1 }}
+				>
+					<EpisodeStrip
+						episodes={episodes}
+						activeEpisodeId={activeEP?.id}
+						onEpisodeClick={onEpisodeClick}
+						viewMode={viewMode}
+					/>
+				</div>
+
+				{/* Episode detail panel */}
+				{activeEpisodeForShow && (
+					<EpisodeDetailPanel episode={activeEpisodeForShow} />
+				)}
 			</div>
 		</div>
 	);
 };
 
-export default SeasonTabs;
+export default memo(SeasonTabs);

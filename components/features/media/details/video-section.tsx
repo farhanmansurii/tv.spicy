@@ -1,97 +1,279 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Clapperboard, Play, MonitorPlay } from 'lucide-react';
-import { fetchVideos } from '@/lib/api';
-import VideoLoader from '@/components/shared/loaders/video-loader';
-import SegmentedControl from '@/components/shared/segmented-control';
-import { DetailHeader, DetailShell } from './detail-primitives';
+import React, { useState, useEffect, useRef, memo } from 'react';
+import Image from 'next/image';
+import { PlayIcon, XIcon, CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-export default function VideoSection({ id, type }: { id: string; type: string }) {
-	const { data, isLoading } = useQuery({
-		queryKey: ['videos', id, type],
-		queryFn: () => fetchVideos(id, type as 'movie' | 'tv'),
-	});
+gsap.registerPlugin(ScrollTrigger);
 
-	const [activeTab, setActiveTab] = useState<'trailers' | 'teasers'>('trailers');
-	const videos = data?.results || [];
-	const trailers = videos.filter((v: any) => v.type === 'Trailer');
-	const teasers = videos.filter((v: any) => v.type === 'Teaser');
-	const activeVideos = activeTab === 'trailers' ? trailers : teasers;
-	const activeLabel = activeTab === 'trailers' ? 'Trailers' : 'Teasers';
-	const activeCount = activeVideos.length;
+interface Video {
+	key: string;
+	name: string;
+	id: string;
+	type: string;
+	site: string;
+}
 
-	if (isLoading) return <VideoLoader />;
-	if (!videos.length) return null;
+interface ImageItem {
+	file_path: string;
+}
+
+interface VideoSectionProps {
+	videos: Video[];
+	images?: { backdrops?: ImageItem[] };
+}
+
+function VideoSectionComponent({ videos, images }: VideoSectionProps) {
+	const [isExpanded, setIsExpanded] = useState(false);
+	const [activeVideo, setActiveVideo] = useState<string | null>(null);
+
+	const sectionRef = useRef<HTMLElement>(null);
+	const headerRef = useRef<HTMLDivElement>(null);
+	const gridRef = useRef<HTMLUListElement>(null);
+	const modalRef = useRef<HTMLDivElement>(null);
+	const modalContentRef = useRef<HTMLDivElement>(null);
+	const hasAnimated = useRef(false);
+
+	const backdrops = images?.backdrops || [];
+
+	const allItems = [
+		...videos.map((v) => ({
+			type: 'video' as const,
+			key: v.key,
+			id: v.id,
+			name: v.name,
+			poster: `https://img.youtube.com/vi/${v.key}/mqdefault.jpg`,
+		})),
+		...backdrops.map((img, i) => ({
+			type: 'image' as const,
+			id: `img-${i}`,
+			name: 'Image',
+			poster: `https://image.tmdb.org/t/p/w780${img.file_path}`,
+		})),
+	];
+
+	if (!allItems.length) return null;
+
+	const displayed = isExpanded ? allItems : allItems.slice(0, 5);
+
+	/* ── ScrollTrigger Entrance ── */
+	useEffect(() => {
+		if (!sectionRef.current) return;
+
+		const ctx = gsap.context(() => {
+			if (headerRef.current) {
+				gsap.fromTo(
+					headerRef.current,
+					{ y: 24, opacity: 0 },
+					{
+						y: 0,
+						opacity: 1,
+						duration: 0.8,
+						ease: 'power3.out',
+						scrollTrigger: {
+							trigger: headerRef.current,
+							start: 'top 85%',
+							toggleActions: 'play none none none',
+						},
+					}
+				);
+			}
+
+			if (gridRef.current) {
+				const items = gridRef.current.querySelectorAll('[data-video-card]');
+				gsap.fromTo(
+					items,
+					{ y: 40, opacity: 0 },
+					{
+						y: 0,
+						opacity: 1,
+						duration: 0.7,
+						stagger: 0.08,
+						ease: 'power3.out',
+						scrollTrigger: {
+							trigger: gridRef.current,
+							start: 'top 85%',
+							toggleActions: 'play none none none',
+						},
+					}
+				);
+			}
+		}, sectionRef);
+
+		return () => ctx.revert();
+	}, []);
+
+	/* ── Animate newly revealed cards on expand ── */
+	useEffect(() => {
+		if (!gridRef.current || !hasAnimated.current) {
+			hasAnimated.current = true;
+			return;
+		}
+		const items = gridRef.current.querySelectorAll('[data-video-card]');
+		const newItems = Array.from(items).slice(5);
+		if (newItems.length > 0) {
+			gsap.fromTo(
+				newItems,
+				{ y: 30, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.6, stagger: 0.06, ease: 'power3.out' }
+			);
+		}
+	}, [displayed.length]);
+
+	/* ── Modal Open / Close Animation ── */
+	useEffect(() => {
+		if (!modalRef.current || !modalContentRef.current) return;
+
+		const ctx = gsap.context(() => {
+			if (activeVideo) {
+				// Open
+				gsap.fromTo(
+					modalRef.current,
+					{ opacity: 0 },
+					{ opacity: 1, duration: 0.35, ease: 'power2.out' }
+				);
+				gsap.fromTo(
+					modalContentRef.current,
+					{ scale: 0.92, opacity: 0, y: 20 },
+					{ scale: 1, opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.2)', delay: 0.05 }
+				);
+			}
+		});
+
+		return () => ctx.revert();
+	}, [activeVideo]);
+
+	const closeModal = () => {
+		if (!modalRef.current || !modalContentRef.current) {
+			setActiveVideo(null);
+			return;
+		}
+		const tl = gsap.timeline({
+			onComplete: () => setActiveVideo(null),
+		});
+		tl.to(modalContentRef.current, {
+			scale: 0.95,
+			opacity: 0,
+			y: 10,
+			duration: 0.25,
+			ease: 'power2.in',
+		});
+		tl.to(
+			modalRef.current,
+			{ opacity: 0, duration: 0.2, ease: 'power2.in' },
+			0.1
+		);
+	};
 
 	return (
-		<DetailShell>
-			<DetailHeader
-				title="Trailers & Clips"
-				subtitle={`${activeLabel} (${activeCount})`}
-				action={
-					<SegmentedControl
-						value={activeTab}
-						onChange={(value) => setActiveTab(value as 'trailers' | 'teasers')}
-						items={[
-							{
-								value: 'trailers',
-								label: 'Trailers',
-								icon: MonitorPlay,
-								showLabelOnMobile: false,
-								tooltip: `${trailers.length} trailers`,
-							},
-							{
-								value: 'teasers',
-								label: 'Teasers',
-								icon: Clapperboard,
-								showLabelOnMobile: false,
-								tooltip: `${teasers.length} teasers`,
-							},
-						]}
-					/>
-				}
-			/>
+		<section ref={sectionRef} className="section-spacing">
+			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
+				{/* Header */}
+				<div ref={headerRef} className="flex items-center justify-between mb-5 md:mb-6">
+					<div className="flex items-baseline gap-3">
+						<h2 className="text-lg md:text-xl font-semibold text-white tracking-tight">
+							Trailers & More
+						</h2>
+						<span className="text-xs md:text-sm text-white/40 font-medium">
+							{videos.length} videos · {backdrops.length} images
+						</span>
+					</div>
+					{allItems.length > 5 && (
+						<button
+							onClick={() => setIsExpanded((p) => !p)}
+							className="inline-flex items-center gap-1 text-xs md:text-sm font-medium text-white/50 hover:text-white/80 transition-colors duration-200"
+						>
+							{isExpanded ? (
+								<>
+									Show less <CaretUpIcon size={14} />
+								</>
+							) : (
+								<>
+									Show all <CaretDownIcon size={14} />
+								</>
+							)}
+						</button>
+					)}
+				</div>
 
-			<div className="mt-2">
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-					{activeVideos.slice(0, 6).map((video: any) => (
-						<Dialog key={video.id}>
-							<DialogTrigger className="relative aspect-video rounded-2xl overflow-hidden group border border-white/5 shadow-2xl">
-								<img
-									src={`https://img.youtube.com/vi/${video.key}/hqdefault.jpg`}
-									className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-									alt={video.name || 'Trailer thumbnail'}
-									loading="lazy"
-								/>
-								<div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
-									<div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-2xl">
-										<Play className="ml-1 w-5 h-5 fill-black text-black" />
+				{/* Video Grid */}
+				<ul ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+					{displayed.map((item) => (
+						<li key={item.id} data-video-card className="group">
+							{item.type === 'video' ? (
+								<button
+									onClick={() => setActiveVideo(item.key!)}
+									className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]"
+								>
+									<Image
+										src={item.poster}
+										alt={item.name}
+										fill
+										loading="lazy"
+										sizes="300px"
+										className="object-cover"
+									/>
+									{/* Play overlay */}
+									<div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/35 transition-colors duration-300">
+										<div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-md group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300 ease-spring">
+											<PlayIcon size={20} weight="fill" className="text-white ml-0.5" />
+										</div>
 									</div>
-								</div>
-								<div className="absolute bottom-4 left-4 right-4 text-left">
-									<p className="text-sm md:text-base font-semibold text-white line-clamp-1">
-										{video.name}
-									</p>
-								</div>
-							</DialogTrigger>
-							<DialogContent className="max-w-5xl p-0 bg-black border-none rounded-[2rem] overflow-hidden">
-								<div className="aspect-video w-full">
-									<iframe
-										src={`https://www.youtube.com/embed/${video.key}?autoplay=1`}
-										className="w-full h-full"
-										allowFullScreen
-										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-										title={video.name || 'Video player'}
+								</button>
+							) : (
+								<div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]">
+									<Image
+										src={item.poster}
+										alt="Backdrop"
+										fill
+										loading="lazy"
+										sizes="300px"
+										className="object-cover"
 									/>
 								</div>
-							</DialogContent>
-						</Dialog>
+							)}
+							<p className="mt-2 text-xs md:text-sm text-white/60 truncate font-medium">
+								{item.name}
+							</p>
+						</li>
 					))}
-				</div>
+				</ul>
 			</div>
-		</DetailShell>
+
+			{/* Video Modal */}
+			{activeVideo && (
+				<div
+					ref={modalRef}
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+					onClick={closeModal}
+				>
+					<div
+						ref={modalContentRef}
+						className="relative w-full max-w-5xl mx-4 aspect-video"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<button
+							onClick={closeModal}
+							className="absolute -top-12 right-0 inline-flex items-center gap-1.5 text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
+						>
+							<XIcon size={16} />
+							Close
+						</button>
+						<iframe
+							src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1&rel=0`}
+							title="Trailer"
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+							allowFullScreen
+							className="w-full h-full rounded-2xl"
+						/>
+					</div>
+				</div>
+			)}
+		</section>
 	);
 }
+
+export default memo(VideoSectionComponent);
+VideoSectionComponent.displayName = 'VideoSection';

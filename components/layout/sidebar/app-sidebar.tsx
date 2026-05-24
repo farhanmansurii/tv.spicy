@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { X } from 'lucide-react';
+import { XIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 
 import {
@@ -91,7 +91,7 @@ export function AppSidebar() {
 						)}
 						aria-label="Close menu"
 					>
-						<X className="h-4 w-4" strokeWidth={2} />
+						<XIcon size={16} weight="bold" />
 					</button>
 				</div>
 			</SidebarHeader>

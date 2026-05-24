@@ -25,11 +25,60 @@ export interface HeroCarouselProps {
 export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 	const [api, setApi] = React.useState<import('@/components/ui/carousel').CarouselApi>();
 	const [activeIndex, setActiveIndex] = React.useState(0);
-	const plugin = React.useRef(Autoplay({ delay: 8000, stopOnInteraction: true }));
+	const [progress, setProgress] = React.useState(0);
+	const progressIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+	const AUTOPLAY_DELAY = 8000;
+
+	const plugin = React.useRef(
+		Autoplay({
+			delay: AUTOPLAY_DELAY,
+			stopOnInteraction: true,
+			stopOnMouseEnter: true,
+		})
+	);
+
 	const validShows = React.useMemo(
-		() => shows?.filter((show) => show.backdrop_path || show.poster_path).slice(0, 4) || [],
+		() => shows?.filter((show) => show.backdrop_path || show.poster_path).slice(0, 5) || [],
 		[shows]
 	);
+
+	// Progress bar animation
+	React.useEffect(() => {
+		if (!api) return;
+
+		const startProgress = () => {
+			setProgress(0);
+			if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+
+			const startTime = Date.now();
+			progressIntervalRef.current = setInterval(() => {
+				const elapsed = Date.now() - startTime;
+				const newProgress = Math.min((elapsed / AUTOPLAY_DELAY) * 100, 100);
+				setProgress(newProgress);
+			}, 50);
+		};
+
+		const stopProgress = () => {
+			if (progressIntervalRef.current) {
+				clearInterval(progressIntervalRef.current);
+				progressIntervalRef.current = null;
+			}
+			setProgress(0);
+		};
+
+		api.on('select', startProgress);
+		api.on('settle', startProgress);
+		api.on('pointerDown', stopProgress);
+
+		startProgress();
+
+		return () => {
+			stopProgress();
+			api.off('select', startProgress);
+			api.off('settle', startProgress);
+			api.off('pointerDown', stopProgress);
+		};
+	}, [api]);
 
 	React.useEffect(() => {
 		if (!api) return;
@@ -42,6 +91,13 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 			api.off('reInit', updateSelection);
 		};
 	}, [api]);
+
+	const scrollTo = React.useCallback(
+		(index: number) => {
+			api?.scrollTo(index);
+		},
+		[api]
+	);
 
 	if (validShows.length === 0) return null;
 
@@ -60,6 +116,7 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 				opts={{
 					loop: true,
 					align: 'start',
+
 				}}
 			>
 				<CarouselContent className="-ml-0">
@@ -71,35 +128,76 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 							index === (activeIndex - 1 + validShows.length) % validShows.length;
 
 						return (
-							<CarouselItem key={show.id} className="pl-0 relative w-full">
+							<CarouselItem
+								key={show.id}
+								className="pl-0 relative w-full"
+							>
 								{isNearActive ? (
-									<HeroBanner
-										show={show}
-										type={(show.media_type as 'movie' | 'tv') || type}
-										isDetailsPage={false}
-										loading={isActive ? 'eager' : 'lazy'}
-										priority={isActive}
-									/>
+									<div
+										className={cn(
+											'transition-opacity duration-700 ease-in-out',
+											isActive ? 'opacity-100' : 'opacity-0'
+										)}
+									>
+										<HeroBanner
+											show={show}
+											type={(show.media_type as 'movie' | 'tv') || type}
+											isDetailsPage={false}
+											loading={isActive ? 'eager' : 'lazy'}
+											priority={isActive}
+											isActive={isActive}
+										/>
+									</div>
 								) : (
-									<div className="h-[68vh] md:h-[80vh] lg:h-[85vh] w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_50%),linear-gradient(180deg,rgba(24,24,27,0.92),rgba(9,9,11,1))]" />
+									<div className="h-[70vh] md:h-[82vh] lg:h-[88vh] w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_50%),linear-gradient(180deg,rgba(24,24,27,0.92),rgba(9,9,11,1))]" />
 								)}
 							</CarouselItem>
 						);
 					})}
 				</CarouselContent>
 
-				{/* Navigation Buttons */}
-				<div className="hidden md:flex absolute right-12 bottom-12 z-20 gap-3">
+				{/* Navigation Buttons — Apple TV style: minimal, bottom right */}
+				<div className="hidden md:flex absolute right-8 lg:right-12 bottom-20 z-20 gap-2">
 					<CarouselPrevious
 						variant="ghost"
-						className="static translate-y-0 h-12 w-12 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-md transition-[background-color,color] duration-300"
+						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-black/40 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300"
 					/>
 					<CarouselNext
 						variant="ghost"
-						className="static translate-y-0 h-12 w-12 rounded-full border-white/10 bg-black/40 hover:bg-white/10 text-white backdrop-blur-md transition-[background-color,color] duration-300"
+						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-black/40 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300"
 					/>
 				</div>
 			</Carousel>
+
+			{/* Apple TV-style segmented progress indicators */}
+			<div className="absolute bottom-6 md:bottom-8 left-0 right-0 z-20 flex justify-center">
+				<div className="flex items-center gap-1.5 md:gap-2">
+					{validShows.map((_, index) => {
+						const isActive = index === activeIndex;
+						return (
+							<button
+								key={index}
+								onClick={() => scrollTo(index)}
+								className={cn(
+									'group relative h-1 rounded-full overflow-hidden transition-all duration-500',
+									isActive
+										? 'w-8 md:w-12 bg-white/20'
+										: 'w-4 md:w-6 bg-white/10 hover:bg-white/20'
+								)}
+								aria-label={`Go to slide ${index + 1}`}
+								aria-current={isActive ? 'true' : undefined}
+							>
+								{isActive && (
+									<div
+										className="absolute inset-y-0 left-0 bg-white rounded-full transition-all duration-100 ease-linear"
+										style={{ width: `${progress}%` }}
+									/>
+								)}
+							</button>
+						);
+					})}
+				</div>
+			</div>
 		</div>
 	);
 }

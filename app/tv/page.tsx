@@ -27,12 +27,10 @@ export const metadata: Metadata = {
 	},
 };
 
-export const revalidate = 604800;
-
 const RecentlyWatched = dynamic(() => import('@/components/features/watchlist/recently-watched'));
 const WatchList = dynamic(() => import('@/components/features/watchlist/watch-list'));
 const GenreGrid = dynamic(() => import('@/components/features/media/genre/genre-grid'), {
-	loading: () => <div className="h-96 bg-muted animate-pulse rounded-md" />,
+	loading: () => <div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />,
 });
 
 export default async function Page() {
@@ -101,7 +99,7 @@ export default async function Page() {
 			</Container>
 
 			{genres.length > 0 && (
-				<Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-md" />}>
+				<Suspense fallback={<div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />}>
 					<GenreGrid type="tv" genres={genres} />
 				</Suspense>
 			)}

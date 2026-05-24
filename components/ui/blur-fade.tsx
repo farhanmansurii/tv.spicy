@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useInView, UseInViewOptions, Variants } from 'framer-motion';
+import { motion, useInView, useReducedMotion, UseInViewOptions, Variants } from 'framer-motion';
 
 type MarginType = UseInViewOptions['margin'];
 
@@ -34,11 +34,14 @@ export default function BlurFade({
 	const ref = useRef(null);
 	const inViewResult = useInView(ref, { once: true, margin: inViewMargin });
 	const isInView = !inView || inViewResult;
+	const prefersReduced = useReducedMotion();
+	// Force animations on for visual testing (set to prefersReduced for production)
+	const shouldReduceMotion = false;
 
 	const defaultVariants: Variants = {
 		hidden: {
-			opacity: 0,
-			y: yOffset,
+			opacity: shouldReduceMotion ? 1 : 0,
+			y: shouldReduceMotion ? 0 : yOffset,
 		},
 		visible: {
 			opacity: 1,
@@ -55,8 +58,8 @@ export default function BlurFade({
 			animate={isInView ? 'visible' : 'hidden'}
 			variants={combinedVariants}
 			transition={{
-				delay: delay,
-				duration,
+				delay: shouldReduceMotion ? 0 : delay,
+				duration: shouldReduceMotion ? 0 : duration,
 				ease: [0.25, 0.4, 0.25, 1],
 			}}
 			className={className}

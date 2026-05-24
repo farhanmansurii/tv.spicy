@@ -2,7 +2,7 @@
 
 import React, { memo, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Play, RotateCcw, X } from 'lucide-react';
+import { PlayIcon, ArrowCounterClockwiseIcon, XIcon } from '@phosphor-icons/react';
 import type { ContinueWatchingItem } from '@/lib/continue-watching';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { cn } from '@/lib/utils';
@@ -76,7 +76,7 @@ function ContinueWatchingCardComponent({ item, index }: ContinueWatchingCardProp
 				{/* Scrim + play button */}
 				<div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 					<div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-lg scale-90 group-hover:scale-100 transition-transform duration-200">
-						<Play className="w-3.5 h-3.5 fill-black text-black ml-0.5" />
+						<PlayIcon size={14} weight="fill" className="text-black ml-0.5" />
 					</div>
 				</div>
 
@@ -119,7 +119,7 @@ function ContinueWatchingCardComponent({ item, index }: ContinueWatchingCardProp
 					aria-label="Start over"
 					title="Start over"
 				>
-					<RotateCcw className="w-3 h-3" />
+					<ArrowCounterClockwiseIcon size={12} />
 				</button>
 				<button
 					onClick={handleRemove}
@@ -127,7 +127,7 @@ function ContinueWatchingCardComponent({ item, index }: ContinueWatchingCardProp
 					aria-label="Remove"
 					title="Remove"
 				>
-					<X className="w-3 h-3" />
+					<XIcon size={12} />
 				</button>
 			</div>
 		</Link>

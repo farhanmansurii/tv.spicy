@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Heart, Trash2 } from 'lucide-react';
+import { HeartIcon, TrashIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { fetchDetailsTMDB } from '@/lib/api';
@@ -121,7 +121,7 @@ export function LibraryFavorites() {
         return (
             <div className="flex flex-col items-center justify-center py-20 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                    <Heart className="w-8 h-8 text-zinc-600" />
+                    <HeartIcon size={32} className="text-zinc-600" />
                 </div>
                 <h3 className="text-xl font-bold text-foreground">No favorites yet</h3>
                 <p className="text-muted-foreground text-center max-w-md">
@@ -147,7 +147,7 @@ export function LibraryFavorites() {
                     onClick={handleClearFavorites}
                     className="text-muted-foreground hover:text-red-500 transition-colors gap-2"
                 >
-                    <Trash2 className="w-4 h-4" />
+                    <TrashIcon size={16} />
                     <span className="hidden sm:inline">Clear All</span>
                 </Button>
             </div>

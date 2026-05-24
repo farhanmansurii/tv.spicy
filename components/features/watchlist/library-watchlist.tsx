@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Bookmark } from 'lucide-react'
+import { BookmarkSimpleIcon } from '@phosphor-icons/react'
 
 import type { Show as MediaShow } from '@/lib/types'
 import useWatchListStore from '@/store/watchlistStore'
@@ -38,7 +38,7 @@ export function LibraryWatchlist() {
 		return (
 			<div className="flex flex-col items-center justify-center py-20 space-y-4">
 				<div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-					<Bookmark className="w-8 h-8 text-zinc-600" />
+					<BookmarkSimpleIcon size={32} className="text-zinc-600" />
 				</div>
 				<h3 className="text-xl font-bold text-foreground">Your watchlist is empty</h3>
 				<p className="text-muted-foreground text-center max-w-md">

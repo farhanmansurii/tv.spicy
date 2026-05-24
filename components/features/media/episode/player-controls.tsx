@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Settings, ChevronRight, X, RotateCcw } from 'lucide-react';
+import { GearIcon, CaretRightIcon, XIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 import {
 	Select,
 	SelectContent,
@@ -39,7 +39,7 @@ function ResumeChip({ seconds, onResume }: ResumeChipProps) {
 			className="inline-flex items-center gap-1.5 h-9 md:h-11 px-3 md:px-4 rounded-full text-xs md:text-sm font-medium bg-white/[0.08] hover:bg-white/[0.14] border border-white/10 hover:border-white/20 text-zinc-200 hover:text-white transition-[background-color,border-color,color] duration-200 backdrop-blur-sm ring-1 ring-white/[0.06] group/resume"
 			title={`Resume from ${formatTimestamp(seconds)}`}
 		>
-			<RotateCcw className="w-3 h-3 text-zinc-400 group-hover/resume:text-zinc-200 transition-colors duration-200" />
+			<ArrowCounterClockwiseIcon size={12} className="text-zinc-400 group-hover/resume:text-zinc-200 transition-colors duration-200" />
 			<span className="hidden sm:inline">Resume</span>
 			<span className="font-mono tracking-tight text-zinc-300 group-hover/resume:text-white transition-colors duration-200">
 				{formatTimestamp(seconds)}
@@ -89,7 +89,7 @@ export function PlayerControls({
 			<div className="flex items-center gap-2">
 				<Select value={selectedProvider} onValueChange={onProviderChange}>
 					<SelectTrigger className="h-9 md:h-11 w-fit bg-white/[0.06] border-white/10 rounded-full px-4 hover:bg-white/[0.10] transition-[background-color,box-shadow] duration-200 gap-3 shadow-lg backdrop-blur-sm ring-1 ring-white/[0.08]">
-						<Settings className="w-3.5 h-3.5 text-zinc-400" />
+						<GearIcon className="w-3.5 h-3.5 text-zinc-400" />
 						<SelectValue className="text-xs md:text-sm font-medium text-zinc-200">
 							{currentLabel}
 						</SelectValue>
@@ -123,7 +123,7 @@ export function PlayerControls({
 						<span className="text-xs md:text-sm font-semibold hidden sm:inline">
 							Next Episode
 						</span>
-						<ChevronRight className="w-4 h-4 transition-transform group-hover/next:translate-x-0.5" />
+						<CaretRightIcon className="w-4 h-4 transition-transform group-hover/next:translate-x-0.5" />
 					</Button>
 
 					{isSticky && onCloseSticky && (
@@ -135,7 +135,7 @@ export function PlayerControls({
 							aria-label="Hide sticky player"
 							title="Hide sticky player"
 						>
-							<X className="w-4 h-4" />
+							<XIcon className="w-4 h-4" />
 						</Button>
 					)}
 				</div>

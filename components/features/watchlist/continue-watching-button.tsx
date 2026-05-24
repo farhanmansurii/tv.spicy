@@ -7,7 +7,7 @@ import { useFavoritesStore } from '@/store/favoritesStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Play, Pause, Plus, Check, Info, Heart, Loader2 } from 'lucide-react';
+import { PlayIcon, PauseIcon, PlusIcon, CheckIcon, InfoIcon, HeartIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { GlowingButton } from '@/components/ui/glowing-button';
 import { useHaptics } from '@/hooks/use-haptics';
@@ -226,7 +226,7 @@ export default function ContinueWatchingButton({
 			return {
 				buttonText: 'Play',
 				buttonLabel: 'Play Movie',
-				ButtonIcon: Play,
+				ButtonIcon: PlayIcon,
 			};
 		}
 
@@ -236,7 +236,7 @@ export default function ContinueWatchingButton({
 			return {
 				buttonText: `Playing S${displaySeasonNumber} E${displayEpisodeNumber}`,
 				buttonLabel: `Now playing Season ${displaySeasonNumber} Episode ${displayEpisodeNumber}`,
-				ButtonIcon: Pause,
+				ButtonIcon: PauseIcon,
 			};
 		}
 
@@ -245,7 +245,7 @@ export default function ContinueWatchingButton({
 			return {
 				buttonText: `Resume S${displaySeasonNumber} E${displayEpisodeNumber}`,
 				buttonLabel: `Resume S${displaySeasonNumber} E${displayEpisodeNumber}`,
-				ButtonIcon: Play,
+				ButtonIcon: PlayIcon,
 			};
 		}
 
@@ -253,64 +253,77 @@ export default function ContinueWatchingButton({
 		return {
 			buttonText: 'Start Watching',
 			buttonLabel: 'Start Watching from Episode 1',
-			ButtonIcon: Play,
+			ButtonIcon: PlayIcon,
 		};
 	}, [type, isCurrentlyPlaying, displayEpisode, displaySeasonNumber, displayEpisodeNumber]);
 
-	// Button styles
-	const iconButtonBase = cn(
-		'bg-white/10 hover:bg-white/20',
-		'border border-white/10',
-		'text-white/90 hover:text-white'
+	// Secondary button shared styles — glassmorphism pill
+	const secondaryBtnBase = cn(
+		'h-11 w-11 md:h-12 md:w-12',
+		'bg-white/[0.08] hover:bg-white/[0.14]',
+		'border border-white/[0.12] hover:border-white/20',
+		'text-white/80 hover:text-white',
+		'backdrop-blur-sm',
+		'transition-all duration-200 ease-out',
+		'hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]'
 	);
 
 	return (
-		<div className="flex items-center gap-3">
-			{/* Play/Resume/Playing Button - Primary CTA */}
+		<div className="flex items-center gap-3 md:gap-3.5">
+			{/* Primary CTA — Apple TV style: large white rounded pill with black text */}
 			<GlowingButton
 				onClick={handlePlay}
 				disabled={isLoading}
-				glow
-				glowVariant={isCurrentlyPlaying ? 'primary' : 'light'}
+				glow={false}
 				className={cn(
-					'h-11 md:h-12 px-5 md:px-6',
-					'inline-flex items-center justify-center gap-2',
-					'font-semibold text-sm',
-					'transition-all duration-200 ease-out',
-					'active:scale-[0.98]',
-					'focus-visible:ring-offset-black',
-					'disabled:opacity-60 disabled:pointer-events-none',
+					// Size: substantial, Apple TV proportions
+					'h-12 md:h-[52px] px-7 md:px-8',
+					// Typography: bold, clean
+					'font-semibold text-sm md:text-[15px] tracking-tight',
+					// Layout
+					'inline-flex items-center justify-center gap-2.5',
+					// Colors: high contrast white-on-black or black-on-white
 					isCurrentlyPlaying
-						? 'bg-primary text-primary-foreground hover:bg-primary/90'
-						: 'bg-white text-black hover:bg-white/90'
+						? 'bg-white text-black hover:bg-white/90'
+						: 'bg-white text-black hover:bg-white/90',
+					// Hover physics
+					'hover:-translate-y-px hover:shadow-[0_12px_32px_rgba(255,255,255,0.15)]',
+					'active:scale-[0.97] active:translate-y-0',
+					// Disabled
+					'disabled:opacity-60 disabled:pointer-events-none',
+					// Transition
+					'transition-all duration-200 ease-out'
 				)}
 				aria-label={buttonLabel}
 				aria-busy={isLoading}
 			>
 				{isLoading ? (
-					<Loader2 className="w-[18px] h-[18px] animate-spin" />
+					<SpinnerGapIcon size={18} className="animate-spin" />
 				) : isCurrentlyPlaying ? (
-					<Pause className="w-[18px] h-[18px] fill-current" strokeWidth={0} />
+					<PauseIcon size={18} weight="fill" />
 				) : (
-					<ButtonIcon className="w-[18px] h-[18px] fill-current" />
+					<ButtonIcon size={18} weight="fill" />
 				)}
 				<span className="whitespace-nowrap">{isLoading ? 'Loading' : buttonText}</span>
 			</GlowingButton>
 
-			{/* Add to Watchlist Button */}
+			{/* Add to Watchlist — glass pill */}
 			<GlowingButton
 				iconOnly
 				onClick={handleAddOrRemove}
 				glow={isAdded}
 				glowVariant="light"
-				className={cn(isAdded ? 'bg-white text-black hover:bg-white/90' : iconButtonBase)}
+				className={cn(
+					secondaryBtnBase,
+					isAdded && 'bg-white/[0.14] border-white/25 text-white'
+				)}
 				aria-label={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
 				title={isAdded ? 'In Watchlist' : 'Add to Watchlist'}
 			>
 				{isAdded ? (
-					<Check className="w-5 h-5" strokeWidth={2.5} />
+					<CheckIcon size={18} weight="bold" />
 				) : (
-					<Plus className="w-5 h-5" strokeWidth={2} />
+					<PlusIcon size={18} weight="bold" />
 				)}
 			</GlowingButton>
 
@@ -322,19 +335,17 @@ export default function ContinueWatchingButton({
 						iconOnly
 						onClick={handleLike}
 						glow={isLiked}
-						glowVariant="primary"
+						glowVariant="accent"
 						className={cn(
+							secondaryBtnBase,
 							isLiked
-								? 'bg-red-500/20 border border-red-500/30 text-red-500 hover:bg-red-500/30'
-								: iconButtonBase
+								? 'bg-red-500/15 border-red-500/25 text-red-400 hover:bg-red-500/25 hover:border-red-500/35'
+								: secondaryBtnBase
 						)}
 						aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
 						title={isLiked ? 'Favorited' : 'Add to Favorites'}
 					>
-						<Heart
-							className={cn('w-5 h-5', isLiked && 'fill-current')}
-							strokeWidth={2}
-						/>
+						<HeartIcon size={18} weight={isLiked ? 'fill' : 'regular'} />
 					</GlowingButton>
 				</>
 			)}
@@ -345,11 +356,11 @@ export default function ContinueWatchingButton({
 					iconOnly
 					onClick={handleInfo}
 					glow={false}
-					className={iconButtonBase}
+					className={secondaryBtnBase}
 					aria-label="View details"
 					title="More Info"
 				>
-					<Info className="w-5 h-5" strokeWidth={2} />
+					<InfoIcon size={18} />
 				</GlowingButton>
 			)}
 		</div>

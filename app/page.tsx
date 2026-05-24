@@ -9,10 +9,7 @@ import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { Suspense } from 'react';
 import { HomePersonalizedRows } from '@/components/features/home/home-personalized-rows';
 
-export const revalidate = 604800;
-
 async function fetchHomePageData() {
-	// Keep first paint focused on hero plus a small set of immediately valuable rows.
 	const [trendingTV, trendingMovies, tvPopular] = await Promise.all([
 		fetchRowData('trending/tv/week'),
 		fetchRowData('trending/movie/week'),
@@ -22,10 +19,9 @@ async function fetchHomePageData() {
 	const allTrending = [...(trendingTV || []), ...(trendingMovies || [])].filter(Boolean);
 	const basicHeroShows = allTrending
 		.filter((show) => show?.backdrop_path || show?.poster_path)
-		.slice(0, 4);
+		.slice(0, 5);
 
-	// Fetch details for a small hero set so the browser isn't decoding a whole billboard strip.
-	const heroShows = (await fetchHeroItemsWithDetails(basicHeroShows, 'tv', 4)) as Array<
+	const heroShows = (await fetchHeroItemsWithDetails(basicHeroShows, 'tv', 5)) as Array<
 		Show & { media_type?: 'movie' | 'tv' }
 	>;
 
@@ -51,10 +47,17 @@ function HomePageContent({
 	return (
 		<div className="min-h-screen bg-background text-foreground pb-20">
 			<HeroCarousel shows={heroShows as unknown as HeroCarouselProps['shows']} type="tv" />
-			<Container className="w-full">
-				<div className="flex flex-col space-y-4 md:space-y-6">
+
+			{/* Apple TV-style content rows with negative margin overlap for cinematic feel */}
+			<div className="relative z-10 -mt-12 md:-mt-20">
+				<div className="bg-gradient-to-t from-background via-background to-transparent h-16 md:h-24" />
+			</div>
+
+			<Container className="w-full relative z-10">
+				<div className="flex flex-col space-y-4 md:space-y-8">
 					<HomePersonalizedRows />
-					{/* Pre-fetched rows - no Suspense needed since data is already available */}
+
+					{/* Pre-fetched rows */}
 					<DataRow
 						endpoint="trending/tv/week"
 						text="Binge-Worthy Series"
@@ -89,7 +92,6 @@ function HomePageContent({
 						/>
 					</Suspense>
 
-					{/* Pre-fetched rows - no Suspense needed since data is already available */}
 					<DataRow
 						endpoint="trending/movie/week"
 						text="Blockbuster Hits"
@@ -137,7 +139,7 @@ function HomePageError() {
 			<Container>
 				<div className="text-center">
 					<h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
-					<p className="text-muted-foreground">Please try refreshing the page.</p>
+					<p className="text-zinc-500">Please try refreshing the page.</p>
 				</div>
 			</Container>
 		</div>

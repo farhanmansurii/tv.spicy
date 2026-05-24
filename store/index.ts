@@ -1,6 +1,5 @@
 export * from './authStore';
 export * from './episodeStore';
-export * from './episodeViewStore';
 export * from './favoritesStore';
 export * from './mediaQueryStore';
 export * from './playerPrefsStore';

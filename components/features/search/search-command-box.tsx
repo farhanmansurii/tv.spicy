@@ -3,21 +3,21 @@
 import * as React from 'react';
 import gsap from 'gsap';
 import {
-	Search,
-	X,
-	Star,
-	Film,
-	Clock,
-	ChevronRight,
-	Command as CmdIcon,
-	Loader2,
-	AlertCircle,
-	ArrowRight,
-	Compass,
-	Library,
-	Sparkles,
-	Tag,
-} from 'lucide-react';
+	MagnifyingGlassIcon,
+	XIcon,
+	StarIcon,
+	FilmSlateIcon,
+	ClockIcon,
+	CaretRightIcon,
+	CommandIcon,
+	CircleNotchIcon,
+	WarningCircleIcon,
+	ArrowRightIcon,
+	CompassIcon,
+	BookOpenIcon,
+	SparkleIcon,
+	TagIcon,
+} from '@phosphor-icons/react';
 import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -234,7 +234,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 							'group'
 						)}
 					>
-						<Search
+						<MagnifyingGlassIcon
 							className={cn(
 								'h-[18px] w-[18px]',
 								'text-muted-foreground/50 group-hover:text-muted-foreground/70',
@@ -264,7 +264,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 							'lg:w-64 lg:h-10 lg:rounded-xl lg:justify-start lg:gap-2.5 lg:px-3.5'
 						)}
 					>
-						<Search
+						<MagnifyingGlassIcon
 							className={cn(
 								'h-[18px] w-[18px] sm:h-5 sm:w-5 lg:h-4 lg:w-4',
 								'text-foreground/60 group-hover:text-foreground/80',
@@ -301,7 +301,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 					<Command shouldFilter={false} className="bg-transparent h-auto">
 						<div className="flex items-center px-4  border-b border-white/5 shrink-0 gap-2">
 							<div className="relative w-6 h-6 shrink-0 flex items-center justify-center">
-								<Search
+								<MagnifyingGlassIcon
 									className={cn(
 										'absolute w-5 h-5 transition-all duration-300 pointer-events-none',
 										isSearching
@@ -309,7 +309,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 											: 'opacity-100 scale-100 text-white/20'
 									)}
 								/>
-								<Loader2
+								<CircleNotchIcon
 									className={cn(
 										'absolute w-6 h-6 animate-spin transition-all duration-300 pointer-events-none',
 										isSearching
@@ -368,7 +368,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 						<CommandList className="max-h-[480px] overflow-y-auto p-0 custom-scrollbar min-h-[120px]">
 							{isError && (
 								<div className="py-20 flex flex-col items-center text-red-400/50">
-									<AlertCircle className="w-8 h-8 mb-2" />
+									<WarningCircleIcon className="w-8 h-8 mb-2" />
 									<span className="text-[10px] font-bold uppercase tracking-widest">
 										Network Error
 									</span>
@@ -418,7 +418,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 										>
 											<div className="flex items-center gap-3">
 												<div className="h-10 w-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-													<Search className="w-5 h-5 text-white/40" />
+													<MagnifyingGlassIcon className="w-5 h-5 text-white/40" />
 												</div>
 												<div className="flex flex-col">
 													<span className="text-sm font-semibold text-white/80 group-aria-selected:text-white">
@@ -429,7 +429,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 													</span>
 												</div>
 											</div>
-											<ArrowRight className="w-4 h-4 text-white/30 group-aria-selected:text-white/40 transition-colors flex-shrink-0 ml-2" />
+											<ArrowRightIcon className="w-4 h-4 text-white/30 group-aria-selected:text-white/40 transition-colors flex-shrink-0 ml-2" />
 										</CommandItem>
 									</CommandGroup>
 								</>
@@ -438,7 +438,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 								<>
 									{showLoader ? (
 										<div className="py-20 flex flex-col items-center justify-center min-h-[120px]">
-											<Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-3" />
+											<CircleNotchIcon className="w-8 h-8 animate-spin text-blue-500 mb-3" />
 											<span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
 												Searching...
 											</span>
@@ -480,7 +480,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 												>
 													<div className="flex items-center gap-3">
 														<div className="h-10 w-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-															<Search className="w-5 h-5 text-white/40" />
+															<MagnifyingGlassIcon className="w-5 h-5 text-white/40" />
 														</div>
 														<div className="flex flex-col">
 															<span className="text-sm font-semibold text-white/80 group-aria-selected:text-white">
@@ -492,7 +492,7 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 															</span>
 														</div>
 													</div>
-													<ArrowRight className="w-4 h-4 text-white/30 group-aria-selected:text-white transition-colors" />
+													<ArrowRightIcon className="w-4 h-4 text-white/30 group-aria-selected:text-white transition-colors" />
 												</CommandItem>
 											</CommandGroup>
 										</>
@@ -511,10 +511,10 @@ export function SearchCommandBox({ variant = 'default' }: SearchCommandBoxProps)
 						<div className="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-black/20 text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">
 							<div className="flex gap-4">
 								<span className="flex items-center gap-1.5">
-									<CmdIcon className="w-3 h-3" /> Select
+									<CommandIcon className="w-3 h-3" /> Select
 								</span>
 								<span className="flex items-center gap-1.5">
-									<ChevronRight className="w-3 h-3 rotate-90" /> Navigate
+									<CaretRightIcon className="w-3 h-3 rotate-90" /> Navigate
 								</span>
 							</div>
 						</div>
@@ -572,7 +572,7 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: ResultItemProps) {
 							<img
 								src={tmdbImage(item.poster_path, 'w92')}
 								className="w-full h-full object-cover"
-								alt=""
+								alt={item.title || item.name || 'Poster'}
 								loading="lazy"
 							/>
 							<div
@@ -582,7 +582,7 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: ResultItemProps) {
 						</>
 					) : (
 						<div className="w-full h-full flex items-center justify-center">
-							<Film className="w-6 h-6 text-white/[0.08]" strokeWidth={1.5} />
+							<FilmSlateIcon className="w-6 h-6 text-white/[0.08]" strokeWidth={1.5} />
 						</div>
 					)}
 				</div>
@@ -623,7 +623,7 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: ResultItemProps) {
 									bg-amber-500/10 group-aria-selected:bg-amber-500/15
 									transition-colors duration-200"
 								>
-									<Star
+									<StarIcon
 										className="w-3 h-3 text-amber-400/70 fill-amber-400/70"
 										strokeWidth={0}
 									/>
@@ -664,13 +664,13 @@ function ResultItem({ item, isRecent, onRemove, onSelect }: ResultItemProps) {
 								transition-all duration-200"
 							aria-label="Remove"
 						>
-							<X className="w-3.5 h-3.5" strokeWidth={2.5} />
+							<XIcon className="w-3.5 h-3.5" strokeWidth={2.5} />
 						</button>
 					)}
 
 					{/* Chevron Indicator */}
 					<div className="p-1">
-						<ChevronRight
+						<CaretRightIcon
 							className="w-4 h-4 text-white/10
 							group-hover:text-white/20 group-aria-selected:text-white/30
 							group-hover:translate-x-0.5 group-aria-selected:translate-x-1

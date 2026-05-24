@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo } from 'react';
 import useTVShowStore from '@/store/recentsStore';
 import { Button } from '@/components/ui/button';
-import { Trash2, History, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TrashIcon, ClockCounterClockwiseIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { ContinueWatchingCard } from './continue-watching-card';
 import {
@@ -47,7 +47,7 @@ export function LibraryContinueWatching() {
         return (
             <div className="flex flex-col items-center justify-center py-20 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                    <History className="w-8 h-8 text-zinc-600" />
+                    <ClockCounterClockwiseIcon size={32} className="text-zinc-600" />
                 </div>
                 <h3 className="text-xl font-bold text-foreground">No recent activity</h3>
                 <p className="text-muted-foreground text-center max-w-md">
@@ -73,7 +73,7 @@ export function LibraryContinueWatching() {
                     onClick={clearRecentlyWatched}
                     className="text-muted-foreground hover:text-red-500 transition-colors gap-2"
                 >
-                    <Trash2 className="w-4 h-4" />
+                    <TrashIcon size={16} />
                     <span className="hidden sm:inline">Clear History</span>
                 </Button>
             </div>
@@ -102,11 +102,11 @@ export function LibraryContinueWatching() {
                     <div className="flex items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-500">
                         <CarouselPrevious
                             className="static translate-y-0 h-8 w-8 bg-zinc-900 border-white/5 text-zinc-500 hover:bg-white hover:text-black transition-all"
-                            icon={<ChevronLeft className="h-4 w-4" />}
+                            icon={<CaretLeftIcon size={16} />}
                         />
                         <CarouselNext
                             className="static translate-y-0 h-8 w-8 bg-zinc-900 border-white/5 text-zinc-500 hover:bg-white hover:text-black transition-all"
-                            icon={<ChevronRight className="h-4 w-4" />}
+                            icon={<CaretRightIcon size={16} />}
                         />
                     </div>
                 </div>

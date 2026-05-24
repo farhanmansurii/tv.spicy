@@ -47,24 +47,17 @@ export default function ShowContainerLoader() {
 				</div>
 			</div>
 
-			{/* Episodes Grid Skeleton */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
-				{Array.from({ length: 8 }).map((_, index) => (
+			{/* Episodes Grid Skeleton — matches list view dimensions */}
+			<div className="flex flex-col gap-2 min-h-[300px]">
+				{Array.from({ length: 6 }).map((_, index) => (
 					<div
 						key={index}
-						className="group relative aspect-video w-full overflow-hidden rounded-xl md:rounded-2xl border border-white/10 bg-card"
+						className="flex items-center gap-4 p-2 rounded-2xl"
 					>
-						<Skeleton className="absolute inset-0 z-0 h-full w-full" />
-						<div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10" />
-						<div className="relative z-20 h-full w-full flex flex-col justify-end p-5 md:p-6">
-							<div className="flex flex-col gap-1">
-								<div className="flex items-center gap-2">
-									<Skeleton className="h-3 w-20 rounded-sm" />
-									<Skeleton className="h-3 w-12 rounded-sm" />
-								</div>
-								<Skeleton className="h-5 md:h-6 w-3/4 rounded-sm" />
-								<Skeleton className="h-3 md:h-4 w-full rounded-sm mt-1.5" />
-							</div>
+						<div className="flex-shrink-0 w-32 sm:w-36 aspect-video rounded-xl bg-white/[0.04] animate-pulse" />
+						<div className="flex-1 space-y-2">
+							<div className="h-3 w-20 bg-white/[0.04] rounded animate-pulse" />
+							<div className="h-4 w-3/4 bg-white/[0.06] rounded animate-pulse" />
 						</div>
 					</div>
 				))}
