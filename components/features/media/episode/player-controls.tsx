@@ -36,7 +36,7 @@ function ResumeChip({ seconds, onResume }: ResumeChipProps) {
 	return (
 		<button
 			onClick={onResume}
-			className="inline-flex items-center gap-1.5 h-9 md:h-11 px-3 md:px-4 rounded-full text-xs md:text-sm font-medium bg-white/[0.08] hover:bg-white/[0.14] border border-white/10 hover:border-white/20 text-zinc-200 hover:text-white transition-[background-color,border-color,color] duration-200 backdrop-blur-sm ring-1 ring-white/[0.06] group/resume"
+			className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.07] px-2.5 text-[11px] font-medium text-zinc-200 ring-1 ring-white/[0.04] transition-[background-color,border-color,color,transform] duration-200 hover:border-white/20 hover:bg-white/[0.12] hover:text-white active:scale-[0.98] md:h-10 md:px-3.5 md:text-sm group/resume"
 			title={`Resume from ${formatTimestamp(seconds)}`}
 		>
 			<ArrowCounterClockwiseIcon size={12} className="text-zinc-400 group-hover/resume:text-zinc-200 transition-colors duration-200" />
@@ -84,17 +84,17 @@ export function PlayerControls({
 	const showResumeChip = !hasResumed && savedPositionSeconds > 30;
 
 	return (
-		<div className="flex items-center justify-between gap-2">
+		<div className="flex flex-wrap items-center justify-between gap-1.5 px-1 pb-1">
 			{/* Left side: provider selector + resume chip */}
-			<div className="flex items-center gap-2">
+			<div className="flex min-w-0 flex-1 items-center gap-1.5">
 				<Select value={selectedProvider} onValueChange={onProviderChange}>
-					<SelectTrigger className="h-9 md:h-11 w-fit bg-white/[0.06] border-white/10 rounded-full px-4 hover:bg-white/[0.10] transition-[background-color,box-shadow] duration-200 gap-3 shadow-lg backdrop-blur-sm ring-1 ring-white/[0.08]">
-						<GearIcon className="w-3.5 h-3.5 text-zinc-400" />
-						<SelectValue className="text-xs md:text-sm font-medium text-zinc-200">
+					<SelectTrigger className="h-8 w-fit min-w-0 max-w-[52vw] rounded-full border-white/10 bg-white/[0.06] px-3 text-xs ring-1 ring-white/[0.04] transition-[background-color,border-color,transform] duration-200 hover:border-white/18 hover:bg-white/[0.1] active:scale-[0.98] md:h-10 md:max-w-none md:px-4">
+						<GearIcon className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+						<SelectValue className="truncate text-xs font-medium text-zinc-200 md:text-sm">
 							{currentLabel}
 						</SelectValue>
 					</SelectTrigger>
-					<SelectContent className="bg-zinc-950/95 border-white/10 rounded-xl backdrop-blur-xl p-1.5 shadow-2xl max-h-[300px]">
+					<SelectContent className="max-h-[300px] rounded-xl border-white/10 bg-zinc-950/95 p-1.5 shadow-2xl backdrop-blur-xl">
 						{providers.map((provider) => (
 							<SelectItem
 								key={provider.name}
@@ -114,16 +114,16 @@ export function PlayerControls({
 
 			{/* Right side: next episode + close sticky — TV only */}
 			{onNextEpisode && mediaType === 'tv' && (
-				<div className="flex items-center gap-2">
+				<div className="flex shrink-0 items-center gap-1.5">
 					<Button
 						variant="ghost"
 						onClick={onNextEpisode}
-						className="h-9 md:h-11 rounded-full px-4 md:px-6 transition-[background-color,box-shadow] duration-200 gap-2 group/next bg-white text-black hover:bg-white/90 font-semibold shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_28px_rgba(255,255,255,0.25)]"
+						className="h-8 rounded-full bg-white px-3 text-black transition-[background-color,transform] duration-200 hover:bg-white/90 active:scale-[0.98] md:h-10 md:px-5 gap-1.5 group/next font-semibold"
 					>
-						<span className="text-xs md:text-sm font-semibold hidden sm:inline">
-							Next Episode
+						<span className="hidden text-xs font-semibold sm:inline md:text-sm">
+							Next
 						</span>
-						<CaretRightIcon className="w-4 h-4 transition-transform group-hover/next:translate-x-0.5" />
+						<CaretRightIcon className="h-4 w-4 transition-transform group-hover/next:translate-x-0.5" />
 					</Button>
 
 					{isSticky && onCloseSticky && (
@@ -131,7 +131,7 @@ export function PlayerControls({
 							variant="ghost"
 							size="icon"
 							onClick={onCloseSticky}
-							className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/10 backdrop-blur-sm"
+							className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.06] text-zinc-200 backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-white/[0.12] active:scale-[0.98] md:h-10 md:w-10"
 							aria-label="Hide sticky player"
 							title="Hide sticky player"
 						>

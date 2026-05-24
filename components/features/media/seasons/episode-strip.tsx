@@ -20,7 +20,7 @@ interface EpisodeStripProps {
 
 function GridSkeleton() {
 	return (
-		<div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+		<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
 			{Array.from({ length: 6 }).map((_, i) => (
 				<motion.div
 					key={i}
@@ -172,7 +172,7 @@ function EpisodeStripComponent({
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.2 }}
-						className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"
+						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"
 					>
 						{episodes.map((ep, i) => (
 							<EpisodeCard

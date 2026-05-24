@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import { useHaptics } from '@/hooks/use-haptics';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { SquaresFourIcon, ListBulletsIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
@@ -61,12 +61,16 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 			setIsMobile(window.innerWidth < 768);
 			setIsPortrait(window.matchMedia('(orientation: portrait)').matches);
 		};
+		const handleOrientationChange = (event: MediaQueryListEvent) => {
+			setIsPortrait(event.matches);
+		};
+
 		check();
 		const mq = window.matchMedia('(orientation: portrait)');
-		mq.addEventListener('change', (e) => setIsPortrait(e.matches));
+		mq.addEventListener('change', handleOrientationChange);
 		window.addEventListener('resize', check, { passive: true });
 		return () => {
-			mq.removeEventListener('change', (e) => setIsPortrait(e.matches));
+			mq.removeEventListener('change', handleOrientationChange);
 			window.removeEventListener('resize', check);
 		};
 	}, []);
@@ -220,48 +224,30 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 						ref={playerRef}
 						data-player-container
 						className={cn(
-							'w-full transition-all duration-200',
+							'w-full',
 							stickyEnabled && isMobile && isPortrait
-								? 'sticky top-2 z-30 bg-zinc-900/85 backdrop-blur-md rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/5'
+								? 'sticky top-2 z-30'
 								: 'relative z-10',
 							isSticky && isStickyDismissed && 'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
 						)}
 					>
-						<AnimatePresence>
-							{isSticky && !isStickyDismissed ? (
-								<motion.div
-									key="sticky-player"
-									initial={{ opacity: 0, y: -6 }}
-									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, y: -6 }}
-									transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-								>
-									<TVContainer
-										key={`${activeEP?.id}-${activeSeason}`}
-										showId={showId}
-										getNextEp={handleNextEpisode}
-										isSticky={true}
-										onCloseSticky={handleStickyClose}
-									/>
-								</motion.div>
-							) : (
-								<div key="inline-player">
-									<TVContainer
-										key={`${activeEP?.id}-${activeSeason}`}
-										showId={showId}
-										getNextEp={handleNextEpisode}
-										isSticky={false}
-										onCloseSticky={handleStickyClose}
-									/>
-								</div>
-							)}
-						</AnimatePresence>
+						<TVContainer
+							showId={showId}
+							getNextEp={handleNextEpisode}
+							isSticky={isSticky && !isStickyDismissed}
+							onCloseSticky={handleStickyClose}
+						/>
 					</div>
 				</>
 			)}
 
 			{/* SEASON SELECTOR + EPISODES */}
 			<div className="space-y-4 md:space-y-5">
+				{/* Episode detail panel */}
+				{activeEpisodeForShow && (
+					<EpisodeDetailPanel episode={activeEpisodeForShow} />
+				)}
+
 				{/* Header row */}
 				<div className="flex items-center justify-between gap-3">
 					{/* Left: title + season info */}
@@ -341,10 +327,6 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 					/>
 				</div>
 
-				{/* Episode detail panel */}
-				{activeEpisodeForShow && (
-					<EpisodeDetailPanel episode={activeEpisodeForShow} />
-				)}
 			</div>
 		</div>
 	);

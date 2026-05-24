@@ -126,7 +126,7 @@ export default function Episode({
 	});
 
 	return (
-		<div className="group relative w-full flex flex-col gap-2">
+		<div className="group relative w-full overflow-hidden rounded-[1.35rem] border border-white/[0.08] bg-zinc-950/92 p-1.5 shadow-[0_20px_60px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
 			<PlayerControls
 				providers={PROVIDERS}
 				selectedProvider={selectedProvider}
@@ -141,19 +141,19 @@ export default function Episode({
 				onCloseSticky={onCloseSticky}
 			/>
 
-			<div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-white/10 shadow-2xl group-hover:ring-white/20 transition-[box-shadow,border-color] duration-300">
+			<div className="relative mt-1.5 w-full aspect-video overflow-hidden rounded-[1rem] bg-zinc-950 ring-1 ring-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
 				<iframe
 					key={iframeKey}
 					ref={iframeRef}
 					allowFullScreen
 					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-					className="w-full h-full"
+					className="block h-full w-full bg-zinc-950"
 					src={currentSource.url}
 					title="Media Player"
 					loading="eager"
 				/>
 				{/* Inset ring for depth */}
-				<div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/5 rounded-xl" />
+				<div className="absolute inset-0 pointer-events-none rounded-[1rem] ring-1 ring-inset ring-white/[0.04]" />
 			</div>
 		</div>
 	);

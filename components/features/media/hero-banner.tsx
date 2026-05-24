@@ -239,10 +239,10 @@ export function HeroBanner({
 										loading={loading}
 										sizes="(max-width: 768px) 90vw, 720px"
 										className={cn(
-											'w-auto h-auto',
+											'h-auto w-[min(86vw,420px)] sm:w-[min(78vw,520px)] md:w-auto',
 											// Much larger logo treatment
-											'max-h-[120px] sm:max-h-[160px] md:max-h-[220px] lg:max-h-[280px]',
-											'max-w-[90%] md:max-w-xl lg:max-w-2xl xl:max-w-3xl',
+											'max-h-[clamp(120px,34vw,180px)] sm:max-h-[220px] md:max-h-[220px] lg:max-h-[280px]',
+											'md:max-w-xl lg:max-w-2xl xl:max-w-3xl',
 											'object-contain object-center md:object-left',
 											// Deep cinematic shadow
 											'drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]'

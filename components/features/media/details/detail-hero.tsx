@@ -16,6 +16,11 @@ interface Logo {
 	file_path: string;
 }
 
+interface HeroImage {
+	iso_639_1: string | null;
+	file_path: string;
+}
+
 interface ContentRating {
 	iso_3166_1: string;
 	rating: string;
@@ -43,7 +48,7 @@ interface ShowData {
 	episode_run_time?: number[] | null;
 	vote_average?: number | null;
 	genres?: Genre[];
-	images?: { logos?: Logo[] };
+	images?: { logos?: Logo[]; posters?: HeroImage[]; backdrops?: HeroImage[] };
 	content_ratings?: { results?: ContentRating[] };
 	release_dates?: { results?: ReleaseDateResult[] };
 }
@@ -70,7 +75,14 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 			? show.content_ratings?.results?.find((r) => r.iso_3166_1 === 'US')?.rating
 			: show.release_dates?.results?.find((r) => r.iso_3166_1 === 'US')?.release_dates?.[0]?.certification;
 	const genres  = show.genres?.slice(0, 3).map((g) => g.name) ?? [];
-	const backdrop = show.backdrop_path || show.poster_path || '';
+	const cleanPoster =
+		show.images?.posters?.find((img) => img.iso_639_1 === null)?.file_path ||
+		show.poster_path;
+	const cleanBackdrop =
+		show.images?.backdrops?.find((img) => img.iso_639_1 === null)?.file_path ||
+		show.backdrop_path;
+	const mobileHeroImage = cleanPoster || cleanBackdrop || '';
+	const desktopHeroImage = cleanBackdrop || cleanPoster || '';
 	const logo =
 		show.images?.logos?.find((img) => img.iso_639_1 === 'en')?.file_path ||
 		show.images?.logos?.[0]?.file_path;
@@ -178,18 +190,30 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 			ref={sectionRef}
 			className="relative w-full overflow-hidden bg-zinc-950 h-[80vh] md:h-[90vh] lg:h-[94vh]"
 		>
-			{/* Backdrop image */}
-			{backdrop && (
+			{/* Hero image: poster on phones, cinematic backdrop on wider screens. */}
+			{(mobileHeroImage || desktopHeroImage) && (
 				<div className="absolute inset-0 z-0 overflow-hidden">
 					<div ref={imageWrapRef} className="absolute inset-0 will-change-transform">
-						<Image
-							src={tmdbImage(backdrop, 'w1280')}
-							alt={title}
-							fill
-							priority
-							sizes="100vw"
-							className="object-cover object-top md:object-center"
-						/>
+						{mobileHeroImage && (
+							<Image
+								src={tmdbImage(mobileHeroImage, 'w780')}
+								alt={title}
+								fill
+								priority
+								sizes="(max-width: 767px) 100vw"
+								className="object-cover object-top md:hidden"
+							/>
+						)}
+						{desktopHeroImage && (
+							<Image
+								src={tmdbImage(desktopHeroImage, 'w1280')}
+								alt={title}
+								fill
+								priority
+								sizes="(min-width: 768px) 100vw"
+								className="hidden object-cover object-center md:block"
+							/>
+						)}
 					</div>
 				</div>
 			)}
@@ -300,7 +324,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 									height={360}
 									priority
 									sizes="(max-width: 768px) 90vw, 720px"
-									className="w-auto h-auto max-h-[80px] sm:max-h-[110px] md:max-h-[160px] lg:max-h-[200px] max-w-[80%] md:max-w-xl object-contain object-left drop-shadow-[0_16px_48px_rgba(0,0,0,0.9)]"
+									className="h-auto w-[min(86vw,420px)] max-h-[clamp(120px,34vw,180px)] sm:w-[min(78vw,520px)] sm:max-h-[220px] md:w-auto md:max-w-xl md:max-h-[160px] lg:max-h-[200px] object-contain object-left drop-shadow-[0_16px_48px_rgba(0,0,0,0.9)]"
 								/>
 							) : (
 								<h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-bold text-white leading-[0.9] tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">

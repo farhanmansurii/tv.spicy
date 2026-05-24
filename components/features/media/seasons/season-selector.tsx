@@ -106,7 +106,7 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 										'-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
 								}}
 							>
-								S{season.season_number}
+								Season {season.season_number}
 							</span>
 
 							{hasCount && (
@@ -118,7 +118,7 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 											: 'bg-white/[0.08] text-white/25'
 									)}
 								>
-									{season.episode_count}
+									{season.episode_count} eps
 								</span>
 							)}
 						</motion.button>
