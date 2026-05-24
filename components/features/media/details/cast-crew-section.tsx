@@ -28,8 +28,6 @@ function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
 	const hasAnimated = useRef(false);
 
 	const cast = credits?.cast || [];
-	if (!cast.length) return null;
-
 	const displayedCast = isExpanded ? cast : cast.slice(0, 8);
 
 	/* ── ScrollTrigger Entrance ── */
@@ -99,6 +97,8 @@ function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
 			);
 		}
 	}, [displayedCast.length]);
+
+	if (!cast.length) return null;
 
 	return (
 		<section ref={sectionRef} className="section-spacing">

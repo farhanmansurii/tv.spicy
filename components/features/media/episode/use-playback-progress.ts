@@ -141,6 +141,7 @@ export function usePlaybackProgress({
 		}, 15_000);
 
 		return () => clearInterval(intervalId);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		selectedProvider,
 		// Stable identifiers only — avoids re-subscribing on every progress tick

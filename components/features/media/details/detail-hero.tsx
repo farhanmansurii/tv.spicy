@@ -315,7 +315,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 								data-hero-tagline
 								className="mt-2.5 text-[12px] md:text-sm text-white/38 font-medium italic max-w-sm tracking-wide leading-snug"
 							>
-								"{show.tagline}"
+								&ldquo;{show.tagline}&rdquo;
 							</p>
 						)}
 

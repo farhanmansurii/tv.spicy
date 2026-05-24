@@ -54,8 +54,6 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 		})),
 	];
 
-	if (!allItems.length) return null;
-
 	const displayed = isExpanded ? allItems : allItems.slice(0, 5);
 
 	/* ── ScrollTrigger Entrance ── */
@@ -144,6 +142,8 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 
 		return () => ctx.revert();
 	}, [activeVideo]);
+
+	if (!allItems.length) return null;
 
 	const closeModal = () => {
 		if (!modalRef.current || !modalContentRef.current) {

@@ -35,8 +35,6 @@ function MediaCardComponent({
 	const playBtnRef = useRef<HTMLDivElement>(null);
 	const hoverTlRef = useRef<gsap.core.Timeline | null>(null);
 
-	if (!mediaType) return <div className="bg-[#1C1C1E] animate-pulse rounded-2xl aspect-video" />;
-
 	const imagePath = isVertical ? show.poster_path : show.backdrop_path;
 	const imageUrl = imagePath ? tmdbImage(imagePath, 'w500') : null;
 	const year = (show.first_air_date || show.release_date)?.split('-')[0];
@@ -79,6 +77,8 @@ function MediaCardComponent({
 	const handleMouseLeave = useCallback(() => {
 		hoverTlRef.current?.reverse();
 	}, []);
+
+	if (!mediaType) return <div className="bg-[#1C1C1E] animate-pulse rounded-2xl aspect-video" />;
 
 	return (
 		<Link
