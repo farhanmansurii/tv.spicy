@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { Genre, SpokenLanguage } from './types/tmdb';
 
 export interface Show {
@@ -114,4 +115,5 @@ export interface SeasonTabsProps {
 	seasons: Array<{ season_number: number }>;
 	showId: string;
 	showData: Show;
+	detailsPanel?: ReactNode;
 }

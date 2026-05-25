@@ -149,7 +149,7 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 										/>
 									</div>
 								) : (
-									<div className="h-[70vh] md:h-[82vh] lg:h-[88vh] w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_50%),linear-gradient(180deg,rgba(24,24,27,0.92),rgba(9,9,11,1))]" />
+									<div className="h-[70vh] md:h-[82vh] lg:h-[88vh] w-full bg-background" />
 								)}
 							</CarouselItem>
 						);
@@ -160,11 +160,11 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 				<div className="hidden md:flex absolute right-8 lg:right-12 bottom-20 z-20 gap-2">
 					<CarouselPrevious
 						variant="ghost"
-						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-black/40 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300"
+						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-background/55 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300 active:scale-[0.98]"
 					/>
 					<CarouselNext
 						variant="ghost"
-						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-black/40 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300"
+						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-background/55 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300 active:scale-[0.98]"
 					/>
 				</div>
 			</Carousel>

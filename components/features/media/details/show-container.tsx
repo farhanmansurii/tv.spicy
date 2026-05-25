@@ -23,6 +23,7 @@ interface ShowContainerProps {
 	id: string;
 	seasons?: TMDBSeason[];
 	showData: Show;
+	children?: React.ReactNode;
 }
 
 const Episode = dynamic(() => import('@/components/features/media/episode/episode'), {
@@ -54,7 +55,7 @@ const SeasonTabs = dynamic(() => import('@/components/features/media/seasons/sea
 	),
 });
 
-export default function ShowContainer({ type, id, seasons, showData }: ShowContainerProps) {
+export default function ShowContainer({ type, id, seasons, showData, children }: ShowContainerProps) {
 	const contentRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -86,9 +87,12 @@ export default function ShowContainer({ type, id, seasons, showData }: ShowConta
 			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
 				<div ref={contentRef}>
 					{type === 'tv' ? (
-						<SeasonTabs seasons={seasons || []} showId={id} showData={showData} />
+						<SeasonTabs seasons={seasons || []} showId={id} showData={showData} detailsPanel={children} />
 					) : (
-						<Episode episodeId={''} id={id || ''} movieID={id} type={type} />
+						<>
+							<Episode episodeId={''} id={id || ''} movieID={id} type={type} />
+							{children}
+						</>
 					)}
 				</div>
 			</div>

@@ -3,8 +3,17 @@
 import { useEffect, useRef, memo } from 'react';
 import Image from 'next/image';
 import { tmdbImage } from '@/lib/tmdb-image';
-import { PlayIcon, PlusIcon, ShareNetworkIcon, StarIcon, FilmSlateIcon, TelevisionIcon } from '@phosphor-icons/react';
+import {
+	FilmSlateIcon,
+	InfoIcon,
+	PlayIcon,
+	PlusIcon,
+	ShareNetworkIcon,
+	StarIcon,
+	TelevisionIcon,
+} from '@phosphor-icons/react';
 import gsap from 'gsap';
+import { useMediaInfoPanelStore } from '@/store/mediaInfoPanelStore';
 
 interface Genre {
 	id: number;
@@ -58,15 +67,23 @@ interface DetailHeroProps {
 	type: 'movie' | 'tv';
 }
 
+function formatRuntime(minutes: number | null) {
+	if (minutes == null || minutes <= 0) return null;
+	return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
+}
+
 function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	const sectionRef  = useRef<HTMLElement>(null);
 	const imageWrapRef = useRef<HTMLDivElement>(null);
 	const contentRef  = useRef<HTMLDivElement>(null);
 	const btnRowRef   = useRef<HTMLDivElement>(null);
+	const openInfoTab = useMediaInfoPanelStore((s) => s.openTab);
 
 	const title       = show.title || show.name || 'Untitled';
-	const releaseYear = (show.first_air_date || show.release_date)?.split('-')[0] ?? null;
+	const releaseDate = show.first_air_date || show.release_date || null;
+	const releaseYear = releaseDate?.split('-')[0] ?? null;
 	const runtime     = show.episode_run_time?.[0] ?? show.runtime ?? null;
+	const runtimeLabel = formatRuntime(runtime);
 	const voteAvg     = typeof show.vote_average === 'number' && show.vote_average > 0
 		? show.vote_average
 		: null;
@@ -74,7 +91,8 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 		type === 'tv'
 			? show.content_ratings?.results?.find((r) => r.iso_3166_1 === 'US')?.rating
 			: show.release_dates?.results?.find((r) => r.iso_3166_1 === 'US')?.release_dates?.[0]?.certification;
-	const genres  = show.genres?.slice(0, 3).map((g) => g.name) ?? [];
+	const genreNames = show.genres?.map((g) => g.name).filter(Boolean) ?? [];
+	const genres  = genreNames.slice(0, 3);
 	const cleanPoster =
 		show.images?.posters?.find((img) => img.iso_639_1 === null)?.file_path ||
 		show.poster_path;
@@ -154,41 +172,10 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 		return () => ctx.revert();
 	}, []);
 
-	/* ── Button hover + press physics ── */
-	useEffect(() => {
-		if (!btnRowRef.current) return;
-
-		const ctx = gsap.context(() => {
-			const btns = btnRowRef.current!.querySelectorAll<HTMLButtonElement>('[data-hero-action]');
-
-			btns.forEach((btn) => {
-				const hoverTl = gsap.timeline({ paused: true }).to(btn, {
-					scale: 1.055,
-					duration: 0.28,
-					ease: 'power2.out',
-				});
-				const pressTl = gsap.timeline({ paused: true }).to(btn, {
-					scale: 0.95,
-					duration: 0.1,
-					ease: 'power2.out',
-				});
-
-				btn.addEventListener('mouseenter', () => hoverTl.play());
-				btn.addEventListener('mouseleave', () => hoverTl.reverse());
-				btn.addEventListener('mousedown', () => pressTl.play());
-				btn.addEventListener('mouseup', () => pressTl.reverse());
-				btn.addEventListener('touchstart', () => pressTl.play(), { passive: true });
-				btn.addEventListener('touchend', () => pressTl.reverse());
-			});
-		}, btnRowRef);
-
-		return () => ctx.revert();
-	}, []);
-
 	return (
 		<section
 			ref={sectionRef}
-			className="relative w-full overflow-hidden bg-zinc-950 h-[80vh] md:h-[90vh] lg:h-[94vh]"
+			className="relative w-full h-[76dvh] min-h-[560px] max-h-[780px] overflow-hidden bg-background md:h-[78dvh] md:min-h-[620px] lg:h-[82dvh]"
 		>
 			{/* Hero image: poster on phones, cinematic backdrop on wider screens. */}
 			{(mobileHeroImage || desktopHeroImage) && (
@@ -221,26 +208,26 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 			{/* Gradient layers */}
 			<div className="absolute inset-0 z-[1] pointer-events-none">
 				{/* Primary bottom fade */}
-				<div className="absolute inset-0 bg-gradient-to-t from-zinc-950 from-[8%] via-zinc-950/75 via-[38%] to-transparent" />
+				<div className="absolute inset-0 bg-gradient-to-t from-background from-[8%] via-background/75 via-[38%] to-transparent" />
 				{/* Left side for text legibility */}
-				<div className="absolute inset-0 bg-gradient-to-r from-zinc-950/90 via-zinc-950/35 to-transparent" />
+				<div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/35 to-transparent" />
 				{/* Radial punch behind content area */}
 				<div
 					className="absolute bottom-0 left-0 w-[60vw] h-[70%] pointer-events-none"
 					style={{
-						background: 'radial-gradient(ellipse 80% 70% at 20% 100%, rgba(0,0,0,0.65) 0%, transparent 70%)',
+						background: 'radial-gradient(ellipse 80% 70% at 20% 100%, color-mix(in oklab, var(--background) 72%, transparent) 0%, transparent 70%)',
 					}}
 				/>
 				{/* Top edge */}
-				<div className="absolute inset-0 bg-gradient-to-b from-zinc-950/50 via-transparent to-transparent" />
+				<div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-transparent" />
 			</div>
 
 			{/* Grain */}
 			<div className="absolute inset-0 z-[2] pointer-events-none opacity-[0.03] grain-overlay" />
 
 			{/* Content */}
-			<div className="relative z-10 h-full flex flex-col justify-end">
-				<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-10 md:pb-16 lg:pb-20">
+			<div className="absolute inset-0 z-10 flex flex-col justify-end">
+				<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-8 md:pb-12 lg:pb-14">
 					<div ref={contentRef} className="max-w-xl md:max-w-2xl flex flex-col items-start text-left">
 
 						{/* Metadata row */}
@@ -278,9 +265,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 								<>
 									<span data-meta className="text-white/18 select-none">·</span>
 									<span data-meta className="text-[11px] font-medium text-white/45 tabular-nums">
-										{runtime >= 60
-											? `${Math.floor(runtime / 60)}h ${runtime % 60}m`
-											: `${runtime}m`}
+										{runtimeLabel}
 									</span>
 								</>
 							)}
@@ -359,7 +344,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							{/* Primary play */}
 							<button
 								data-hero-action
-								className="inline-flex items-center justify-center gap-2 rounded-full font-bold bg-white text-zinc-950 px-6 py-2.5 md:px-8 md:py-3 text-[13px] md:text-sm shadow-[0_6px_28px_rgba(255,255,255,0.18)] will-change-transform"
+								className="inline-flex items-center justify-center gap-2 rounded-full font-bold bg-white text-zinc-950 px-6 py-2.5 md:px-8 md:py-3 text-[13px] md:text-sm shadow-[0_6px_28px_rgba(255,255,255,0.18)] transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98]"
 							>
 								<PlayIcon weight="fill" size={16} />
 								Play
@@ -368,7 +353,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							{/* Watchlist frosted */}
 							<button
 								data-hero-action
-								className="inline-flex items-center justify-center gap-2 rounded-full font-semibold text-white px-5 py-2.5 md:px-6 md:py-3 text-[13px] md:text-sm will-change-transform"
+								className="inline-flex items-center justify-center gap-2 rounded-full font-semibold text-white px-5 py-2.5 md:px-6 md:py-3 text-[13px] md:text-sm transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98]"
 								style={{
 									background: 'rgba(255,255,255,0.1)',
 									backdropFilter: 'blur(24px) saturate(180%)',
@@ -380,11 +365,36 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 								Watchlist
 							</button>
 
+							{/* More info — opens details panel directly */}
+							<button
+								data-hero-action
+								aria-label="More info"
+								onClick={() => {
+									openInfoTab('details');
+									if (typeof window !== 'undefined') {
+										requestAnimationFrame(() => {
+											document
+												.getElementById('media-info-body')
+												?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+										});
+									}
+								}}
+								className="inline-flex items-center justify-center rounded-full w-[42px] h-[42px] md:w-11 md:h-11 text-white transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98]"
+								style={{
+									background: 'rgba(255,255,255,0.08)',
+									backdropFilter: 'blur(24px) saturate(180%)',
+									border: '1px solid rgba(255,255,255,0.11)',
+									boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)',
+								}}
+							>
+								<InfoIcon weight="bold" size={16} />
+							</button>
+
 							{/* Share icon only */}
 							<button
 								data-hero-action
 								aria-label="Share"
-								className="inline-flex items-center justify-center rounded-full w-[42px] h-[42px] md:w-11 md:h-11 text-white will-change-transform"
+								className="inline-flex items-center justify-center rounded-full w-[42px] h-[42px] md:w-11 md:h-11 text-white transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98]"
 								style={{
 									background: 'rgba(255,255,255,0.08)',
 									backdropFilter: 'blur(24px) saturate(180%)',
@@ -394,6 +404,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							>
 								<ShareNetworkIcon weight="bold" size={16} />
 							</button>
+
 						</div>
 
 					</div>

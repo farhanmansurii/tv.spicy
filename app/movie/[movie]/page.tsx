@@ -10,16 +10,14 @@ import { tmdbImage } from '@/lib/tmdb-image';
 import {
 	MediaDetailsShell,
 	DetailHero,
+	MediaInfoPanel,
 	ShowContainer,
-	CastCrewSection,
-	VideoSection,
-	StorylineSection,
 	MoreDetailsContainer,
 } from '@/components/features/media/details';
 import {
 	ShowContainerSkeleton,
-	CastCrewSkeleton,
 	RelatedSkeleton,
+	StorylineSkeleton,
 } from '@/components/features/media/details/detail-skeletons';
 
 /* ────────────────────────────────────────────────────────────
@@ -62,10 +60,16 @@ export async function generateMetadata(props: any): Promise<Metadata> {
 /* ────────────────────────────────────────────────────────────
    Async section wrappers — each streams independently
    ──────────────────────────────────────────────────────────── */
-async function CreditsSection({ id }: { id: string }) {
+async function InfoPanelSection({ id, show }: { id: string; show: any }) {
 	const credits = await getDetailCredits(id, 'movie');
-	if (!credits?.cast?.length) return null;
-	return <CastCrewSection credits={credits} />;
+	return (
+		<MediaInfoPanel
+			data={show}
+			type="movie"
+			credits={credits}
+			videos={show.videos?.results || []}
+		/>
+	);
 }
 
 async function RelatedSection({ id }: { id: string }) {
@@ -88,23 +92,18 @@ export default async function MovieDetailsPage(props: {
 	if (!show) return notFound();
 
 	const showId = String(show.id);
-	const hasVideos = show.videos?.results && show.videos.results.length > 0;
 
 	return (
 		<MediaDetailsShell>
 			<DetailHero show={show} type="movie" />
 
 			<Suspense fallback={<ShowContainerSkeleton type="movie" />}>
-				<ShowContainer showData={show as any} id={showId} type="movie" />
+				<ShowContainer showData={show as any} id={showId} type="movie">
+					<Suspense fallback={<StorylineSkeleton />}>
+						<InfoPanelSection id={movie} show={show} />
+					</Suspense>
+				</ShowContainer>
 			</Suspense>
-
-			<Suspense fallback={<CastCrewSkeleton />}>
-				<CreditsSection id={movie} />
-			</Suspense>
-
-			{hasVideos && <VideoSection videos={show.videos!.results} />}
-
-			<StorylineSection data={show} type="movie" />
 
 			<Suspense fallback={<RelatedSkeleton />}>
 				<RelatedSection id={movie} />

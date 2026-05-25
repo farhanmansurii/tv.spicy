@@ -1,19 +1,14 @@
-/**
- * Apple TV+ styled skeletons for detail page sections.
- * Matches the new design system with pure black backgrounds and subtle pulse.
- */
-
 import React from 'react';
 
 export function HeroSkeleton() {
 	return (
-		<section className="relative w-full h-[78vh] md:h-[88vh] lg:h-[92vh] bg-black overflow-hidden">
+		<section className="relative w-full h-[76dvh] min-h-[560px] max-h-[780px] md:h-[78dvh] md:min-h-[620px] lg:h-[82dvh] bg-background overflow-hidden">
 			{/* Backdrop placeholder */}
 			<div className="absolute inset-0 bg-white/[0.03] animate-pulse" />
-			<div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 via-[20%] to-transparent" />
+			<div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 via-[20%] to-transparent" />
 
 			{/* Content skeleton */}
-			<div className="relative z-10 h-full flex flex-col justify-end">
+			<div className="absolute inset-0 z-10 flex flex-col justify-end">
 				<div className="mx-auto w-full max-w-[1400px] px-5 pb-12 md:px-8 md:pb-20 lg:px-12 lg:pb-28">
 					<div className="max-w-2xl">
 						{/* Meta chips */}

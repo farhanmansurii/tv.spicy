@@ -120,7 +120,7 @@ export function HeroBanner({
 		<section
 			className={cn(
 				'relative w-full overflow-hidden bg-background',
-				'h-[78vh] md:h-[88vh] lg:h-[92vh]'
+				'h-[76dvh] min-h-[560px] max-h-[780px] md:h-[80dvh] md:min-h-[620px] lg:h-[84dvh]'
 			)}
 		>
 			{/* Background Image with Ken Burns */}
@@ -158,13 +158,19 @@ export function HeroBanner({
 				{/* Top fade for header blend */}
 				<div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-transparent" />
 				{/* Radial vignette for cinematic depth */}
-				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_70%,transparent_20%,rgba(0,0,0,0.55)_100%)]" />
+				<div
+					className="absolute inset-0"
+					style={{
+						background:
+							'radial-gradient(ellipse at 50% 70%, transparent 20%, color-mix(in oklab, var(--background) 62%, transparent) 100%)',
+					}}
+				/>
 				{/* Additional bottom scrim for text legibility */}
 				<div className="absolute bottom-0 left-0 right-0 h-[45%] bg-gradient-to-t from-background via-background/60 to-transparent" />
 			</div>
 
 			{/* Content */}
-			<div className="relative z-10 h-full flex flex-col justify-end">
+			<div className="absolute inset-0 z-10 flex flex-col justify-end">
 				<Container variant={isDetailsPage ? 'detail' : 'default'} className="pb-12 md:pb-20 lg:pb-28">
 					<div
 						ref={contentRef}

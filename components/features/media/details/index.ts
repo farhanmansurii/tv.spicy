@@ -2,6 +2,7 @@
 
 export { default as MediaDetailsShell } from './media-details-shell';
 export { default as DetailHero } from './detail-hero';
+export { default as MediaInfoPanel } from './media-info-panel';
 export { default as ShowContainer } from './show-container';
 export { default as CastCrewSection } from './cast-crew-section';
 export { default as VideoSection } from './video-section';

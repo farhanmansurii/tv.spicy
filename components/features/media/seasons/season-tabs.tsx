@@ -18,9 +18,8 @@ import type { Episode as EpisodeType, SeasonTabsProps } from '@/lib/types';
 import type { TMDBEpisode, TMDBSeasonDetails } from '@/lib/types/tmdb';
 import { SeasonSelector } from './season-selector';
 import { EpisodeStrip, type EpisodeViewMode } from './episode-strip';
-import { EpisodeDetailPanel } from './episode-detail-panel';
 
-const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
+const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps) => {
 	const haptic = useHaptics();
 	const router = useRouter();
 	const pathname = usePathname();
@@ -243,10 +242,7 @@ const SeasonTabs = ({ seasons, showId, showData }: SeasonTabsProps) => {
 
 			{/* SEASON SELECTOR + EPISODES */}
 			<div className="space-y-4 md:space-y-5">
-				{/* Episode detail panel */}
-				{activeEpisodeForShow && (
-					<EpisodeDetailPanel episode={activeEpisodeForShow} />
-				)}
+				{detailsPanel}
 
 				{/* Header row */}
 				<div className="flex items-center justify-between gap-3">

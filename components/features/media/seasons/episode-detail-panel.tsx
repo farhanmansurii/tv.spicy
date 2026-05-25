@@ -88,98 +88,41 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 						'inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 64px rgba(0,0,0,0.7)',
 				}}
 			>
-				{/* ── Cinematic Hero ── */}
-				{stillUrl ? (
-					<div className="relative w-full overflow-hidden" style={{ aspectRatio: '21/9' }}>
-						<motion.div
-							className="absolute inset-0"
-							initial={{ scale: 1.05 }}
-							animate={{ scale: 1 }}
-							transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-						>
+				{/* ── Compact Editorial Header — thumbnail + title row ── */}
+				<div className="flex items-stretch gap-4 px-4 pt-4 md:px-5 md:pt-5">
+					{stillUrl ? (
+						<div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-lg bg-white/[0.04] sm:w-40 md:w-48">
 							<Image
 								src={stillUrl}
 								alt={episode.name || `Episode ${episode.episode_number}`}
 								fill
 								loading="lazy"
-								sizes="(max-width: 1024px) 100vw, 60vw"
+								sizes="(max-width: 640px) 128px, (max-width: 768px) 160px, 192px"
 								className="object-cover"
 							/>
-						</motion.div>
+							<div className="absolute inset-0 pointer-events-none" style={{ boxShadow: 'inset 0 0 40px rgba(0,0,0,0.35)' }} />
+						</div>
+					) : null}
 
-						{/* Multi-layer gradient system */}
-						<div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-black/30 to-transparent" />
-						<div className="absolute inset-0 bg-gradient-to-r from-[#121214]/80 via-black/20 to-transparent" />
-						{/* Edge vignette */}
-						<div
-							className="absolute inset-0 pointer-events-none"
-							style={{
-								boxShadow: 'inset 0 0 80px rgba(0,0,0,0.55)',
-							}}
-						/>
-
-						{/* Episode code — top left */}
-						<motion.div
-							initial={{ opacity: 0, y: -6 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: 0.14, type: 'spring', stiffness: 320, damping: 26 }}
-							className="absolute top-4 left-5"
-						>
-							<span
-								className="text-[9px] font-black uppercase tracking-[0.22em] tabular-nums px-2.5 py-[5px] rounded-full"
-								style={{
-									background: 'rgba(255,255,255,0.08)',
-									border: '1px solid rgba(255,255,255,0.12)',
-									backdropFilter: 'blur(16px)',
-									color: 'rgba(255,255,255,0.55)',
-									letterSpacing: '0.2em',
-								}}
-							>
-								{epCode}
-							</span>
-						</motion.div>
-
-						{/* Title on image — visible on all sizes */}
-						<motion.div
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: 0.22, type: 'spring', stiffness: 240, damping: 26 }}
-							className="absolute bottom-0 left-0 right-0 px-5 pb-5"
-						>
-							<h3
-								className="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-tight tracking-tight"
-								style={{
-									fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
-									textShadow: '0 2px 16px rgba(0,0,0,0.8)',
-								}}
-							>
-								{episode.name || `Episode ${episode.episode_number}`}
-							</h3>
-						</motion.div>
-					</div>
-				) : (
-					/* No still — minimal header */
-					<div className="px-5 pt-5 pb-1">
-						<p
-							className="text-[9px] font-black uppercase tracking-[0.22em] text-white/30 mb-1.5"
-						>
+					<div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+						<p className="text-[9px] font-black uppercase tracking-[0.22em] text-white/35 tabular-nums">
 							{epCode}
 						</p>
 						<h3
-							className="text-lg font-bold text-white leading-snug tracking-tight"
+							className="text-base sm:text-lg font-bold text-white leading-tight tracking-tight line-clamp-2"
 							style={{ fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif' }}
 						>
 							{episode.name || `Episode ${episode.episode_number}`}
 						</h3>
 					</div>
-				)}
+				</div>
 
 				{/* ── Body ── */}
 				<motion.div
 					variants={stagger}
 					initial="hidden"
 					animate="visible"
-					className="px-5 py-4 md:px-6 md:py-5 flex flex-col gap-5"
+					className="px-4 py-3.5 md:px-5 md:py-4 flex flex-col gap-3.5"
 				>
 					{/* Inline metadata strip */}
 					{(hasRating || hasRuntime || airLabel) && (
@@ -233,7 +176,7 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 					{(director?.name || writerNames) && (
 						<motion.div
 							variants={fadeUp}
-							className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4"
+							className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3"
 							style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
 						>
 							{director?.name && (
@@ -265,13 +208,13 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 					{guests.length > 0 && (
 						<motion.div
 							variants={fadeUp}
-							className="pt-4"
+							className="pt-3"
 							style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
 						>
-							<p className="text-[9.5px] font-bold uppercase tracking-[0.15em] text-white/25 mb-3">
+							<p className="text-[9.5px] font-bold uppercase tracking-[0.15em] text-white/25 mb-2.5">
 								Guest Stars
 							</p>
-							<div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+							<div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
 								{guests.map((g, i) => (
 									<motion.div
 										key={i}
