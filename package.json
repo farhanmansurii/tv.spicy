@@ -103,6 +103,7 @@
 		"dotenv": "^17.2.3",
 		"eslint": "^9.26.0",
 		"eslint-config-next": "^16.0.0",
+		"playwright": "^1.60.0",
 		"postcss": "latest",
 		"prettier": "^3.3.3",
 		"prisma": "^7.2.0",

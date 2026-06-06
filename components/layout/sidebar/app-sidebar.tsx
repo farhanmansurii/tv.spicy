@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import { XIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 
@@ -61,13 +60,12 @@ export function AppSidebar() {
 						)}
 					>
 						<div className="relative h-10 w-10 flex-shrink-0">
-							<Image
+							<img
 								src="/logo.webp"
 								alt="Spicy TV"
-								fill
-								className="object-contain"
-								priority
-								sizes="40px"
+								loading="eager"
+								fetchPriority="high"
+								className="h-full w-full object-contain"
 							/>
 						</div>
 						<div className="flex flex-col gap-0.5">

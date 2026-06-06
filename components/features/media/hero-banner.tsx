@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { StarIcon } from '@phosphor-icons/react';
@@ -50,9 +49,8 @@ export function HeroBanner({
 	const rating =
 		type === 'tv'
 			? show.content_ratings?.results?.find((r) => r.iso_3166_1 === 'US')?.rating
-			: show.release_dates?.results
-					?.find((r) => r.iso_3166_1 === 'US')
-					?.release_dates?.[0]?.certification;
+			: show.release_dates?.results?.find((r) => r.iso_3166_1 === 'US')?.release_dates?.[0]
+					?.certification;
 
 	const runtime = show.episode_run_time?.[0] ?? show.runtime ?? null;
 	const genreList = show.genres?.slice(0, 2).map((g) => g.name) ?? [];
@@ -125,6 +123,9 @@ export function HeroBanner({
 		>
 			{/* Background Image with Ken Burns */}
 			<div className="absolute inset-0 z-0">
+				{/* Fallback dark surface — visible when image is missing or fails */}
+				<div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black" />
+
 				{currentImage ? (
 					<div
 						ref={imageContainerRef}
@@ -134,18 +135,25 @@ export function HeroBanner({
 						)}
 						style={{ willChange: imageLoaded ? 'transform' : 'auto' }}
 					>
-						<Image
+						<img
 							key={currentImage}
-							src={tmdbImage(currentImage, isDetailsPage ? 'w1280' : isMobile ? 'w780' : 'w1280')}
+							src={tmdbImage(
+								currentImage,
+								isDetailsPage ? 'w1280' : isMobile ? 'w780' : 'w1280'
+							)}
 							alt={`${title} backdrop`}
-							fill
-							priority={priority}
-							sizes="100vw"
+							loading={priority ? 'eager' : loading}
+							fetchPriority={priority ? 'high' : undefined}
 							className={cn(
 								'w-full h-full object-cover',
-								isDetailsPage ? 'object-top md:object-center' : isMobile ? 'object-top' : 'object-center'
+								isDetailsPage
+									? 'object-top md:object-center'
+									: isMobile
+										? 'object-top'
+										: 'object-center'
 							)}
 							onLoad={handleImageLoad}
+							onError={handleImageLoad}
 						/>
 					</div>
 				) : null}
@@ -171,7 +179,10 @@ export function HeroBanner({
 
 			{/* Content */}
 			<div className="absolute inset-0 z-10 flex flex-col justify-end">
-				<Container variant={isDetailsPage ? 'detail' : 'default'} className="pb-12 md:pb-20 lg:pb-28">
+				<Container
+					variant={isDetailsPage ? 'detail' : 'default'}
+					className="pb-12 md:pb-20 lg:pb-28"
+				>
 					<div
 						ref={contentRef}
 						className={cn(
@@ -226,7 +237,11 @@ export function HeroBanner({
 								<>
 									<span className="text-white/15">·</span>
 									<span className="flex items-center gap-1 text-[11px] md:text-xs font-medium text-amber-400/90 tabular-nums">
-										<StarIcon weight="fill" size={12} className="flex-shrink-0" />
+										<StarIcon
+											weight="fill"
+											size={12}
+											className="flex-shrink-0"
+										/>
 										{(show.vote_average ?? 0).toFixed(1)}
 									</span>
 								</>
@@ -237,13 +252,12 @@ export function HeroBanner({
 						<div className="flex flex-col items-center md:items-start gap-4 md:gap-5 w-full">
 							{logo ? (
 								<div className="relative w-full flex justify-center md:justify-start">
-									<Image
+									<img
 										src={tmdbImage(logo, 'w500')}
 										alt={title}
 										width={720}
 										height={360}
 										loading={loading}
-										sizes="(max-width: 768px) 90vw, 720px"
 										className={cn(
 											'h-auto w-[min(86vw,420px)] sm:w-[min(78vw,520px)] md:w-auto',
 											// Much larger logo treatment

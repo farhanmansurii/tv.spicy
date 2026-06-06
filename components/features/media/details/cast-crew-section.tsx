@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, memo } from 'react';
-import Image from 'next/image';
 import { CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react';
 import { tmdbImage } from '@/lib/tmdb-image';
 import gsap from 'gsap';
@@ -136,13 +135,11 @@ function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
 						<li key={actor.id} data-cast-card className="group">
 							<div className="relative aspect-[2/3] overflow-hidden rounded-2xl bg-white/5 mb-2.5 md:mb-3 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]">
 								{actor.profile_path ? (
-									<Image
+									<img
 										src={tmdbImage(actor.profile_path, 'w185')}
 										alt={actor.name}
-										fill
 										loading="lazy"
-										sizes="150px"
-										className="object-cover transition-opacity duration-300"
+										className="h-full w-full object-cover transition-opacity duration-300"
 									/>
 								) : (
 									<div className="absolute inset-0 flex items-center justify-center text-white/20 text-xs font-medium">

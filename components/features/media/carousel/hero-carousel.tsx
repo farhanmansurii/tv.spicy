@@ -102,13 +102,7 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 	if (validShows.length === 0) return null;
 
 	return (
-		<div
-			className={cn(
-				'relative w-full group',
-				'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]',
-				'md:w-full md:left-auto md:right-auto md:ml-0 md:mr-0'
-			)}
-		>
+		<div className="relative w-full group">
 			<Carousel
 				setApi={setApi}
 				plugins={[plugin.current]}
@@ -116,7 +110,6 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 				opts={{
 					loop: true,
 					align: 'start',
-
 				}}
 			>
 				<CarouselContent className="-ml-0">
@@ -128,10 +121,7 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 							index === (activeIndex - 1 + validShows.length) % validShows.length;
 
 						return (
-							<CarouselItem
-								key={show.id}
-								className="pl-0 relative w-full"
-							>
+							<CarouselItem key={show.id} className="pl-0 relative w-full">
 								{isNearActive ? (
 									<div
 										className={cn(
@@ -160,11 +150,11 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 				<div className="hidden md:flex absolute right-8 lg:right-12 bottom-20 z-20 gap-2">
 					<CarouselPrevious
 						variant="ghost"
-						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-background/55 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300 active:scale-[0.98]"
+						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-background/55 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 					/>
 					<CarouselNext
 						variant="ghost"
-						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-background/55 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300 active:scale-[0.98]"
+						className="static translate-y-0 h-10 w-10 rounded-full border-white/10 bg-background/55 hover:bg-white/15 text-white backdrop-blur-md transition-all duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 					/>
 				</div>
 			</Carousel>

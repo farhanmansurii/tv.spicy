@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, memo } from 'react';
-import Image from 'next/image';
 import { tmdbImage } from '@/lib/tmdb-image';
 import {
 	FilmSlateIcon,
@@ -73,29 +72,28 @@ function formatRuntime(minutes: number | null) {
 }
 
 function DetailHeroComponent({ show, type }: DetailHeroProps) {
-	const sectionRef  = useRef<HTMLElement>(null);
+	const sectionRef = useRef<HTMLElement>(null);
 	const imageWrapRef = useRef<HTMLDivElement>(null);
-	const contentRef  = useRef<HTMLDivElement>(null);
-	const btnRowRef   = useRef<HTMLDivElement>(null);
+	const contentRef = useRef<HTMLDivElement>(null);
+	const btnRowRef = useRef<HTMLDivElement>(null);
 	const openInfoTab = useMediaInfoPanelStore((s) => s.openTab);
 
-	const title       = show.title || show.name || 'Untitled';
+	const title = show.title || show.name || 'Untitled';
 	const releaseDate = show.first_air_date || show.release_date || null;
 	const releaseYear = releaseDate?.split('-')[0] ?? null;
-	const runtime     = show.episode_run_time?.[0] ?? show.runtime ?? null;
+	const runtime = show.episode_run_time?.[0] ?? show.runtime ?? null;
 	const runtimeLabel = formatRuntime(runtime);
-	const voteAvg     = typeof show.vote_average === 'number' && show.vote_average > 0
-		? show.vote_average
-		: null;
+	const voteAvg =
+		typeof show.vote_average === 'number' && show.vote_average > 0 ? show.vote_average : null;
 	const rating =
 		type === 'tv'
 			? show.content_ratings?.results?.find((r) => r.iso_3166_1 === 'US')?.rating
-			: show.release_dates?.results?.find((r) => r.iso_3166_1 === 'US')?.release_dates?.[0]?.certification;
+			: show.release_dates?.results?.find((r) => r.iso_3166_1 === 'US')?.release_dates?.[0]
+					?.certification;
 	const genreNames = show.genres?.map((g) => g.name).filter(Boolean) ?? [];
-	const genres  = genreNames.slice(0, 3);
+	const genres = genreNames.slice(0, 3);
 	const cleanPoster =
-		show.images?.posters?.find((img) => img.iso_639_1 === null)?.file_path ||
-		show.poster_path;
+		show.images?.posters?.find((img) => img.iso_639_1 === null)?.file_path || show.poster_path;
 	const cleanBackdrop =
 		show.images?.backdrops?.find((img) => img.iso_639_1 === null)?.file_path ||
 		show.backdrop_path;
@@ -178,32 +176,37 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 			className="relative w-full h-[76dvh] min-h-[560px] max-h-[780px] overflow-hidden bg-background md:h-[78dvh] md:min-h-[620px] lg:h-[82dvh]"
 		>
 			{/* Hero image: poster on phones, cinematic backdrop on wider screens. */}
-			{(mobileHeroImage || desktopHeroImage) && (
-				<div className="absolute inset-0 z-0 overflow-hidden">
-					<div ref={imageWrapRef} className="absolute inset-0 will-change-transform">
-						{mobileHeroImage && (
-							<Image
-								src={tmdbImage(mobileHeroImage, 'w780')}
-								alt={title}
-								fill
-								priority
-								sizes="(max-width: 767px) 100vw"
-								className="object-cover object-top md:hidden"
-							/>
-						)}
-						{desktopHeroImage && (
-							<Image
-								src={tmdbImage(desktopHeroImage, 'w1280')}
-								alt={title}
-								fill
-								priority
-								sizes="(min-width: 768px) 100vw"
-								className="hidden object-cover object-center md:block"
-							/>
-						)}
-					</div>
+			<div className="absolute inset-0 z-0 overflow-hidden">
+				{/* Fallback dark surface — visible when images are missing or fail */}
+				<div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black" />
+
+				<div ref={imageWrapRef} className="absolute inset-0 will-change-transform">
+					{mobileHeroImage && (
+						<img
+							src={tmdbImage(mobileHeroImage, 'w780')}
+							alt={title}
+							loading="eager"
+							fetchPriority="high"
+							className="absolute inset-0 h-full w-full object-cover object-top md:hidden"
+							onError={(e) => {
+								(e.currentTarget as HTMLImageElement).style.display = 'none';
+							}}
+						/>
+					)}
+					{desktopHeroImage && (
+						<img
+							src={tmdbImage(desktopHeroImage, 'w1280')}
+							alt={title}
+							loading="eager"
+							fetchPriority="high"
+							className="absolute inset-0 hidden h-full w-full object-cover object-center md:block"
+							onError={(e) => {
+								(e.currentTarget as HTMLImageElement).style.display = 'none';
+							}}
+						/>
+					)}
 				</div>
-			)}
+			</div>
 
 			{/* Gradient layers */}
 			<div className="absolute inset-0 z-[1] pointer-events-none">
@@ -215,7 +218,8 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 				<div
 					className="absolute bottom-0 left-0 w-[60vw] h-[70%] pointer-events-none"
 					style={{
-						background: 'radial-gradient(ellipse 80% 70% at 20% 100%, color-mix(in oklab, var(--background) 72%, transparent) 0%, transparent 70%)',
+						background:
+							'radial-gradient(ellipse 80% 70% at 20% 100%, color-mix(in oklab, var(--background) 72%, transparent) 0%, transparent 70%)',
 					}}
 				/>
 				{/* Top edge */}
@@ -228,8 +232,10 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 			{/* Content */}
 			<div className="absolute inset-0 z-10 flex flex-col justify-end">
 				<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-8 md:pb-12 lg:pb-14">
-					<div ref={contentRef} className="max-w-xl md:max-w-2xl flex flex-col items-start text-left">
-
+					<div
+						ref={contentRef}
+						className="max-w-xl md:max-w-2xl flex flex-col items-start text-left"
+					>
 						{/* Metadata row */}
 						<div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mb-4 md:mb-5">
 							{/* Type badge */}
@@ -237,16 +243,23 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 								data-meta
 								className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/60"
 							>
-								{type === 'tv'
-									? <TelevisionIcon weight="fill" size={10} />
-									: <FilmSlateIcon weight="fill" size={10} />}
+								{type === 'tv' ? (
+									<TelevisionIcon weight="fill" size={10} />
+								) : (
+									<FilmSlateIcon weight="fill" size={10} />
+								)}
 								{type === 'tv' ? 'Series' : 'Film'}
 							</span>
 
 							{genres.length > 0 && (
 								<>
-									<span data-meta className="text-white/18 select-none">·</span>
-									<span data-meta className="text-[11px] font-medium text-white/45 tracking-wide">
+									<span data-meta className="text-white/18 select-none">
+										·
+									</span>
+									<span
+										data-meta
+										className="text-[11px] font-medium text-white/45 tracking-wide"
+									>
 										{genres.join(' / ')}
 									</span>
 								</>
@@ -254,8 +267,13 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 
 							{releaseYear && (
 								<>
-									<span data-meta className="text-white/18 select-none">·</span>
-									<span data-meta className="text-[11px] font-medium text-white/45 tabular-nums">
+									<span data-meta className="text-white/18 select-none">
+										·
+									</span>
+									<span
+										data-meta
+										className="text-[11px] font-medium text-white/45 tabular-nums"
+									>
 										{releaseYear}
 									</span>
 								</>
@@ -263,8 +281,13 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 
 							{runtime != null && runtime > 0 && (
 								<>
-									<span data-meta className="text-white/18 select-none">·</span>
-									<span data-meta className="text-[11px] font-medium text-white/45 tabular-nums">
+									<span data-meta className="text-white/18 select-none">
+										·
+									</span>
+									<span
+										data-meta
+										className="text-[11px] font-medium text-white/45 tabular-nums"
+									>
 										{runtimeLabel}
 									</span>
 								</>
@@ -272,14 +295,27 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 
 							{voteAvg && (
 								<>
-									<span data-meta className="text-white/18 select-none">·</span>
+									<span data-meta className="text-white/18 select-none">
+										·
+									</span>
 									<span
 										data-meta
 										className="inline-flex items-center gap-1 px-1.5 py-[3px] rounded-md"
-										style={{ background: 'rgba(255,214,10,0.12)', border: '1px solid rgba(255,214,10,0.2)' }}
+										style={{
+											background: 'rgba(255,214,10,0.12)',
+											border: '1px solid rgba(255,214,10,0.2)',
+										}}
 									>
-										<StarIcon weight="fill" size={10} color="#FFD60A" aria-hidden="true" />
-										<span className="text-[10px] font-bold tabular-nums" style={{ color: '#FFD60A' }}>
+										<StarIcon
+											weight="fill"
+											size={10}
+											color="#FFD60A"
+											aria-hidden="true"
+										/>
+										<span
+											className="text-[10px] font-bold tabular-nums"
+											style={{ color: '#FFD60A' }}
+										>
 											{voteAvg.toFixed(1)}
 										</span>
 									</span>
@@ -288,7 +324,9 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 
 							{rating && (
 								<>
-									<span data-meta className="text-white/18 select-none">·</span>
+									<span data-meta className="text-white/18 select-none">
+										·
+									</span>
 									<span
 										data-meta
 										className="text-[10px] font-bold text-white/50 border border-white/18 rounded-[4px] px-[5px] py-[2px] leading-none tracking-widest uppercase"
@@ -300,16 +338,23 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						</div>
 
 						{/* Logo or title */}
-						<div data-hero-title className="flex flex-col items-start gap-2.5 md:gap-3 w-full">
+						<div
+							data-hero-title
+							className="flex flex-col items-start gap-2.5 md:gap-3 w-full"
+						>
 							{logo ? (
-								<Image
+								<img
 									src={tmdbImage(logo, 'w500')}
 									alt={title}
 									width={720}
 									height={360}
-									priority
-									sizes="(max-width: 768px) 90vw, 720px"
+									loading="eager"
+									fetchPriority="high"
 									className="h-auto w-[min(86vw,420px)] max-h-[clamp(120px,34vw,180px)] sm:w-[min(78vw,520px)] sm:max-h-[220px] md:w-auto md:max-w-xl md:max-h-[160px] lg:max-h-[200px] object-contain object-left drop-shadow-[0_16px_48px_rgba(0,0,0,0.9)]"
+									onError={(e) => {
+										(e.currentTarget as HTMLImageElement).style.display =
+											'none';
+									}}
 								/>
 							) : (
 								<h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-bold text-white leading-[0.9] tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
@@ -333,18 +378,24 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							<p
 								data-hero-overview
 								className="mt-3 md:mt-3.5 text-[12.5px] md:text-sm text-white/52 leading-relaxed max-w-lg line-clamp-3 md:line-clamp-4"
-								style={{ fontFamily: '-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif' }}
+								style={{
+									fontFamily:
+										'-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
+								}}
 							>
 								{show.overview}
 							</p>
 						)}
 
 						{/* Actions */}
-						<div ref={btnRowRef} className="flex flex-wrap items-center gap-2.5 md:gap-3 mt-6 md:mt-8">
+						<div
+							ref={btnRowRef}
+							className="flex flex-wrap items-center gap-2.5 md:gap-3 mt-6 md:mt-8"
+						>
 							{/* Primary play */}
 							<button
 								data-hero-action
-								className="inline-flex items-center justify-center gap-2 rounded-full font-bold bg-white text-zinc-950 px-6 py-2.5 md:px-8 md:py-3 text-[13px] md:text-sm shadow-[0_6px_28px_rgba(255,255,255,0.18)] transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98]"
+								className="inline-flex items-center justify-center gap-2 rounded-full font-bold bg-white text-zinc-950 px-6 py-2.5 md:px-8 md:py-3 text-[13px] md:text-sm shadow-[0_6px_28px_rgba(255,255,255,0.18)] transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
 							>
 								<PlayIcon weight="fill" size={16} />
 								Play
@@ -353,7 +404,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							{/* Watchlist frosted */}
 							<button
 								data-hero-action
-								className="inline-flex items-center justify-center gap-2 rounded-full font-semibold text-white px-5 py-2.5 md:px-6 md:py-3 text-[13px] md:text-sm transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98]"
+								className="inline-flex items-center justify-center gap-2 rounded-full font-semibold text-white px-5 py-2.5 md:px-6 md:py-3 text-[13px] md:text-sm transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
 								style={{
 									background: 'rgba(255,255,255,0.1)',
 									backdropFilter: 'blur(24px) saturate(180%)',
@@ -375,11 +426,14 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 										requestAnimationFrame(() => {
 											document
 												.getElementById('media-info-body')
-												?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+												?.scrollIntoView({
+													behavior: 'smooth',
+													block: 'start',
+												});
 										});
 									}
 								}}
-								className="inline-flex items-center justify-center rounded-full w-[42px] h-[42px] md:w-11 md:h-11 text-white transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98]"
+								className="inline-flex items-center justify-center rounded-full w-11 h-11 text-white transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
 								style={{
 									background: 'rgba(255,255,255,0.08)',
 									backdropFilter: 'blur(24px) saturate(180%)',
@@ -394,7 +448,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							<button
 								data-hero-action
 								aria-label="Share"
-								className="inline-flex items-center justify-center rounded-full w-[42px] h-[42px] md:w-11 md:h-11 text-white transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98]"
+								className="inline-flex items-center justify-center rounded-full w-11 h-11 text-white transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
 								style={{
 									background: 'rgba(255,255,255,0.08)',
 									backdropFilter: 'blur(24px) saturate(180%)',
@@ -404,9 +458,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							>
 								<ShareNetworkIcon weight="bold" size={16} />
 							</button>
-
 						</div>
-
 					</div>
 				</div>
 			</div>

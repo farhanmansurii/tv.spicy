@@ -1,7 +1,6 @@
 'use client';
 
 import { memo } from 'react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
 	StarIcon,
@@ -55,16 +54,29 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 				month: 'long',
 				day: 'numeric',
 				year: 'numeric',
-		  })
+			})
 		: null;
 
-	const crew = (episode.crew ?? []) as Array<{ job?: string; name?: string; profile_path?: string | null }>;
+	const crew = (episode.crew ?? []) as Array<{
+		job?: string;
+		name?: string;
+		profile_path?: string | null;
+	}>;
 	const director = crew.find((c) => c.job === 'Director');
-	const writers = crew.filter((c) => c.job === 'Writer' || c.job === 'Teleplay' || c.job === 'Story');
-	const writerNames = writers.map((w) => w.name).filter(Boolean).join(', ');
+	const writers = crew.filter(
+		(c) => c.job === 'Writer' || c.job === 'Teleplay' || c.job === 'Story'
+	);
+	const writerNames = writers
+		.map((w) => w.name)
+		.filter(Boolean)
+		.join(', ');
 
 	const guests = (
-		(episode.guest_stars ?? []) as Array<{ name?: string; character?: string; profile_path?: string | null }>
+		(episode.guest_stars ?? []) as Array<{
+			name?: string;
+			character?: string;
+			profile_path?: string | null;
+		}>
 	).slice(0, 10);
 
 	const epCode = `S${String(episode.season_number).padStart(2, '0')} · E${String(episode.episode_number).padStart(2, '0')}`;
@@ -84,23 +96,26 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 					background: 'rgba(18,18,20,0.85)',
 					border: '1px solid rgba(255,255,255,0.07)',
 					backdropFilter: 'blur(32px) saturate(140%)',
-					boxShadow:
-						'inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 64px rgba(0,0,0,0.7)',
+					boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 64px rgba(0,0,0,0.7)',
 				}}
 			>
 				{/* ── Compact Editorial Header — thumbnail + title row ── */}
 				<div className="flex items-stretch gap-4 px-4 pt-4 md:px-5 md:pt-5">
 					{stillUrl ? (
 						<div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-lg bg-white/[0.04] sm:w-40 md:w-48">
-							<Image
+							<img
 								src={stillUrl}
 								alt={episode.name || `Episode ${episode.episode_number}`}
-								fill
 								loading="lazy"
-								sizes="(max-width: 640px) 128px, (max-width: 768px) 160px, 192px"
-								className="object-cover"
+								className="h-full w-full object-cover"
+								onError={(e) => {
+									(e.currentTarget as HTMLImageElement).style.display = 'none';
+								}}
 							/>
-							<div className="absolute inset-0 pointer-events-none" style={{ boxShadow: 'inset 0 0 40px rgba(0,0,0,0.35)' }} />
+							<div
+								className="absolute inset-0 pointer-events-none"
+								style={{ boxShadow: 'inset 0 0 40px rgba(0,0,0,0.35)' }}
+							/>
 						</div>
 					) : null}
 
@@ -110,7 +125,10 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 						</p>
 						<h3
 							className="text-base sm:text-lg font-bold text-white leading-tight tracking-tight line-clamp-2"
-							style={{ fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif' }}
+							style={{
+								fontFamily:
+									'-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
+							}}
 						>
 							{episode.name || `Episode ${episode.episode_number}`}
 						</h3>
@@ -126,10 +144,7 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 				>
 					{/* Inline metadata strip */}
 					{(hasRating || hasRuntime || airLabel) && (
-						<motion.div
-							variants={fadeUp}
-							className="flex items-center gap-0 flex-wrap"
-						>
+						<motion.div variants={fadeUp} className="flex items-center gap-0 flex-wrap">
 							{hasRating && (
 								<span
 									className="inline-flex items-center gap-1 text-[12px] font-bold tabular-nums pr-3"
@@ -165,7 +180,10 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 						<motion.div variants={fadeUp}>
 							<p
 								className="text-[13.5px] sm:text-sm text-white/60 leading-relaxed"
-								style={{ fontFamily: '-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif' }}
+								style={{
+									fontFamily:
+										'-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
+								}}
 							>
 								{episode.overview}
 							</p>
@@ -181,23 +199,33 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 						>
 							{director?.name && (
 								<div className="flex items-start gap-2.5">
-									<FilmSlateIcon size={13} className="text-white/22 mt-[1px] flex-shrink-0" />
+									<FilmSlateIcon
+										size={13}
+										className="text-white/22 mt-[1px] flex-shrink-0"
+									/>
 									<div>
 										<p className="text-[9.5px] font-bold uppercase tracking-[0.15em] text-white/25 mb-0.5">
 											Director
 										</p>
-										<p className="text-[12.5px] font-semibold text-white/75">{director.name}</p>
+										<p className="text-[12.5px] font-semibold text-white/75">
+											{director.name}
+										</p>
 									</div>
 								</div>
 							)}
 							{writerNames && (
 								<div className="flex items-start gap-2.5">
-									<PencilSimpleIcon size={13} className="text-white/22 mt-[1px] flex-shrink-0" />
+									<PencilSimpleIcon
+										size={13}
+										className="text-white/22 mt-[1px] flex-shrink-0"
+									/>
 									<div>
 										<p className="text-[9.5px] font-bold uppercase tracking-[0.15em] text-white/25 mb-0.5">
 											Written by
 										</p>
-										<p className="text-[12.5px] font-semibold text-white/75 leading-snug">{writerNames}</p>
+										<p className="text-[12.5px] font-semibold text-white/75 leading-snug">
+											{writerNames}
+										</p>
 									</div>
 								</div>
 							)}
@@ -230,13 +258,16 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 									>
 										{g.profile_path ? (
 											<div className="relative w-14 h-[84px] rounded-xl overflow-hidden bg-zinc-800 flex-shrink-0">
-												<Image
+												<img
 													src={tmdbImage(g.profile_path, 'w185')}
 													alt={g.name || ''}
-													fill
 													loading="lazy"
-													sizes="56px"
-													className="object-cover"
+													className="h-full w-full object-cover"
+													onError={(e) => {
+														(
+															e.currentTarget as HTMLImageElement
+														).style.display = 'none';
+													}}
 												/>
 												<div className="absolute inset-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] rounded-xl pointer-events-none" />
 											</div>

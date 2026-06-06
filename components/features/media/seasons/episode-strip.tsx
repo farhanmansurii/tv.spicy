@@ -20,7 +20,7 @@ interface EpisodeStripProps {
 
 function GridSkeleton() {
 	return (
-		<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+		<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
 			{Array.from({ length: 6 }).map((_, i) => (
 				<motion.div
 					key={i}
@@ -50,9 +50,18 @@ function GridSkeleton() {
 						/>
 					</div>
 					<div className="px-3 pt-2.5 pb-3 space-y-1.5">
-						<div className="h-2 w-12 rounded" style={{ background: 'rgba(255,255,255,0.05)' }} />
-						<div className="h-3.5 w-3/4 rounded" style={{ background: 'rgba(255,255,255,0.07)' }} />
-						<div className="h-2.5 w-full rounded" style={{ background: 'rgba(255,255,255,0.04)' }} />
+						<div
+							className="h-2 w-12 rounded"
+							style={{ background: 'rgba(255,255,255,0.05)' }}
+						/>
+						<div
+							className="h-3.5 w-3/4 rounded"
+							style={{ background: 'rgba(255,255,255,0.07)' }}
+						/>
+						<div
+							className="h-2.5 w-full rounded"
+							style={{ background: 'rgba(255,255,255,0.04)' }}
+						/>
 					</div>
 				</motion.div>
 			))}
@@ -96,8 +105,14 @@ function ListSkeleton() {
 						/>
 					</div>
 					<div className="flex-1 space-y-1.5">
-						<div className="h-2.5 w-1/2 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
-						<div className="h-2 w-4/5 rounded" style={{ background: 'rgba(255,255,255,0.04)' }} />
+						<div
+							className="h-2.5 w-1/2 rounded"
+							style={{ background: 'rgba(255,255,255,0.06)' }}
+						/>
+						<div
+							className="h-2 w-4/5 rounded"
+							style={{ background: 'rgba(255,255,255,0.04)' }}
+						/>
 					</div>
 				</motion.div>
 			))}
@@ -172,7 +187,7 @@ function EpisodeStripComponent({
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.2 }}
-						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"
+						className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
 					>
 						{episodes.map((ep, i) => (
 							<EpisodeCard

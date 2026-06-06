@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 const GitHubIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => (
 	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" {...props}>
@@ -49,15 +48,15 @@ export default function Footer() {
 					<div className="flex flex-col gap-4 max-w-sm">
 						<Link href="/" className="flex items-center gap-2 w-fit group" aria-label="Spicy TV home">
 							<div className="relative h-7 w-7 flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
-								<Image src="/logo.webp" alt="" fill className="object-contain" sizes="28px" />
+								<img src="/logo.webp" alt="" className="h-full w-full object-contain" />
 							</div>
 							<span
 								className="text-[15px] font-semibold tracking-tight text-white/80 group-hover:text-white transition-colors duration-200"
 								style={{ fontFamily: 'var(--font-geist-sans), sans-serif' }}
 							>
-								Spicy TV
-							</span>
-						</Link>
+							Spicy TV
+						</span>
+					</Link>
 
 						<p className="text-[12px] leading-relaxed text-zinc-500 max-w-xs">
 							This site does not store any files on its server. All contents are provided

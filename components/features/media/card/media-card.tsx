@@ -1,8 +1,7 @@
 'use client';
 
-import { memo, useRef, useEffect, useCallback } from 'react';
+import { memo, useRef, useEffect, useCallback, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Show } from '@/lib/types';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { PlayIcon, StarIcon } from '@phosphor-icons/react';
@@ -35,6 +34,8 @@ function MediaCardComponent({
 	const playBtnRef = useRef<HTMLDivElement>(null);
 	const hoverTlRef = useRef<gsap.core.Timeline | null>(null);
 
+	const [imageError, setImageError] = useState(false);
+
 	const imagePath = isVertical ? show.poster_path : show.backdrop_path;
 	const imageUrl = imagePath ? tmdbImage(imagePath, 'w500') : null;
 	const year = (show.first_air_date || show.release_date)?.split('-')[0];
@@ -48,23 +49,36 @@ function MediaCardComponent({
 			gsap.set(playBtnRef.current, { opacity: 0, scale: 0.6 });
 
 			// Build hover timeline (paused)
-			hoverTlRef.current = gsap.timeline({ paused: true })
-				.to(imageRef.current, {
-					scale: 1.06,
-					duration: 0.55,
-					ease: 'power2.out',
-				}, 0)
-				.to(overlayRef.current, {
-					opacity: 1,
-					duration: 0.3,
-					ease: 'power2.out',
-				}, 0)
-				.to(playBtnRef.current, {
-					opacity: 1,
-					scale: 1,
-					duration: 0.5,
-					ease: 'back.out(1.8)',
-				}, 0.08);
+			hoverTlRef.current = gsap
+				.timeline({ paused: true })
+				.to(
+					imageRef.current,
+					{
+						scale: 1.06,
+						duration: 0.55,
+						ease: 'power2.out',
+					},
+					0
+				)
+				.to(
+					overlayRef.current,
+					{
+						opacity: 1,
+						duration: 0.3,
+						ease: 'power2.out',
+					},
+					0
+				)
+				.to(
+					playBtnRef.current,
+					{
+						opacity: 1,
+						scale: 1,
+						duration: 0.5,
+						ease: 'back.out(1.8)',
+					},
+					0.08
+				);
 		}, shellRef);
 
 		return () => ctx.revert();
@@ -107,7 +121,8 @@ function MediaCardComponent({
 								fontSize: 'clamp(5rem, 9vw, 8rem)',
 								WebkitTextStroke: '1.5px rgba(255,255,255,0.12)',
 								color: 'transparent',
-								fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
+								fontFamily:
+									'-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
 								letterSpacing: '-0.05em',
 							}}
 							aria-hidden="true"
@@ -118,7 +133,7 @@ function MediaCardComponent({
 
 					{/* Image */}
 					<div className="relative h-full w-full overflow-hidden rounded-xl md:rounded-2xl">
-						{imageUrl ? (
+						{imageUrl && !imageError ? (
 							<BlurFade
 								key={imageUrl}
 								delay={0.01 * (index % 8)}
@@ -128,18 +143,16 @@ function MediaCardComponent({
 								className="relative h-full w-full"
 							>
 								{/* Image wrapper — GSAP scales this */}
-								<div ref={imageRef} className="absolute inset-0 will-change-transform">
-									<Image
+								<div
+									ref={imageRef}
+									className="absolute inset-0 will-change-transform"
+								>
+									<img
 										src={imageUrl}
 										alt={show.title || show.name || ''}
-										fill
 										loading="lazy"
-										sizes={
-											isVertical
-												? '(max-width: 640px) 45vw, (max-width: 1024px) 22vw, 14vw'
-												: '(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 25vw'
-										}
 										className="w-full h-full object-cover"
+										onError={() => setImageError(true)}
 									/>
 								</div>
 
@@ -158,23 +171,29 @@ function MediaCardComponent({
 										ref={playBtnRef}
 										className={cn(
 											'h-11 w-11 md:h-12 md:w-12 rounded-full flex items-center justify-center',
-											'will-change-transform',
+											'will-change-transform'
 										)}
 										style={{
 											background: 'rgba(255,255,255,0.92)',
 											backdropFilter: 'blur(20px) saturate(180%)',
 											border: '1px solid rgba(255,255,255,0.30)',
-											boxShadow: '0 8px 32px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,255,255,0.25)',
+											boxShadow:
+												'0 8px 32px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,255,255,0.25)',
 										}}
 									>
-										<PlayIcon weight="fill" size={18} className="text-black ml-0.5" />
+										<PlayIcon
+											weight="fill"
+											size={18}
+											className="text-black ml-0.5"
+										/>
 									</div>
 								</div>
-
 							</BlurFade>
 						) : (
-							<div className="flex items-center justify-center w-full h-full text-xs font-medium text-zinc-700 tracking-wide">
-								No Image
+							<div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-950 px-4">
+								<h4 className="text-sm md:text-base font-semibold text-white/90 text-center line-clamp-2 leading-snug">
+									{show.title || show.name}
+								</h4>
 							</div>
 						)}
 					</div>
@@ -187,7 +206,10 @@ function MediaCardComponent({
 				<div className="flex flex-col gap-1 px-0.5">
 					<h3
 						className="text-sm md:text-[15px] font-semibold text-zinc-100 line-clamp-1 leading-snug transition-colors duration-300 group-hover:text-white"
-						style={{ fontFamily: '-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif' }}
+						style={{
+							fontFamily:
+								'-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
+						}}
 					>
 						{show.title || show.name}
 					</h3>
@@ -199,7 +221,13 @@ function MediaCardComponent({
 						)}
 						{show.vote_average > 0 && (
 							<span className="flex items-center gap-1">
-								<StarIcon weight="fill" size={11} color="#FFD60A" className="flex-shrink-0" aria-hidden="true" />
+								<StarIcon
+									weight="fill"
+									size={11}
+									color="#FFD60A"
+									className="flex-shrink-0"
+									aria-hidden="true"
+								/>
 								<span
 									className="text-xs md:text-[13px] font-semibold"
 									style={{ color: '#FFD60A' }}

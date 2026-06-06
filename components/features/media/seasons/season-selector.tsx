@@ -74,7 +74,7 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 							whileTap={!isActive ? { scale: 0.96 } : { scale: 0.98 }}
 							className={cn(
 								'relative z-[1] flex-shrink-0 flex items-center gap-1.5 rounded-full',
-								'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
+								'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 								hasCount ? 'pl-3 pr-2 py-[6px]' : 'px-3 py-[6px]'
 							)}
 						>

@@ -1,7 +1,6 @@
 'use client';
 
 import { memo, useMemo } from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { PlayIcon, LockSimpleIcon, StarIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
@@ -51,14 +50,13 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 				...itemTransition,
 				delay: Math.min(index * 0.04, 0.4),
 			}}
-			whileHover={isReleased ? { y: -3 } : undefined}
 			whileTap={isReleased ? { scale: 0.97 } : undefined}
 			className={cn(
-				'group relative w-full text-left rounded-2xl overflow-hidden will-change-transform',
+				'group relative w-full h-full text-left rounded-lg sm:rounded-xl overflow-hidden will-change-transform',
 				'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 				active
-					? 'shadow-[0_0_0_1.5px_rgba(255,255,255,0.22),0_20px_50px_rgba(0,0,0,0.8)]'
-					: 'shadow-[0_0_0_1px_rgba(255,255,255,0.07)]',
+					? 'ring-1 ring-[#0A84FF]/40 shadow-[0_0_20px_rgba(10,132,255,0.12)]'
+					: 'ring-1 ring-white/[0.06]',
 				!isReleased && 'opacity-40 cursor-not-allowed'
 			)}
 		>
@@ -66,17 +64,18 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 			<div className="relative w-full aspect-video overflow-hidden bg-zinc-900">
 				<motion.div
 					className="absolute inset-0"
-					whileHover={isReleased && !active ? { scale: 1.06 } : undefined}
-					transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+					whileHover={isReleased && !active ? { scale: 1.04 } : undefined}
+					transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
 				>
 					{stillUrl ? (
-						<Image
+						<img
 							src={stillUrl}
 							alt={`Episode ${episode.episode_number}${episode.name ? `: ${episode.name}` : ''} still`}
-							fill
 							loading="lazy"
-							sizes="(max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-							className="object-cover"
+							className="h-full w-full object-cover"
+							onError={(e) => {
+								(e.currentTarget as HTMLImageElement).style.display = 'none';
+							}}
 						/>
 					) : (
 						<div className="w-full h-full bg-gradient-to-br from-zinc-800 via-zinc-850 to-zinc-950" />
@@ -84,23 +83,7 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 				</motion.div>
 
 				{/* Gradient */}
-				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-				{/* Ghost episode number */}
-				<div
-					className="absolute top-1 right-2 select-none pointer-events-none leading-none"
-					style={{
-						fontSize: 'clamp(2.8rem, 6vw, 5rem)',
-						fontWeight: 900,
-						color: 'rgba(255,255,255,0.055)',
-						fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
-						letterSpacing: '-0.05em',
-						mixBlendMode: 'screen',
-						lineHeight: 1,
-					}}
-				>
-					{epNum}
-				</div>
+				<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
 
 				{/* Active glow */}
 				{active && (
@@ -108,51 +91,44 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 						className="absolute inset-0 pointer-events-none"
 						style={{
 							background:
-								'radial-gradient(ellipse at 50% 110%, rgba(10,132,255,0.15) 0%, transparent 65%)',
+								'radial-gradient(ellipse at 50% 110%, rgba(10,132,255,0.12) 0%, transparent 65%)',
 						}}
 					/>
 				)}
 
-				{/* Play button */}
+				{/* Play button - fades in on hover */}
 				<div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[2]">
 					<motion.div
 						initial={false}
 						animate={
 							active
 								? { opacity: 1, scale: 1, y: 0 }
-								: { opacity: 0, scale: 0.78, y: 6 }
+								: { opacity: 0, scale: 0.85, y: 4 }
 						}
 						whileHover={
-							isReleased && !active
-								? { opacity: 1, scale: 1, y: 0 }
-								: undefined
+							isReleased && !active ? { opacity: 1, scale: 1, y: 0 } : undefined
 						}
 						transition={{
 							type: 'spring',
 							stiffness: 260,
 							damping: 22,
 						}}
-						className="w-11 h-11 rounded-full flex items-center justify-center"
+						className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-white/90 backdrop-blur-md"
 						style={{
-							background: 'rgba(255,255,255,0.92)',
-							backdropFilter: 'blur(20px) saturate(180%)',
-							border: '1px solid rgba(255,255,255,0.28)',
-							boxShadow:
-								'0 6px 28px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.4)',
+							boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
 						}}
 					>
-						<PlayIcon weight="fill" size={16} className="text-black ml-0.5" />
+						<PlayIcon weight="fill" size={14} className="text-black ml-0.5" />
 					</motion.div>
 				</div>
 
 				{/* Now-playing waveform */}
 				{active && (
-					<div className="absolute top-3 left-3 flex items-end gap-[2.5px] h-3.5 z-[3]">
+					<div className="absolute top-2.5 left-2.5 flex items-end gap-[2px] h-3 z-[3]">
 						{[55, 100, 40, 75].map((h, i) => (
 							<motion.span
 								key={i}
-								className="w-[2.5px] rounded-full"
-								style={{ background: 'rgba(255,255,255,0.75)' }}
+								className="w-[2px] rounded-full bg-white/80"
 								animate={{
 									height: [`${h * 0.4}%`, `${h}%`, `${h * 0.4}%`],
 								}}
@@ -169,29 +145,36 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 
 				{!isReleased && (
 					<div className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-sm z-[4]">
-						<LockSimpleIcon size={18} className="text-white/25" weight="bold" />
+						<LockSimpleIcon size={16} className="text-white/25" weight="bold" />
 					</div>
 				)}
 
-				{/* Inner edge refraction */}
-				<div className="absolute inset-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] pointer-events-none" />
+				{/* Subtle inner highlight */}
+				<div className="absolute inset-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] pointer-events-none" />
 			</div>
 
 			{/* Info */}
 			<div
 				className={cn(
-					'px-3 pt-2.5 pb-3 transition-colors duration-200',
-					active
-						? 'bg-white/[0.07]'
-						: 'bg-white/[0.028] group-hover:bg-white/[0.045]'
+					'flex flex-col gap-0.5 px-2 sm:px-2.5 pt-1.5 pb-2 sm:pt-2 sm:pb-2.5',
+					active ? 'bg-[#0A84FF]/[0.06]' : 'bg-white/[0.02]'
 				)}
-				style={active ? { borderTop: '1px solid rgba(10,132,255,0.12)' } : { borderTop: '1px solid transparent' }}
 			>
-				{/* Eyebrow */}
-				<div className="flex items-center gap-1.5 mb-1">
+				{/* Title */}
+				<h3
+					className={cn(
+						'text-xs sm:text-sm font-semibold leading-tight line-clamp-1 transition-colors duration-200',
+						active ? 'text-white' : 'text-zinc-200 group-hover:text-white'
+					)}
+				>
+					{episode.name || `Episode ${episode.episode_number}`}
+				</h3>
+
+				{/* Metadata row */}
+				<div className="flex items-center gap-1.5">
 					<span
 						className={cn(
-							'text-[9.5px] font-black uppercase tracking-[0.15em] tabular-nums transition-colors duration-200',
+							'text-[10px] sm:text-xs font-bold tabular-nums transition-colors duration-200',
 							active ? 'text-[#0A84FF]' : 'text-white/35 group-hover:text-white/50'
 						)}
 					>
@@ -200,7 +183,7 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 					{hasRuntime && (
 						<>
 							<span className="text-white/15 text-[8px]">&middot;</span>
-							<span className="text-[9.5px] text-white/28 tabular-nums">
+							<span className="text-[10px] sm:text-xs text-white/30 tabular-nums">
 								{episode.runtime}m
 							</span>
 						</>
@@ -209,7 +192,7 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 						<>
 							<span className="text-white/15 text-[8px]">&middot;</span>
 							<span
-								className="inline-flex items-center gap-0.5 text-[9.5px] font-bold tabular-nums"
+								className="inline-flex items-center gap-0.5 text-[10px] sm:text-xs font-bold tabular-nums"
 								style={{ color: '#FFD60A' }}
 							>
 								<StarIcon weight="fill" size={7} />
@@ -218,31 +201,6 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 						</>
 					)}
 				</div>
-
-				{/* Title */}
-				<h3
-					className={cn(
-						'text-[13px] sm:text-[13.5px] font-semibold leading-snug line-clamp-1 transition-colors duration-200',
-						active ? 'text-white' : 'text-zinc-200 group-hover:text-white'
-					)}
-					style={{
-						fontFamily: '-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
-					}}
-				>
-					{episode.name || `Episode ${episode.episode_number}`}
-				</h3>
-
-				{/* Overview */}
-				{episode.overview && (
-					<p
-						className={cn(
-							'mt-1 text-[11px] leading-relaxed line-clamp-2 transition-colors duration-200',
-							active ? 'text-white/55' : 'text-white/30 group-hover:text-white/44'
-						)}
-					>
-						{episode.overview}
-					</p>
-				)}
 			</div>
 		</motion.button>
 	);

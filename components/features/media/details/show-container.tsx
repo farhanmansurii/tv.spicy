@@ -55,8 +55,15 @@ const SeasonTabs = dynamic(() => import('@/components/features/media/seasons/sea
 	),
 });
 
-export default function ShowContainer({ type, id, seasons, showData, children }: ShowContainerProps) {
+export default function ShowContainer({
+	type,
+	id,
+	seasons,
+	showData,
+	children,
+}: ShowContainerProps) {
 	const contentRef = useRef<HTMLDivElement>(null);
+	const [isVisible, setIsVisible] = React.useState(false);
 
 	useEffect(() => {
 		if (!contentRef.current) return;
@@ -79,15 +86,26 @@ export default function ShowContainer({ type, id, seasons, showData, children }:
 			);
 		});
 
-		return () => ctx.revert();
+		// Fallback: ensure content is visible even if GSAP/ScrollTrigger fails
+		const timer = setTimeout(() => setIsVisible(true), 100);
+
+		return () => {
+			clearTimeout(timer);
+			ctx.revert();
+		};
 	}, []);
 
 	return (
 		<section className="section-spacing">
 			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
-				<div ref={contentRef}>
+				<div ref={contentRef} style={{ opacity: isVisible ? 1 : undefined }}>
 					{type === 'tv' ? (
-						<SeasonTabs seasons={seasons || []} showId={id} showData={showData} detailsPanel={children} />
+						<SeasonTabs
+							seasons={seasons || []}
+							showId={id}
+							showData={showData}
+							detailsPanel={children}
+						/>
 					) : (
 						<>
 							<Episode episodeId={''} id={id || ''} movieID={id} type={type} />

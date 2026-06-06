@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, memo } from 'react';
-import Image from 'next/image';
 import { PlayIcon, XIcon, CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -207,13 +206,11 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 									onClick={() => setActiveVideo(item.key!)}
 									className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]"
 								>
-									<Image
+									<img
 										src={item.poster}
 										alt={item.name}
-										fill
 										loading="lazy"
-										sizes="300px"
-										className="object-cover"
+										className="h-full w-full object-cover"
 									/>
 									{/* Play overlay */}
 									<div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/35 transition-colors duration-300">
@@ -224,13 +221,11 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 								</button>
 							) : (
 								<div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]">
-									<Image
+									<img
 										src={item.poster}
 										alt="Backdrop"
-										fill
 										loading="lazy"
-										sizes="300px"
-										className="object-cover"
+										className="h-full w-full object-cover"
 									/>
 								</div>
 							)}

@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -86,13 +85,12 @@ export function Header({ className }: HeaderProps) {
 						aria-label="Go to home page"
 					>
 						<div className="relative h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 transition-transform duration-200 group-hover:scale-[1.04] group-active:scale-[0.96]">
-							<Image
+							<img
 								src="/logo.webp"
 								alt="Spicy TV"
-								fill
-								className="object-contain"
-								priority
-								sizes="(max-width: 640px) 28px, 32px"
+								loading="eager"
+								fetchPriority="high"
+								className="h-full w-full object-contain"
 							/>
 						</div>
 						<span

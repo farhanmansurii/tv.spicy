@@ -91,10 +91,14 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		[seasons]
 	);
 	const [activeSeason, setActiveSeason] = useState<number | null>(null);
-	const [viewMode, setViewMode] = useState<EpisodeViewMode>('grid');
+	const [viewMode, setViewMode] = useState<EpisodeViewMode>(isMobile ? 'list' : 'grid');
 
 	// Data
-	const { data: seasonData, isFetching, isError } = useQuery<TMDBSeasonDetails>({
+	const {
+		data: seasonData,
+		isFetching,
+		isError,
+	} = useQuery<TMDBSeasonDetails>({
 		queryKey: ['episodes', showId, activeSeason],
 		queryFn: () => fetchSeasonEpisodes(showId, activeSeason as number),
 		enabled: !!showId && activeSeason !== null,
@@ -203,7 +207,16 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			params.set('episode', '1');
 			router.push(`${pathname}?${params.toString()}`, { scroll: false });
 		}
-	}, [activeEP, episodes, activeSeason, validSeasons, router, pathname, searchParams, onEpisodeClick]);
+	}, [
+		activeEP,
+		episodes,
+		activeSeason,
+		validSeasons,
+		router,
+		pathname,
+		searchParams,
+		onEpisodeClick,
+	]);
 
 	if (isError)
 		return (
@@ -227,7 +240,9 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 							stickyEnabled && isMobile && isPortrait
 								? 'sticky top-2 z-30'
 								: 'relative z-10',
-							isSticky && isStickyDismissed && 'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
+							isSticky &&
+								isStickyDismissed &&
+								'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
 						)}
 					>
 						<TVContainer
@@ -251,7 +266,8 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 						<h2
 							className="text-base md:text-lg font-bold text-white tracking-tight flex-shrink-0"
 							style={{
-								fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
+								fontFamily:
+									'-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
 							}}
 						>
 							Episodes
@@ -260,11 +276,12 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 							<span className="text-[12px] text-white/28 tabular-nums font-medium truncate">
 								{seasonData.episodes.length} ep
 								{seasonData.episodes.length !== 1 ? 's' : ''}
-								{seasonData.name && seasonData.name !== `Season ${activeSeason}` && (
-									<span className="hidden sm:inline ml-1.5 text-white/20">
-										· {seasonData.name}
-									</span>
-								)}
+								{seasonData.name &&
+									seasonData.name !== `Season ${activeSeason}` && (
+										<span className="hidden sm:inline ml-1.5 text-white/20">
+											· {seasonData.name}
+										</span>
+									)}
 							</span>
 						)}
 					</div>
@@ -279,8 +296,16 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 					>
 						{(
 							[
-								{ mode: 'grid', icon: <SquaresFourIcon size={15} weight="bold" />, label: 'Grid' },
-								{ mode: 'list', icon: <ListBulletsIcon size={15} weight="bold" />, label: 'List' },
+								{
+									mode: 'grid',
+									icon: <SquaresFourIcon size={15} weight="bold" />,
+									label: 'Grid',
+								},
+								{
+									mode: 'list',
+									icon: <ListBulletsIcon size={15} weight="bold" />,
+									label: 'List',
+								},
 							] as { mode: EpisodeViewMode; icon: React.ReactNode; label: string }[]
 						).map(({ mode, icon, label }) => (
 							<motion.button
@@ -289,7 +314,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 								aria-label={label}
 								whileTap={{ scale: 0.92 }}
 								className={cn(
-									'flex items-center justify-center w-7 h-7 rounded-[7px] transition-all duration-200',
+									'flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 									viewMode === mode
 										? 'bg-white text-zinc-900 shadow-[0_1px_4px_rgba(0,0,0,0.35)]'
 										: 'text-white/35 hover:text-white/65'
@@ -322,7 +347,6 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 						viewMode={viewMode}
 					/>
 				</div>
-
 			</div>
 		</div>
 	);
