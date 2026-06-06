@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { useAuthStore } from '@/store/authStore';
 import { invalidateUserQueries } from '@/lib/query-client';
 
-interface FavoriteItem {
+export interface FavoriteItem {
 	id: number;
 	title?: string;
 	name?: string;
@@ -179,11 +179,13 @@ export const useFavoritesStore = create<FavoritesStore>()(
 						return {
 							favoriteMovies: [
 								...state.favoriteMovies,
-								...dbMovies.filter((item) => !localMovieIds.has(item.id)),
+								...dbMovies.filter(
+									(item: FavoriteItem) => !localMovieIds.has(item.id)
+								),
 							],
 							favoriteTV: [
 								...state.favoriteTV,
-								...dbTV.filter((item) => !localTVIds.has(item.id)),
+								...dbTV.filter((item: FavoriteItem) => !localTVIds.has(item.id)),
 							],
 							isInitialized: true,
 							isLoading: false,

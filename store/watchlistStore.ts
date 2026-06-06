@@ -212,11 +212,11 @@ const useWatchListStore = create<WatchlistStore>()(
 						return {
 							watchlist: [
 								...state.watchlist,
-								...dbMovies.filter((item) => !localMovieIds.has(item.id)),
+								...dbMovies.filter((item: Show) => !localMovieIds.has(item.id)),
 							],
 							tvwatchlist: [
 								...state.tvwatchlist,
-								...dbTV.filter((item) => !localTVIds.has(item.id)),
+								...dbTV.filter((item: Show) => !localTVIds.has(item.id)),
 							],
 							isInitialized: true,
 							isLoading: false,
@@ -253,10 +253,11 @@ const useWatchListStore = create<WatchlistStore>()(
 		{
 			name: 'watchlist-storage',
 			storage: createJSONStorage(() => localStorage),
-			partialize: (state) => ({
-				watchlist: state.watchlist,
-				tvwatchlist: state.tvwatchlist,
-			}),
+			partialize: (state) =>
+				({
+					watchlist: state.watchlist,
+					tvwatchlist: state.tvwatchlist,
+				}) as unknown as WatchlistStore,
 		}
 	)
 );
