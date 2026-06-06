@@ -2,14 +2,13 @@
 
 import { signOut } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import Container from '@/components/shared/containers/container';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import useWatchListStore from '@/store/watchlistStore';
 import useTVShowStore from '@/store/recentsStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
-import { useUserWatchlist, useUserFavorites } from '@/hooks/use-user-data';
 import {
 	CalendarIcon,
 	ClockIcon,
@@ -18,7 +17,6 @@ import {
 	StarIcon,
 	HeartIcon,
 	BookmarkSimpleIcon,
-	TrendUpIcon,
 	UserIcon,
 	GearIcon,
 	SignOutIcon,
@@ -26,10 +24,8 @@ import {
 	EyeIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import { fetchDetailsTMDB } from '@/lib/api';
 import { Show } from '@/lib/types';
 import MediaRow from '@/components/features/media/row/media-row';
-import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { usePlayerPrefsStore } from '@/store/playerPrefsStore';
@@ -84,155 +80,37 @@ interface ProfilePageClientProps {
 
 export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 	const router = useRouter();
-	const { watchlist, tvwatchlist } = useWatchListStore();
-	const { recentlyWatched, initialize: initializeContinueWatching } = useTVShowStore();
-	const { favoriteMovies, favoriteTV } = useFavoritesStore();
-	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
+	const watchlist = useWatchListStore((s) => s.watchlist);
+	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist);
+	const recentlyWatched = useTVShowStore((s) => s.recentlyWatched);
+	const favoriteMovies = useFavoritesStore((s) => s.favoriteMovies);
+	const favoriteTV = useFavoritesStore((s) => s.favoriteTV);
+	const stickyEnabled = usePlayerPrefsStore((s) => s.stickyEnabled);
+	const setStickyEnabled = usePlayerPrefsStore((s) => s.setStickyEnabled);
 
-	// Fetch data from database
-	const { data: dbWatchlistMovies = [], isLoading: loadingWatchlistMovies } =
-		useUserWatchlist('movie');
-	const { data: dbWatchlistTV = [], isLoading: loadingWatchlistTV } = useUserWatchlist('tv');
-	const { data: dbFavoritesMovies = [], isLoading: loadingFavoritesMovies } =
-		useUserFavorites('movie');
-	const { data: dbFavoritesTV = [], isLoading: loadingFavoritesTV } = useUserFavorites('tv');
-
-	const [watchlistMovies, setWatchlistMovies] = useState<Show[]>([]);
-	const [watchlistTV, setWatchlistTV] = useState<Show[]>([]);
-	const [favoritesMovies, setFavoritesMovies] = useState<Show[]>([]);
-	const [favoritesTV, setFavoritesTV] = useState<Show[]>([]);
-	const [isLoadingDetails, setIsLoadingDetails] = useState(false);
-
-	useEffect(() => {
-		initializeContinueWatching();
-	}, [initializeContinueWatching]);
-
-	// Fetch details for watchlist items
-	useEffect(() => {
-		const fetchWatchlistDetails = async () => {
-			if (dbWatchlistMovies.length === 0 && dbWatchlistTV.length === 0) {
-				setWatchlistMovies([]);
-				setWatchlistTV([]);
-				return;
-			}
-
-			setIsLoadingDetails(true);
-			try {
-				const moviePromises = dbWatchlistMovies.map(async (item: any) => {
-					try {
-						const data = await fetchDetailsTMDB(String(item.mediaId), 'movie');
-						return { ...data, media_type: 'movie' };
-					} catch {
-						return null;
-					}
-				});
-
-				const tvPromises = dbWatchlistTV.map(async (item: any) => {
-					try {
-						const data = await fetchDetailsTMDB(String(item.mediaId), 'tv');
-						return { ...data, media_type: 'tv' };
-					} catch {
-						return null;
-					}
-				});
-
-				const [movieResults, tvResults] = await Promise.all([
-					Promise.all(moviePromises),
-					Promise.all(tvPromises),
-				]);
-
-				setWatchlistMovies(movieResults.filter((item): item is Show => item !== null));
-				setWatchlistTV(tvResults.filter((item): item is Show => item !== null));
-			} catch {
-				// Silently fail - UI shows empty state
-			} finally {
-				setIsLoadingDetails(false);
-			}
-		};
-
-		if (dbWatchlistMovies.length > 0 || dbWatchlistTV.length > 0) {
-			fetchWatchlistDetails();
-		}
-	}, [dbWatchlistMovies, dbWatchlistTV]);
-
-	// Fetch details for favorites
-	useEffect(() => {
-		const fetchFavoritesDetails = async () => {
-			if (dbFavoritesMovies.length === 0 && dbFavoritesTV.length === 0) {
-				setFavoritesMovies([]);
-				setFavoritesTV([]);
-				return;
-			}
-
-			setIsLoadingDetails(true);
-			try {
-				const moviePromises = dbFavoritesMovies.map(async (item: any) => {
-					try {
-						const data = await fetchDetailsTMDB(String(item.mediaId), 'movie');
-						return { ...data, media_type: 'movie' };
-					} catch {
-						return null;
-					}
-				});
-
-				const tvPromises = dbFavoritesTV.map(async (item: any) => {
-					try {
-						const data = await fetchDetailsTMDB(String(item.mediaId), 'tv');
-						return { ...data, media_type: 'tv' };
-					} catch {
-						return null;
-					}
-				});
-
-				const [movieResults, tvResults] = await Promise.all([
-					Promise.all(moviePromises),
-					Promise.all(tvPromises),
-				]);
-
-				setFavoritesMovies(movieResults.filter((item): item is Show => item !== null));
-				setFavoritesTV(tvResults.filter((item): item is Show => item !== null));
-			} catch {
-				// Silently fail - UI shows empty state
-			} finally {
-				setIsLoadingDetails(false);
-			}
-		};
-
-		if (dbFavoritesMovies.length > 0 || dbFavoritesTV.length > 0) {
-			fetchFavoritesDetails();
-		}
-	}, [dbFavoritesMovies, dbFavoritesTV]);
-
-	// Calculate totals and filtered data
-	const totalWatchlist =
-		(watchlist?.length || 0) +
-		(tvwatchlist?.length || 0) +
-		dbWatchlistMovies.length +
-		dbWatchlistTV.length;
+	const totalWatchlist = (watchlist?.length || 0) + (tvwatchlist?.length || 0);
 	const totalWatched = recentlyWatched?.length || 0;
-	const totalFavorites =
-		(favoriteMovies?.length || 0) +
-		(favoriteTV?.length || 0) +
-		dbFavoritesMovies.length +
-		dbFavoritesTV.length;
-	const totalMovies = (watchlist?.length || 0) + dbWatchlistMovies.length;
-	const totalTV = (tvwatchlist?.length || 0) + dbWatchlistTV.length;
+	const totalFavorites = (favoriteMovies?.length || 0) + (favoriteTV?.length || 0);
+	const totalMovies = watchlist?.length || 0;
+	const totalTV = tvwatchlist?.length || 0;
 
 	const filteredWatchlistMovies = useMemo(() => {
-		return watchlistMovies.filter((show: Show) => show.poster_path || show.backdrop_path);
-	}, [watchlistMovies]);
+		return watchlist.filter((show: Show) => show.poster_path || show.backdrop_path);
+	}, [watchlist]);
 
 	const filteredWatchlistTV = useMemo(() => {
-		return watchlistTV.filter((show: Show) => show.poster_path || show.backdrop_path);
-	}, [watchlistTV]);
+		return tvwatchlist.filter((show: Show) => show.poster_path || show.backdrop_path);
+	}, [tvwatchlist]);
 
 	const filteredFavoritesMovies = useMemo(() => {
-		return favoritesMovies.filter((show: Show) => show.poster_path || show.backdrop_path);
-	}, [favoritesMovies]);
+		return favoriteMovies.filter(
+			(show: Show) => show.poster_path || show.backdrop_path
+		);
+	}, [favoriteMovies]);
 
 	const filteredFavoritesTV = useMemo(() => {
-		return favoritesTV.filter((show: Show) => show.poster_path || show.backdrop_path);
-	}, [favoritesTV]);
+		return favoriteTV.filter((show: Show) => show.poster_path || show.backdrop_path);
+	}, [favoriteTV]);
 
 	const userInitials =
 		session.user?.name
@@ -285,131 +163,127 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 											className="border-border/50 hover:bg-foreground/[0.03]"
 											onClick={() => router.push('/')}
 										>
-											<GearIcon className="w-4 h-4 mr-2" />
-											Settings
-										</Button>
-										<Button
-											variant="outline"
-											size="sm"
-											className="border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40 text-red-400"
-											onClick={async () => {
-												await signOut();
-												router.push('/');
-											}}
-										>
-											<SignOutIcon className="w-4 h-4 mr-2" />
-											Sign Out
-										</Button>
-									</div>
-								</div>
-
-								<div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
-									<span className="px-4 py-1.5 rounded-full bg-foreground/[0.06] border border-border/50 text-foreground text-xs font-semibold">
-										Premium Member
-									</span>
-									<span className="px-4 py-1.5 rounded-full bg-foreground/[0.03] border border-border/50 text-muted-foreground text-xs font-medium">
-										Active Since {new Date().getFullYear()}
-									</span>
-								</div>
-							</div>
-						</div>
-					</Card>
-
-					{/* Stats Grid */}
-					<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
-						<StatCard
-							icon={<BookmarkSimpleIcon className="w-6 h-6 text-foreground" />}
-							value={totalWatchlist}
-							label="In Watchlist"
-						/>
-						<StatCard
-							icon={<ClockIcon className="w-6 h-6 text-foreground" />}
-							value={totalWatched}
-							label="Recently Watched"
-						/>
-						<StatCard
-							icon={<HeartIcon className="w-6 h-6 text-foreground" />}
-							value={totalFavorites}
-							label="Favorites"
-						/>
-						<StatCard
-							icon={<FilmSlateIcon className="w-6 h-6 text-foreground" />}
-							value={totalMovies + totalTV}
-							label="Total Content"
-						/>
-					</div>
-
-					{/* Content Sections */}
-					<div className="space-y-6 md:space-y-8">
-						{/* Overview Section */}
-						<div className="space-y-3 md:space-y-4">
-							<div className="flex items-center gap-3">
-								<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
-									<SquaresFourIcon className="h-5 w-5 text-foreground" />
-								</div>
-								<h2 className="text-xl md:text-2xl font-bold text-foreground">Overview</h2>
-							</div>
-							<div className="space-y-3 md:space-y-4 lg:space-y-6">
-								{recentlyWatched && recentlyWatched.length > 0 && (
-									<div className="space-y-2 md:space-y-3">
-										<RecentlyWatchedComponent />
-									</div>
-								)}
-								<div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
-									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-left">
-										<div className="flex items-center justify-between">
-											<div>
-												<p className="text-xs text-muted-foreground">Sticky Player</p>
-												<p className="text-sm font-semibold text-foreground">
-													{stickyEnabled ? 'On' : 'Off'}
-												</p>
+												<GearIcon className="w-4 h-4 mr-2" />
+												Settings
+											</Button>
+											<Button
+												variant="outline"
+												size="sm"
+												className="border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40 text-red-400"
+												onClick={async () => {
+													await signOut();
+													router.push('/');
+												}}
+											>
+													<SignOutIcon className="w-4 h-4 mr-2" />
+													Sign Out
+												</Button>
 											</div>
-											<Switch
-												checked={stickyEnabled}
-												onCheckedChange={setStickyEnabled}
-												className="data-[state=checked]:bg-primary"
-											/>
 										</div>
-									</Card>
-									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
-										<FilmSlateIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
-										<p className="text-xl md:text-2xl font-bold text-foreground">{totalMovies}</p>
-										<p className="text-xs text-muted-foreground">Movies</p>
-									</Card>
-									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
-										<TelevisionIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
-										<p className="text-xl md:text-2xl font-bold text-foreground">{totalTV}</p>
-										<p className="text-xs text-muted-foreground">TV Shows</p>
-									</Card>
-									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
-										<StarIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
-										<p className="text-xl md:text-2xl font-bold text-foreground">
-											{totalFavorites}
-										</p>
-										<p className="text-xs text-muted-foreground">Favorites</p>
-									</Card>
-									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
-										<CalendarIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
-										<p className="text-xl md:text-2xl font-bold text-foreground">{totalWatched}</p>
-										<p className="text-xs text-muted-foreground">Watched</p>
-									</Card>
-								</div>
-							</div>
-						</div>
 
-						{/* Watchlist Section */}
-						<div className="space-y-3 md:space-y-4">
-							<div className="flex items-center gap-3">
-								<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
-									<BookmarkSimpleIcon className="h-5 w-5 text-foreground" />
+										<div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
+											<span className="px-4 py-1.5 rounded-full bg-foreground/[0.06] border border-border/50 text-foreground text-xs font-semibold">
+												Premium Member
+											</span>
+											<span className="px-4 py-1.5 rounded-full bg-foreground/[0.03] border border-border/50 text-muted-foreground text-xs font-medium">
+												Active Since {new Date().getFullYear()}
+											</span>
+										</div>
+									</div>
 								</div>
-								<h2 className="text-xl md:text-2xl font-bold text-foreground">Watchlist</h2>
+							</Card>
+
+							{/* Stats Grid */}
+							<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
+								<StatCard
+									icon={<BookmarkSimpleIcon className="w-6 h-6 text-foreground" />}
+									value={totalWatchlist}
+									label="In Watchlist"
+								/>
+								<StatCard
+									icon={<ClockIcon className="w-6 h-6 text-foreground" />}
+									value={totalWatched}
+									label="Recently Watched"
+								/>
+								<StatCard
+									icon={<HeartIcon className="w-6 h-6 text-foreground" />}
+									value={totalFavorites}
+									label="Favorites"
+								/>
+								<StatCard
+									icon={<FilmSlateIcon className="w-6 h-6 text-foreground" />}
+									value={totalMovies + totalTV}
+									label="Total Content"
+								/>
 							</div>
-							<div className="space-y-3 md:space-y-4">
-								{loadingWatchlistMovies || loadingWatchlistTV || isLoadingDetails ? (
-									<MediaLoader withHeader className="min-h-[280px]" />
-								) : (
-									<>
+
+							{/* Content Sections */}
+							<div className="space-y-6 md:space-y-8">
+								{/* Overview Section */}
+								<div className="space-y-3 md:space-y-4">
+									<div className="flex items-center gap-3">
+										<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
+											<SquaresFourIcon className="h-5 w-5 text-foreground" />
+										</div>
+										<h2 className="text-xl md:text-2xl font-bold text-foreground">Overview</h2>
+									</div>
+									<div className="space-y-3 md:space-y-4 lg:space-y-6">
+										{recentlyWatched && recentlyWatched.length > 0 && (
+											<div className="space-y-2 md:space-y-3">
+												<RecentlyWatchedComponent />
+											</div>
+										)}
+										<div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
+											<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-left">
+												<div className="flex items-center justify-between">
+													<div>
+														<p className="text-xs text-muted-foreground">Sticky Player</p>
+														<p className="text-sm font-semibold text-foreground">
+															{stickyEnabled ? 'On' : 'Off'}
+														</p>
+													</div>
+													<Switch
+														checked={stickyEnabled}
+														onCheckedChange={setStickyEnabled}
+														className="data-[state=checked]:bg-primary"
+													/>
+												</div>
+											</Card>
+											<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
+												<FilmSlateIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
+												<p className="text-xl md:text-2xl font-bold text-foreground">{totalMovies}</p>
+												<p className="text-xs text-muted-foreground">Movies</p>
+											</Card>
+											<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
+												<TelevisionIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
+												<p className="text-xl md:text-2xl font-bold text-foreground">{totalTV}</p>
+												<p className="text-xs text-muted-foreground">TV Shows</p>
+											</Card>
+											<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
+												<StarIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
+												<p className="text-xl md:text-2xl font-bold text-foreground">
+													{totalFavorites}
+												</p>
+												<p className="text-xs text-muted-foreground">Favorites</p>
+											</Card>
+											<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
+												<CalendarIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
+												<p className="text-xl md:text-2xl font-bold text-foreground">{totalWatched}</p>
+												<p className="text-xs text-muted-foreground">Watched</p>
+											</Card>
+										</div>
+									</div>
+								</div>
+
+								{/* Watchlist Section */}
+								<div className="space-y-3 md:space-y-4">
+									<div className="flex items-center gap-3">
+										<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
+											<BookmarkSimpleIcon className="h-5 w-5 text-foreground" />
+										</div>
+										<h2 className="text-xl md:text-2xl font-bold text-foreground">Watchlist</h2>
+									</div>
+									<div className="space-y-3 md:space-y-4">
 										{filteredWatchlistMovies.length > 0 && (
 											<MediaRow
 												isVertical={false}
@@ -429,8 +303,7 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 											</div>
 										)}
 										{filteredWatchlistMovies.length === 0 &&
-											filteredWatchlistTV.length === 0 &&
-											!isLoadingDetails && (
+											filteredWatchlistTV.length === 0 && (
 												<div className="text-center py-6 md:py-8 text-muted-foreground">
 													<BookmarkSimpleIcon className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 opacity-50" />
 													<p className="text-sm">Your watchlist is empty</p>
@@ -439,24 +312,18 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 													</p>
 												</div>
 											)}
-									</>
-									)}
-								</div>
-							</div>
+										</div>
+									</div>
 
-						{/* Favorites Section */}
-						<div className="space-y-3 md:space-y-4">
-							<div className="flex items-center gap-3">
-								<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
-									<HeartIcon className="h-5 w-5 text-foreground" />
-								</div>
-								<h2 className="text-xl md:text-2xl font-bold text-foreground">Favorites</h2>
-							</div>
-							<div className="space-y-3 md:space-y-4">
-								{loadingFavoritesMovies || loadingFavoritesTV || isLoadingDetails ? (
-									<MediaLoader withHeader className="min-h-[280px]" />
-								) : (
-									<>
+								{/* Favorites Section */}
+								<div className="space-y-3 md:space-y-4">
+									<div className="flex items-center gap-3">
+										<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
+											<HeartIcon className="h-5 w-5 text-foreground" />
+										</div>
+										<h2 className="text-xl md:text-2xl font-bold text-foreground">Favorites</h2>
+									</div>
+									<div className="space-y-3 md:space-y-4">
 										{filteredFavoritesMovies.length > 0 && (
 											<MediaRow
 												isVertical={false}
@@ -476,8 +343,7 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 											</div>
 										)}
 										{filteredFavoritesMovies.length === 0 &&
-											filteredFavoritesTV.length === 0 &&
-											!isLoadingDetails && (
+											filteredFavoritesTV.length === 0 && (
 												<div className="text-center py-6 md:py-8 text-muted-foreground">
 													<HeartIcon className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 opacity-50" />
 													<p className="text-sm">No favorites yet</p>
@@ -486,41 +352,39 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 													</p>
 												</div>
 											)}
-									</>
-									)}
-								</div>
-							</div>
-
-						{/* Recently Watched Section */}
-						<div className="space-y-3 md:space-y-4">
-							<div className="flex items-center gap-3">
-								<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
-									<EyeIcon className="h-5 w-5 text-foreground" />
-								</div>
-								<h2 className="text-xl md:text-2xl font-bold text-foreground">
-									Recently Watched
-								</h2>
-							</div>
-							<div className="space-y-3 md:space-y-4">
-								<>
-									{recentlyWatched && recentlyWatched.length > 0 && (
-										<RecentlyWatchedComponent />
-									)}
-									{(!recentlyWatched || recentlyWatched.length === 0) && (
-										<div className="text-center py-6 md:py-8 text-muted-foreground">
-											<ClockIcon className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 opacity-50" />
-											<p className="text-sm">No recent activity</p>
-											<p className="text-xs mt-2">
-												Start watching to see your recent activity here!
-											</p>
 										</div>
-									)}
-								</>
+									</div>
+
+								{/* Recently Watched Section */}
+								<div className="space-y-3 md:space-y-4">
+									<div className="flex items-center gap-3">
+										<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.08]">
+											<EyeIcon className="h-5 w-5 text-foreground" />
+										</div>
+										<h2 className="text-xl md:text-2xl font-bold text-foreground">
+											Recently Watched
+										</h2>
+									</div>
+									<div className="space-y-3 md:space-y-4">
+										<>
+											{recentlyWatched && recentlyWatched.length > 0 && (
+												<RecentlyWatchedComponent />
+											)}
+											{(!recentlyWatched || recentlyWatched.length === 0) && (
+												<div className="text-center py-6 md:py-8 text-muted-foreground">
+													<ClockIcon className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 opacity-50" />
+													<p className="text-sm">No recent activity</p>
+													<p className="text-xs mt-2">
+														Start watching to see your recent activity here!
+													</p>
+												</div>
+											)}
+										</>
+									</div>
+								</div>
 							</div>
 						</div>
-					</div>
+					</Container>
 				</div>
-			</Container>
-		</div>
-	);
-}
+			);
+			}

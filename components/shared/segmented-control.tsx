@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import gsap from 'gsap';
 import { cn } from '@/lib/utils';
-import { GlowingButton } from '@/components/ui/glowing-button';
+import { Button } from '@/components/ui/button';
 
 export interface SegmentedControlItem {
 	value: string;
@@ -51,7 +51,7 @@ export default function SegmentedControl({
 			{items.map((item) => {
 				const isActive = item.value === value;
 				return (
-					<GlowingButton
+					<Button
 						key={item.value}
 						ref={(node) => {
 							itemRefs.current[item.value] = node;
@@ -83,7 +83,7 @@ export default function SegmentedControl({
 								{item.count}
 							</span>
 						)}
-					</GlowingButton>
+					</Button>
 				);
 			})}
 		</div>

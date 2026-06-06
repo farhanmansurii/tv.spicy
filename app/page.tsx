@@ -46,7 +46,9 @@ function HomePageContent({
 }) {
 	return (
 		<div className="min-h-screen bg-background text-foreground pb-20">
-			<HeroCarousel shows={heroShows as unknown as HeroCarouselProps['shows']} type="tv" />
+			<div className="-mt-16 lg:mt-0">
+				<HeroCarousel shows={heroShows as unknown as HeroCarouselProps['shows']} type="tv" />
+			</div>
 
 			{/* Apple TV-style content rows with negative margin overlap for cinematic feel */}
 			<div className="relative z-10 -mt-12 md:-mt-20">

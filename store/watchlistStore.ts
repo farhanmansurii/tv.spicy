@@ -16,8 +16,8 @@ interface Show {
 interface WatchlistState {
 	watchlist: Show[];
 	tvwatchlist: Show[];
-	isInitialized?: boolean;
-	isLoading?: boolean;
+	isInitialized: boolean;
+	isLoading: boolean;
 }
 
 interface WatchlistActions {
@@ -30,6 +30,7 @@ interface WatchlistActions {
 	loadFromDatabase: () => Promise<void>;
 	syncWithDatabase: () => Promise<void>;
 	initialize: () => Promise<void>;
+	resetInitialization: () => void;
 }
 
 type WatchlistStore = WatchlistState & WatchlistActions;
@@ -41,7 +42,6 @@ type MyPersist = (
 
 // Background sync - fire and forget
 const syncToDatabase = (mediaType: 'movie' | 'tv', item: Show, action: 'add' | 'remove') => {
-	// Run in background, don't block
 	setTimeout(async () => {
 		try {
 			const authState = useAuthStore.getState();
@@ -88,25 +88,32 @@ const syncToDatabase = (mediaType: 'movie' | 'tv', item: Show, action: 'add' | '
 	}, 0);
 };
 
+const convertToLocalFormat = (item: any): Show => ({
+	id: item.mediaId,
+	title: item.title,
+	name: item.title,
+	poster_path: item.posterPath,
+	backdrop_path: item.backdropPath,
+	overview: item.overview,
+	media_type: item.mediaType?.toLowerCase(),
+});
+
 const useWatchListStore = create<WatchlistStore>()(
 	(persist as MyPersist)(
 		(set, get) => ({
 			watchlist: [],
 			tvwatchlist: [],
-			isInitialized: false as boolean,
-			isLoading: false as boolean,
+			isInitialized: false,
+			isLoading: false,
 
 			addToWatchlist: (show: Show) => {
 				const authState = useAuthStore.getState();
-				// Optimistic update - instant UI feedback
 				set((state) => ({
 					watchlist: [show, ...state.watchlist.filter((s) => s.id !== show.id)],
 				}));
-				// Invalidate React Query cache
 				if (authState.userId) {
 					invalidateUserQueries(authState.userId);
 				}
-				// Sync in background
 				syncToDatabase('movie', show, 'add');
 			},
 
@@ -114,24 +121,19 @@ const useWatchListStore = create<WatchlistStore>()(
 				const currentState = get();
 				const authState = useAuthStore.getState();
 				const show = currentState.watchlist.find((s) => s.id === id);
-				// Optimistic update - instant UI feedback
 				set((state) => ({
 					watchlist: state.watchlist.filter((s) => s.id !== id),
 				}));
-				// Invalidate React Query cache
 				if (authState.userId) {
 					invalidateUserQueries(authState.userId);
 				}
-				// Sync in background
 				if (show) {
 					syncToDatabase('movie', show, 'remove');
 				}
 			},
 
 			clearWatchlist: () => {
-				// Optimistic update
 				set({ watchlist: [] });
-				// Sync in background
 				const authState = useAuthStore.getState();
 				if (authState.isAuthenticated) {
 					fetch('/api/watchlist?mediaType=movie', {
@@ -143,15 +145,12 @@ const useWatchListStore = create<WatchlistStore>()(
 
 			addToTvWatchlist: (show: Show) => {
 				const authState = useAuthStore.getState();
-				// Optimistic update - instant UI feedback
 				set((state) => ({
 					tvwatchlist: [show, ...state.tvwatchlist.filter((s) => s.id !== show.id)],
 				}));
-				// Invalidate React Query cache
 				if (authState.userId) {
 					invalidateUserQueries(authState.userId);
 				}
-				// Sync in background
 				syncToDatabase('tv', show, 'add');
 			},
 
@@ -159,24 +158,19 @@ const useWatchListStore = create<WatchlistStore>()(
 				const currentState = get();
 				const authState = useAuthStore.getState();
 				const show = currentState.tvwatchlist.find((s) => s.id === id);
-				// Optimistic update - instant UI feedback
 				set((state) => ({
 					tvwatchlist: state.tvwatchlist.filter((s) => s.id !== id),
 				}));
-				// Invalidate React Query cache
 				if (authState.userId) {
 					invalidateUserQueries(authState.userId);
 				}
-				// Sync in background
 				if (show) {
 					syncToDatabase('tv', show, 'remove');
 				}
 			},
 
 			clearTVWatchlist: () => {
-				// Optimistic update
 				set({ tvwatchlist: [] });
-				// Sync in background
 				const authState = useAuthStore.getState();
 				if (authState.isAuthenticated) {
 					fetch('/api/watchlist?mediaType=tv', {
@@ -187,61 +181,46 @@ const useWatchListStore = create<WatchlistStore>()(
 			},
 
 			loadFromDatabase: async () => {
-				const state = get();
-				if (state.isInitialized) return;
-
 				const authState = useAuthStore.getState();
 				if (!authState.isAuthenticated) {
 					set({ isInitialized: true });
 					return;
 				}
 
-				set({ isLoading: true });
 				try {
 					const [moviesResponse, tvResponse] = await Promise.all([
 						fetch('/api/watchlist?type=movie', { credentials: 'include' }),
 						fetch('/api/watchlist?type=tv', { credentials: 'include' }),
 					]);
 
-					// Handle authentication errors gracefully
 					if (moviesResponse.status === 401 || tvResponse.status === 401) {
-						set({ isLoading: false, isInitialized: true });
+						set({ isInitialized: true });
 						return;
 					}
 
-					// Check for other errors and provide specific error messages
-					if (!moviesResponse.ok) {
-						const errorData = await moviesResponse.json().catch(() => ({}));
-						throw new Error(
-							`Failed to fetch movies watchlist: ${moviesResponse.status} ${moviesResponse.statusText}${errorData.error ? ` - ${errorData.error}` : ''}`
-						);
-					}
+					const movies = moviesResponse.ok ? await moviesResponse.json() : [];
+					const tv = tvResponse.ok ? await tvResponse.json() : [];
 
-					if (!tvResponse.ok) {
-						const errorData = await tvResponse.json().catch(() => ({}));
-						throw new Error(
-							`Failed to fetch TV watchlist: ${tvResponse.status} ${tvResponse.statusText}${errorData.error ? ` - ${errorData.error}` : ''}`
-						);
-					}
+					const dbMovies = movies.map(convertToLocalFormat);
+					const dbTV = tv.map(convertToLocalFormat);
 
-					const movies = await moviesResponse.json();
-					const tv = await tvResponse.json();
+					set((state) => {
+						// Merge: keep local items, add DB items that are not already local
+						const localMovieIds = new Set(state.watchlist.map((s) => s.id));
+						const localTVIds = new Set(state.tvwatchlist.map((s) => s.id));
 
-					const convertToLocalFormat = (item: any): Show => ({
-						id: item.mediaId,
-						title: item.title,
-						name: item.title,
-						poster_path: item.posterPath,
-						backdrop_path: item.backdropPath,
-						overview: item.overview,
-						media_type: item.mediaType.toLowerCase(),
-					});
-
-					set({
-						watchlist: movies.map(convertToLocalFormat),
-						tvwatchlist: tv.map(convertToLocalFormat),
-						isInitialized: true,
-						isLoading: false,
+						return {
+							watchlist: [
+								...state.watchlist,
+								...dbMovies.filter((item) => !localMovieIds.has(item.id)),
+							],
+							tvwatchlist: [
+								...state.tvwatchlist,
+								...dbTV.filter((item) => !localTVIds.has(item.id)),
+							],
+							isInitialized: true,
+							isLoading: false,
+						};
 					});
 				} catch (error) {
 					console.error('Error loading watchlist from database:', error);
@@ -254,21 +233,30 @@ const useWatchListStore = create<WatchlistStore>()(
 				if (!authState.isAuthenticated) return;
 
 				const { watchlist, tvwatchlist } = get();
-				// Sync all items in background
 				watchlist.forEach((item) => syncToDatabase('movie', item, 'add'));
 				tvwatchlist.forEach((item) => syncToDatabase('tv', item, 'add'));
 			},
 
 			initialize: async () => {
-				const { isInitialized, loadFromDatabase } = get();
-				if (!isInitialized) {
-					await loadFromDatabase();
+				const authState = useAuthStore.getState();
+				if (!authState.isAuthenticated) {
+					set({ isInitialized: true });
+					return;
 				}
+				await get().loadFromDatabase();
+			},
+
+			resetInitialization: () => {
+				set({ isInitialized: false });
 			},
 		}),
 		{
 			name: 'watchlist-storage',
 			storage: createJSONStorage(() => localStorage),
+			partialize: (state) => ({
+				watchlist: state.watchlist,
+				tvwatchlist: state.tvwatchlist,
+			}),
 		}
 	)
 );

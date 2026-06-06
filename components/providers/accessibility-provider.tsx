@@ -1,16 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
-import { initAccessibleGsap } from '@/lib/gsap-accessible';
-
 /**
- * Initializes accessibility features at app boot:
- * - Respects `prefers-reduced-motion` for GSAP animations
+ * Accessibility provider — reduced-motion handling disabled.
+ * All animations run at full speed regardless of OS preference.
  */
 export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
-	useEffect(() => {
-		initAccessibleGsap();
-	}, []);
-
 	return <>{children}</>;
 }

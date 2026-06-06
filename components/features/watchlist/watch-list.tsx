@@ -1,28 +1,16 @@
 'use client';
 import type { Show } from '@/lib/types';
-import React, { useMemo, useState, useEffect, memo } from 'react';
+import React, { useMemo, memo } from 'react';
 import useWatchListStore from '@/store/watchlistStore';
 import MediaRow from '@/components/features/media/row/media-row';
 import { useHasMounted } from '@/hooks/use-has-mounted';
-import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { useSession } from '@/lib/auth-client';
 
 function WatchListComponent({ type }: { type: string }) {
 	const hasMounted = useHasMounted();
 	const { data: session } = useSession();
-	const { watchlist, tvwatchlist, initialize } = useWatchListStore();
-	const [isLoading, setIsLoading] = useState(true);
-
-	// Load from database on mount if authenticated
-	useEffect(() => {
-		if (hasMounted && session?.user?.id) {
-			initialize()
-				.then(() => setIsLoading(false))
-				.catch(() => setIsLoading(false));
-		} else if (hasMounted) {
-			setIsLoading(false);
-		}
-	}, [hasMounted, session?.user?.id, initialize]);
+	const watchlist = useWatchListStore((s) => s.watchlist);
+	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist);
 
 	// Filter and ensure proper categorization
 	const filteredMovieWatchlist = useMemo(() => {
@@ -43,9 +31,8 @@ function WatchListComponent({ type }: { type: string }) {
 		});
 	}, [tvwatchlist, type]);
 
-	// Show skeleton while loading or mounting
-	if (!hasMounted || isLoading) {
-		return <MediaLoader withHeader className="min-h-[280px]" />;
+	if (!hasMounted) {
+		return null;
 	}
 
 	const hasMovieContent =

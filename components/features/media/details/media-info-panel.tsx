@@ -18,6 +18,7 @@ import {
 	UsersThreeIcon,
 	XIcon,
 } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { EpisodeDetailPanel } from '@/components/features/media/seasons/episode-detail-panel';
 import { useEpisodeStore } from '@/store/episodeStore';
@@ -62,25 +63,25 @@ interface MediaInfoPanelProps {
 type PanelTab = 'episode' | 'details' | 'watch' | 'cast' | 'trailers' | 'links';
 
 const panelVariants = {
-	hidden: { opacity: 0, y: 20 },
+	hidden: { opacity: 0, y: 12 },
 	visible: {
 		opacity: 1,
 		y: 0,
-		transition: { type: 'spring' as const, stiffness: 180, damping: 24 },
+		transition: { type: 'spring' as const, stiffness: 200, damping: 26 },
 	},
 };
 
 const stagger = {
 	hidden: {},
-	visible: { transition: { staggerChildren: 0.055, delayChildren: 0.08 } },
+	visible: { transition: { staggerChildren: 0.04, delayChildren: 0.06 } },
 };
 
 const fadeUp = {
-	hidden: { opacity: 0, y: 10 },
+	hidden: { opacity: 0, y: 8 },
 	visible: {
 		opacity: 1,
 		y: 0,
-		transition: { type: 'spring' as const, stiffness: 280, damping: 26 },
+		transition: { type: 'spring' as const, stiffness: 300, damping: 28 },
 	},
 };
 
@@ -88,12 +89,12 @@ const expandVariants = {
 	collapsed: {
 		height: 0,
 		opacity: 0,
-		transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+		transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
 	},
 	expanded: {
 		height: 'auto' as const,
 		opacity: 1,
-		transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+		transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
 	},
 };
 
@@ -126,21 +127,16 @@ function uniqueProviders(providers: WatchProvider[]) {
 	});
 }
 
-const SECTION_LABEL = 'text-[9.5px] font-bold uppercase tracking-[0.18em] text-white/30';
+const SECTION_LABEL = 'text-[10px] font-bold uppercase tracking-[0.16em] text-white/25';
 
 function SectionHeading({ title, kicker }: { title: string; kicker?: string }) {
 	return (
-		<div className="flex items-baseline gap-3">
-			<h3
-				className="text-lg font-bold tracking-tight text-white md:text-xl"
-				style={{
-					fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
-				}}
-			>
+		<div className="flex items-baseline gap-2.5">
+			<h3 className="text-sm font-bold tracking-tight text-white md:text-base">
 				{title}
 			</h3>
 			{kicker && (
-				<span className="text-[9.5px] font-black uppercase tracking-[0.22em] text-white/25 tabular-nums">
+				<span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/25 tabular-nums">
 					{kicker}
 				</span>
 			)}
@@ -210,9 +206,9 @@ function ProviderLogo({
 			target="_blank"
 			rel="noreferrer"
 			title={`Open ${provider.provider_name}`}
-			className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.055] py-1.5 pl-1.5 pr-3 text-[12px] font-semibold text-white/75 transition-all duration-300 hover:border-white/[0.18] hover:bg-white/[0.09] hover:text-white active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121214]"
+			className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] py-1.5 pl-1.5 pr-3 text-[12px] font-semibold text-white/70 transition-all duration-300 hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white active:scale-[0.97]"
 		>
-			<span className="relative h-6 w-6 overflow-hidden rounded-full bg-white/[0.08]">
+			<span className="relative h-6 w-6 overflow-hidden rounded-full bg-white/[0.06]">
 				{provider.logo_path ? (
 					<img
 						src={tmdbImage(provider.logo_path, 'w92')}
@@ -226,7 +222,7 @@ function ProviderLogo({
 				) : null}
 			</span>
 			{provider.provider_name}
-			<ArrowSquareOutIcon size={11} weight="bold" className="text-white/35" />
+			<ArrowSquareOutIcon size={11} weight="bold" className="text-white/30" />
 		</a>
 	);
 }
@@ -305,7 +301,6 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 			: null;
 
 	const posterUrl = data?.poster_path ? tmdbImage(data.poster_path, 'w342') : null;
-	const backdropUrl = data?.backdrop_path ? tmdbImage(data.backdrop_path, 'w1280') : null;
 
 	const indiaProviders = data?.['watch/providers']?.results?.IN;
 	const providerGroups = [
@@ -350,7 +345,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 
 	const people = useMemo(() => {
 		const castItems =
-			credits?.cast?.slice(0, 18).map((person) => ({
+			credits?.cast?.slice(0, 24).map((person) => ({
 				id: `cast-${person.id}`,
 				name: person.name,
 				role: person.character || 'Cast',
@@ -359,7 +354,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 		const crewItems =
 			credits?.crew
 				?.filter((person) => person.job || person.department)
-				.slice(0, 10)
+				.slice(0, 12)
 				.map((person, index) => ({
 					id: `crew-${person.id ?? index}`,
 					name: person.name,
@@ -406,138 +401,103 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 	if (primaryGenre) summaryChips.push({ icon: TagIcon, label: primaryGenre });
 
 	return (
-		<section className="w-full pt-1 md:pt-2">
+		<section className="w-full">
 			<motion.div
 				variants={panelVariants}
 				initial="hidden"
 				animate="visible"
-				className="w-full overflow-hidden rounded-2xl"
-				style={{
-					background: 'rgba(18,18,20,0.85)',
-					border: '1px solid rgba(255,255,255,0.07)',
-					backdropFilter: 'blur(32px) saturate(140%)',
-					boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 64px rgba(0,0,0,0.48)',
-				}}
+				className="w-full"
 			>
-				{/* ── Collapsed Header / Summary Row ── */}
-				<button
-					type="button"
-					onClick={() => toggleExpanded()}
-					aria-expanded={isExpanded}
-					aria-controls="media-info-body"
-					className="group relative flex w-full items-center gap-4 px-4 py-4 text-left transition-colors duration-300 hover:bg-white/[0.02] md:px-6 md:py-5"
-				>
-					{/* Backdrop wash on hover */}
-					{backdropUrl && (
-						<div
-							className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-[0.18]"
-							style={{
-								backgroundImage: `linear-gradient(90deg, rgba(18,18,20,0.95) 0%, rgba(18,18,20,0.4) 60%, rgba(18,18,20,0.95) 100%), url(${backdropUrl})`,
-								backgroundSize: 'cover',
-								backgroundPosition: 'center',
-							}}
-						/>
-					)}
-
-					{/* Poster thumb */}
-					<div className="relative z-[1] h-14 w-10 shrink-0 overflow-hidden rounded-md bg-white/[0.05] md:h-[68px] md:w-[48px]">
-						{posterUrl ? (
-							<img
-								src={posterUrl}
-								alt={title}
-								loading="lazy"
-								className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-								onError={(e) => {
-									(e.currentTarget as HTMLImageElement).style.display = 'none';
-								}}
-							/>
-						) : (
-							<div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-white/25">
-								<FilmStripIcon size={18} />
-							</div>
-						)}
-					</div>
-
-					{/* Title + chips */}
-					<div className="relative z-[1] flex min-w-0 flex-1 flex-col gap-1.5">
-						<div className="flex items-center gap-2">
-							<p className={SECTION_LABEL}>
-								{type === 'tv' ? 'Show info' : 'Movie info'}
-							</p>
-							{voteLabel && (
-								<span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#FFD60A]/20 bg-[#FFD60A]/10 px-2 py-[3px] text-[10px] font-bold tabular-nums text-[#FFD60A]">
-									<StarIcon weight="fill" size={9} />
-									{data.vote_average.toFixed(1)}
-								</span>
+								
+					{/* Header Trigger */}
+					<button
+						type="button"
+						onClick={() => toggleExpanded()}
+						aria-expanded={isExpanded}
+						aria-controls="media-info-body"
+						className="group relative flex w-full items-center gap-3.5 py-3.5 text-left transition-colors duration-300 hover:bg-white/[0.03] md:py-4 border-b border-white/[0.06]"
+					>
+						{/* Poster thumb */}
+						<div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-lg bg-white/[0.05] ring-1 ring-white/[0.08] shadow-sm md:h-16 md:w-11">
+							{posterUrl ? (
+								<img
+									src={posterUrl}
+									alt={title}
+									loading="lazy"
+									className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+									onError={(e) => {
+										(e.currentTarget as HTMLImageElement).style.display = 'none';
+									}}
+								/>
+							) : (
+								<div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-white/25">
+									<FilmStripIcon size={18} />
+								</div>
 							)}
 						</div>
-						<h2
-							className="truncate text-base font-bold leading-tight tracking-tight text-white md:text-lg"
-							style={{
-								fontFamily:
-									'-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
-							}}
-						>
-							{title}
-						</h2>
-						{summaryChips.length > 0 && (
-							<div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-								{summaryChips.map((chip, idx) => (
-									<React.Fragment key={chip.label}>
-										{idx > 0 && (
-											<span className="text-[10px] text-white/15">|</span>
-										)}
-										<span className="inline-flex items-center gap-1 text-[11.5px] text-white/45 tabular-nums">
-											<chip.icon size={10} className="text-white/25" />
+
+						{/* Title + chips */}
+						<div className="flex min-w-0 flex-1 flex-col gap-1.5">
+							<h2 className="truncate text-[15px] font-bold leading-tight tracking-tight text-white md:text-base">
+								{title}
+							</h2>
+							{summaryChips.length > 0 && (
+								<div className="flex flex-wrap items-center gap-2">
+									{summaryChips.map((chip) => (
+										<span
+											key={chip.label}
+											className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.05] px-2 py-[3px] text-[11px] font-medium text-white/55"
+										>
+											<chip.icon size={10} className="text-white/35" />
 											{chip.label}
 										</span>
-									</React.Fragment>
-								))}
-							</div>
-						)}
-					</div>
+									))}
+								</div>
+							)}
+						</div>
 
-					{/* Chevron */}
-					<div className="relative z-[1] flex shrink-0 items-center gap-2">
-						<span className="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-white/30 sm:inline">
-							{isExpanded ? 'Hide' : 'View'}
-						</span>
+						{/* Chevron */}
 						<motion.span
 							animate={{ rotate: isExpanded ? 180 : 0 }}
-							transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-							className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.04] text-white/65 transition-colors duration-300 group-hover:border-white/[0.16] group-hover:text-white"
+							transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+							className={cn(
+								'inline-flex h-8 w-8 items-center justify-center rounded-full',
+								'border border-white/[0.10] bg-white/[0.06] text-white/60',
+								'transition-all duration-200',
+								'group-hover:border-white/[0.18] group-hover:bg-white/[0.10] group-hover:text-white',
+								isExpanded && 'border-white/[0.18] bg-white/[0.10] text-white'
+							)}
 						>
 							<CaretDownIcon size={14} weight="bold" />
 						</motion.span>
-					</div>
-				</button>
+					</button>
 
-				{/* ── Expandable Body ── */}
-				<AnimatePresence initial={false}>
-					{isExpanded && (
-						<motion.div
-							key="media-info-body"
-							id="media-info-body"
-							variants={expandVariants}
-							initial="collapsed"
-							animate="expanded"
-							exit="collapsed"
-							style={{ overflow: 'hidden' }}
-						>
-							<div className="border-t border-white/[0.06]">
+					{/* ── Expandable Body ── */}
+					<AnimatePresence initial={false}>
+						{isExpanded && (
+							<motion.div
+								key="media-info-body"
+								id="media-info-body"
+								variants={expandVariants}
+								initial="collapsed"
+								animate="expanded"
+								exit="collapsed"
+								style={{ overflow: 'hidden' }}
+							>
+								<div className="bg-background">
 								{/* Tab nav */}
-								<div className="mx-4 mt-4 overflow-x-auto rounded-full border border-white/[0.07] bg-white/[0.035] p-[3px] md:mx-6">
-									<div className="flex min-w-max gap-1">
+								<div className="mx-4 mt-5 overflow-x-auto scrollbar-none md:mx-5">
+									<div className="flex min-w-max gap-6 border-b border-white/[0.06]">
 										{tabs.map((tab) => (
 											<button
 												key={tab.id}
 												type="button"
 												disabled={tab.disabled}
 												onClick={() => setActiveTab(tab.id)}
-												className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-bold transition-all duration-300 active:scale-[0.96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121214] ${
+												className={`relative pb-3 text-[13px] font-semibold transition-colors duration-200 disabled:pointer-events-none disabled:opacity-25 ${
 													activeTab === tab.id
-														? 'bg-white text-zinc-950'
-														: 'text-white/40 hover:bg-white/[0.06] hover:text-white/76 disabled:pointer-events-none disabled:opacity-25'
+														? 'text-white'
+														: 'text-white/30 hover:text-white/60'
 												}`}
 											>
 												{tab.label}
@@ -545,12 +505,19 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 													<span
 														className={
 															activeTab === tab.id
-																? 'text-zinc-500'
-																: 'text-white/32'
+																? 'text-white/40 ml-1'
+																: 'text-white/20 ml-1'
 														}
 													>
 														{tab.count}
 													</span>
+												)}
+												{activeTab === tab.id && (
+													<motion.div
+														layoutId="activeTabIndicator"
+														className="absolute bottom-0 left-0 right-0 h-[2px] bg-white"
+														transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+													/>
 												)}
 											</button>
 										))}
@@ -563,77 +530,45 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 									variants={stagger}
 									initial="hidden"
 									animate="visible"
-									className="flex min-w-0 flex-col gap-5 px-4 py-5 md:px-6 md:py-6"
+									className="flex min-w-0 flex-col gap-6 py-5 md:py-6"
 								>
 									{activeTab === 'episode' && type === 'tv' && activeEpisode && (
 										<EpisodeDetailPanel episode={activeEpisode} />
 									)}
 
 									{activeTab === 'details' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-6"
-										>
-											{/* Tagline + overview block */}
-											<div className="flex flex-col gap-3.5">
+										<motion.div variants={fadeUp} className="flex flex-col gap-5">
+											{/* Tagline + overview */}
+											<div className="flex flex-col gap-3">
 												{data?.tagline && (
-													<p
-														className="text-[15px] font-medium italic leading-snug text-white/55 md:text-base"
-														style={{
-															fontFamily:
-																'-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
-														}}
-													>
+													<p className="text-[15px] font-medium leading-snug text-white/40">
 														&ldquo;{data.tagline}&rdquo;
 													</p>
 												)}
 												{data?.overview ? (
-													<p
-														className="text-[13.5px] leading-relaxed text-white/65 md:text-[14px]"
-														style={{
-															fontFamily:
-																'-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
-														}}
-													>
+													<p className="text-[13.5px] leading-relaxed text-white/60 md:text-sm max-w-prose">
 														{data.overview}
 													</p>
 												) : (
-													<p className="text-[13px] text-white/35">
+													<p className="text-[13px] text-white/30">
 														No overview available.
 													</p>
 												)}
 											</div>
 
-											{/* Editorial fact grid — bento style, no empty cells */}
+											{/* Fact grid */}
 											{facts.length > 0 && (
-												<div
-													className="grid grid-cols-2 gap-px overflow-hidden rounded-xl md:grid-cols-3"
-													style={{
-														background: 'rgba(255,255,255,0.05)',
-														border: '1px solid rgba(255,255,255,0.06)',
-													}}
-												>
+												<div className="grid grid-cols-2 gap-2 md:gap-2.5 md:grid-cols-3">
 													{facts.map(({ label, value, icon: Icon }) => (
 														<div
 															key={label}
-															className="flex flex-col gap-2 bg-[rgba(18,18,20,0.92)] p-3.5 transition-colors duration-300 hover:bg-[rgba(24,24,28,0.92)]"
+															className="flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-transparent p-3.5 transition-colors duration-300 hover:bg-white/[0.03]"
 														>
 															<div className="flex items-center gap-1.5">
-																<Icon
-																	size={11}
-																	className="text-white/30"
-																/>
-																<p className={SECTION_LABEL}>
-																	{label}
-																</p>
+																<Icon size={11} className="text-white/25" />
+																<p className={SECTION_LABEL}>{label}</p>
 															</div>
-															<p
-																className="text-[12.5px] font-semibold leading-snug text-white/85"
-																style={{
-																	fontFamily:
-																		'-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
-																}}
-															>
+															<p className="text-[13px] font-semibold leading-snug text-white/80">
 																{value}
 															</p>
 														</div>
@@ -644,10 +579,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 									)}
 
 									{activeTab === 'watch' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-5"
-										>
+										<motion.div variants={fadeUp} className="flex flex-col gap-5">
 											<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 												<div>
 													<SectionHeading
@@ -658,19 +590,18 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 																: undefined
 														}
 													/>
-													<p className="mt-1.5 text-[12.5px] text-white/40">
-														Provider availability via TMDB watch
-														providers, region IN.
+													<p className="mt-1 text-[12.5px] text-white/35">
+														Provider availability via TMDB watch providers, region IN.
 													</p>
 												</div>
 												<a
 													href={providerLink}
 													target="_blank"
 													rel="noreferrer"
-													className="inline-flex h-9 w-fit items-center gap-2 rounded-full bg-white px-3.5 text-[12px] font-bold text-zinc-950 transition-transform duration-300 active:scale-[0.98]"
+													className="inline-flex h-9 w-fit items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 text-[12px] font-bold text-white/80 transition-all duration-300 hover:bg-white/[0.07] hover:text-white active:scale-[0.98]"
 												>
 													Open providers
-													<ArrowSquareOutIcon size={15} weight="bold" />
+													<ArrowSquareOutIcon size={14} weight="bold" />
 												</a>
 											</div>
 
@@ -678,9 +609,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 												<div className="space-y-4 border-t border-white/[0.06] pt-4">
 													{providerGroups.map((group) => (
 														<div key={group.label}>
-															<p
-																className={`${SECTION_LABEL} mb-2.5`}
-															>
+															<p className={`${SECTION_LABEL} mb-2.5`}>
 																{group.label}
 															</p>
 															<div className="flex flex-wrap gap-2">
@@ -698,10 +627,9 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 													))}
 												</div>
 											) : (
-												<div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
-													<p className="text-sm font-medium text-white/60">
-														No India streaming providers are listed for
-														this title yet.
+												<div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+													<p className="text-sm font-medium text-white/50">
+														No India streaming providers are listed for this title yet.
 													</p>
 												</div>
 											)}
@@ -709,189 +637,139 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 									)}
 
 									{activeTab === 'cast' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-4"
-										>
+										<motion.div variants={fadeUp} className="flex flex-col gap-4">
 											<SectionHeading
 												title="Cast & crew"
 												kicker={`${people.length} people`}
 											/>
-											<div className="overflow-hidden border-t border-white/[0.06] pt-4">
-												<ul className="flex snap-x gap-3 overflow-x-auto pb-1 pr-1 scrollbar-none">
-													{people.map((person, i) => (
-														<motion.li
-															key={person.id}
-															initial={{
-																opacity: 0,
-																scale: 0.94,
-																y: 6,
-															}}
-															animate={{ opacity: 1, scale: 1, y: 0 }}
-															transition={{
-																delay: 0.05 + i * 0.025,
-																type: 'spring',
-																stiffness: 280,
-																damping: 26,
-															}}
-															className="w-24 shrink-0 snap-start md:w-28"
-														>
-															<div className="group relative aspect-[2/3] overflow-hidden rounded-xl bg-white/[0.045]">
-																{person.profile_path ? (
-																	<img
-																		src={tmdbImage(
-																			person.profile_path,
-																			'w185'
-																		)}
-																		alt={person.name}
-																		loading="lazy"
-																		className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-																		onError={(e) => {
-																			(
-																				e.currentTarget as HTMLImageElement
-																			).style.display =
-																				'none';
-																		}}
-																	/>
-																) : (
-																	<div className="absolute inset-0 flex items-center justify-center px-3 text-center text-[10px] font-semibold text-white/25">
-																		No image
-																	</div>
-																)}
-																<div className="absolute inset-0 pointer-events-none rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]" />
-															</div>
-															<h4 className="mt-2 truncate text-[12px] font-bold tracking-tight text-white">
-																{person.name}
-															</h4>
-															<p className="mt-0.5 truncate text-[10.5px] text-white/40">
-																{person.role}
-															</p>
-														</motion.li>
-													))}
-												</ul>
-											</div>
-										</motion.div>
-									)}
-
-									{activeTab === 'trailers' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-4"
-										>
-											<SectionHeading
-												title="Trailers & previews"
-												kicker={`${videos.length} videos`}
-											/>
-											<div className="overflow-hidden border-t border-white/[0.06] pt-4">
-												<ul className="flex snap-x gap-3 overflow-x-auto pb-1 pr-1 scrollbar-none">
-													{videos.map((video, i) => (
-														<motion.li
-															key={video.id}
-															initial={{
-																opacity: 0,
-																scale: 0.96,
-																y: 6,
-															}}
-															animate={{ opacity: 1, scale: 1, y: 0 }}
-															transition={{
-																delay: 0.05 + i * 0.04,
-																type: 'spring',
-																stiffness: 280,
-																damping: 26,
-															}}
-															className="w-[82vw] max-w-[420px] shrink-0 snap-start"
-														>
-															<button
-																type="button"
-																onClick={() =>
-																	setActiveVideo(video.key)
-																}
-																className="group relative aspect-video w-full overflow-hidden rounded-xl bg-white/[0.045] text-left transition-transform duration-300 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121214]"
-															>
+											<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
+												{people.map((person) => (
+													<div key={person.id} className="group">
+														<div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-white/[0.04]">
+															{person.profile_path ? (
 																<img
-																	src={`https://img.youtube.com/vi/${video.key}/mqdefault.jpg`}
-																	alt={video.name}
+																	src={tmdbImage(person.profile_path, 'w185')}
+																	alt={person.name}
 																	loading="lazy"
-																	className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+																	className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
 																	onError={(e) => {
 																		(
 																			e.currentTarget as HTMLImageElement
 																		).style.display = 'none';
 																	}}
 																/>
-																<div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-black/20 to-transparent" />
-																<div
-																	className="pointer-events-none absolute inset-0"
-																	style={{
-																		boxShadow:
-																			'inset 0 0 80px rgba(0,0,0,0.45)',
-																	}}
-																/>
-																<div className="absolute bottom-3 left-3 right-3 flex items-end gap-3">
-																	<span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-zinc-950 shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
-																		<PlayIcon
-																			size={16}
-																			weight="fill"
-																		/>
-																	</span>
-																	<span
-																		className="line-clamp-2 text-[13px] font-semibold leading-snug text-white"
-																		style={{
-																			textShadow:
-																				'0 2px 12px rgba(0,0,0,0.6)',
-																		}}
-																	>
-																		{video.name}
+															) : (
+																<div className="flex h-full w-full items-center justify-center">
+																	<span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">
+																		{person.name
+																			?.split(' ')
+																			.map((n) => n[0])
+																			.join('')}
 																	</span>
 																</div>
-															</button>
-														</motion.li>
-													))}
-												</ul>
+															)}
+															<div className="absolute inset-0 pointer-events-none rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" />
+														</div>
+														<h4 className="mt-2 truncate text-[12px] font-semibold text-white/80">
+															{person.name}
+														</h4>
+														<p className="truncate text-[11px] text-white/30">
+															{person.role}
+														</p>
+													</div>
+												))}
+											</div>
+										</motion.div>
+									)}
+
+									{activeTab === 'trailers' && (
+										<motion.div variants={fadeUp} className="flex flex-col gap-4">
+											<SectionHeading
+												title="Trailers & previews"
+												kicker={`${videos.length} videos`}
+											/>
+											<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+												{videos.map((video, i) => (
+													<motion.div
+														key={video.id}
+														initial={{ opacity: 0, y: 8 }}
+														animate={{ opacity: 1, y: 0 }}
+														transition={{
+															delay: 0.05 + i * 0.04,
+															type: 'spring',
+															stiffness: 300,
+															damping: 28,
+														}}
+													>
+														<button
+															type="button"
+															onClick={() => setActiveVideo(video.key)}
+															className="group relative aspect-video w-full overflow-hidden rounded-xl bg-white/[0.04] text-left transition-transform duration-200 active:scale-[0.98]"
+														>
+															<img
+																src={`https://img.youtube.com/vi/${video.key}/hqdefault.jpg`}
+																alt={video.name}
+																loading="lazy"
+																className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+																onError={(e) => {
+																	(
+																		e.currentTarget as HTMLImageElement
+																	).style.display = 'none';
+																}}
+															/>
+															<div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+															<div className="absolute inset-0 flex items-center justify-center">
+																<div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-transform duration-300 group-hover:scale-110">
+																	<PlayIcon weight="fill" size={16} />
+																</div>
+															</div>
+														</button>
+														<p className="mt-2 text-[13px] font-medium text-white/60 line-clamp-1">
+															{video.name}
+														</p>
+													</motion.div>
+												))}
 											</div>
 										</motion.div>
 									)}
 
 									{activeTab === 'links' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-4"
-										>
+										<motion.div variants={fadeUp} className="flex flex-col gap-4">
 											<SectionHeading
 												title="External pages"
 												kicker={`${externalLinks.length} sources`}
 											/>
-											<div className="overflow-hidden border-t border-white/[0.06]">
+											<div className="flex flex-col gap-1">
 												{externalLinks.map((link, i) => (
 													<motion.a
 														key={link.label}
 														href={link.href || '#'}
 														target="_blank"
 														rel="noreferrer"
-														initial={{ opacity: 0, x: -6 }}
+														initial={{ opacity: 0, x: -4 }}
 														animate={{ opacity: 1, x: 0 }}
 														transition={{
-															delay: 0.05 + i * 0.04,
+															delay: 0.04 + i * 0.03,
 															type: 'spring',
-															stiffness: 280,
-															damping: 26,
+															stiffness: 300,
+															damping: 28,
 														}}
-														className="group flex min-h-14 items-center justify-between gap-4 border-b border-white/[0.055] py-3 transition-colors duration-300 hover:bg-white/[0.025] last:border-b-0"
+														className="group flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2.5 transition-colors duration-200 hover:bg-white/[0.03]"
 													>
 														<span className="flex flex-col">
-															<span className="text-[13px] font-bold text-white">
+															<span className="text-[13px] font-semibold text-white/70 transition-colors duration-200 group-hover:text-white">
 																{link.label}
 															</span>
 															{link.detail && (
-																<span className="mt-0.5 text-[11px] text-white/35">
+																<span className="text-[11px] text-white/25">
 																	{link.detail}
 																</span>
 															)}
 														</span>
-														<LinkIcon
-															size={16}
+														<ArrowSquareOutIcon
+															size={14}
 															weight="bold"
-															className="text-white/35 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white/85"
+															className="text-white/25 transition-colors duration-200 group-hover:text-white/70"
 														/>
 													</motion.a>
 												))}
@@ -903,6 +781,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 						</motion.div>
 					)}
 				</AnimatePresence>
+				
 			</motion.div>
 
 			{activeVideo && (

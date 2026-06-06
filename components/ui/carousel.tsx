@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { GlowingButton } from '@/components/ui/glowing-button';
+
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -198,15 +198,15 @@ const CarouselPrevious = React.forwardRef<
 		},
 		ref
 	) => {
-		const ButtonComponent = glow ? GlowingButton : Button;
 		const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
 		return (
-			<ButtonComponent
+			<Button
 				ref={ref}
-				variant={variant ?? undefined}
-				size={size ?? undefined}
-				{...(glow ? { glow, glowVariant } : {})}
+				variant={variant}
+				size={size}
+				glow={glow}
+				glowVariant={glowVariant}
 				className={cn(
 					'absolute h-8 w-8 rounded-full',
 					orientation === 'horizontal'
@@ -220,7 +220,7 @@ const CarouselPrevious = React.forwardRef<
 			>
 				{icon || <ChevronLeft className="h-4 w-4" />}
 				<span className="sr-only">Previous slide</span>
-			</ButtonComponent>
+			</Button>
 		);
 	}
 );
@@ -246,15 +246,15 @@ const CarouselNext = React.forwardRef<
 		},
 		ref
 	) => {
-		const ButtonComponent = glow ? GlowingButton : Button;
 		const { orientation, scrollNext, canScrollNext } = useCarousel();
 
 		return (
-			<ButtonComponent
+			<Button
 				ref={ref}
-				variant={variant ?? undefined}
-				size={size ?? undefined}
-				{...(glow ? { glow, glowVariant } : {})}
+				variant={variant}
+				size={size}
+				glow={glow}
+				glowVariant={glowVariant}
 				className={cn(
 					'absolute h-8 w-8 rounded-full',
 					orientation === 'horizontal'
@@ -268,7 +268,7 @@ const CarouselNext = React.forwardRef<
 			>
 				{icon || <ChevronRight className="h-4 w-4" />}
 				<span className="sr-only">Next slide</span>
-			</ButtonComponent>
+			</Button>
 		);
 	}
 );

@@ -16,8 +16,8 @@ interface FavoriteItem {
 interface FavoritesState {
 	favoriteMovies: FavoriteItem[];
 	favoriteTV: FavoriteItem[];
-	isInitialized?: boolean;
-	isLoading?: boolean;
+	isInitialized: boolean;
+	isLoading: boolean;
 }
 
 interface FavoritesActions {
@@ -27,6 +27,7 @@ interface FavoritesActions {
 	loadFromDatabase: () => Promise<void>;
 	syncWithDatabase: () => Promise<void>;
 	initialize: () => Promise<void>;
+	resetInitialization: () => void;
 }
 
 type FavoritesStore = FavoritesState & FavoritesActions;
@@ -37,7 +38,6 @@ const syncFavoriteToDatabase = (
 	mediaType: 'movie' | 'tv',
 	action: 'add' | 'remove'
 ) => {
-	// Run in background, don't block
 	setTimeout(async () => {
 		try {
 			const authState = useAuthStore.getState();
@@ -75,18 +75,22 @@ const syncFavoriteToDatabase = (
 	}, 0);
 };
 
+const convertToLocalFormat = (item: any): FavoriteItem => ({
+	id: item.mediaId,
+	media_type: item.mediaType?.toLowerCase(),
+});
+
 export const useFavoritesStore = create<FavoritesStore>()(
 	persist(
 		(set, get) => ({
 			favoriteMovies: [],
 			favoriteTV: [],
-			isInitialized: false as boolean,
-			isLoading: false as boolean,
+			isInitialized: false,
+			isLoading: false,
 
 			addFavorite: (item: FavoriteItem, mediaType: 'movie' | 'tv') => {
 				const key = mediaType === 'movie' ? 'favoriteMovies' : 'favoriteTV';
 				const authState = useAuthStore.getState();
-				// Optimistic update - instant UI feedback
 				set((state) => ({
 					[key]: [
 						item,
@@ -95,38 +99,31 @@ export const useFavoritesStore = create<FavoritesStore>()(
 						),
 					],
 				}));
-				// Invalidate React Query cache
 				if (authState.userId) {
 					invalidateUserQueries(authState.userId);
 				}
-				// Sync in background
 				syncFavoriteToDatabase(item.id, mediaType, 'add');
 			},
 
 			removeFavorite: (mediaId: number, mediaType: 'movie' | 'tv') => {
 				const key = mediaType === 'movie' ? 'favoriteMovies' : 'favoriteTV';
 				const authState = useAuthStore.getState();
-				// Optimistic update - instant UI feedback
 				set((state) => ({
 					[key]: (state[key as keyof FavoritesStore] as FavoriteItem[]).filter(
 						(i) => i.id !== mediaId
 					),
 				}));
-				// Invalidate React Query cache
 				if (authState.userId) {
 					invalidateUserQueries(authState.userId);
 				}
-				// Sync in background
 				syncFavoriteToDatabase(mediaId, mediaType, 'remove');
 			},
 
 			clearFavorites: (mediaType?: 'movie' | 'tv') => {
 				const authState = useAuthStore.getState();
-				// Optimistic update
 				if (mediaType) {
 					const key = mediaType === 'movie' ? 'favoriteMovies' : 'favoriteTV';
 					set({ [key]: [] });
-					// Sync in background
 					if (authState.isAuthenticated) {
 						fetch(`/api/favorites?mediaType=${mediaType}`, {
 							method: 'DELETE',
@@ -135,7 +132,6 @@ export const useFavoritesStore = create<FavoritesStore>()(
 					}
 				} else {
 					set({ favoriteMovies: [], favoriteTV: [] });
-					// Sync in background
 					if (authState.isAuthenticated) {
 						Promise.all([
 							fetch('/api/favorites?mediaType=movie', {
@@ -152,39 +148,46 @@ export const useFavoritesStore = create<FavoritesStore>()(
 			},
 
 			loadFromDatabase: async () => {
-				const state = get();
-				if (state.isInitialized) return;
-
 				const authState = useAuthStore.getState();
 				if (!authState.isAuthenticated) {
 					set({ isInitialized: true });
 					return;
 				}
 
-				set({ isLoading: true });
 				try {
 					const [moviesResponse, tvResponse] = await Promise.all([
 						fetch('/api/favorites?type=movie', { credentials: 'include' }),
 						fetch('/api/favorites?type=tv', { credentials: 'include' }),
 					]);
 
-					if (!moviesResponse.ok || !tvResponse.ok) {
-						throw new Error('Failed to fetch favorites');
+					if (moviesResponse.status === 401 || tvResponse.status === 401) {
+						set({ isInitialized: true });
+						return;
 					}
 
-					const movies = await moviesResponse.json();
-					const tv = await tvResponse.json();
+					const movies = moviesResponse.ok ? await moviesResponse.json() : [];
+					const tv = tvResponse.ok ? await tvResponse.json() : [];
 
-					const convertToLocalFormat = (item: any): FavoriteItem => ({
-						id: item.mediaId,
-						media_type: item.mediaType.toLowerCase(),
-					});
+					const dbMovies = movies.map(convertToLocalFormat);
+					const dbTV = tv.map(convertToLocalFormat);
 
-					set({
-						favoriteMovies: movies.map(convertToLocalFormat),
-						favoriteTV: tv.map(convertToLocalFormat),
-						isInitialized: true,
-						isLoading: false,
+					set((state) => {
+						// Merge: keep local items, add DB items that are not already local
+						const localMovieIds = new Set(state.favoriteMovies.map((i) => i.id));
+						const localTVIds = new Set(state.favoriteTV.map((i) => i.id));
+
+						return {
+							favoriteMovies: [
+								...state.favoriteMovies,
+								...dbMovies.filter((item) => !localMovieIds.has(item.id)),
+							],
+							favoriteTV: [
+								...state.favoriteTV,
+								...dbTV.filter((item) => !localTVIds.has(item.id)),
+							],
+							isInitialized: true,
+							isLoading: false,
+						};
 					});
 				} catch (error) {
 					console.error('Error loading favorites from database:', error);
@@ -197,21 +200,30 @@ export const useFavoritesStore = create<FavoritesStore>()(
 				if (!authState.isAuthenticated) return;
 
 				const { favoriteMovies, favoriteTV } = get();
-				// Sync all items in background
 				favoriteMovies.forEach((item) => syncFavoriteToDatabase(item.id, 'movie', 'add'));
 				favoriteTV.forEach((item) => syncFavoriteToDatabase(item.id, 'tv', 'add'));
 			},
 
 			initialize: async () => {
-				const { isInitialized, loadFromDatabase } = get();
-				if (!isInitialized) {
-					await loadFromDatabase();
+				const authState = useAuthStore.getState();
+				if (!authState.isAuthenticated) {
+					set({ isInitialized: true });
+					return;
 				}
+				await get().loadFromDatabase();
+			},
+
+			resetInitialization: () => {
+				set({ isInitialized: false });
 			},
 		}),
 		{
 			name: 'favorites-storage',
 			storage: createJSONStorage(() => localStorage),
+			partialize: (state) => ({
+				favoriteMovies: state.favoriteMovies,
+				favoriteTV: state.favoriteTV,
+			}),
 		}
 	)
 );

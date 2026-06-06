@@ -95,7 +95,9 @@ export default async function MovieDetailsPage(props: {
 
 	return (
 		<MediaDetailsShell>
-			<DetailHero show={show} type="movie" />
+			<div className="-mt-16 lg:mt-0">
+				<DetailHero show={show} type="movie" />
+			</div>
 
 			<Suspense fallback={<ShowContainerSkeleton type="movie" />}>
 				<ShowContainer showData={show as any} id={showId} type="movie">

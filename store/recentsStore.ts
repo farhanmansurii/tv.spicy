@@ -317,16 +317,7 @@ const useTVShowStore = create<TVShowStore>()(
 						lastUserId: authState.userId,
 					});
 
-					if (mergedItems.length > 0) {
-						await fetch('/api/sync', {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							credentials: 'include',
-							body: JSON.stringify({
-								recentlyWatched: mergedItems,
-							}),
-						});
-					}
+
 				} catch (error) {
 					console.error('Error loading continue watching from database:', error);
 					set({

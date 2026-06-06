@@ -8,48 +8,51 @@ import useTVShowStore from '@/store/recentsStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 
 /**
- * Component that handles database syncing and data loading when user is authenticated
- * Session syncing is now handled by useAuth hook, so this focuses on data operations
+ * AuthSync handles the local-first → database sync lifecycle.
+ *
+ * Architecture:
+ * 1. LocalStorage (via Zustand persist) is the UI source of truth.
+ * 2. All reads are instant from local state.
+ * 3. DB sync happens invisibly in the background.
+ * 4. On login: merge DB data into local, then push merged local back to DB.
+ * 5. On logout: stop syncing. Local data remains for next session.
  */
 export function AuthSync() {
-	const { user, userId } = useAuthStore();
-	const hasSyncedRef = useRef(false);
-	const hasLoadedRef = useRef(false);
-	const { initialize: initializeWatchlist } = useWatchListStore();
-	const { initialize: initializeRecents } = useTVShowStore();
-	const { initialize: initializeFavorites } = useFavoritesStore();
+	const { userId, isAuthenticated } = useAuthStore();
+	const lastSyncedUserId = useRef<string | null>(null);
 
 	useEffect(() => {
-		if (user && userId) {
-			// Initialize stores - load from database once
-			if (!hasLoadedRef.current) {
-				hasLoadedRef.current = true;
-				// Load from database first
-				Promise.all([
-					initializeWatchlist(),
-					initializeRecents(),
-					initializeFavorites(),
-				]).then(() => {
-					// After loading, sync local data to database in background
-					if (!hasSyncedRef.current) {
-						hasSyncedRef.current = true;
-						syncLocalToDatabase(userId).catch((error) => {
-							console.error('Auto-sync failed:', error);
-						});
-					}
-				}).catch((error) => {
-					console.error('Initialization failed:', error);
-				});
+		// User logged out or not authenticated
+		if (!isAuthenticated || !userId) {
+			if (lastSyncedUserId.current !== null) {
+				lastSyncedUserId.current = null;
 			}
-		} else {
-			// Reset refs when user logs out
-			hasSyncedRef.current = false;
-			hasLoadedRef.current = false;
-			// Reset initialization flags
-			useWatchListStore.setState({ isInitialized: false });
-			useFavoritesStore.setState({ isInitialized: false });
+			return;
 		}
-	}, [user, userId, initializeWatchlist, initializeRecents, initializeFavorites]);
+
+		// Already synced for this user in this session
+		if (lastSyncedUserId.current === userId) {
+			return;
+		}
+
+		// Mark this user as synced so we don't re-run
+		lastSyncedUserId.current = userId;
+
+		// Step 1: Load DB data and merge into local stores (background, non-blocking)
+		Promise.all([
+			useWatchListStore.getState().initialize(),
+			useTVShowStore.getState().initialize(),
+			useFavoritesStore.getState().initialize(),
+		])
+			.then(() => {
+				// Step 2: Push merged local data back to DB
+				// This ensures anything saved while logged out gets uploaded
+				return syncLocalToDatabase(userId);
+			})
+			.catch((error) => {
+				console.error('AuthSync failed:', error);
+			});
+	}, [isAuthenticated, userId]);
 
 	return null;
 }

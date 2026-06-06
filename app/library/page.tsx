@@ -1,189 +1,235 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import Link from 'next/link'
-import { useSession } from '@/lib/auth-client'
-import Container from '@/components/shared/containers/container'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { Bookmark, Heart, History, LogIn } from 'lucide-react'
+import * as React from 'react';
+import Link from 'next/link';
+import { useSession } from '@/lib/auth-client';
+import Container from '@/components/shared/containers/container';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import {
+	Bookmark,
+	Heart,
+	History,
+	LogIn,
+	Clapperboard,
+	Sparkles,
+} from 'lucide-react';
 
-import { LibraryWatchlist } from '@/components/features/watchlist/library-watchlist'
-import { LibraryContinueWatching } from '@/components/features/watchlist/library-continue-watching'
-import { LibraryFavoritesSynced } from '@/components/features/watchlist/library-favorites-synced'
-import { useUserFavorites, useUserWatchlist } from '@/hooks/use-user-data'
-import useWatchListStore from '@/store/watchlistStore'
-import useTVShowStore from '@/store/recentsStore'
-import { useFavoritesStore } from '@/store/favoritesStore'
-import { usePersonalizedGreeting } from '@/hooks/use-personalized-greeting'
+import { LibraryWatchlist } from '@/components/features/watchlist/library-watchlist';
+import { LibraryContinueWatching } from '@/components/features/watchlist/library-continue-watching';
+import { LibraryFavoritesSynced } from '@/components/features/watchlist/library-favorites-synced';
+import useWatchListStore from '@/store/watchlistStore';
+import useTVShowStore from '@/store/recentsStore';
+import { useFavoritesStore } from '@/store/favoritesStore';
+import { usePersonalizedGreeting } from '@/hooks/use-personalized-greeting';
 
-interface LibraryStatCardProps {
-	label: string
-	value: number
-	icon: React.ReactNode
-	className?: string
-}
+type TabValue = 'continue' | 'watchlist' | 'favorites';
 
-function LibraryStatCard({ label, value, icon, className }: LibraryStatCardProps) {
+function TabButton({
+	active,
+	value,
+	onClick,
+	icon,
+	label,
+	count,
+}: {
+	active: boolean;
+	value: TabValue;
+	onClick: (v: TabValue) => void;
+	icon: React.ReactNode;
+	label: string;
+	count: number;
+}) {
 	return (
-		<Card
+		<button
+			onClick={() => onClick(value)}
 			className={cn(
-				'bg-background/40 backdrop-blur-xl border-border/50 p-4',
-				'hover:border-border/80 transition-all duration-300 hover:shadow-lg',
-				className
+				'relative flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3',
+				'text-sm font-medium transition-colors duration-200',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+				active
+					? 'text-foreground'
+					: 'text-muted-foreground/60 hover:text-muted-foreground'
 			)}
+			aria-selected={active}
+			role="tab"
 		>
-			<div className="flex items-center justify-between gap-3">
-				<div className="flex items-center gap-3">
-					<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground/[0.08] border border-border/50">
-						{icon}
-					</div>
-					<div className="min-w-0">
-						<p className="text-2xl font-bold text-foreground leading-tight">{value}</p>
-						<p className="text-xs text-muted-foreground font-medium">{label}</p>
-					</div>
-				</div>
-			</div>
-		</Card>
-	)
+			{icon}
+			<span className="hidden sm:inline">{label}</span>
+			{count > 0 && (
+				<span
+					className={cn(
+						'inline-flex items-center justify-center',
+						'min-w-[1.25rem] h-5 px-1 rounded-full text-[11px] font-semibold tabular-nums',
+						active
+							? 'bg-white/[0.10] text-foreground'
+							: 'bg-white/[0.06] text-muted-foreground/70'
+					)}
+				>
+					{count > 99 ? '99+' : count}
+				</span>
+			)}
+			{active && (
+				<span className="absolute bottom-0 left-2 right-2 h-[2px] bg-foreground rounded-full" />
+			)}
+		</button>
+	);
 }
 
 export default function LibraryPage() {
-	const { data: session, isPending } = useSession()
-	const { watchlist, tvwatchlist } = useWatchListStore()
-	const { favoriteMovies, favoriteTV } = useFavoritesStore()
-	const { recentlyWatched, initialize: initializeContinueWatching } = useTVShowStore()
-	const { message: greetingMessage, isAuthenticated } = usePersonalizedGreeting()
-	const isSignedIn = Boolean(session?.user?.id)
+	const { data: session, isPending } = useSession();
+	const watchlist = useWatchListStore((s) => s.watchlist);
+	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist);
+	const favoriteMovies = useFavoritesStore((s) => s.favoriteMovies);
+	const favoriteTV = useFavoritesStore((s) => s.favoriteTV);
+	const recentlyWatched = useTVShowStore((s) => s.recentlyWatched);
+	const { message: greetingMessage, isAuthenticated } = usePersonalizedGreeting();
+	const isSignedIn = Boolean(session?.user?.id);
 
-	// DB-backed counts (only enabled when signed in)
-	const { data: dbWatchlistMovies = [] } = useUserWatchlist('movie')
-	const { data: dbWatchlistTV = [] } = useUserWatchlist('tv')
-	const { data: dbFavoritesMovies = [] } = useUserFavorites('movie')
-	const { data: dbFavoritesTV = [] } = useUserFavorites('tv')
+	const [activeTab, setActiveTab] = React.useState<TabValue>('continue');
 
-	React.useEffect(() => {
-		initializeContinueWatching()
-	}, [initializeContinueWatching])
-
+	// Counts from the same stores the sub-components render from
 	const counts = React.useMemo(() => {
-		const localCounts = {
-			watchlist: (watchlist?.length || 0) + (tvwatchlist?.length || 0),
-			favorites: (favoriteMovies?.length || 0) + (favoriteTV?.length || 0),
-			recent: recentlyWatched?.length || 0
-		}
-
+		const watchlistItems = (watchlist?.length || 0) + (tvwatchlist?.length || 0);
+		const favoritesItems = (favoriteMovies?.length || 0) + (favoriteTV?.length || 0);
+		const recentItems = recentlyWatched?.length || 0;
 		return {
-			watchlist: isSignedIn ? dbWatchlistMovies.length + dbWatchlistTV.length : localCounts.watchlist,
-			favorites: isSignedIn ? dbFavoritesMovies.length + dbFavoritesTV.length : localCounts.favorites,
-			recent: localCounts.recent
+			watchlist: watchlistItems,
+			favorites: favoritesItems,
+			recent: recentItems,
+		};
+	}, [watchlist, tvwatchlist, favoriteMovies, favoriteTV, recentlyWatched]);
+
+	// Auto-switch to the first non-empty tab once on initial load only
+	const didAutoSwitch = React.useRef(false);
+	React.useEffect(() => {
+		if (didAutoSwitch.current || isPending) return;
+		if (counts.recent === 0 && activeTab === 'continue') {
+			if (counts.watchlist > 0) {
+				setActiveTab('watchlist');
+				didAutoSwitch.current = true;
+			} else if (counts.favorites > 0) {
+				setActiveTab('favorites');
+				didAutoSwitch.current = true;
+			} else {
+				didAutoSwitch.current = true;
+			}
+		} else {
+			didAutoSwitch.current = true;
 		}
-	}, [
-		isSignedIn,
-		dbWatchlistMovies.length,
-		dbWatchlistTV.length,
-		dbFavoritesMovies.length,
-		dbFavoritesTV.length,
-		watchlist,
-		tvwatchlist,
-		favoriteMovies,
-		favoriteTV,
-		recentlyWatched
-	])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [counts.recent, counts.watchlist, counts.favorites, isPending]);
 
 	if (isPending) {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
 				<div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
 			</div>
-		)
+		);
 	}
 
 	return (
 		<div className="min-h-screen mt-20 bg-background">
-			<div className="relative w-full overflow-hidden bg-gradient-to-b from-zinc-950 via-zinc-950/95 to-zinc-950 border-b border-white/5">
-				<Container className="relative py-10 md:py-14">
-					<div className="max-w-4xl">
-						<p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.18em]">
-							{isSignedIn ? 'Library · Synced' : 'Library · Local mode'}
-						</p>
+			{/* Header */}
+			<Container className="pt-8 pb-6 md:pt-12 md:pb-8">
+				<div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+					<div className="max-w-2xl">
+						<div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-[0.2em]">
+							<Clapperboard className="h-3.5 w-3.5" />
+							<span>{isSignedIn ? 'Library · Synced' : 'Library · Local'}</span>
+						</div>
 						{isAuthenticated && greetingMessage ? (
-							<h1 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+							<h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
 								{greetingMessage}
 							</h1>
 						) : (
-							<h1 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+							<h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
 								Your Library
 							</h1>
 						)}
-						<p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl">
-							Everything you saved in one place: watchlist, favorites, and continue-watching.
-							{isSignedIn ? ' Synced across devices.' : ' Stored on this device.'}
+						<p className="mt-3 text-sm md:text-base text-muted-foreground max-w-xl leading-relaxed">
+							Everything you saved in one place.
+							{isSignedIn
+								? ' Synced across your devices.'
+								: ' Stored on this device.'}
 						</p>
-						{!isSignedIn && (
-							<div className="mt-6 flex flex-wrap items-center gap-3">
-								<Button asChild className="gap-2">
-									<Link href="/auth/signin?callbackUrl=/library">
-										<LogIn className="h-4 w-4" />
-										Sign in to sync
-									</Link>
-								</Button>
-								<p className="text-xs text-muted-foreground/70">
-									Signing in keeps your Library across devices.
-								</p>
-							</div>
-						)}
 					</div>
-				</Container>
-			</div>
 
-			<Container className="py-8 md:py-12">
-				<div className="grid gap-3 sm:grid-cols-3 mb-8">
-					<LibraryStatCard
-						label="Watchlist"
-						value={counts.watchlist}
-						icon={<Bookmark className="h-5 w-5 text-foreground" />}
-					/>
-					<LibraryStatCard
-						label="Favorites"
-						value={counts.favorites}
-						icon={<Heart className="h-5 w-5 text-foreground" />}
-					/>
-					<LibraryStatCard
-						label="Continue watching"
-						value={counts.recent}
-						icon={<History className="h-5 w-5 text-foreground" />}
-					/>
+					{!isSignedIn && (
+						<div className="flex items-center gap-3 shrink-0">
+							<Button
+								asChild
+								className="gap-2 rounded-lg h-10 px-4"
+							>
+								<Link href="/auth/signin?callbackUrl=/library">
+									<LogIn className="h-4 w-4" />
+									Sign in to sync
+								</Link>
+							</Button>
+						</div>
+					)}
+
+					{isSignedIn && (
+						<div className="flex items-center gap-2 text-xs text-muted-foreground/60 shrink-0">
+							<Sparkles className="h-3.5 w-3.5" />
+							<span>Synced across devices</span>
+						</div>
+					)}
+				</div>
+			</Container>
+
+			{/* Tabs */}
+			<Container className="pb-10 md:pb-16">
+				<div className="border-b border-white/[0.06]">
+					<div className="flex items-center gap-1 -mb-px">
+						<TabButton
+							active={activeTab === 'continue'}
+							value="continue"
+							onClick={setActiveTab}
+							icon={<History className="h-4 w-4" />}
+							label="Continue"
+							count={counts.recent}
+						/>
+						<TabButton
+							active={activeTab === 'watchlist'}
+							value="watchlist"
+							onClick={setActiveTab}
+							icon={<Bookmark className="h-4 w-4" />}
+							label="Watchlist"
+							count={counts.watchlist}
+						/>
+						<TabButton
+							active={activeTab === 'favorites'}
+							value="favorites"
+							onClick={setActiveTab}
+							icon={<Heart className="h-4 w-4" />}
+							label="Favorites"
+							count={counts.favorites}
+						/>
+					</div>
 				</div>
 
-				{/* Continue Watching Section */}
-				<div className="mb-12">
-					<Card className="bg-background/40 backdrop-blur-xl border-border/50">
-						<div className="p-4 md:p-6">
+				{/* Tab Panels */}
+				<div className="pt-6 md:pt-8" role="tabpanel">
+					{activeTab === 'continue' && (
+						<section>
 							<LibraryContinueWatching />
-						</div>
-					</Card>
-				</div>
+						</section>
+					)}
 
-				{/* Watchlist Section */}
-				<div className="mb-12">
-					<Card className="bg-background/40 backdrop-blur-xl border-border/50">
-						<div className="p-4 md:p-6">
+					{activeTab === 'watchlist' && (
+						<section>
 							<LibraryWatchlist />
-						</div>
-					</Card>
-				</div>
+						</section>
+					)}
 
-				{/* Favorites Section */}
-				<div className="mb-12">
-					<Card className="bg-background/40 backdrop-blur-xl border-border/50">
-						<div className="p-4 md:p-6">
+					{activeTab === 'favorites' && (
+						<section>
 							<LibraryFavoritesSynced />
-						</div>
-					</Card>
+						</section>
+					)}
 				</div>
 			</Container>
 		</div>
-	)
+	);
 }

@@ -95,7 +95,9 @@ export default async function TVDetailsPage(props: {
 
 	return (
 		<MediaDetailsShell>
-			<DetailHero show={show} type="tv" />
+			<div className="-mt-16 lg:mt-0">
+				<DetailHero show={show} type="tv" />
+			</div>
 
 			<Suspense fallback={<ShowContainerSkeleton type="tv" seasons={(show as any).seasons} />}>
 				<ShowContainer showData={show as any} id={showId} type="tv" seasons={(show as any).seasons || []}>

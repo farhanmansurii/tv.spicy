@@ -17,24 +17,7 @@ import { cn } from '@/lib/utils';
 
 const RecentlyWatchedComponent = () => {
 	const hasMounted = useHasMounted();
-	const { recentlyWatched, initialize, isLoading: storeIsLoading } = useTVShowStore();
-	const [isBootstrapping, setIsBootstrapping] = useState(true);
-
-	const loadData = useCallback(async () => {
-		if (!hasMounted) return;
-
-		try {
-			await initialize();
-		} catch (error) {
-			console.error('Error loading continue watching:', error);
-		} finally {
-			setIsBootstrapping(false);
-		}
-	}, [hasMounted, initialize]);
-
-	useEffect(() => {
-		loadData();
-	}, [loadData]);
+	const recentlyWatched = useTVShowStore((s) => s.recentlyWatched);
 
 	const clearRecentlyWatched = useCallback(() => {
 		const store = useTVShowStore.getState();
@@ -46,12 +29,10 @@ const RecentlyWatchedComponent = () => {
 		return recentlyWatched;
 	}, [hasMounted, recentlyWatched]);
 
-	// Show skeleton while loading
-	if (!hasMounted || storeIsLoading || isBootstrapping) {
-		return <MediaLoader withHeader withHeaderAction className="min-h-[280px]" />;
+	if (!hasMounted) {
+		return null;
 	}
 
-	// Only return null after loading is complete
 	if (episodes.length === 0) return null;
 
 	return (

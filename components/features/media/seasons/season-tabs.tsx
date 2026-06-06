@@ -76,7 +76,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 
 	const { ref: stickySentinelRef, inView: stickySentinelInView } = useInView({
 		threshold: 0,
-		rootMargin: '-72px 0px 0px 0px',
+		rootMargin: '-68px 0px 0px 0px',
 	});
 	const isSticky =
 		hasActiveEpisode && stickyEnabled && !stickySentinelInView && isMobile && isPortrait;
@@ -238,7 +238,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 						className={cn(
 							'w-full',
 							stickyEnabled && isMobile && isPortrait
-								? 'sticky top-2 z-30'
+								? 'sticky top-[68px] z-30'
 								: 'relative z-10',
 							isSticky &&
 								isStickyDismissed &&
@@ -256,20 +256,14 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			)}
 
 			{/* SEASON SELECTOR + EPISODES */}
-			<div className="space-y-4 md:space-y-5">
+			<div className="space-y-3 md:space-y-4">
 				{detailsPanel}
 
 				{/* Header row */}
 				<div className="flex items-center justify-between gap-3">
 					{/* Left: title + season info */}
 					<div className="flex items-baseline gap-3 min-w-0">
-						<h2
-							className="text-base md:text-lg font-bold text-white tracking-tight flex-shrink-0"
-							style={{
-								fontFamily:
-									'-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
-							}}
-						>
+						<h2 className="text-base md:text-lg font-bold text-white tracking-tight flex-shrink-0 font-sans">
 							Episodes
 						</h2>
 						{seasonData?.episodes && (

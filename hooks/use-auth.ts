@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useSession } from '@/lib/auth-client';
 import { useAuthStore } from '@/store/authStore';
 
@@ -10,7 +10,6 @@ import { useAuthStore } from '@/store/authStore';
  * Benefits over raw useSession():
  * - Single React subscriber to useSession (reduces re-renders)
  * - Auth state accessible from Zustand without hook calls
- * - Stable identity across renders via useMemo
  *
  * Usage:
  *   const { user, isAuthenticated, isLoading } = useAuth();
@@ -34,14 +33,11 @@ export function useAuth() {
 	const isLoading = useAuthStore((s) => s.isLoading);
 	const userId = useAuthStore((s) => s.userId);
 
-	return useMemo(
-		() => ({
-			session,
-			user,
-			isAuthenticated,
-			isLoading: isLoading || isPending,
-			userId,
-		}),
-		[session, user, isAuthenticated, isLoading, isPending, userId]
-	);
+	return {
+		session,
+		user,
+		isAuthenticated,
+		isLoading: isLoading || isPending,
+		userId,
+	};
 }

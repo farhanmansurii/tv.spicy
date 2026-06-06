@@ -9,8 +9,15 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type { ProviderConfig } from './providers';
+
+/* ── Shared glass surface styles (matches header exactly) ── */
+const glassPill =
+	'rounded-full bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_4px_20px_rgba(0,0,0,0.35)]';
+
+const glassOrb =
+	'rounded-full bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_4px_20px_rgba(0,0,0,0.35)]';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -36,12 +43,19 @@ function ResumeChip({ seconds, onResume }: ResumeChipProps) {
 	return (
 		<button
 			onClick={onResume}
-			className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.07] px-2.5 text-[11px] font-medium text-zinc-200 ring-1 ring-white/[0.04] transition-[background-color,border-color,color,transform] duration-200 hover:border-white/20 hover:bg-white/[0.12] hover:text-white active:scale-[0.98] md:h-10 md:px-3.5 md:text-sm group/resume"
+			className={cn(
+				glassPill,
+				'inline-flex h-9 items-center gap-1.5 px-3',
+				'text-[11px] font-medium text-white/70',
+				'transition-[background-color,color,transform] duration-200',
+				'hover:bg-white/[0.10] hover:text-white active:scale-[0.98]',
+				'md:h-10 md:px-3.5 md:text-sm group/resume'
+			)}
 			title={`Resume from ${formatTimestamp(seconds)}`}
 		>
-			<ArrowCounterClockwiseIcon size={12} className="text-zinc-400 group-hover/resume:text-zinc-200 transition-colors duration-200" />
+			<ArrowCounterClockwiseIcon size={13} className="text-white/40 group-hover/resume:text-white/70 transition-colors duration-200" />
 			<span className="hidden sm:inline">Resume</span>
-			<span className="font-mono tracking-tight text-zinc-300 group-hover/resume:text-white transition-colors duration-200">
+			<span className="font-mono tracking-tight text-white/60 group-hover/resume:text-white transition-colors duration-200">
 				{formatTimestamp(seconds)}
 			</span>
 		</button>
@@ -84,22 +98,31 @@ export function PlayerControls({
 	const showResumeChip = !hasResumed && savedPositionSeconds > 30;
 
 	return (
-		<div className="flex flex-wrap items-center justify-between gap-1.5 px-1 pb-1">
+		<div className="flex flex-wrap items-center justify-between gap-2">
 			{/* Left side: provider selector + resume chip */}
-			<div className="flex min-w-0 flex-1 items-center gap-1.5">
+			<div className="flex min-w-0 flex-1 items-center gap-2">
 				<Select value={selectedProvider} onValueChange={onProviderChange}>
-					<SelectTrigger className="h-8 w-fit min-w-0 max-w-[52vw] rounded-full border-white/10 bg-white/[0.06] px-3 text-xs ring-1 ring-white/[0.04] transition-[background-color,border-color,transform] duration-200 hover:border-white/18 hover:bg-white/[0.1] active:scale-[0.98] md:h-10 md:max-w-none md:px-4">
-						<GearIcon className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
-						<SelectValue className="truncate text-xs font-medium text-zinc-200 md:text-sm">
-							{currentLabel}
-						</SelectValue>
+					<SelectTrigger
+						className={cn(
+							glassPill,
+							'h-9 w-fit min-w-0 max-w-[52vw]',
+							'flex items-center gap-2 px-3',
+							'border-0 focus:ring-0 focus:ring-offset-0',
+							'text-xs text-white/80',
+							'transition-[background-color,color,transform] duration-200',
+							'hover:bg-white/[0.10] active:scale-[0.98]',
+							'md:h-10 md:max-w-none md:px-4'
+						)}
+					>
+						<GearIcon size={16} className="shrink-0 text-white/40" />
+						<SelectValue className="truncate text-xs font-medium text-white/80 md:text-sm" />
 					</SelectTrigger>
-					<SelectContent className="max-h-[300px] rounded-xl border-white/10 bg-zinc-950/95 p-1.5 shadow-2xl backdrop-blur-xl">
+					<SelectContent className="max-h-[300px] rounded-xl bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] p-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
 						{providers.map((provider) => (
 							<SelectItem
 								key={provider.name}
 								value={provider.name}
-								className="text-xs rounded-lg"
+								className="text-xs rounded-lg focus:bg-white/[0.08] focus:text-white hover:bg-white/[0.06] hover:text-white/90"
 							>
 								{provider.label}
 							</SelectItem>
@@ -114,29 +137,46 @@ export function PlayerControls({
 
 			{/* Right side: next episode + close sticky — TV only */}
 			{onNextEpisode && mediaType === 'tv' && (
-				<div className="flex shrink-0 items-center gap-1.5">
-					<Button
-						variant="ghost"
+				<div className="flex shrink-0 items-center gap-2">
+					{/* Mobile: circle orb | Desktop: full pill with text */}
+					<button
 						onClick={onNextEpisode}
-						className="h-8 rounded-full bg-white px-3 text-black transition-[background-color,transform] duration-200 hover:bg-white/90 active:scale-[0.98] md:h-10 md:px-5 gap-1.5 group/next font-semibold"
+						className={cn(
+							/* Mobile: circle orb */
+							'h-9 w-9 flex items-center justify-center',
+							/* Desktop: pill with text */
+							'md:h-10 md:w-auto md:px-4 md:gap-1.5',
+							'text-white/80',
+							'transition-[background-color,transform] duration-200',
+							'hover:bg-white/[0.10] hover:text-white active:scale-[0.98]',
+							'group/next',
+							/* Glass */
+							glassOrb,
+							'md:' + glassPill
+						)}
+						aria-label="Next episode"
+						title="Next episode"
 					>
-						<span className="hidden text-xs font-semibold sm:inline md:text-sm">
-							Next
-						</span>
-						<CaretRightIcon className="h-4 w-4 transition-transform group-hover/next:translate-x-0.5" />
-					</Button>
+						<span className="hidden md:inline text-xs font-semibold">Next</span>
+						<CaretRightIcon size={18} className="transition-transform group-hover/next:translate-x-0.5" />
+					</button>
 
 					{isSticky && onCloseSticky && (
-						<Button
-							variant="ghost"
-							size="icon"
+						<button
 							onClick={onCloseSticky}
-							className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.06] text-zinc-200 backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-white/[0.12] active:scale-[0.98] md:h-10 md:w-10"
+							className={cn(
+								glassOrb,
+								'h-9 w-9 flex items-center justify-center',
+								'text-white/70',
+								'transition-[background-color,color,transform] duration-200',
+								'hover:bg-white/[0.10] hover:text-white active:scale-[0.98]',
+								'md:h-10 md:w-10'
+							)}
 							aria-label="Hide sticky player"
 							title="Hide sticky player"
 						>
-							<XIcon className="w-4 h-4" />
-						</Button>
+							<XIcon size={16} />
+						</button>
 					)}
 				</div>
 			)}

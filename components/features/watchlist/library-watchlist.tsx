@@ -11,7 +11,8 @@ import { cn } from '@/lib/utils'
 
 export function LibraryWatchlist() {
 	const hasMounted = useHasMounted()
-	const { watchlist, tvwatchlist } = useWatchListStore()
+	const watchlist = useWatchListStore((s) => s.watchlist)
+	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist)
 
 	const filteredMovieWatchlist = React.useMemo(() => {
 		return watchlist?.filter((show) => show.poster_path || show.backdrop_path) || []
@@ -24,24 +25,17 @@ export function LibraryWatchlist() {
 	const totalCount = filteredMovieWatchlist.length + filteredTVWatchlist.length
 
 	if (!hasMounted) {
-		return (
-			<div className="flex items-center justify-center py-20">
-				<div className="text-center space-y-4">
-					<div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-					<p className="text-muted-foreground text-sm">Loading...</p>
-				</div>
-			</div>
-		)
+		return null
 	}
 
 	if (totalCount === 0) {
 		return (
 			<div className="flex flex-col items-center justify-center py-20 space-y-4">
-				<div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-					<BookmarkSimpleIcon size={32} className="text-zinc-600" />
+				<div className="w-16 h-16 rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.06] flex items-center justify-center">
+					<BookmarkSimpleIcon size={28} className="text-muted-foreground/50" />
 				</div>
-				<h3 className="text-xl font-bold text-foreground">Your watchlist is empty</h3>
-				<p className="text-muted-foreground text-center max-w-md">
+				<h3 className="text-lg font-semibold text-foreground">Your watchlist is empty</h3>
+				<p className="text-sm text-muted-foreground text-center max-w-md leading-relaxed">
 					Add shows and movies to your watchlist by clicking the bookmark icon on any details page.
 				</p>
 			</div>
@@ -49,20 +43,15 @@ export function LibraryWatchlist() {
 	}
 
 	return (
-		<div className="space-y-10">
-			<div>
-				<h2 className="text-2xl md:text-3xl font-bold text-foreground">My Watchlist</h2>
-				<p className="text-sm text-muted-foreground mt-1">
-					{totalCount} {totalCount === 1 ? 'item' : 'items'} saved
-				</p>
-			</div>
-
+		<div className="flex flex-col space-y-8 md:space-y-10">
 			{filteredMovieWatchlist.length > 0 && (
-				<div className="space-y-6">
+				<div className="space-y-4 md:space-y-5">
 					<div>
-						<h3 className="text-lg md:text-xl font-semibold text-foreground mb-1">Movies</h3>
-						<p className="text-sm text-muted-foreground">
-							{filteredMovieWatchlist.length} movies
+						<p className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-[0.2em]">
+							Movies
+						</p>
+						<p className="text-sm text-muted-foreground mt-1">
+							{filteredMovieWatchlist.length} {filteredMovieWatchlist.length === 1 ? 'movie' : 'movies'}
 						</p>
 					</div>
 					<div
@@ -72,23 +61,27 @@ export function LibraryWatchlist() {
 						)}
 					>
 						{filteredMovieWatchlist.map((show, index) => (
-								<MediaCard
-									key={show.id}
-									type="movie"
-									show={show as unknown as MediaShow}
-									index={index}
-									isVertical
-								/>
+							<MediaCard
+								key={show.id}
+								type="movie"
+								show={show as unknown as MediaShow}
+								index={index}
+								isVertical
+							/>
 						))}
 					</div>
 				</div>
 			)}
 
 			{filteredTVWatchlist.length > 0 && (
-				<div className="space-y-6">
+				<div className="space-y-4 md:space-y-5">
 					<div>
-						<h3 className="text-lg md:text-xl font-semibold text-foreground mb-1">TV Shows</h3>
-						<p className="text-sm text-muted-foreground">{filteredTVWatchlist.length} shows</p>
+						<p className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-[0.2em]">
+							TV Shows
+						</p>
+						<p className="text-sm text-muted-foreground mt-1">
+							{filteredTVWatchlist.length} {filteredTVWatchlist.length === 1 ? 'show' : 'shows'}
+						</p>
 					</div>
 					<div
 						className={cn(
@@ -96,15 +89,15 @@ export function LibraryWatchlist() {
 							'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
 						)}
 					>
-							{filteredTVWatchlist.map((show, index) => (
-								<MediaCard
-									key={show.id}
-									type="tv"
-									show={show as unknown as MediaShow}
-									index={index}
-									isVertical
-								/>
-							))}
+						{filteredTVWatchlist.map((show, index) => (
+							<MediaCard
+								key={show.id}
+								type="tv"
+								show={show as unknown as MediaShow}
+								index={index}
+								isVertical
+							/>
+						))}
 					</div>
 				</div>
 			)}

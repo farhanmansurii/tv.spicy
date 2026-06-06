@@ -9,10 +9,10 @@ export function HeroSkeleton() {
 
 			{/* Content skeleton */}
 			<div className="absolute inset-0 z-10 flex flex-col justify-end">
-				<div className="mx-auto w-full max-w-[1400px] px-5 pb-12 md:px-8 md:pb-20 lg:px-12 lg:pb-28">
-					<div className="max-w-2xl">
+				<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-8 md:pb-12 lg:pb-14">
+					<div className="max-w-xl md:max-w-2xl">
 						{/* Meta chips */}
-						<div className="flex items-center gap-2 mb-5 md:mb-6">
+						<div className="flex items-center gap-2 mb-4 md:mb-5">
 							<div className="h-3.5 w-16 rounded-full bg-white/10 animate-pulse" />
 							<div className="h-3.5 w-2 rounded-full bg-white/10 animate-pulse" />
 							<div className="h-3.5 w-20 rounded-full bg-white/10 animate-pulse" />
@@ -42,7 +42,7 @@ export function ShowContainerSkeleton({
 	const isTV = type === 'tv';
 	return (
 		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-[1400px] px-5 md:px-8 lg:px-12">
+			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
 				{/* Header */}
 				<div className="mb-5 md:mb-6">
 					<div className="h-6 w-24 rounded-lg bg-white/10 animate-pulse mb-2" />
@@ -64,10 +64,7 @@ export function ShowContainerSkeleton({
 				{/* Desktop: horizontal card skeletons */}
 				<div className="hidden md:flex gap-4 overflow-hidden">
 					{Array.from({ length: 4 }).map((_, i) => (
-						<div
-							key={i}
-							className="flex-shrink-0 w-[300px] lg:w-[340px]"
-						>
+						<div key={i} className="flex-shrink-0 w-[300px] lg:w-[340px]">
 							<div className="aspect-[16/10] rounded-2xl bg-white/[0.06] animate-pulse" />
 							<div className="h-3.5 w-16 rounded-md bg-white/[0.06] animate-pulse mt-2.5" />
 							<div className="h-4 w-3/4 rounded-md bg-white/[0.06] animate-pulse mt-1.5" />
@@ -95,7 +92,7 @@ export function ShowContainerSkeleton({
 export function CastCrewSkeleton() {
 	return (
 		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-[1400px] px-5 md:px-8 lg:px-12">
+			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between mb-5 md:mb-6">
 					<div className="h-6 w-32 rounded-lg bg-white/10 animate-pulse" />
 					<div className="h-5 w-20 rounded-md bg-white/10 animate-pulse" />
@@ -117,7 +114,7 @@ export function CastCrewSkeleton() {
 export function VideoSkeleton() {
 	return (
 		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-[1400px] px-5 md:px-8 lg:px-12">
+			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between mb-5 md:mb-6">
 					<div className="h-6 w-40 rounded-lg bg-white/10 animate-pulse" />
 					<div className="h-5 w-16 rounded-md bg-white/10 animate-pulse" />
@@ -138,7 +135,7 @@ export function VideoSkeleton() {
 export function RelatedSkeleton() {
 	return (
 		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-[1400px] px-5 md:px-8 lg:px-12">
+			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between mb-5 md:mb-6">
 					<div className="h-6 w-36 rounded-lg bg-white/10 animate-pulse" />
 					<div className="flex items-center gap-1 bg-white/[0.06] rounded-full p-1">
@@ -163,7 +160,7 @@ export function RelatedSkeleton() {
 export function StorylineSkeleton() {
 	return (
 		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-[1400px] px-5 md:px-8 lg:px-12">
+			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between mb-5 md:mb-6">
 					<div className="h-6 w-24 rounded-lg bg-white/10 animate-pulse" />
 					<div className="h-8 w-20 rounded-full bg-white/10 animate-pulse" />

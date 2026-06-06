@@ -14,7 +14,7 @@ import {
 	useSidebar,
 } from '@/components/ui/sidebar';
 
-import { SearchCommandBox } from '@/components/features/search/search-command-box';
+import { SearchTrigger } from '@/components/features/search/search-trigger';
 import { navigationItems } from '../header/navigation-data';
 import { cn } from '@/lib/utils';
 import { AuthButton } from '@/components/auth/auth-button';
@@ -95,7 +95,7 @@ export function AppSidebar() {
 			</SidebarHeader>
 
 			<div className="px-4 pb-4">
-				<SearchCommandBox variant="expanded" />
+				<SearchTrigger variant="expanded" />
 			</div>
 
 			<div className="mx-4 h-px bg-border/50" />

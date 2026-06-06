@@ -78,20 +78,15 @@ function EpisodeListRowComponent({
 			<div
 				className={cn(
 					'flex items-center gap-2.5 sm:gap-3 md:gap-3.5 w-full px-2.5 sm:px-3 py-2.5 sm:py-3 rounded-lg sm:rounded-xl transition-colors duration-200 min-h-[44px]',
-					active ? 'bg-white/[0.05]' : 'hover:bg-white/[0.025]'
+					active ? 'bg-white/[0.08]' : 'hover:bg-white/[0.04]'
 				)}
 			>
 				{/* Episode number */}
 				<div
 					className={cn(
-						'flex-shrink-0 w-6 sm:w-7 text-center tabular-nums font-bold leading-none select-none transition-colors duration-300',
+						'flex-shrink-0 w-6 sm:w-7 text-center tabular-nums font-bold leading-none select-none transition-colors duration-300 text-sm',
 						active ? 'text-[#0A84FF]' : 'text-white/25 group-hover:text-white/40'
 					)}
-					style={{
-						fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)',
-						fontFamily: '-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif',
-						letterSpacing: '-0.02em',
-					}}
 				>
 					{epNum}
 				</div>

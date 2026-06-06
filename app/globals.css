@@ -341,29 +341,6 @@
 	contain-intrinsic-size: auto 300px;
 }
 
-/* Reduce motion support */
-@media (prefers-reduced-motion: reduce) {
-	*,
-	*::before,
-	*::after {
-		animation-duration: 0.01ms !important;
-		animation-iteration-count: 1 !important;
-		transition-duration: 0.01ms !important;
-		scroll-behavior: auto !important;
-	}
-
-	/* Disable cinematic grain overlay */
-	.grain-overlay::before {
-		animation: none !important;
-		display: none !important;
-	}
-
-	/* Disable liquid-glass backdrop blur (can trigger vestibular issues) */
-	.liquid-glass {
-		backdrop-filter: none !important;
-		-webkit-backdrop-filter: none !important;
-	}
-}
 
 /* Custom scrollbar for specific containers */
 .custom-scrollbar {
@@ -471,16 +448,6 @@
 	}
 }
 
-/* DEV: force all animations regardless of system preference */
-@media (prefers-reduced-motion: reduce) {
-	*, *::before, *::after {
-		animation-duration: revert !important;
-		animation-delay: revert !important;
-		transition-duration: revert !important;
-		transition-delay: revert !important;
-	}
-}
-
 /* ── Apple TV+ Detail Page Design Tokens ── */
 
 /* Liquid Glass surface */
@@ -508,19 +475,19 @@
 
 /* Section vertical rhythm */
 .section-spacing {
-	padding-top: 3rem;
-	padding-bottom: 3rem;
+	padding-top: 1.5rem;
+	padding-bottom: 1.5rem;
 }
 @media (min-width: 768px) {
 	.section-spacing {
-		padding-top: 4rem;
-		padding-bottom: 4rem;
+		padding-top: 2rem;
+		padding-bottom: 2rem;
 	}
 }
 @media (min-width: 1024px) {
 	.section-spacing {
-		padding-top: 5rem;
-		padding-bottom: 5rem;
+		padding-top: 2.5rem;
+		padding-bottom: 2.5rem;
 	}
 }
 
