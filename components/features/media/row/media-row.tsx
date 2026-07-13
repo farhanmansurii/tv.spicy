@@ -2,7 +2,7 @@
 
 import React, { useMemo, memo } from 'react';
 import Link from 'next/link';
-import { CaretLeftIcon, CaretRightIcon, PlusIcon } from '@phosphor-icons/react';
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import {
 	Carousel,
 	CarouselContent,
@@ -38,6 +38,9 @@ function MediaRowComponent({
 	ranked = false,
 }: MediaRowProps) {
 	const effectiveIsVertical = isVertical ?? false;
+	const carouselItemBasis = effectiveIsVertical
+		? 'basis-[46%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
+		: 'basis-[82%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4';
 
 	const validShows = useMemo(() => {
 		if (!shows) return [];
@@ -94,9 +97,7 @@ function MediaRowComponent({
 							key={show.id}
 							className={cn(
 								'pl-3 md:pl-5 select-none',
-								!effectiveIsVertical
-									? 'basis-[82%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4'
-									: 'basis-[42%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
+								carouselItemBasis
 							)}
 						>
 							<MediaCard
@@ -109,41 +110,16 @@ function MediaRowComponent({
 						</CarouselItem>
 					))}
 
-					{viewAllLink && (
-						<CarouselItem
-							className={cn(
-								'pl-3 md:pl-5 select-none',
-								!effectiveIsVertical
-									? 'basis-[82%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4'
-									: 'basis-[42%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
-							)}
-						>
-							<Link
-								href={viewAllLink}
-								aria-label={`View all titles in ${text || 'this collection'}`}
-								className="block h-full group/all"
-							>
-								<div className="relative aspect-video md:h-full w-full flex items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] transition-colors hover:bg-white/[0.04]">
-									<div className="flex flex-col items-center gap-2">
-										<PlusIcon size={18} weight="bold" className="text-zinc-500 group-hover/all:text-zinc-300 transition-colors" />
-										<span className="text-xs font-medium text-zinc-500 group-hover/all:text-zinc-300 transition-colors">
-											View All
-										</span>
-									</div>
-								</div>
-							</Link>
-						</CarouselItem>
-					)}
 				</CarouselContent>
 
-				{/* Hover-peek navigation arrows */}
-				<div className="absolute -left-1 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover/row:opacity-100 transition-opacity duration-500">
+				{/* Keep controls discoverable on touch and visible when reached by keyboard. */}
+				<div className="absolute -left-1 top-1/2 -translate-y-1/2 z-20 opacity-100 md:opacity-0 md:group-hover/row:opacity-100 md:group-focus-within/row:opacity-100 transition-opacity duration-300">
 					<CarouselPrevious
 						className="static translate-y-0 h-9 w-9 bg-black/60 border-white/10 text-white hover:bg-white hover:text-black transition-all backdrop-blur-md"
 						icon={<CaretLeftIcon size={16} weight="bold" />}
 					/>
 				</div>
-				<div className="absolute -right-1 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover/row:opacity-100 transition-opacity duration-500">
+				<div className="absolute -right-1 top-1/2 -translate-y-1/2 z-20 opacity-100 md:opacity-0 md:group-hover/row:opacity-100 md:group-focus-within/row:opacity-100 transition-opacity duration-300">
 					<CarouselNext
 						className="static translate-y-0 h-9 w-9 bg-black/60 border-white/10 text-white hover:bg-white hover:text-black transition-all backdrop-blur-md"
 						icon={<CaretRightIcon size={16} weight="bold" />}
@@ -156,12 +132,22 @@ function MediaRowComponent({
 	return (
 		<div className="w-full py-3 md:py-5 group/row overflow-visible">
 			{!hideHeader && (
-				<div className="flex items-end justify-between px-1 mb-3 md:mb-4">
-					{/* Apple TV-style section header: small, uppercase, wide tracking */}
-					<h2 className="text-xs md:text-sm font-bold text-white/70 uppercase tracking-[0.12em] hover:text-white transition-colors duration-300 cursor-default">
+				<div className="flex items-center justify-between gap-4 px-1 mb-3 md:mb-4">
+					<h2 className="text-base md:text-lg font-semibold text-white hover:text-white transition-colors duration-300 cursor-default">
 						{text || ''}
 					</h2>
-					{headerAction && <div className="flex items-center">{headerAction}</div>}
+					<div className="flex shrink-0 items-center gap-3">
+						{viewAllLink && (
+							<Link
+								href={viewAllLink}
+								aria-label={`See all titles in ${text || 'this collection'}`}
+								className="rounded-sm text-sm font-medium text-zinc-400 underline-offset-4 transition-colors hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+							>
+								See all
+							</Link>
+						)}
+						{headerAction && <div className="flex items-center">{headerAction}</div>}
+					</div>
 				</div>
 			)}
 			{gridLayout ? renderGrid() : renderCarousel()}
