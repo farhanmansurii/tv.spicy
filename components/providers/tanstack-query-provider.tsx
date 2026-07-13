@@ -7,6 +7,8 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 import { useMediaQueryStore } from '@/store/mediaQueryStore';
 import { setQueryClient } from '@/lib/query-client';
 
+const persistedUserResources = new Set(['watchlist', 'recently-watched', 'favorites']);
+
 const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 	const [queryClient] = useState(
 		() =>
@@ -27,11 +29,24 @@ const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 		const localStoragePersistor = createSyncStoragePersister({
 			storage: window.localStorage,
 		});
-		persistQueryClient({
+		const [unsubscribe] = persistQueryClient({
 			queryClient,
 			persister: localStoragePersistor,
 			maxAge: 1000 * 60 * 60 * 24 * 7,
+			dehydrateOptions: {
+				shouldDehydrateQuery: (query) => {
+					const [scope, userId, resource] = query.queryKey;
+					return (
+						scope === 'user' &&
+						typeof userId === 'string' &&
+						typeof resource === 'string' &&
+						persistedUserResources.has(resource)
+					);
+				},
+			},
 		});
+
+		return unsubscribe;
 	}, [queryClient]);
 
 	// Initialize media query store

@@ -91,9 +91,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 									{children}
 								</AccessibilityProvider>
 							</SidebarProvider>
-							<Toaster />
 						</TanstackQueryProvider>
-					</AuthProvider>
+							<Toaster />
+						</AuthProvider>
 				</ThemeProvider>
 			</body>
 		</html>
