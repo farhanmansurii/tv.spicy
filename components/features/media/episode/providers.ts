@@ -320,31 +320,15 @@ export const PROVIDERS: ProviderConfig[] = [
 		},
 	},
 
-	// ── Embed.su / Vidsrc ────────────────────────────────────────────────────
-	// vidsrc.pro 301-redirects to embed.su — they are the same service.
-	// Both use the VidSrc-family PLAYER_EVENT format but with different event
-	// names: "time" (not "timeupdate") and "complete" (not "ended").
-	// postMessage origin is always https://embed.su regardless of which URL was
-	// loaded, because the browser resolves the redirect before the iframe loads.
-	{
-		name: 'embed.su',
-		label: 'Embed SU',
-		buildUrl(params) {
-			return embedUrl('embed.su', params);
-		},
-		postMessageOrigin: 'https://embed.su',
-		parseProgressMessage: parseSuFamily,
-	},
-
-	// vidsrc.pro is just an alias — keep it as a separate selectable provider
-	// so users who prefer the label see it, but wiring is identical to embed.su.
+	// ── Vidsrc ───────────────────────────────────────────────────────────────
+	// vidsrc.pro is an alias for the same VidSrc-family provider. Use the
+	// direct player domain to avoid extra redirects and keep the postMessage
+	// origin stable.
 	{
 		name: 'vidsrc',
 		label: 'Vidsrc',
 		buildUrl(params) {
-			// vidsrc.pro → embed.su redirect; use embed.su directly to avoid the
-			// extra round-trip and ensure postMessage origin matches.
-			return embedUrl('embed.su', params);
+			return embedUrl('vidsrc.sbs', params);
 		},
 		postMessageOrigin: 'https://embed.su',
 		parseProgressMessage: parseSuFamily,
@@ -384,8 +368,93 @@ export const PROVIDERS: ProviderConfig[] = [
 		label: 'VidEasy',
 		buildUrl({ type, id, seasonNumber, episodeNumber }) {
 			return type === 'movie'
-				? `https://player.videasy.net/movie/${id}`
-				: `https://player.videasy.net/tv/${id}/${seasonNumber}/${episodeNumber}`;
+				? `https://player.videasy.to/movie/${id}`
+				: `https://player.videasy.to/tv/${id}/${seasonNumber}/${episodeNumber}`;
+		},
+	},
+
+	// ── MoviePire ────────────────────────────────────────────────────────────
+	// No postMessage API documented — falls back to time-based estimation.
+	{
+		name: 'moviepire',
+		label: 'MoviePire',
+		buildUrl(params) {
+			return embedUrl('video.moviepire.co', params);
+		},
+	},
+
+	// ── VidZee ─────────────────────────────────────────────────────────────────
+	// No postMessage API documented — falls back to time-based estimation.
+	{
+		name: 'vidzee',
+		label: 'VidZee',
+		buildUrl({ type, id, seasonNumber, episodeNumber, resumeSeconds }) {
+			const base =
+				type === 'movie'
+					? `https://player.vidzee.wtf/embed/movie/${id}`
+					: `https://player.vidzee.wtf/embed/tv/${id}/${seasonNumber}/${episodeNumber}`;
+			return appendResume(base, resumeSeconds, 'startAt');
+		},
+	},
+
+	// ── ZXCStream ─────────────────────────────────────────────────────────────
+	// No postMessage API documented — falls back to time-based estimation.
+	{
+		name: 'zxcstream',
+		label: 'ZXCStream',
+		buildUrl({ type, id, seasonNumber, episodeNumber, resumeSeconds }) {
+			const base =
+				type === 'movie'
+					? `https://zxcstream.xyz/player/movie/${id}`
+					: `https://zxcstream.xyz/player/tv/${id}/${seasonNumber}/${episodeNumber}`;
+			return appendResume(base, resumeSeconds, 'startAt');
+		},
+	},
+
+	// ── Vidnest ──────────────────────────────────────────────────────────────
+	// Docs show standard movie/TV embed URLs plus ?startAt=<seconds> for resume.
+	// No postMessage API was documented, so playback progress falls back to
+	// time-based estimation.
+	{
+		name: 'vidnest',
+		label: 'Vidnest',
+		buildUrl({ type, id, seasonNumber, episodeNumber, resumeSeconds }) {
+			const base =
+				type === 'movie'
+					? `https://vidnest.fun/movie/${id}`
+					: `https://vidnest.fun/tv/${id}/${seasonNumber}/${episodeNumber}`;
+			return appendResume(base, resumeSeconds, 'startAt');
+		},
+	},
+
+	// ── Cinesrc ──────────────────────────────────────────────────────────────
+	// Public docs show a simple embed URL pattern with movie/TV routes and the
+	// same startAt-style resume parameter used by similar providers. No event API
+	// was documented, so progress tracking remains time-based.
+	{
+		name: 'cinesrc',
+		label: 'CineSrc',
+		buildUrl({ type, id, seasonNumber, episodeNumber, resumeSeconds }) {
+			const base =
+				type === 'movie'
+					? `https://cinesrc.st/embed/movie/${id}`
+					: `https://cinesrc.st/embed/tv/${id}/${seasonNumber}/${episodeNumber}`;
+			return appendResume(base, resumeSeconds, 'startAt');
+		},
+	},
+
+	// ── TouStream ───────────────────────────────────────────────────────────
+	// URLs shared by the user follow the /tou/movies/<id> and /tou/tv/<id>/<season>/<episode>
+	// shape. No event API was surfaced, so progress tracking stays time-based.
+	{
+		name: 'toustream',
+		label: 'TouStream',
+		buildUrl({ type, id, seasonNumber, episodeNumber, resumeSeconds }) {
+			const base =
+				type === 'movie'
+					? `https://toustream.xyz/tou/movies/${id}`
+					: `https://toustream.xyz/tou/tv/${id}/${seasonNumber}/${episodeNumber}`;
+			return appendResume(base, resumeSeconds, 'startAt');
 		},
 	},
 
