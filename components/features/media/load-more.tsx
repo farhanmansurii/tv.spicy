@@ -2,7 +2,7 @@
 
 import { useInView } from 'react-intersection-observer';
 import { useEffect, useState } from 'react';
-import { fetchGenreById } from '@/lib/api';
+import { fetchGenreByIdFromApi } from '@/lib/api/tmdb-row-client';
 import { Show } from '@/lib/types';
 import MediaRow from './row/media-row';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
@@ -46,7 +46,7 @@ function LoadMore(props: { params: any }) {
 					// Normalize type to 'movie' or 'tv'
 					const normalizedType =
 						searchParams.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
-					const res = await fetchGenreById(normalizedType, searchParams.id!, 1);
+					const res = await fetchGenreByIdFromApi(normalizedType, searchParams.id!, 1);
 					setData((res as Show[]) || []);
 				} catch (error) {
 					console.error('Error loading genre data:', error);
@@ -77,7 +77,11 @@ function LoadMore(props: { params: any }) {
 					// Normalize type to 'movie' or 'tv'
 					const normalizedType =
 						searchParams.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
-					const res = await fetchGenreById(normalizedType, searchParams.id!, nextPage);
+					const res = await fetchGenreByIdFromApi(
+						normalizedType,
+						searchParams.id!,
+						nextPage
+					);
 					const nextBatch = (res as Show[]) || [];
 					if (nextBatch.length > 0) {
 						setData((prev) => [...prev, ...nextBatch]);

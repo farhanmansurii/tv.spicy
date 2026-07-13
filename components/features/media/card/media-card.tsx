@@ -1,13 +1,11 @@
 'use client';
 
-import { memo, useRef, useEffect, useCallback, useState } from 'react';
+import { memo, useState } from 'react';
 import Link from 'next/link';
 import { Show } from '@/lib/types';
-import { tmdbImage } from '@/lib/tmdb-image';
+import { tmdbImage, tmdbImageSrcSet } from '@/lib/tmdb-image';
 import { PlayIcon, StarIcon } from '@phosphor-icons/react';
-import BlurFade from '@/components/ui/blur-fade';
 import { cn } from '@/lib/utils';
-import gsap from 'gsap';
 
 interface MediaCardProps {
 	index: number;
@@ -18,79 +16,18 @@ interface MediaCardProps {
 	rank?: number;
 }
 
-function MediaCardComponent({
-	index,
-	show,
-	isVertical = false,
-	type,
-	onClick,
-	rank,
-}: MediaCardProps) {
+function MediaCardComponent({ show, isVertical = false, type, onClick, rank }: MediaCardProps) {
 	const mediaType = show.media_type || type;
-
-	const shellRef = useRef<HTMLDivElement>(null);
-	const imageRef = useRef<HTMLDivElement>(null);
-	const overlayRef = useRef<HTMLDivElement>(null);
-	const playBtnRef = useRef<HTMLDivElement>(null);
-	const hoverTlRef = useRef<gsap.core.Timeline | null>(null);
 
 	const [imageError, setImageError] = useState(false);
 
 	const imagePath = isVertical ? show.poster_path : show.backdrop_path;
 	const imageUrl = imagePath ? tmdbImage(imagePath, 'w500') : null;
+	const imageSrcSet = imagePath ? tmdbImageSrcSet(imagePath) : undefined;
+	const imageSizes = isVertical
+		? '(min-width: 1280px) 16vw, (min-width: 1024px) 18vw, (min-width: 768px) 22vw, 42vw'
+		: '(min-width: 1280px) 22vw, (min-width: 1024px) 31vw, (min-width: 640px) 48vw, 82vw';
 	const year = (show.first_air_date || show.release_date)?.split('-')[0];
-
-	useEffect(() => {
-		if (!imageUrl) return;
-
-		const ctx = gsap.context(() => {
-			// Set initial states
-			gsap.set(overlayRef.current, { opacity: 0 });
-			gsap.set(playBtnRef.current, { opacity: 0, scale: 0.6 });
-
-			// Build hover timeline (paused)
-			hoverTlRef.current = gsap
-				.timeline({ paused: true })
-				.to(
-					imageRef.current,
-					{
-						scale: 1.06,
-						duration: 0.55,
-						ease: 'power2.out',
-					},
-					0
-				)
-				.to(
-					overlayRef.current,
-					{
-						opacity: 1,
-						duration: 0.3,
-						ease: 'power2.out',
-					},
-					0
-				)
-				.to(
-					playBtnRef.current,
-					{
-						opacity: 1,
-						scale: 1,
-						duration: 0.5,
-						ease: 'back.out(1.8)',
-					},
-					0.08
-				);
-		}, shellRef);
-
-		return () => ctx.revert();
-	}, [imageUrl]);
-
-	const handleMouseEnter = useCallback(() => {
-		hoverTlRef.current?.play();
-	}, []);
-
-	const handleMouseLeave = useCallback(() => {
-		hoverTlRef.current?.reverse();
-	}, []);
 
 	if (!mediaType) return <div className="bg-[#1C1C1E] animate-pulse rounded-2xl aspect-video" />;
 
@@ -103,9 +40,6 @@ function MediaCardComponent({
 			<div className="flex flex-col gap-2.5 w-full">
 				{/* Card shell */}
 				<div
-					ref={shellRef}
-					onMouseEnter={handleMouseEnter}
-					onMouseLeave={handleMouseLeave}
 					className={cn(
 						'relative w-full overflow-hidden bg-[#1C1C1E]',
 						'rounded-xl md:rounded-2xl',
@@ -134,24 +68,17 @@ function MediaCardComponent({
 					{/* Image */}
 					<div className="relative h-full w-full overflow-hidden rounded-xl md:rounded-2xl">
 						{imageUrl && !imageError ? (
-							<BlurFade
-								key={imageUrl}
-								delay={0.01 * (index % 8)}
-								inView
-								duration={0.22}
-								yOffset={6}
-								className="relative h-full w-full"
-							>
-								{/* Image wrapper — GSAP scales this */}
-								<div
-									ref={imageRef}
-									className="absolute inset-0 will-change-transform"
-								>
+							<div className="relative h-full w-full">
+								{/* CSS keeps the hover effect compositor-friendly without a per-card animation instance. */}
+								<div className="absolute inset-0 transform-gpu transition-transform duration-500 ease-out group-hover:scale-[1.06] motion-reduce:transform-none motion-reduce:transition-none">
 									<img
 										src={imageUrl}
+										srcSet={imageSrcSet}
+										sizes={imageSizes}
 										alt={show.title || show.name || ''}
 										loading="lazy"
-										className="w-full h-full object-cover"
+										decoding="async"
+										className="h-full w-full object-cover"
 										onError={() => setImageError(true)}
 									/>
 								</div>
@@ -159,19 +86,15 @@ function MediaCardComponent({
 								{/* Persistent vignette */}
 								<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none z-[1]" />
 
-								{/* Hover darkening overlay — GSAP fades this */}
-								<div
-									ref={overlayRef}
-									className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 pointer-events-none z-[2]"
-								/>
+								{/* Hover darkening overlay */}
+								<div className="absolute inset-0 z-[2] pointer-events-none bg-gradient-to-t from-black/80 via-black/30 to-black/10 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 motion-reduce:transition-none" />
 
-								{/* Liquid Glass play button — GSAP scales in */}
+								{/* Liquid Glass play button */}
 								<div className="absolute inset-0 flex items-center justify-center z-[3]">
 									<div
-										ref={playBtnRef}
 										className={cn(
 											'h-11 w-11 md:h-12 md:w-12 rounded-full flex items-center justify-center',
-											'will-change-transform'
+											'opacity-0 scale-75 transition-[opacity,transform] duration-500 ease-out delay-75 group-hover:opacity-100 group-hover:scale-100 motion-reduce:transition-none'
 										)}
 										style={{
 											background: 'rgba(255,255,255,0.92)',
@@ -188,7 +111,7 @@ function MediaCardComponent({
 										/>
 									</div>
 								</div>
-							</BlurFade>
+							</div>
 						) : (
 							<div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-950 px-4">
 								<h4 className="text-sm md:text-base font-semibold text-white/90 text-center line-clamp-2 leading-snug">

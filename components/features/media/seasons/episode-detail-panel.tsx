@@ -129,9 +129,15 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 
 					{/* Metadata chips */}
 					{(hasRating || hasRuntime || airLabel) && (
-						<motion.div variants={fadeUp} className="flex flex-wrap items-center gap-x-3 gap-y-1">
+						<motion.div
+							variants={fadeUp}
+							className="flex flex-wrap items-center gap-x-3 gap-y-1"
+						>
 							{hasRating && (
-								<span className="inline-flex items-center gap-1 text-[12px] font-bold tabular-nums" style={{ color: '#FFD60A' }}>
+								<span
+									className="inline-flex items-center gap-1 text-[12px] font-bold tabular-nums"
+									style={{ color: '#FFD60A' }}
+								>
 									<StarIcon weight="fill" size={10} />
 									{(episode.vote_average ?? 0).toFixed(1)}
 								</span>
@@ -174,7 +180,10 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 						>
 							{director?.name && (
 								<div className="flex items-start gap-2.5">
-									<FilmSlateIcon size={13} className="text-white/20 mt-[2px] flex-shrink-0" />
+									<FilmSlateIcon
+										size={13}
+										className="text-white/20 mt-[2px] flex-shrink-0"
+									/>
 									<div>
 										<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-0.5">
 											Director
@@ -187,7 +196,10 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 							)}
 							{writerNames && (
 								<div className="flex items-start gap-2.5">
-									<PencilSimpleIcon size={13} className="text-white/20 mt-[2px] flex-shrink-0" />
+									<PencilSimpleIcon
+										size={13}
+										className="text-white/20 mt-[2px] flex-shrink-0"
+									/>
 									<div>
 										<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-0.5">
 											Written by
@@ -203,17 +215,18 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 
 					{/* Guest stars */}
 					{guests.length > 0 && (
-						<motion.div
-							variants={fadeUp}
-							className="pt-3 border-t border-white/[0.06]"
-						>
+						<motion.div variants={fadeUp} className="pt-3 border-t border-white/[0.06]">
 							<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-3">
 								Guest Stars
 							</p>
 							<div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-								{guests.map((g) => (
+								{guests.map((g, index) => (
 									<div
-										key={g.name ? `${g.name}-${g.character || ''}` : Math.random()}
+										key={
+											g.name
+												? `${g.name}-${g.character || ''}`
+												: `guest-${index}`
+										}
 										className="flex-shrink-0 flex flex-col items-center gap-1.5 w-[72px]"
 									>
 										{g.profile_path ? (
@@ -224,7 +237,9 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 													loading="lazy"
 													className="h-full w-full object-cover"
 													onError={(e) => {
-														(e.currentTarget as HTMLImageElement).style.display = 'none';
+														(
+															e.currentTarget as HTMLImageElement
+														).style.display = 'none';
 													}}
 												/>
 												<div className="absolute inset-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-xl pointer-events-none" />

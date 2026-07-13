@@ -135,6 +135,9 @@ const useWatchListStore = create<WatchlistStore>()(
 			clearWatchlist: () => {
 				set({ watchlist: [] });
 				const authState = useAuthStore.getState();
+				if (authState.userId) {
+					invalidateUserQueries(authState.userId);
+				}
 				if (authState.isAuthenticated) {
 					fetch('/api/watchlist?mediaType=movie', {
 						method: 'DELETE',
@@ -172,6 +175,9 @@ const useWatchListStore = create<WatchlistStore>()(
 			clearTVWatchlist: () => {
 				set({ tvwatchlist: [] });
 				const authState = useAuthStore.getState();
+				if (authState.userId) {
+					invalidateUserQueries(authState.userId);
+				}
 				if (authState.isAuthenticated) {
 					fetch('/api/watchlist?mediaType=tv', {
 						method: 'DELETE',

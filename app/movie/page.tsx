@@ -10,6 +10,7 @@ import HeroCarousel, {
 } from '@/components/features/media/carousel/hero-carousel';
 import type { Genre } from '@/lib/types/tmdb';
 import type { Show } from '@/lib/types';
+import ProgressiveGenreRows from '@/components/features/media/genre/progressive-genre-rows';
 
 export const metadata: Metadata = {
 	title: 'Movies | Spicy TV',
@@ -38,11 +39,13 @@ export default async function Page() {
 	let heroShows: Array<Show & { media_type?: 'movie' | 'tv' }> = [];
 
 	try {
-		genres = await fetchGenres('movie');
-		topRatedMovies = await fetchRowData('movie/top_rated');
+		[genres, topRatedMovies] = await Promise.all([
+			fetchGenres('movie'),
+			fetchRowData('movie/top_rated'),
+		]);
 
 		// Fetch full details (with logos) for hero items
-		heroShows = (await fetchHeroItemsWithDetails(topRatedMovies, 'movie', 10)) as Array<
+		heroShows = (await fetchHeroItemsWithDetails(topRatedMovies, 'movie', 5)) as Array<
 			Show & { media_type?: 'movie' | 'tv' }
 		>;
 	} catch (error) {
@@ -73,24 +76,13 @@ export default async function Page() {
 						type="movie"
 					/>
 
-					{genres?.map((genre) => (
-						<Suspense
-							key={genre.id}
-							fallback={<MediaLoader withHeader key={genre.id} />}
-						>
-							<DataRow
-								showRank={false}
-								type="movie"
-								endpoint={{ id: genre.id, type: 'movie' }}
-								text={genre.name}
-								isGenre={true}
-							/>
-						</Suspense>
-					))}
+					<ProgressiveGenreRows genres={genres} type="movie" />
 				</div>
 
 				{genres.length > 0 && (
-					<Suspense fallback={<div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />}>
+					<Suspense
+						fallback={<div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />}
+					>
 						<GenreGrid genres={genres} type="movie" />
 					</Suspense>
 				)}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useQuery } from '@tanstack/react-query';
-import { fetchGenreById, fetchRowData } from '@/lib/api';
+import { fetchGenreByIdFromApi, fetchRowDataFromApi } from '@/lib/api/tmdb-row-client';
 import MediaRow from './media-row';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import type { Show } from '@/lib/types';
@@ -52,9 +52,9 @@ export default function DataRow({
 		queryFn: async () => {
 			if (!endpoint) return [];
 			if (isGenre && typeof endpoint !== 'string') {
-				return fetchGenreById(endpoint.type, String(endpoint.id), 1);
+				return fetchGenreByIdFromApi(endpoint.type, String(endpoint.id), 1);
 			}
-			return fetchRowData(
+			return fetchRowDataFromApi(
 				typeof endpoint === 'string' ? endpoint : `${endpoint.type}/${endpoint.id}`
 			);
 		},

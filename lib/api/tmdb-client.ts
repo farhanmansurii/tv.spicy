@@ -284,6 +284,24 @@ export async function fetchDetailsTMDB(
 }
 
 /**
+ * Fetch only the fields needed to render a media card. Unlike fetchDetailsTMDB,
+ * this deliberately avoids the large appended videos/providers/images payload.
+ */
+export async function fetchBasicDetailsTMDB(
+	id: string,
+	type: MediaType
+): Promise<(TMDBMovie & TMDBTVShow) | null> {
+	try {
+		return await tmdbFetch<TMDBMovie & TMDBTVShow>(`/${type}/${id}?language=en-US`, {
+			revalidate: CACHE_DURATIONS.LONG,
+		});
+	} catch (error) {
+		console.error(`Error fetching basic ${type} details for ${id}:`, error);
+		return null;
+	}
+}
+
+/**
  * Fetch media images
  */
 export async function fetchTMDBImages(
@@ -569,7 +587,9 @@ export async function fetchHeroItemsWithDetails(
 		const detailsPromises = topShows.map((show) =>
 			fetchDetailsTMDB(
 				show.id.toString(),
-				(show.media_type === 'movie' || show.media_type === 'tv' ? show.media_type : type) as MediaType
+				(show.media_type === 'movie' || show.media_type === 'tv'
+					? show.media_type
+					: type) as MediaType
 			).catch(() => show)
 		);
 

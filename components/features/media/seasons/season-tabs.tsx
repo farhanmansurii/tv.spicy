@@ -8,7 +8,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { toast } from 'sonner';
-import { fetchSeasonEpisodes } from '@/lib/api';
+import { fetchSeasonEpisodesFromApi } from '@/lib/api/tmdb-row-client';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { usePlayerPrefsStore } from '@/store/playerPrefsStore';
 import useTVShowStore from '@/store/recentsStore';
@@ -100,7 +100,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		isError,
 	} = useQuery<TMDBSeasonDetails>({
 		queryKey: ['episodes', showId, activeSeason],
-		queryFn: () => fetchSeasonEpisodes(showId, activeSeason as number),
+		queryFn: () => fetchSeasonEpisodesFromApi(showId, activeSeason as number),
 		enabled: !!showId && activeSeason !== null,
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60 * 1000,

@@ -1,5 +1,4 @@
 'use client';
-import { fetchGenres } from '@/lib/api';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';

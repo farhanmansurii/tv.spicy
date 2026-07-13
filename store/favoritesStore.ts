@@ -121,6 +121,9 @@ export const useFavoritesStore = create<FavoritesStore>()(
 
 			clearFavorites: (mediaType?: 'movie' | 'tv') => {
 				const authState = useAuthStore.getState();
+				if (authState.userId) {
+					invalidateUserQueries(authState.userId);
+				}
 				if (mediaType) {
 					const key = mediaType === 'movie' ? 'favoriteMovies' : 'favoriteTV';
 					set({ [key]: [] });

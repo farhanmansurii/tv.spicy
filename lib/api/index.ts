@@ -7,6 +7,7 @@
 export {
 	fetchRowData,
 	fetchDetailsTMDB,
+	fetchBasicDetailsTMDB,
 	fetchTMDBImages,
 	fetchRecommendations,
 	fetchCredits,

@@ -10,7 +10,7 @@ import { MagnifyingGlassIcon, XIcon, ArrowLeftIcon, ArrowRightIcon } from '@phos
 import Container from '@/components/shared/containers/container';
 import MediaCard from '@/components/features/media/card/media-card';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
-import { searchTMDB, fetchRowData } from '@/lib/api';
+import { fetchRowDataFromApi, searchTMDBFromApi } from '@/lib/api/tmdb-row-client';
 import { tmdbImage } from '@/lib/tmdb-image';
 import useSearchStore from '@/store/recentsSearchStore';
 import { cn } from '@/lib/utils';
@@ -293,7 +293,7 @@ export default function SearchPage() {
 	// Search query
 	const { data: searchData, isFetching } = useQuery({
 		queryKey: ['search', query, page],
-		queryFn: () => searchTMDB(query, page),
+		queryFn: () => searchTMDBFromApi(query, page),
 		enabled: query.length >= 2,
 		placeholderData: (prev) => prev,
 	});
@@ -301,7 +301,7 @@ export default function SearchPage() {
 	// Trending for empty state
 	const { data: trendingData } = useQuery({
 		queryKey: ['trending', 'all', 'week'],
-		queryFn: () => fetchRowData('trending/all/week'),
+		queryFn: () => fetchRowDataFromApi('trending/all/week'),
 	});
 
 	const results = useMemo(() => {

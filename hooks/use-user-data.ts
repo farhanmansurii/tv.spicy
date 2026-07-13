@@ -20,6 +20,40 @@ interface FavoriteItem {
 	mediaType: 'MOVIE' | 'TV';
 }
 
+export interface PersonalizedHomeData {
+	recentlyWatched: ContinueWatchingItem[];
+	watchlist: WatchlistItem[];
+	favorites: Array<{
+		id: number;
+		media_type: 'movie' | 'tv';
+		title?: string;
+		name?: string;
+		poster_path?: string | null;
+		backdrop_path?: string | null;
+		overview?: string | null;
+	}>;
+}
+
+const fetchPersonalizedHome = async (): Promise<PersonalizedHomeData> => {
+	const response = await fetch('/api/home/personalized', { credentials: 'include' });
+	if (!response.ok) throw new Error('Failed to fetch personalized home data');
+	return response.json();
+};
+
+export function usePersonalizedHome() {
+	const { data: session } = useSession();
+	const userId = session?.user?.id;
+
+	return useQuery({
+		queryKey: ['user', userId, 'personalized-home'],
+		queryFn: fetchPersonalizedHome,
+		enabled: !!userId,
+		staleTime: 5 * 60 * 1000,
+		gcTime: 30 * 60 * 1000,
+		retry: 1,
+	});
+}
+
 const fetchWatchlist = async (type?: 'movie' | 'tv'): Promise<WatchlistItem[]> => {
 	const url = type ? `/api/watchlist?type=${type}` : '/api/watchlist';
 	const response = await fetch(url, { credentials: 'include' });
