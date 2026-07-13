@@ -18,25 +18,27 @@ const UserFavoritesAll = dynamic<UserMediaRowProps>(
 	{ ssr: false, loading: () => <MediaLoader withHeader className="min-h-[280px]" /> }
 );
 
-export function HomePersonalizedRows() {
+interface HomePersonalizedRowsProps {
+	section: 'continue-watching' | 'saved';
+}
+
+export function HomePersonalizedRows({ section }: HomePersonalizedRowsProps) {
 	const { ref, inView } = useInView({
 		triggerOnce: true,
 		rootMargin: '320px 0px',
 	});
 
+	if (section === 'continue-watching') {
+		return <RecentlyWatched />;
+	}
+
 	return (
 		<>
-			<RecentlyWatched />
 			<div ref={ref} className="h-1 w-full" />
-			{inView ? (
+			{inView && (
 				<>
 					<UserWatchlistAll variant="watchlist" scope="all" />
 					<UserFavoritesAll variant="favorites" scope="all" />
-				</>
-			) : (
-				<>
-					<MediaLoader withHeader className="min-h-[280px]" />
-					<MediaLoader withHeader className="min-h-[280px]" />
 				</>
 			)}
 		</>

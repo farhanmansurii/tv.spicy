@@ -57,7 +57,17 @@ function HomePageContent({
 
 			<Container className="w-full relative z-10">
 				<div className="flex flex-col space-y-4 md:space-y-8">
-					<HomePersonalizedRows />
+					<HomePersonalizedRows section="continue-watching" />
+
+					<DataRow
+						endpoint="tv/popular"
+						text="Popular Tonight"
+						type="tv"
+						viewAllLink="/browse/popular-tonight"
+						initialData={tvPopular as unknown as Show[]}
+					/>
+
+					<HomePersonalizedRows section="saved" />
 
 					{/* Pre-fetched rows */}
 					<DataRow
@@ -66,14 +76,6 @@ function HomePageContent({
 						type="tv"
 						viewAllLink="/browse/binge-worthy-series"
 						initialData={trendingTV as unknown as Show[]}
-					/>
-
-					<DataRow
-						endpoint="tv/popular"
-						text="Crowd Favorites: TV"
-						type="tv"
-						viewAllLink="/browse/crowd-favorites-tv"
-						initialData={tvPopular as unknown as Show[]}
 					/>
 
 					<Suspense fallback={<MediaLoader withHeader />}>
