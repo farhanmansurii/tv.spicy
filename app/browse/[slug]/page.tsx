@@ -16,6 +16,13 @@ const categoryMap: Record<
     string,
     { endpoint: string; title: string; type: 'tv' | 'movie'; description: string; label: string }
 > = {
+	'popular-tonight': {
+		endpoint: 'tv/popular',
+		title: 'Popular Tonight',
+		label: 'Tonight',
+		type: 'tv',
+		description: 'Popular TV shows audiences are watching right now',
+	},
     'binge-worthy-series': {
         endpoint: 'trending/tv/week',
         title: 'Binge-Worthy Series',
@@ -23,13 +30,20 @@ const categoryMap: Record<
         type: 'tv',
         description: 'Discover the most trending TV series this week',
     },
-    'crowd-favorites-tv': {
+	'crowd-favorites-tv': {
         endpoint: 'tv/popular',
         title: 'Crowd Favorites',
         label: 'Television',
         type: 'tv',
         description: 'Popular TV shows loved by audiences worldwide',
-    },
+	},
+	'airing-this-week': {
+		endpoint: 'tv/on_the_air',
+		title: 'Airing This Week',
+		label: 'On Television',
+		type: 'tv',
+		description: 'TV shows with new episodes airing this week',
+	},
     'critically-acclaimed-tv': {
         endpoint: 'tv/top_rated',
         title: 'Critically Acclaimed',
@@ -44,13 +58,20 @@ const categoryMap: Record<
         type: 'movie',
         description: 'The most trending movies this week',
     },
-    'fresh-in-theaters': {
+	'fresh-in-theaters': {
         endpoint: 'movie/now_playing',
         title: 'Fresh in Theaters',
         label: 'New Releases',
         type: 'movie',
         description: 'Movies currently playing in theaters',
-    },
+	},
+	'cult-classics-fan-favorites': {
+		endpoint: 'movie/popular',
+		title: 'Cult Classics & Fan Favorites',
+		label: 'Audience Favorites',
+		type: 'movie',
+		description: 'Popular movies audiences keep coming back to',
+	},
     'cinema-hall-of-fame': {
         endpoint: 'movie/top_rated',
         title: 'Hall of Fame',

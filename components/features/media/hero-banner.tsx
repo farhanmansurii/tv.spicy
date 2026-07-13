@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { tmdbImage } from '@/lib/tmdb-image';
+import { tmdbImage, tmdbImageSrcSet } from '@/lib/tmdb-image';
 import { StarIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/store/mediaQueryStore';
@@ -26,6 +26,7 @@ interface HeroBannerProps {
 	loading?: 'eager' | 'lazy';
 	priority?: boolean;
 	isActive?: boolean;
+	prefersReducedMotion?: boolean;
 }
 
 export function HeroBanner({
@@ -35,6 +36,7 @@ export function HeroBanner({
 	loading = 'lazy',
 	priority = false,
 	isActive = true,
+	prefersReducedMotion = false,
 }: HeroBannerProps) {
 	const isMobile = useMediaQuery();
 	const [imageLoaded, setImageLoaded] = useState(false);
@@ -104,21 +106,21 @@ export function HeroBanner({
 		}
 	}, [handleImageLoad]);
 
-	// Ken Burns: slow zoom on active slide (disabled on detail pages to save GPU)
+	// Ken Burns is decorative only and must not run for reduced-motion users.
 	useEffect(() => {
 		if (isDetailsPage || !imageContainerRef.current) return;
-		if (isActive) {
+		if (isActive && !prefersReducedMotion) {
 			imageContainerRef.current.style.transform = 'scale(1.08)';
 		} else {
 			imageContainerRef.current.style.transform = 'scale(1)';
 		}
-	}, [isActive, isDetailsPage]);
+	}, [isActive, isDetailsPage, prefersReducedMotion]);
 
 	return (
 		<section
 			className={cn(
 				'relative w-full overflow-hidden bg-background',
-				'h-[76dvh] min-h-[560px] max-h-[780px] md:h-[80dvh] md:min-h-[620px] lg:h-[84dvh]'
+				'h-[62dvh] min-h-[430px] max-h-[620px] md:h-[72dvh] md:min-h-[540px] lg:max-h-[760px]'
 			)}
 		>
 			{/* Background Image with Ken Burns */}
@@ -130,7 +132,7 @@ export function HeroBanner({
 					<div
 						ref={imageContainerRef}
 						className={cn(
-							'absolute inset-0 transition-transform duration-[12000ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+							'absolute inset-0 transition-transform duration-[12000ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
 							imageLoaded ? 'opacity-100' : 'opacity-0'
 						)}
 						style={{ willChange: imageLoaded ? 'transform' : 'auto' }}
@@ -141,6 +143,8 @@ export function HeroBanner({
 								currentImage,
 								isDetailsPage ? 'w1280' : isMobile ? 'w780' : 'w1280'
 							)}
+							srcSet={tmdbImageSrcSet(currentImage)}
+							sizes="100vw"
 							alt={`${title} backdrop`}
 							loading={priority ? 'eager' : loading}
 							fetchPriority={priority ? 'high' : undefined}
@@ -181,14 +185,14 @@ export function HeroBanner({
 			<div className="absolute inset-0 z-10 flex flex-col justify-end">
 				<Container
 					variant={isDetailsPage ? 'detail' : 'default'}
-					className="pb-12 md:pb-20 lg:pb-28"
+					className="pb-8 md:pb-12 lg:pb-16"
 				>
 					<div
 						ref={contentRef}
 						className={cn(
 							'max-w-4xl flex flex-col items-center md:items-start text-center md:text-left',
 							shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
-							'transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]'
+							'motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none transition-all duration-500 ease-out'
 						)}
 					>
 						{/* Metadata — clean, minimal, Apple TV style */}
