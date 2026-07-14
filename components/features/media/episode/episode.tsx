@@ -5,7 +5,7 @@ import useProviderStore from '@/store/providerStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import useTVShowStore from '@/store/recentsStore';
 
-import { PROVIDERS, getProvider } from './providers';
+import { ENABLED_PROVIDERS, getProvider } from './providers';
 import { usePlaybackProgress } from './use-playback-progress';
 import { PlayerControls } from './player-controls';
 
@@ -48,6 +48,12 @@ export default function Episode({
 	const [iframeKey, setIframeKey] = useState(0);
 	const [activeResumeSeconds, setActiveResumeSeconds] = useState(0);
 	const [hasResumed, setHasResumed] = useState(false);
+	const currentProvider = getProvider(selectedProvider);
+
+	// Migrate persisted selections when a provider has been disabled.
+	useEffect(() => {
+		if (currentProvider.name !== selectedProvider) setProvider(currentProvider.name);
+	}, [currentProvider.name, selectedProvider, setProvider]);
 
 	// Reset resume chip whenever the user switches providers so they can choose
 	// to resume on the new provider too.
@@ -95,7 +101,7 @@ export default function Episode({
 	// URLs only rebuild (and the iframe only remounts) on an explicit user action.
 	const sources = useMemo(
 		() =>
-			PROVIDERS.map((provider) => ({
+			ENABLED_PROVIDERS.map((provider) => ({
 				name: provider.name,
 				label: provider.label,
 				url: provider.buildUrl({
@@ -111,7 +117,6 @@ export default function Episode({
 	);
 
 	const currentSource = sources.find((s) => s.name === selectedProvider) ?? sources[0];
-	const currentProvider = getProvider(selectedProvider);
 
 	// ── Progress tracking ────────────────────────────────────────────────────
 	usePlaybackProgress({
@@ -128,9 +133,8 @@ export default function Episode({
 	return (
 		<>
 			<PlayerControls
-				providers={PROVIDERS}
-				selectedProvider={selectedProvider}
-				currentLabel={currentProvider.label}
+				providers={ENABLED_PROVIDERS}
+				selectedProvider={currentProvider.name}
 				onProviderChange={setProvider}
 				savedPositionSeconds={savedPositionSeconds}
 				onResume={handleResume}

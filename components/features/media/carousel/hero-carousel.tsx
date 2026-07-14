@@ -13,7 +13,6 @@ import {
 import { Show } from '@/lib/types';
 import { HeroBanner } from '@/components/features/media/hero-banner';
 import { cn } from '@/lib/utils';
-import { tmdbImage } from '@/lib/tmdb-image';
 import type { TMDBImagesResponse, TMDBMovie, TMDBTVShow } from '@/lib/types/tmdb';
 
 export interface HeroCarouselProps {
@@ -110,7 +109,8 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 				className="w-full"
 				aria-label="Featured titles"
 				onPointerDown={(event) => {
-					if ((event.target as HTMLElement).closest('button[aria-label*="autoplay"]')) return;
+					if ((event.target as HTMLElement).closest('button[aria-label*="autoplay"]'))
+						return;
 					pauseOnInteraction();
 				}}
 				opts={{ loop: true, align: 'start' }}
@@ -168,48 +168,47 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 							type="button"
 							onClick={toggleAutoplay}
 							aria-pressed={isPaused}
-							aria-label={isPaused ? 'Resume featured title autoplay' : 'Pause featured title autoplay'}
+							aria-label={
+								isPaused
+									? 'Resume featured title autoplay'
+									: 'Pause featured title autoplay'
+							}
 							className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-background/55 text-white backdrop-blur-md transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 						>
-							{isPaused ? <PlayIcon size={16} weight="fill" /> : <PauseIcon size={16} weight="fill" />}
+							{isPaused ? (
+								<PlayIcon size={16} weight="fill" />
+							) : (
+								<PauseIcon size={16} weight="fill" />
+							)}
 						</button>
 					</div>
 				)}
 			</Carousel>
 
-			<div className="border-t border-white/[0.08] bg-background/95 px-4 py-3 md:px-8 md:py-4">
-				<div className="mx-auto flex max-w-7xl snap-x snap-mandatory gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+			<div className="pointer-events-none absolute bottom-6 left-1/2 z-20 -translate-x-1/2">
+				<div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-black/45 px-3 py-2 backdrop-blur-md">
 					{validShows.map((show, index) => {
 						const isActive = index === activeIndex;
 						const title = show.title || show.name || 'Untitled';
-						const year = (show.release_date || show.first_air_date)?.slice(0, 4);
-						const thumbnail = show.poster_path || show.backdrop_path;
 						return (
 							<button
 								key={show.id}
 								type="button"
 								onClick={() => scrollTo(index)}
 								className={cn(
-									'flex min-w-[150px] snap-start items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 md:min-w-0 md:flex-1',
-									isActive
-										? 'border-white/35 bg-white/12 text-white'
-										: 'border-white/10 bg-white/[0.04] text-white/60 hover:border-white/25 hover:text-white'
+									'h-2 rounded-full transition-[width,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+									isActive ? 'w-6 bg-white' : 'w-2 bg-white/35 hover:bg-white/70'
 								)}
-								aria-label={`Show featured title ${title}${year ? `, ${year}` : ''}`}
+								aria-label={`Show featured title ${title}`}
 								aria-current={isActive ? 'true' : undefined}
-							>
-								{thumbnail ? <img src={tmdbImage(thumbnail, 'w185')} alt="" className="h-12 w-9 shrink-0 rounded object-cover" loading="lazy" decoding="async" /> : null}
-								<span className="min-w-0">
-									<span className="block truncate text-sm font-semibold">{title}</span>
-									{year ? <span className="block text-xs text-white/45">{year}</span> : null}
-								</span>
-							</button>
+							/>
 						);
 					})}
 				</div>
 			</div>
 			<div className="sr-only" aria-live="polite">
-				Selected featured title: {validShows[activeIndex]?.title || validShows[activeIndex]?.name}
+				Selected featured title:{' '}
+				{validShows[activeIndex]?.title || validShows[activeIndex]?.name}
 			</div>
 		</div>
 	);

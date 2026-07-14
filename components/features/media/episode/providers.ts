@@ -32,6 +32,10 @@ export interface ParsedProgressEvent {
 export interface ProviderConfig {
 	name: string;
 	label: string;
+	/** Disabled providers remain documented here but are never offered to users. */
+	enabled?: boolean;
+	/** Short maintenance note explaining why a provider is disabled. */
+	disabledReason?: string;
 	buildUrl: (params: ProviderUrlParams) => string;
 	/**
 	 * If set, this provider sends postMessage progress events from this exact origin.
@@ -340,6 +344,8 @@ export const PROVIDERS: ProviderConfig[] = [
 	{
 		name: 'autoembed',
 		label: 'AutoEmbed',
+		enabled: false,
+		disabledReason: 'Configured host failed DNS verification on 2026-07-14.',
 		buildUrl({ type, id, seasonNumber, episodeNumber }) {
 			return type === 'movie'
 				? `https://player.autoembed.cc/embed/movie/${id}`
@@ -354,6 +360,8 @@ export const PROVIDERS: ProviderConfig[] = [
 	{
 		name: 'rivestream',
 		label: 'Rivestream',
+		enabled: false,
+		disabledReason: 'Provider domain failed DNS verification on 2026-07-14.',
 		buildUrl({ type, id, seasonNumber, episodeNumber }) {
 			return type === 'movie'
 				? `https://rivestream.org/embed?type=movie&id=${encodeURIComponent(id)}`
@@ -438,7 +446,7 @@ export const PROVIDERS: ProviderConfig[] = [
 			const base =
 				type === 'movie'
 					? `https://cinesrc.st/embed/movie/${id}`
-					: `https://cinesrc.st/embed/tv/${id}/${seasonNumber}/${episodeNumber}`;
+					: `https://cinesrc.st/embed/tv/${id}?s=${encodeURIComponent(String(seasonNumber))}&e=${encodeURIComponent(String(episodeNumber))}`;
 			return appendResume(base, resumeSeconds, 'startAt');
 		},
 	},
@@ -449,6 +457,8 @@ export const PROVIDERS: ProviderConfig[] = [
 	{
 		name: 'toustream',
 		label: 'TouStream',
+		enabled: false,
+		disabledReason: 'Cloudflare response blocks third-party framing (verified 2026-07-14).',
 		buildUrl({ type, id, seasonNumber, episodeNumber, resumeSeconds }) {
 			const base =
 				type === 'movie'
@@ -555,7 +565,10 @@ export const PROVIDERS: ProviderConfig[] = [
 	},
 ];
 
-/** Look up a provider by name. Falls back to the first provider. */
+/** Providers safe to expose in the manual source selector. */
+export const ENABLED_PROVIDERS = PROVIDERS.filter((provider) => provider.enabled !== false);
+
+/** Look up an enabled provider by name. Falls back to the first enabled provider. */
 export function getProvider(name: string): ProviderConfig {
-	return PROVIDERS.find((p) => p.name === name) ?? PROVIDERS[0];
+	return ENABLED_PROVIDERS.find((provider) => provider.name === name) ?? ENABLED_PROVIDERS[0];
 }

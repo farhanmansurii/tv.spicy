@@ -53,7 +53,10 @@ function ResumeChip({ seconds, onResume }: ResumeChipProps) {
 			)}
 			title={`Resume from ${formatTimestamp(seconds)}`}
 		>
-			<ArrowCounterClockwiseIcon size={13} className="text-white/40 group-hover/resume:text-white/70 transition-colors duration-200" />
+			<ArrowCounterClockwiseIcon
+				size={13}
+				className="text-white/40 group-hover/resume:text-white/70 transition-colors duration-200"
+			/>
 			<span className="hidden sm:inline">Resume</span>
 			<span className="font-mono tracking-tight text-white/60 group-hover/resume:text-white transition-colors duration-200">
 				{formatTimestamp(seconds)}
@@ -67,7 +70,6 @@ function ResumeChip({ seconds, onResume }: ResumeChipProps) {
 interface PlayerControlsProps {
 	providers: ProviderConfig[];
 	selectedProvider: string;
-	currentLabel: string;
 	onProviderChange: (name: string) => void;
 	/** Seconds of saved progress. Shows a resume chip when > 30. */
 	savedPositionSeconds: number;
@@ -85,7 +87,6 @@ interface PlayerControlsProps {
 export function PlayerControls({
 	providers,
 	selectedProvider,
-	currentLabel,
 	onProviderChange,
 	savedPositionSeconds,
 	onResume,
@@ -101,34 +102,39 @@ export function PlayerControls({
 		<div className="flex flex-wrap items-center justify-between gap-2">
 			{/* Left side: provider selector + resume chip */}
 			<div className="flex min-w-0 flex-1 items-center gap-2">
-				<Select value={selectedProvider} onValueChange={onProviderChange}>
-					<SelectTrigger
-						className={cn(
-							glassPill,
-							'h-9 w-fit min-w-0 max-w-[52vw]',
-							'flex items-center gap-2 px-3',
-							'border-0 focus:ring-0 focus:ring-offset-0',
-							'text-xs text-white/80',
-							'transition-[background-color,color,transform] duration-200',
-							'hover:bg-white/[0.10] active:scale-[0.98]',
-							'md:h-10 md:max-w-none md:px-4'
-						)}
-					>
-						<GearIcon size={16} className="shrink-0 text-white/40" />
-						<SelectValue className="truncate text-xs font-medium text-white/80 md:text-sm" />
-					</SelectTrigger>
-					<SelectContent className="max-h-[300px] rounded-xl bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] p-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
-						{providers.map((provider) => (
-							<SelectItem
-								key={provider.name}
-								value={provider.name}
-								className="text-xs rounded-lg focus:bg-white/[0.08] focus:text-white hover:bg-white/[0.06] hover:text-white/90"
-							>
-								{provider.label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<div className="flex min-w-0 items-center gap-2">
+					<span className="hidden text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40 sm:inline">
+						Source
+					</span>
+					<Select value={selectedProvider} onValueChange={onProviderChange}>
+						<SelectTrigger
+							className={cn(
+								glassPill,
+								'h-9 w-fit min-w-0 max-w-[52vw]',
+								'flex items-center gap-2 px-3',
+								'border-0 focus:ring-0 focus:ring-offset-0',
+								'text-xs text-white/80',
+								'transition-[background-color,color,transform] duration-200',
+								'hover:bg-white/[0.10] active:scale-[0.98]',
+								'md:h-10 md:max-w-none md:px-4'
+							)}
+						>
+							<GearIcon size={16} className="shrink-0 text-white/40" />
+							<SelectValue className="truncate text-xs font-medium text-white/80 md:text-sm" />
+						</SelectTrigger>
+						<SelectContent className="max-h-[300px] rounded-xl bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] p-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
+							{providers.map((provider) => (
+								<SelectItem
+									key={provider.name}
+									value={provider.name}
+									className="text-xs rounded-lg focus:bg-white/[0.08] focus:text-white hover:bg-white/[0.06] hover:text-white/90"
+								>
+									{provider.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 
 				{showResumeChip && (
 					<ResumeChip seconds={savedPositionSeconds} onResume={onResume} />
@@ -158,7 +164,10 @@ export function PlayerControls({
 						title="Next episode"
 					>
 						<span className="hidden md:inline text-xs font-semibold">Next</span>
-						<CaretRightIcon size={18} className="transition-transform group-hover/next:translate-x-0.5" />
+						<CaretRightIcon
+							size={18}
+							className="transition-transform group-hover/next:translate-x-0.5"
+						/>
 					</button>
 
 					{isSticky && onCloseSticky && (
