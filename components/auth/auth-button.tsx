@@ -55,7 +55,7 @@ export function AuthButton() {
 					'bg-foreground/[0.03] hover:bg-foreground/[0.06] active:bg-foreground/[0.08]',
 					'border border-border/40 hover:border-border/60',
 					'transition-all duration-300 ease-out',
-					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2',
+					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 					'touch-manipulation',
 					'group'
 				)}
@@ -92,7 +92,7 @@ export function AuthButton() {
 						'bg-foreground/[0.03] hover:bg-foreground/[0.06] active:bg-foreground/[0.08]',
 						'border border-border/40 hover:border-border/60',
 						'transition-all duration-300 ease-out',
-						'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2',
+						'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 						'touch-manipulation',
 						'group',
 						'p-0.5'

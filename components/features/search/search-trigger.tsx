@@ -117,7 +117,7 @@ export function SearchTrigger({ variant = 'default', className }: SearchTriggerP
 					'w-11 h-11',
 					'text-white/60 hover:text-white/90',
 					'transition-colors duration-200',
-					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 					'touch-manipulation select-none',
 					className
 				)}

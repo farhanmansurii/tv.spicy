@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { NavigationItem } from './navigation-data';
 
@@ -12,7 +11,7 @@ interface HeaderNavigationProps {
 
 export function HeaderNavigation({ items, isActive }: HeaderNavigationProps) {
 	return (
-		<ul className="relative flex items-center gap-1 rounded-full bg-white/[0.04] p-1 border border-white/[0.06]">
+		<ul className="relative flex items-center gap-7">
 			{items.map((item) => {
 				const active = isActive(item.href);
 
@@ -22,23 +21,23 @@ export function HeaderNavigation({ items, isActive }: HeaderNavigationProps) {
 							href={item.href}
 							aria-current={active ? 'page' : undefined}
 							className={cn(
-								'relative z-10 flex items-center px-4 py-1.5 rounded-full',
-								'text-[13px] font-medium tracking-tight',
+								'relative flex h-11 items-center rounded-md px-0.5',
+								'text-[13px] font-medium tracking-[-0.01em]',
 								'transition-colors duration-200 ease-out',
-								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 								'select-none',
-								active ? 'text-white' : 'text-white/45 hover:text-white/80'
+								active ? 'text-white' : 'text-white/55 hover:text-white/90'
 							)}
 						>
 							{item.label}
-						</Link>
-						{active && (
-							<motion.div
-								layoutId="headerNavIndicator"
-								className="absolute inset-0 rounded-full bg-white/10 border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
-								transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+							<span
+								aria-hidden="true"
+								className={cn(
+									'absolute inset-x-0 bottom-1.5 mx-auto h-[2px] w-4 rounded-full bg-white transition-opacity duration-200',
+									active ? 'opacity-100' : 'opacity-0'
+								)}
 							/>
-						)}
+						</Link>
 					</li>
 				);
 			})}

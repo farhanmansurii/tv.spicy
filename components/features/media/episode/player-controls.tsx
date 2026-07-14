@@ -10,7 +10,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import type { ProviderConfig } from './providers';
+import type { ProviderSummary } from './providers';
 
 /* ── Shared glass surface styles (matches header exactly) ── */
 const glassPill =
@@ -68,9 +68,9 @@ function ResumeChip({ seconds, onResume }: ResumeChipProps) {
 // ── PlayerControls ────────────────────────────────────────────────────────────
 
 interface PlayerControlsProps {
-	providers: ProviderConfig[];
+	providers: ProviderSummary[];
 	selectedProvider: string;
-	onProviderChange: (name: string) => void;
+	onProviderChange: (id: string) => void;
 	/** Seconds of saved progress. Shows a resume chip when > 30. */
 	savedPositionSeconds: number;
 	/** Called when the user clicks the resume chip. */
@@ -125,8 +125,8 @@ export function PlayerControls({
 						<SelectContent className="max-h-[300px] rounded-xl bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] p-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
 							{providers.map((provider) => (
 								<SelectItem
-									key={provider.name}
-									value={provider.name}
+									key={provider.id}
+									value={provider.id}
 									className="text-xs rounded-lg focus:bg-white/[0.08] focus:text-white hover:bg-white/[0.06] hover:text-white/90"
 								>
 									{provider.label}

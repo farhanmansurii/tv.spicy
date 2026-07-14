@@ -341,7 +341,6 @@
 	contain-intrinsic-size: auto 300px;
 }
 
-
 /* Custom scrollbar for specific containers */
 .custom-scrollbar {
 	scrollbar-width: thin;
@@ -456,6 +455,128 @@
 	backdrop-filter: blur(24px) saturate(180%);
 	-webkit-backdrop-filter: blur(24px) saturate(180%);
 	border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Adaptive navigation glass: neutral center, geometry-led edge light. */
+.liquid-glass-surface {
+	--glass-touch-x: 50%;
+	--glass-touch-y: 50%;
+	color: rgba(255, 255, 255, 0.96);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.22);
+	transition: box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.liquid-glass-dimmer,
+.liquid-glass-optics,
+.liquid-glass-rim,
+.liquid-glass-touch {
+	pointer-events: none;
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+
+.liquid-glass-dimmer {
+	z-index: 0;
+	background: linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.105),
+		rgba(255, 255, 255, 0.06)
+	);
+	transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.liquid-glass-optics {
+	z-index: 1;
+	background:
+		radial-gradient(120% 75% at 48% -18%, rgba(255, 255, 255, 0.17), transparent 58%),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+	backdrop-filter: blur(15px) saturate(135%) contrast(1.04);
+	-webkit-backdrop-filter: blur(15px) saturate(135%) contrast(1.04);
+	transition: background 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.liquid-glass-rim {
+	z-index: 2;
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.24),
+		inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+		inset 1px 0 0 rgba(255, 255, 255, 0.055),
+		inset -1px 0 0 rgba(255, 255, 255, 0.055);
+}
+
+.liquid-glass-touch {
+	z-index: 3;
+	opacity: 0;
+	background: radial-gradient(
+		circle 34px at var(--glass-touch-x) var(--glass-touch-y),
+		rgba(255, 255, 255, 0.2),
+		rgba(255, 255, 255, 0.055) 42%,
+		transparent 72%
+	);
+	transition: opacity 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.liquid-glass-surface[data-pressed='true'] {
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+}
+
+.liquid-glass-surface[data-pressed='true'] .liquid-glass-touch {
+	opacity: 1;
+}
+
+.liquid-glass-surface[data-strength='protective'] .liquid-glass-dimmer {
+	background: rgba(28, 28, 30, 0.76);
+}
+
+.liquid-glass-surface[data-strength='protective'] .liquid-glass-optics {
+	background:
+		radial-gradient(120% 75% at 48% -18%, rgba(255, 255, 255, 0.15), transparent 58%),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025));
+	backdrop-filter: blur(20px) saturate(125%) contrast(1.06);
+	-webkit-backdrop-filter: blur(20px) saturate(125%) contrast(1.06);
+}
+
+.liquid-glass-surface[data-tone='light'] {
+	color: rgba(12, 12, 14, 0.92);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.14);
+}
+
+.liquid-glass-surface[data-tone='light'] .liquid-glass-dimmer {
+	background: rgba(255, 255, 255, 0.24);
+}
+
+.liquid-glass-surface[data-tone='light'] .liquid-glass-rim {
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.5),
+		inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.liquid-glass-dimmer {
+		background: rgba(28, 28, 30, 0.94) !important;
+	}
+
+	.liquid-glass-optics {
+		background: rgba(255, 255, 255, 0.035) !important;
+	}
+}
+
+.reduce-transparency .liquid-glass-dimmer {
+	background: rgba(28, 28, 30, 0.92) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.liquid-glass-surface,
+	.liquid-glass-surface * {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+
+	.liquid-glass-touch {
+		display: none;
+	}
 }
 
 /* Pure black cinematic background */

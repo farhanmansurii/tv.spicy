@@ -5,7 +5,7 @@ import useProviderStore from '@/store/providerStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import useTVShowStore from '@/store/recentsStore';
 
-import { ENABLED_PROVIDERS, getProvider } from './providers';
+import { listEnabledProviders, resolveProvider } from './providers';
 import { usePlaybackProgress } from './use-playback-progress';
 import { PlayerControls } from './player-controls';
 
@@ -48,12 +48,13 @@ export default function Episode({
 	const [iframeKey, setIframeKey] = useState(0);
 	const [activeResumeSeconds, setActiveResumeSeconds] = useState(0);
 	const [hasResumed, setHasResumed] = useState(false);
-	const currentProvider = getProvider(selectedProvider);
+	const currentProvider = resolveProvider(selectedProvider);
 
-	// Migrate persisted selections when a provider has been disabled.
+	// Migrate persisted selections when a provider is unknown, candidate, or
+	// disabled — resolveProvider already fell back to the default.
 	useEffect(() => {
-		if (currentProvider.name !== selectedProvider) setProvider(currentProvider.name);
-	}, [currentProvider.name, selectedProvider, setProvider]);
+		if (currentProvider.id !== selectedProvider) setProvider(currentProvider.id);
+	}, [currentProvider.id, selectedProvider, setProvider]);
 
 	// Reset resume chip whenever the user switches providers so they can choose
 	// to resume on the new provider too.
@@ -96,27 +97,30 @@ export default function Episode({
 		setIframeKey((k) => k + 1);
 	}, [savedPositionSeconds]);
 
-	// ── Build provider URLs ──────────────────────────────────────────────────
-	// `activeResumeSeconds` and `iframeKey` are intentionally in deps here so
-	// URLs only rebuild (and the iframe only remounts) on an explicit user action.
-	const sources = useMemo(
+	// ── Build the current provider URL ───────────────────────────────────────
+	// Only the selected provider's URL is built. `activeResumeSeconds` and
+	// `iframeKey` are intentionally in deps here so the URL only rebuilds (and
+	// the iframe only remounts) on an explicit user action.
+	const currentUrl = useMemo(
 		() =>
-			ENABLED_PROVIDERS.map((provider) => ({
-				name: provider.name,
-				label: provider.label,
-				url: provider.buildUrl({
-					type: type as 'movie' | 'tv',
-					id,
-					seasonNumber: numericSeasonNumber,
-					episodeNumber: numericEpisodeNumber,
-					resumeSeconds: activeResumeSeconds,
-				}),
-			})),
+			currentProvider.buildUrl({
+				type: type as 'movie' | 'tv',
+				id,
+				seasonNumber: numericSeasonNumber,
+				episodeNumber: numericEpisodeNumber,
+				resumeSeconds: activeResumeSeconds,
+			}),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[type, id, numericSeasonNumber, numericEpisodeNumber, activeResumeSeconds, iframeKey]
+		[
+			currentProvider.id,
+			type,
+			id,
+			numericSeasonNumber,
+			numericEpisodeNumber,
+			activeResumeSeconds,
+			iframeKey,
+		]
 	);
-
-	const currentSource = sources.find((s) => s.name === selectedProvider) ?? sources[0];
 
 	// ── Progress tracking ────────────────────────────────────────────────────
 	usePlaybackProgress({
@@ -125,7 +129,7 @@ export default function Episode({
 		numericMediaId,
 		numericSeasonNumber,
 		numericEpisodeNumber,
-		selectedProvider,
+		provider: currentProvider,
 		currentWatchItem,
 		updatePlaybackProgress,
 	});
@@ -133,8 +137,8 @@ export default function Episode({
 	return (
 		<>
 			<PlayerControls
-				providers={ENABLED_PROVIDERS}
-				selectedProvider={currentProvider.name}
+				providers={listEnabledProviders()}
+				selectedProvider={currentProvider.id}
 				onProviderChange={setProvider}
 				savedPositionSeconds={savedPositionSeconds}
 				onResume={handleResume}
@@ -153,7 +157,7 @@ export default function Episode({
 						allowFullScreen
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
 						className="block h-full w-full bg-transparent"
-						src={currentSource.url}
+						src={currentUrl}
 						title="Media Player"
 						loading="eager"
 					/>

@@ -1,8 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import Autoplay from 'embla-carousel-autoplay';
-import { PauseIcon, PlayIcon } from '@phosphor-icons/react';
 import {
 	Carousel,
 	CarouselContent,
@@ -26,17 +24,7 @@ export interface HeroCarouselProps {
 export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 	const [api, setApi] = React.useState<import('@/components/ui/carousel').CarouselApi>();
 	const [activeIndex, setActiveIndex] = React.useState(0);
-	const [isPaused, setIsPaused] = React.useState(false);
 	const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
-	const AUTOPLAY_DELAY = 8000;
-
-	const plugin = React.useRef(
-		Autoplay({
-			delay: AUTOPLAY_DELAY,
-			playOnInit: false,
-			stopOnInteraction: true,
-		})
-	);
 
 	const validShows = React.useMemo(
 		() => shows?.filter((show) => show.backdrop_path || show.poster_path).slice(0, 5) || [],
@@ -54,12 +42,6 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 
 	React.useEffect(() => {
 		if (!api) return;
-		if (validShows.length < 2 || prefersReducedMotion || isPaused) plugin.current.stop();
-		else plugin.current.play();
-	}, [api, isPaused, prefersReducedMotion, validShows.length]);
-
-	React.useEffect(() => {
-		if (!api) return;
 		const updateSelection = () => setActiveIndex(api.selectedScrollSnap());
 		updateSelection();
 		api.on('select', updateSelection);
@@ -70,49 +52,21 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 		};
 	}, [api]);
 
-	const pauseOnInteraction = React.useCallback(() => {
-		plugin.current.stop();
-		setIsPaused(true);
-	}, []);
-
 	const scrollTo = React.useCallback(
 		(index: number) => {
-			plugin.current.stop();
-			setIsPaused(true);
 			api?.scrollTo(index);
 		},
 		[api]
 	);
 
-	const toggleAutoplay = React.useCallback(() => {
-		setIsPaused((paused) => {
-			const nextPaused = !paused;
-			if (nextPaused || prefersReducedMotion) plugin.current.stop();
-			else plugin.current.play();
-			return nextPaused;
-		});
-	}, [prefersReducedMotion]);
-
 	if (validShows.length === 0) return null;
 
 	return (
-		<div
-			className="relative w-full group"
-			onMouseEnter={() => plugin.current.stop()}
-			onMouseLeave={() => {
-				if (!isPaused && !prefersReducedMotion) plugin.current.play();
-			}}
-		>
+		<div className="relative w-full group">
 			<Carousel
 				setApi={setApi}
-				plugins={[plugin.current]}
 				className="w-full"
 				aria-label="Featured titles"
-				onPointerDown={(event) => {
-					if ((event.target as HTMLElement).closest('button[aria-label*="autoplay"]'))
-						return;
-					pauseOnInteraction();
-				}}
 				opts={{ loop: true, align: 'start' }}
 			>
 				<CarouselContent className="-ml-0">
@@ -155,38 +109,21 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 				</CarouselContent>
 
 				{validShows.length > 1 && (
-					<div className="absolute right-4 bottom-5 z-20 flex gap-2 lg:right-8">
+					<div className="absolute right-4 bottom-5 z-20 hidden gap-2 md:flex lg:right-8">
 						<CarouselPrevious
 							variant="ghost"
-							className="static hidden h-10 w-10 translate-y-0 rounded-full border-white/10 bg-background/55 text-white backdrop-blur-md hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black md:inline-flex"
+							className="static h-10 w-10 translate-y-0 rounded-full border-white/10 bg-background/55 text-white backdrop-blur-md hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 						/>
 						<CarouselNext
 							variant="ghost"
-							className="static hidden h-10 w-10 translate-y-0 rounded-full border-white/10 bg-background/55 text-white backdrop-blur-md hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black md:inline-flex"
+							className="static h-10 w-10 translate-y-0 rounded-full border-white/10 bg-background/55 text-white backdrop-blur-md hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 						/>
-						<button
-							type="button"
-							onClick={toggleAutoplay}
-							aria-pressed={isPaused}
-							aria-label={
-								isPaused
-									? 'Resume featured title autoplay'
-									: 'Pause featured title autoplay'
-							}
-							className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-background/55 text-white backdrop-blur-md transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-						>
-							{isPaused ? (
-								<PlayIcon size={16} weight="fill" />
-							) : (
-								<PauseIcon size={16} weight="fill" />
-							)}
-						</button>
 					</div>
 				)}
 			</Carousel>
 
-			<div className="pointer-events-none absolute bottom-6 left-1/2 z-20 -translate-x-1/2">
-				<div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-black/45 px-3 py-2 backdrop-blur-md">
+			<div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 md:bottom-6">
+				<div className="pointer-events-auto flex items-center gap-1.5 md:gap-2 md:rounded-full md:border md:border-white/10 md:bg-black/45 md:px-3 md:py-2 md:backdrop-blur-md">
 					{validShows.map((show, index) => {
 						const isActive = index === activeIndex;
 						const title = show.title || show.name || 'Untitled';
@@ -196,8 +133,10 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 								type="button"
 								onClick={() => scrollTo(index)}
 								className={cn(
-									'h-2 rounded-full transition-[width,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
-									isActive ? 'w-6 bg-white' : 'w-2 bg-white/35 hover:bg-white/70'
+									'h-1.5 rounded-full transition-[width,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black md:h-2',
+									isActive
+										? 'w-5 bg-white md:w-6'
+										: 'w-1.5 bg-white/40 hover:bg-white/70 md:w-2'
 								)}
 								aria-label={`Show featured title ${title}`}
 								aria-current={isActive ? 'true' : undefined}

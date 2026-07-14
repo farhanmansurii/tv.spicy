@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 
 import type { ContinueWatchingItem } from '@/lib/continue-watching';
-import { getProvider } from './providers';
+import { getProgressAdapter, type ResolvedProvider } from './providers';
 
 interface UsePlaybackProgressParams {
 	id: string;
@@ -11,7 +11,7 @@ interface UsePlaybackProgressParams {
 	numericMediaId: number;
 	numericSeasonNumber: number;
 	numericEpisodeNumber: number;
-	selectedProvider: string;
+	provider: ResolvedProvider;
 	currentWatchItem: ContinueWatchingItem | undefined;
 	updatePlaybackProgress: (input: {
 		mediaId: string;
@@ -27,9 +27,9 @@ interface UsePlaybackProgressParams {
 /**
  * Handles all playback progress tracking in one place:
  *
- * 1. postMessage tracking — for providers that emit accurate player events
- *    (e.g. Vidking). Wired up automatically when the provider has a
- *    `postMessageOrigin` + `parseProgressMessage` config.
+ * 1. postMessage tracking — for providers with a progress adapter. Messages
+ *    are accepted only from the provider's configured origin; malformed
+ *    payloads are ignored by the adapter.
  *
  * 2. Time-based fallback — for every other provider. Ticks every 15 s and
  *    estimates position from wall-clock time. Requires `durationSeconds` to
@@ -42,22 +42,21 @@ export function usePlaybackProgress({
 	numericMediaId,
 	numericSeasonNumber,
 	numericEpisodeNumber,
-	selectedProvider,
+	provider,
 	currentWatchItem,
 	updatePlaybackProgress,
 }: UsePlaybackProgressParams): void {
 	const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
+	const progressOrigin = provider.progress?.origin;
+
 	// ── 1. postMessage progress tracking ─────────────────────────────────────
 	useEffect(() => {
-		const provider = getProvider(selectedProvider);
-		if (!provider.postMessageOrigin || !provider.parseProgressMessage) return;
-
-		const origin = provider.postMessageOrigin;
-		const parse = provider.parseProgressMessage;
+		const parse = getProgressAdapter(provider);
+		if (!progressOrigin || !parse) return;
 
 		const handleMessage = (event: MessageEvent) => {
-			if (event.origin !== origin) return;
+			if (event.origin !== progressOrigin) return;
 
 			const parsed = parse(event.data, {
 				id,
@@ -101,12 +100,13 @@ export function usePlaybackProgress({
 				debounceRef.current = null;
 			}
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		id,
 		numericEpisodeNumber,
 		numericMediaId,
 		numericSeasonNumber,
-		selectedProvider,
+		provider.id,
 		type,
 		updatePlaybackProgress,
 	]);
@@ -115,8 +115,7 @@ export function usePlaybackProgress({
 	// Only fires when the current provider has no postMessage support.
 	// Requires `durationSeconds` in the store — skips silently otherwise.
 	useEffect(() => {
-		const provider = getProvider(selectedProvider);
-		if (provider.postMessageOrigin) return; // handled above
+		if (progressOrigin) return; // handled above
 		if (!currentWatchItem) return;
 
 		const duration = currentWatchItem.durationSeconds;
@@ -143,7 +142,8 @@ export function usePlaybackProgress({
 		return () => clearInterval(intervalId);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
-		selectedProvider,
+		provider.id,
+		progressOrigin,
 		// Stable identifiers only — avoids re-subscribing on every progress tick
 		currentWatchItem?.id,
 		currentWatchItem?.durationSeconds,

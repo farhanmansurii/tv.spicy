@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback, memo } from '
 import { useHaptics } from '@/hooks/use-haptics';
 import { motion } from 'framer-motion';
 import { SquaresFourIcon, ListBulletsIcon, WarningCircleIcon } from '@phosphor-icons/react';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { toast } from 'sonner';
@@ -21,7 +21,6 @@ import { EpisodeStrip, type EpisodeViewMode } from './episode-strip';
 
 const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps) => {
 	const haptic = useHaptics();
-	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
@@ -144,9 +143,9 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			const params = new URLSearchParams(searchParams.toString());
 			params.set('season', String(sNum));
 			params.delete('episode');
-			router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+			window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
 		},
-		[haptic, router, pathname, searchParams]
+		[haptic, pathname, searchParams]
 	);
 
 	const onEpisodeClick = useCallback(
@@ -156,9 +155,9 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			const params = new URLSearchParams(searchParams.toString());
 			params.set('season', String(episode.season_number));
 			params.set('episode', String(episode.episode_number));
-			router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+			window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
 		},
-		[router, pathname, searchParams, setActiveEP, addRecentlyWatched]
+		[pathname, searchParams, setActiveEP, addRecentlyWatched]
 	);
 
 	const handleStickyClose = useCallback(() => {
@@ -205,14 +204,13 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			const params = new URLSearchParams(searchParams.toString());
 			params.set('season', String(nextSeason.season_number));
 			params.set('episode', '1');
-			router.push(`${pathname}?${params.toString()}`, { scroll: false });
+			window.history.pushState(null, '', `${pathname}?${params.toString()}`);
 		}
 	}, [
 		activeEP,
 		episodes,
 		activeSeason,
 		validSeasons,
-		router,
 		pathname,
 		searchParams,
 		onEpisodeClick,
