@@ -150,7 +150,7 @@ export default function Episode({
 			/>
 
 			<div className="relative mt-1 w-full rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_4px_20px_rgba(0,0,0,0.35)]">
-				<div className="relative w-full aspect-video overflow-hidden rounded-xl bg-black">
+				<div className="relative w-full h-[50vh] min-h-[280px] max-h-[560px] overflow-hidden rounded-xl bg-black sm:aspect-video sm:h-auto sm:min-h-0">
 					<iframe
 						key={iframeKey}
 						ref={iframeRef}

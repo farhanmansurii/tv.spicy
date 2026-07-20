@@ -24,7 +24,7 @@ import {
 	encodeSegment as enc,
 } from './url-builders';
 
-export const DEFAULT_PROVIDER_ID = 'vidcore';
+export const DEFAULT_PROVIDER_ID = 'cinesrc';
 
 const VIDKING_QUERY = {
 	color: 'ef4444',
@@ -64,8 +64,7 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 		rank: 16,
 		urls: customEmbedUrls(
 			'https://www.vidking.net',
-			(id) =>
-				withQuery(`https://www.vidking.net/embed/movie/${enc(id)}`, VIDKING_QUERY),
+			(id) => withQuery(`https://www.vidking.net/embed/movie/${enc(id)}`, VIDKING_QUERY),
 			(id, s, e) =>
 				withQuery(
 					`https://www.vidking.net/embed/tv/${enc(id)}/${enc(s)}/${enc(e)}`,
@@ -295,11 +294,27 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 		rank: 2,
 		urls: customEmbedUrls(
 			'https://cinesrc.st',
-			(id) => `https://cinesrc.st/embed/movie/${enc(id)}`,
-			// CineSrc uses a query-based TV route, not path segments
-			(id, s, e) => `https://cinesrc.st/embed/tv/${enc(id)}?s=${enc(s)}&e=${enc(e)}`
+			(id) =>
+				withQuery(`https://cinesrc.st/embed/movie/${enc(id)}`, {
+					autoplay: 'true',
+					seek: '10',
+					prioritize: 'true',
+					color: '#ef4444',
+				}),
+			(id, s, e) =>
+				withQuery(`https://cinesrc.st/embed/tv/${enc(id)}`, {
+					s: String(s),
+					e: String(e),
+					autoplay: 'true',
+					autonext: 'false',
+					autoskip: 'true',
+					seek: '10',
+					prioritize: 'true',
+					color: '#ef4444',
+				})
 		),
-		resume: queryResume('startAt'),
+		resume: queryResume('t'),
+		progress: { origin: 'https://cinesrc.st', adapter: 'cinesrc' },
 		verification: {
 			checkedAt: '2026-07-14',
 			movieRoute: 'reachable',
@@ -364,7 +379,9 @@ export function validateRegistry(definitions: ProviderDefinition[]): void {
 		ranks.add(def.rank);
 
 		if (!/^https:\/\/[^/]+$/.test(def.urls.origin)) {
-			problems.push(`"${def.id}" origin must be a bare HTTPS origin, got "${def.urls.origin}"`);
+			problems.push(
+				`"${def.id}" origin must be a bare HTTPS origin, got "${def.urls.origin}"`
+			);
 		}
 		if (def.status === 'disabled' && !def.disabledReason) {
 			problems.push(`disabled provider "${def.id}" is missing disabledReason`);

@@ -16,6 +16,7 @@ import { parseVidking } from './progress/vidking';
 import { parseVidlink } from './progress/vidlink';
 import { parseVidsrcFamily } from './progress/vidsrc-family';
 import { parseMediaData } from './progress/media-data';
+import { parseCineSrc } from './progress/cinesrc';
 
 export type {
 	ParsedProgressEvent,
@@ -30,6 +31,7 @@ export const PROGRESS_ADAPTERS: Record<ProgressAdapterId, ProgressAdapter> = {
 	vidlink: parseVidlink,
 	'vidsrc-family': parseVidsrcFamily,
 	'media-data': parseMediaData,
+	cinesrc: parseCineSrc,
 };
 
 if (process.env.NODE_ENV !== 'production') {

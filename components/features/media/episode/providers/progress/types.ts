@@ -24,7 +24,7 @@ export interface ProgressContext {
 
 export type ProgressAdapter = (data: unknown, context: ProgressContext) => ParsedProgressEvent | null;
 
-export type ProgressAdapterId = 'vidking' | 'vidlink' | 'vidsrc-family' | 'media-data';
+export type ProgressAdapterId = 'vidking' | 'vidlink' | 'vidsrc-family' | 'media-data' | 'cinesrc';
 
 /** Parse a payload that may arrive as a JSON string or an object. */
 export function coercePayload(data: unknown): Record<string, unknown> | null {

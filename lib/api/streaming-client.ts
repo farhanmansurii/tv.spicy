@@ -3,6 +3,7 @@
  * For various streaming sources
  */
 
+
 /**
  * Fetch links from Susflix
  */
@@ -62,4 +63,3 @@ export async function fetchVidSrc(
 		throw error;
 	}
 }
-
