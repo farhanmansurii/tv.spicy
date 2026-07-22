@@ -131,6 +131,17 @@ test('movie and tv builders encode identifiers', () => {
 	);
 });
 
+test('videasy uses the direct player routes', () => {
+	assert.equal(
+		buildProviderUrl('videasy', { type: 'movie', id: '1368337' }),
+		'https://player.videasy.to/movie/1368337'
+	);
+	assert.equal(
+		buildProviderUrl('videasy', tv),
+		'https://player.videasy.to/tv/1399/1/1'
+	);
+});
+
 test('cinesrc keeps its query-based tv route and resume composes with it', () => {
 	const cinesrc = PROVIDER_DEFINITIONS.find((d) => d.id === 'cinesrc')!;
 	assert.equal(
