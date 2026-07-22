@@ -356,7 +356,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 					/>
 				</div>
 
-				{detailsPanel}
+				<div className="pt-1 md:pt-2">{detailsPanel}</div>
 			</div>
 		</div>
 	);

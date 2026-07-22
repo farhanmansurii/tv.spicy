@@ -114,12 +114,12 @@ export default function ShowContainer({
 							detailsPanel={children}
 						/>
 					) : (
-						<>
+						<div className="flex flex-col gap-4 md:gap-6">
 							{children}
 							<div id="media-player" className="scroll-mt-24">
 								<Episode episodeId={''} id={id || ''} movieID={id} type={type} />
 							</div>
-						</>
+						</div>
 					)}
 				</div>
 			</div>

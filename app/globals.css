@@ -654,4 +654,16 @@
 		background: rgb(9 9 11 / 0.99) !important;
 		backdrop-filter: none !important;
 	}
+
+	[data-information-shelf] > div {
+		background: rgb(18 18 20 / 0.99) !important;
+		backdrop-filter: none !important;
+	}
+}
+
+@media (prefers-contrast: more) {
+	[data-information-shelf] > div {
+		background: rgb(9 9 11 / 0.99) !important;
+		box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
+	}
 }

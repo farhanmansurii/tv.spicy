@@ -1,13 +1,12 @@
 'use client';
 
 import { memo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-	StarIcon,
-	ClockIcon,
 	CalendarBlankIcon,
+	ClockIcon,
 	FilmSlateIcon,
 	PencilSimpleIcon,
+	StarIcon,
 	UserIcon,
 } from '@phosphor-icons/react';
 import { tmdbImage } from '@/lib/tmdb-image';
@@ -17,38 +16,9 @@ interface EpisodeDetailPanelProps {
 	episode: Episode | null;
 }
 
-const panelVariants = {
-	hidden: { opacity: 0, y: 16 },
-	visible: {
-		opacity: 1,
-		y: 0,
-		transition: { type: 'spring', stiffness: 200, damping: 26 },
-	},
-	exit: {
-		opacity: 0,
-		y: 8,
-		transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] },
-	},
-};
-
-const stagger = {
-	hidden: {},
-	visible: { transition: { staggerChildren: 0.045, delayChildren: 0.1 } },
-};
-
-const fadeUp = {
-	hidden: { opacity: 0, y: 8 },
-	visible: {
-		opacity: 1,
-		y: 0,
-		transition: { type: 'spring', stiffness: 300, damping: 28 },
-	},
-};
-
 function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 	if (!episode) return null;
 
-	const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w780') : null;
 	const airLabel = episode.air_date
 		? new Date(episode.air_date).toLocaleDateString('en-US', {
 				month: 'long',
@@ -56,220 +26,142 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 				year: 'numeric',
 			})
 		: null;
-
 	const crew = (episode.crew ?? []) as Array<{
 		job?: string;
 		name?: string;
-		profile_path?: string | null;
 	}>;
-	const director = crew.find((c) => c.job === 'Director');
-	const writers = crew.filter(
-		(c) => c.job === 'Writer' || c.job === 'Teleplay' || c.job === 'Story'
-	);
-	const writerNames = writers
-		.map((w) => w.name)
+	const director = crew.find((person) => person.job === 'Director');
+	const writerNames = crew
+		.filter((person) => ['Writer', 'Teleplay', 'Story'].includes(person.job ?? ''))
+		.map((person) => person.name)
 		.filter(Boolean)
 		.join(', ');
-
 	const guests = (
 		(episode.guest_stars ?? []) as Array<{
 			name?: string;
 			character?: string;
 			profile_path?: string | null;
 		}>
-	).slice(0, 12);
-
-	const epCode = `Season ${episode.season_number}, Episode ${episode.episode_number}`;
+	).slice(0, 10);
 	const hasRating = typeof episode.vote_average === 'number' && episode.vote_average > 0;
 	const hasRuntime = episode.runtime != null && episode.runtime > 0;
 
 	return (
-		<AnimatePresence mode="wait">
-			<motion.div
-				key={episode.id}
-				variants={panelVariants}
-				initial="hidden"
-				animate="visible"
-				exit="exit"
-				className="w-full"
-			>
-				{/* Episode still — cinematic hero */}
-				{stillUrl && (
-					<div className="relative w-full aspect-[21/9] max-h-[280px] overflow-hidden rounded-xl bg-white/[0.04]">
-						<img
-							src={stillUrl}
-							alt={episode.name || `Episode ${episode.episode_number}`}
-							loading="lazy"
-							className="h-full w-full object-cover"
-							onError={(e) => {
-								(e.currentTarget as HTMLImageElement).style.display = 'none';
-							}}
-						/>
-						<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-						<div className="absolute inset-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]" />
+		<div className="flex min-w-0 flex-col gap-5">
+			<header className="space-y-2">
+				<p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0A84FF]">
+					Season {episode.season_number} · Episode {episode.episode_number}
+				</p>
+				<h3 className="text-xl font-bold leading-tight tracking-[-0.025em] text-white md:text-2xl">
+					{episode.name || `Episode ${episode.episode_number}`}
+				</h3>
+				{(hasRating || hasRuntime || airLabel) && (
+					<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-white/48">
+						{hasRating && (
+							<span className="inline-flex items-center gap-1 font-semibold text-[#FFD60A] tabular-nums">
+								<StarIcon size={12} weight="fill" />
+								{episode.vote_average?.toFixed(1)}
+							</span>
+						)}
+						{hasRuntime && (
+							<span className="inline-flex items-center gap-1.5 tabular-nums">
+								<ClockIcon size={13} /> {episode.runtime} min
+							</span>
+						)}
+						{airLabel && (
+							<span className="inline-flex items-center gap-1.5 tabular-nums">
+								<CalendarBlankIcon size={13} /> {airLabel}
+							</span>
+						)}
 					</div>
 				)}
+			</header>
 
-				{/* Content */}
-				<motion.div
-					variants={stagger}
-					initial="hidden"
-					animate="visible"
-					className="flex flex-col gap-4 pt-4"
-				>
-					{/* Title block */}
-					<motion.div variants={fadeUp} className="flex flex-col gap-1.5">
-						<p className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/30">
-							{epCode}
-						</p>
-						<h3 className="text-lg font-bold text-white leading-tight tracking-tight">
-							{episode.name || `Episode ${episode.episode_number}`}
-						</h3>
-					</motion.div>
+			{episode.overview && (
+				<p className="max-w-3xl text-[13.5px] leading-[1.65] text-white/62 md:text-sm">
+					{episode.overview}
+				</p>
+			)}
 
-					{/* Metadata chips */}
-					{(hasRating || hasRuntime || airLabel) && (
-						<motion.div
-							variants={fadeUp}
-							className="flex flex-wrap items-center gap-x-3 gap-y-1"
-						>
-							{hasRating && (
-								<span
-									className="inline-flex items-center gap-1 text-[12px] font-bold tabular-nums"
-									style={{ color: '#FFD60A' }}
-								>
-									<StarIcon weight="fill" size={10} />
-									{(episode.vote_average ?? 0).toFixed(1)}
-								</span>
-							)}
-							{hasRating && (hasRuntime || airLabel) && (
-								<span className="text-white/15 text-[9px]">·</span>
-							)}
-							{hasRuntime && (
-								<span className="inline-flex items-center gap-1 text-[12px] text-white/40 tabular-nums">
-									<ClockIcon size={10} className="text-white/25" />
-									{episode.runtime} min
-								</span>
-							)}
-							{hasRuntime && airLabel && (
-								<span className="text-white/15 text-[9px]">·</span>
-							)}
-							{airLabel && (
-								<span className="inline-flex items-center gap-1 text-[12px] text-white/35 tabular-nums">
-									<CalendarBlankIcon size={10} className="text-white/20" />
-									{airLabel}
-								</span>
-							)}
-						</motion.div>
-					)}
-
-					{/* Overview */}
-					{episode.overview && (
-						<motion.div variants={fadeUp}>
-							<p className="text-[13.5px] leading-relaxed text-white/55 max-w-prose">
-								{episode.overview}
-							</p>
-						</motion.div>
-					)}
-
-					{/* Crew */}
-					{(director?.name || writerNames) && (
-						<motion.div
-							variants={fadeUp}
-							className="flex flex-col sm:flex-row sm:items-start gap-4 pt-3 border-t border-white/[0.06]"
-						>
-							{director?.name && (
-								<div className="flex items-start gap-2.5">
-									<FilmSlateIcon
-										size={13}
-										className="text-white/20 mt-[2px] flex-shrink-0"
-									/>
-									<div>
-										<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-0.5">
-											Director
-										</p>
-										<p className="text-[13px] font-semibold text-white/75">
-											{director.name}
-										</p>
-									</div>
-								</div>
-							)}
-							{writerNames && (
-								<div className="flex items-start gap-2.5">
-									<PencilSimpleIcon
-										size={13}
-										className="text-white/20 mt-[2px] flex-shrink-0"
-									/>
-									<div>
-										<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-0.5">
-											Written by
-										</p>
-										<p className="text-[13px] font-semibold text-white/75 leading-snug">
-											{writerNames}
-										</p>
-									</div>
-								</div>
-							)}
-						</motion.div>
-					)}
-
-					{/* Guest stars */}
-					{guests.length > 0 && (
-						<motion.div variants={fadeUp} className="pt-3 border-t border-white/[0.06]">
-							<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/25 mb-3">
-								Guest Stars
-							</p>
-							<div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-								{guests.map((g, index) => (
-									<div
-										key={
-											g.name
-												? `${g.name}-${g.character || ''}`
-												: `guest-${index}`
-										}
-										className="flex-shrink-0 flex flex-col items-center gap-1.5 w-[72px]"
-									>
-										{g.profile_path ? (
-											<div className="relative w-[72px] h-[96px] rounded-xl overflow-hidden bg-white/[0.04]">
-												<img
-													src={tmdbImage(g.profile_path, 'w185')}
-													alt={g.name || ''}
-													loading="lazy"
-													className="h-full w-full object-cover"
-													onError={(e) => {
-														(
-															e.currentTarget as HTMLImageElement
-														).style.display = 'none';
-													}}
-												/>
-												<div className="absolute inset-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-xl pointer-events-none" />
-											</div>
-										) : (
-											<div className="w-[72px] h-[96px] rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
-												<span className="text-[10px] font-bold text-white/20">
-													{g.name
-														?.split(' ')
-														.map((n) => n[0])
-														.join('')}
-												</span>
-											</div>
-										)}
-										<p className="text-[11px] font-medium text-white/55 text-center leading-tight line-clamp-2 w-full">
-											{g.name}
-										</p>
-										{g.character && (
-											<p className="text-[9px] text-white/25 text-center leading-tight line-clamp-1 w-full">
-												{g.character}
-											</p>
-										)}
-									</div>
-								))}
+			{(director?.name || writerNames) && (
+				<div className="grid gap-2 sm:grid-cols-2">
+					{director?.name && (
+						<div className="flex min-h-16 items-center gap-3 rounded-2xl bg-white/[0.035] px-3.5 ring-1 ring-inset ring-white/[0.06]">
+							<FilmSlateIcon size={17} className="shrink-0 text-white/30" />
+							<div className="min-w-0">
+								<p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+									Director
+								</p>
+								<p className="truncate text-[13px] font-semibold text-white/80">
+									{director.name}
+								</p>
 							</div>
-						</motion.div>
+						</div>
 					)}
-				</motion.div>
-			</motion.div>
-		</AnimatePresence>
+					{writerNames && (
+						<div className="flex min-h-16 items-center gap-3 rounded-2xl bg-white/[0.035] px-3.5 ring-1 ring-inset ring-white/[0.06]">
+							<PencilSimpleIcon size={17} className="shrink-0 text-white/30" />
+							<div className="min-w-0">
+								<p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+									Written by
+								</p>
+								<p className="line-clamp-2 text-[13px] font-semibold leading-snug text-white/80">
+									{writerNames}
+								</p>
+							</div>
+						</div>
+					)}
+				</div>
+			)}
+
+			{guests.length > 0 && (
+				<section aria-labelledby="guest-stars-heading">
+					<div className="mb-3 flex items-center gap-2">
+						<UserIcon size={14} className="text-white/30" />
+						<h4
+							id="guest-stars-heading"
+							className="text-sm font-semibold tracking-[-0.01em] text-white"
+						>
+							Guest Cast
+						</h4>
+					</div>
+					<div className="-mx-1 flex gap-2.5 overflow-x-auto px-1 pb-1 scrollbar-none">
+						{guests.map((guest, index) => (
+							<div
+								key={`${guest.name || 'guest'}-${index}`}
+								className="w-28 shrink-0 rounded-2xl bg-white/[0.035] p-2 ring-1 ring-inset ring-white/[0.06]"
+							>
+								<div className="aspect-[4/3] overflow-hidden rounded-xl bg-white/[0.04]">
+									{guest.profile_path ? (
+										<img
+											src={tmdbImage(guest.profile_path, 'w185')}
+											alt=""
+											loading="lazy"
+											className="h-full w-full object-cover"
+										/>
+									) : (
+										<div className="flex h-full items-center justify-center text-xs font-bold text-white/20">
+											{guest.name
+												?.split(' ')
+												.map((part) => part[0])
+												.join('')}
+										</div>
+									)}
+								</div>
+								<p className="mt-2 truncate text-xs font-semibold text-white/78">
+									{guest.name}
+								</p>
+								{guest.character && (
+									<p className="truncate text-[10px] text-white/35">
+										{guest.character}
+									</p>
+								)}
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+		</div>
 	);
 }
 
