@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, memo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { tmdbImage } from '@/lib/tmdb-image';
 import {
 	FilmSlateIcon,
@@ -12,7 +13,12 @@ import {
 	TelevisionIcon,
 } from '@phosphor-icons/react';
 import gsap from 'gsap';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useMediaInfoPanelStore } from '@/store/mediaInfoPanelStore';
+import { useEpisodeStore } from '@/store/episodeStore';
+import useWatchListStore from '@/store/watchlistStore';
+import { useHaptics } from '@/hooks/use-haptics';
+import { toast } from 'sonner';
 
 interface Genre {
 	id: number;
@@ -44,6 +50,7 @@ interface ReleaseDateResult {
 }
 
 interface ShowData {
+	id?: number;
 	title?: string | null;
 	name?: string | null;
 	tagline?: string | null;
@@ -77,6 +84,17 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	const contentRef = useRef<HTMLDivElement>(null);
 	const btnRowRef = useRef<HTMLDivElement>(null);
 	const openInfoTab = useMediaInfoPanelStore((s) => s.openTab);
+	const activeEP = useEpisodeStore((s) => s.activeEP);
+	const isPlayerSticky = useEpisodeStore((s) => s.isPlayerSticky);
+	const prefersReducedMotion = useReducedMotion();
+	const haptic = useHaptics();
+	const watchlist = useWatchListStore((s) => s.watchlist);
+	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist);
+	const addToWatchlist = useWatchListStore((s) => s.addToWatchlist);
+	const removeFromWatchList = useWatchListStore((s) => s.removeFromWatchList);
+	const addToTvWatchlist = useWatchListStore((s) => s.addToTvWatchlist);
+	const removeFromTvWatchList = useWatchListStore((s) => s.removeFromTvWatchList);
+	const [isHeroVisible, setIsHeroVisible] = useState(true);
 
 	const title = show.title || show.name || 'Untitled';
 	const releaseDate = show.first_air_date || show.release_date || null;
@@ -91,7 +109,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 			: show.release_dates?.results?.find((r) => r.iso_3166_1 === 'US')?.release_dates?.[0]
 					?.certification;
 	const genreNames = show.genres?.map((g) => g.name).filter(Boolean) ?? [];
-	const genres = genreNames.slice(0, 3);
+	const genres = genreNames.slice(0, 2);
 	const cleanPoster =
 		show.images?.posters?.find((img) => img.iso_639_1 === null)?.file_path || show.poster_path;
 	const cleanBackdrop =
@@ -102,10 +120,96 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	const logo =
 		show.images?.logos?.find((img) => img.iso_639_1 === 'en')?.file_path ||
 		show.images?.logos?.[0]?.file_path;
+	const activeEpisodeForShow =
+		type === 'tv' && activeEP && String(activeEP.tv_id) === String(show.id) ? activeEP : null;
+	const isInWatchlist = useMemo(() => {
+		if (!show.id) return false;
+		const items = type === 'movie' ? watchlist : tvwatchlist;
+		return items.some((item) => item.id === show.id);
+	}, [show.id, type, watchlist, tvwatchlist]);
+	const primaryLabel =
+		type === 'movie'
+			? 'Play'
+			: activeEpisodeForShow
+				? `Continue S${activeEpisodeForShow.season_number} E${activeEpisodeForShow.episode_number}`
+				: 'Choose Episode';
 
-	/* ── Ken Burns + entrance ── */
+	const scrollToSection = useCallback(
+		(id: string) => {
+			document.getElementById(id)?.scrollIntoView({
+				behavior: prefersReducedMotion ? 'auto' : 'smooth',
+				block: 'start',
+			});
+		},
+		[prefersReducedMotion]
+	);
+
+	const handlePrimaryAction = useCallback(() => {
+		haptic('medium');
+		if (type === 'tv' && !activeEpisodeForShow) {
+			scrollToSection('episodes-section');
+			return;
+		}
+		scrollToSection('media-player');
+	}, [activeEpisodeForShow, haptic, scrollToSection, type]);
+
+	const handleWatchlist = useCallback(() => {
+		if (!show.id) return;
+		const watchlistItem = {
+			id: show.id,
+			title: show.title ?? undefined,
+			name: show.name ?? undefined,
+			poster_path: show.poster_path ?? null,
+			backdrop_path: show.backdrop_path ?? null,
+			overview: show.overview ?? null,
+			media_type: type,
+		};
+		haptic(isInWatchlist ? 'soft' : 'success');
+		if (type === 'movie') {
+			isInWatchlist ? removeFromWatchList(show.id) : addToWatchlist(watchlistItem);
+		} else {
+			isInWatchlist ? removeFromTvWatchList(show.id) : addToTvWatchlist(watchlistItem);
+		}
+		toast(isInWatchlist ? 'Removed from Watchlist' : 'Added to Watchlist');
+	}, [
+		addToTvWatchlist,
+		addToWatchlist,
+		haptic,
+		isInWatchlist,
+		removeFromTvWatchList,
+		removeFromWatchList,
+		show,
+		type,
+	]);
+
+	const handleShare = useCallback(async () => {
+		const shareData = { title, url: window.location.href };
+		try {
+			if (navigator.share) await navigator.share(shareData);
+			else {
+				await navigator.clipboard.writeText(window.location.href);
+				toast.success('Link copied');
+			}
+		} catch (error) {
+			if ((error as Error).name !== 'AbortError') toast.error('Unable to share');
+		}
+	}, [title]);
+
+	useEffect(() => {
+		const section = sectionRef.current;
+		if (!section) return;
+		const observer = new IntersectionObserver(
+			([entry]) => setIsHeroVisible(entry.isIntersecting),
+			{ threshold: 0.12 }
+		);
+		observer.observe(section);
+		return () => observer.disconnect();
+	}, []);
+
+	/* ── Desktop artwork + entrance ── */
 	useEffect(() => {
 		if (!sectionRef.current) return;
+		if (prefersReducedMotion || window.matchMedia('(max-width: 767px)').matches) return;
 
 		const ctx = gsap.context(() => {
 			if (imageWrapRef.current) {
@@ -168,12 +272,12 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 		}, sectionRef);
 
 		return () => ctx.revert();
-	}, []);
+	}, [prefersReducedMotion]);
 
 	return (
 		<section
 			ref={sectionRef}
-			className="relative w-full h-[76dvh] min-h-[560px] max-h-[780px] overflow-hidden bg-background md:h-[78dvh] md:min-h-[620px] lg:h-[82dvh]"
+			className="relative w-full h-[60dvh] min-h-[480px] max-h-[620px] overflow-hidden bg-background md:h-[78dvh] md:min-h-[620px] md:max-h-[780px] lg:h-[82dvh]"
 		>
 			{/* Hero image: poster on phones, cinematic backdrop on wider screens. */}
 			<div className="absolute inset-0 z-0 overflow-hidden">
@@ -208,12 +312,11 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 				</div>
 			</div>
 
-			{/* Gradient layers */}
+			{/* One stable legibility field on mobile; richer directional light on desktop. */}
 			<div className="absolute inset-0 z-[1] pointer-events-none">
-				{/* Primary bottom fade */}
-				<div className="absolute inset-0 bg-gradient-to-t from-background from-[8%] via-background/75 via-[38%] to-transparent" />
+				<div className="absolute inset-0 bg-gradient-to-t from-background from-[5%] via-background/65 via-[42%] to-black/5" />
 				{/* Left side for text legibility */}
-				<div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/35 to-transparent" />
+				<div className="absolute inset-0 hidden bg-gradient-to-r from-background/90 via-background/35 to-transparent md:block" />
 				{/* Radial punch behind content area */}
 				<div
 					className="absolute bottom-0 left-0 w-[60vw] h-[70%] pointer-events-none"
@@ -223,7 +326,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 					}}
 				/>
 				{/* Top edge */}
-				<div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-transparent" />
+				<div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent md:from-background/50" />
 			</div>
 
 			{/* Grain */}
@@ -231,7 +334,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 
 			{/* Content */}
 			<div className="absolute inset-0 z-10 flex flex-col justify-end">
-				<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-8 md:pb-12 lg:pb-14">
+				<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-6 md:pb-12 lg:pb-14">
 					<div
 						ref={contentRef}
 						className="max-w-xl md:max-w-2xl flex flex-col items-start text-left"
@@ -350,7 +453,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 									height={360}
 									loading="eager"
 									fetchPriority="high"
-									className="h-auto w-[min(86vw,420px)] max-h-[clamp(120px,34vw,180px)] sm:w-[min(78vw,520px)] sm:max-h-[220px] md:w-auto md:max-w-xl md:max-h-[160px] lg:max-h-[200px] object-contain object-left drop-shadow-[0_16px_48px_rgba(0,0,0,0.9)]"
+									className="h-auto w-[min(72vw,330px)] max-h-[120px] sm:w-[min(68vw,390px)] md:w-auto md:max-w-xl md:max-h-[160px] lg:max-h-[200px] object-contain object-left drop-shadow-[0_16px_48px_rgba(0,0,0,0.9)]"
 									onError={(e) => {
 										(e.currentTarget as HTMLImageElement).style.display =
 											'none';
@@ -367,7 +470,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						{show.tagline && (
 							<p
 								data-hero-tagline
-								className="mt-2.5 text-[12px] md:text-sm text-white/38 font-medium italic max-w-sm tracking-wide leading-snug"
+								className="mt-2.5 line-clamp-1 text-[12px] font-medium italic leading-snug tracking-wide text-white/55 md:text-sm"
 							>
 								&ldquo;{show.tagline}&rdquo;
 							</p>
@@ -377,7 +480,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						{show.overview && (
 							<p
 								data-hero-overview
-								className="mt-3 md:mt-3.5 text-[12.5px] md:text-sm text-white/52 leading-relaxed max-w-lg line-clamp-3 md:line-clamp-4"
+								className="mt-3 hidden max-w-lg text-sm leading-relaxed text-white/52 md:mt-3.5 md:block md:line-clamp-4"
 								style={{
 									fontFamily:
 										'-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
@@ -390,21 +493,26 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						{/* Actions */}
 						<div
 							ref={btnRowRef}
-							className="flex flex-wrap items-center gap-2.5 md:gap-3 mt-6 md:mt-8"
+							className="mt-5 flex w-full items-center gap-2.5 md:mt-8 md:w-auto md:gap-3"
 						>
 							{/* Primary play */}
 							<button
 								data-hero-action
-								className="inline-flex items-center justify-center gap-2 rounded-full font-bold bg-white text-zinc-950 px-6 py-2.5 md:px-8 md:py-3 text-[13px] md:text-sm shadow-[0_6px_28px_rgba(255,255,255,0.18)] transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
+								onClick={handlePrimaryAction}
+								className="inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 text-[13px] font-bold text-zinc-950 shadow-[0_6px_28px_rgba(255,255,255,0.18)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none md:h-auto md:flex-none md:px-8 md:py-3 md:text-sm"
 							>
 								<PlayIcon weight="fill" size={16} />
-								Play
+								<span className="truncate">{primaryLabel}</span>
 							</button>
 
 							{/* Watchlist frosted */}
 							<button
 								data-hero-action
-								className="inline-flex items-center justify-center gap-2 rounded-full font-semibold text-white px-5 py-2.5 md:px-6 md:py-3 text-[13px] md:text-sm transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
+								onClick={handleWatchlist}
+								aria-label={
+									isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'
+								}
+								className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-semibold text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none md:w-auto md:gap-2 md:px-6 md:text-sm"
 								style={{
 									background: 'rgba(255,255,255,0.1)',
 									backdropFilter: 'blur(24px) saturate(180%)',
@@ -412,8 +520,14 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 									boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
 								}}
 							>
-								<PlusIcon weight="bold" size={15} />
-								Watchlist
+								<PlusIcon
+									weight="bold"
+									size={17}
+									className={isInWatchlist ? 'rotate-45' : ''}
+								/>
+								<span className="hidden md:inline">
+									{isInWatchlist ? 'Remove' : 'Watchlist'}
+								</span>
 							</button>
 
 							{/* More info — opens details panel directly */}
@@ -433,7 +547,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 										});
 									}
 								}}
-								className="inline-flex items-center justify-center rounded-full w-11 h-11 text-white transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
+								className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
 								style={{
 									background: 'rgba(255,255,255,0.08)',
 									backdropFilter: 'blur(24px) saturate(180%)',
@@ -448,7 +562,8 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							<button
 								data-hero-action
 								aria-label="Share"
-								className="inline-flex items-center justify-center rounded-full w-11 h-11 text-white transition-transform duration-300 ease-spring will-change-transform hover:scale-[1.035] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
+								onClick={handleShare}
+								className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none min-[375px]:inline-flex"
 								style={{
 									background: 'rgba(255,255,255,0.08)',
 									backdropFilter: 'blur(24px) saturate(180%)',
@@ -462,6 +577,59 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 					</div>
 				</div>
 			</div>
+
+			{typeof document !== 'undefined'
+				? createPortal(
+						<AnimatePresence>
+							{!isHeroVisible && !isPlayerSticky && (
+								<motion.div
+									data-mobile-detail-dock
+									initial={
+										prefersReducedMotion
+											? { opacity: 0 }
+											: { opacity: 0, y: 24 }
+									}
+									animate={{ opacity: 1, y: 0 }}
+									exit={
+										prefersReducedMotion
+											? { opacity: 0 }
+											: { opacity: 0, y: 24 }
+									}
+									transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
+									className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 md:hidden"
+								>
+									<div className="flex items-center gap-2 rounded-[22px] border border-white/10 bg-black/78 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl supports-[backdrop-filter]:bg-black/62 motion-reduce:backdrop-blur-none">
+										<button
+											type="button"
+											onClick={handlePrimaryAction}
+											className="flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-[16px] bg-white px-4 text-sm font-semibold text-black transition-transform duration-100 active:scale-[0.97]"
+										>
+											<PlayIcon size={16} weight="fill" />
+											<span className="truncate">{primaryLabel}</span>
+										</button>
+										<button
+											type="button"
+											onClick={handleWatchlist}
+											aria-label={
+												isInWatchlist
+													? 'Remove from Watchlist'
+													: 'Add to Watchlist'
+											}
+											className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-white/10 text-white transition-transform duration-100 active:scale-[0.94]"
+										>
+											<PlusIcon
+												size={18}
+												weight="bold"
+												className={isInWatchlist ? 'rotate-45' : ''}
+											/>
+										</button>
+									</div>
+								</motion.div>
+							)}
+						</AnimatePresence>,
+						document.body
+					)
+				: null}
 		</section>
 	);
 }

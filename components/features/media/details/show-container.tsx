@@ -67,6 +67,13 @@ export default function ShowContainer({
 
 	useEffect(() => {
 		if (!contentRef.current) return;
+		if (
+			window.matchMedia('(max-width: 767px)').matches ||
+			window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		) {
+			setIsVisible(true);
+			return;
+		}
 
 		const ctx = gsap.context(() => {
 			gsap.fromTo(
@@ -108,8 +115,10 @@ export default function ShowContainer({
 						/>
 					) : (
 						<>
-							<Episode episodeId={''} id={id || ''} movieID={id} type={type} />
 							{children}
+							<div id="media-player" className="scroll-mt-24">
+								<Episode episodeId={''} id={id || ''} movieID={id} type={type} />
+							</div>
 						</>
 					)}
 				</div>

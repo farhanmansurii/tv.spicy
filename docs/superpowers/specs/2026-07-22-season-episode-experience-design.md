@@ -6,8 +6,8 @@ Redesign TV season and episode selection as one calm, touch-first surface that m
 
 ## Responsive Model
 
-- Phones use one purpose-built vertical episode list. The grid/list preference is hidden because the list carries the title, synopsis, progress, and availability more clearly at narrow widths.
-- Tablets and desktops retain the existing grid/list choice and denser layouts.
+- Phones retain both grid and list views so people can choose visual browsing or rapid scanning. The phone grid uses two compact columns; the phone list uses dense thumbnail rows designed for 20+ episode seasons.
+- Tablets and desktops retain the same grid/list choice with roomier breakpoints.
 - Shows with two to four seasons expose a horizontal segmented season rail.
 - Shows with five or more seasons expose a compact current-season button that opens an anchored bottom sheet containing every season, its episode count, and the current-selection checkmark.
 - A single-season show does not render a season picker.
@@ -20,12 +20,12 @@ The long-show sheet enters from and exits toward the bottom, includes a clear ti
 
 ## Mobile Episode Card
 
-Each phone card is a full-width button with:
+Each phone list row is a compact full-width button with:
 
-- a 16:9 still image;
+- a compact 16:9 thumbnail;
 - episode number and title;
 - runtime and air date when available;
-- a two-line synopsis;
+- a single-line synopsis when space permits;
 - playback progress when known;
 - explicit `Now Playing`, completed, or upcoming treatment.
 

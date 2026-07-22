@@ -14,6 +14,8 @@ interface EpisodeStripProps {
 	onEpisodeClick: (episode: Episode, event?: React.MouseEvent) => void;
 	isLoading?: boolean;
 	viewMode?: EpisodeViewMode;
+	progressEpisodeId?: number | null;
+	progressPercent?: number | null;
 }
 
 /* ── Skeletons ─────────────────────────────────────────────────────────────── */
@@ -163,6 +165,8 @@ function EpisodeStripComponent({
 	onEpisodeClick,
 	isLoading,
 	viewMode = 'grid',
+	progressEpisodeId,
+	progressPercent,
 }: EpisodeStripProps) {
 	if (isLoading) {
 		return (
@@ -187,7 +191,7 @@ function EpisodeStripComponent({
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.2 }}
-						className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
+						className="grid grid-cols-2 gap-3 sm:gap-5 md:gap-6 lg:grid-cols-3 xl:grid-cols-4"
 					>
 						{episodes.map((ep, i) => (
 							<EpisodeCard
@@ -208,7 +212,7 @@ function EpisodeStripComponent({
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.2 }}
-						className="flex flex-col gap-0"
+						className="flex flex-col gap-2 md:gap-0"
 					>
 						{episodes.map((ep, i) => (
 							<EpisodeListRow
@@ -217,6 +221,9 @@ function EpisodeStripComponent({
 								active={activeEpisodeId === ep.id}
 								onClick={onEpisodeClick}
 								index={i}
+								progressPercent={
+									progressEpisodeId === ep.id ? progressPercent : null
+								}
 							/>
 						))}
 					</motion.div>

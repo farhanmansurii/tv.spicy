@@ -1,8 +1,8 @@
 'use client';
 
 import { memo, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { PlayIcon, LockSimpleIcon, StarIcon } from '@phosphor-icons/react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { PlayIcon, LockSimpleIcon, StarIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { tmdbImage } from '@/lib/tmdb-image';
 import type { Episode } from '@/lib/types';
@@ -13,6 +13,7 @@ interface EpisodeListRowProps {
 	active?: boolean;
 	onClick: (episode: Episode, event?: React.MouseEvent) => void;
 	index?: number;
+	progressPercent?: number | null;
 }
 
 function EpisodeListRowComponent({
@@ -20,11 +21,16 @@ function EpisodeListRowComponent({
 	active = false,
 	onClick,
 	index = 0,
+	progressPercent,
 }: EpisodeListRowProps) {
 	const haptic = useHaptics();
+	const reducedMotion = useReducedMotion();
 	const stillUrl = episode.still_path ? tmdbImage(episode.still_path, 'w300') : null;
 	const isReleased = episode.air_date ? new Date(episode.air_date) <= new Date() : true;
 	const epNum = String(episode.episode_number).padStart(2, '0');
+	const progress = Math.max(0, Math.min(100, progressPercent ?? 0));
+	const isComplete = progress >= 95;
+	const hasProgress = progress >= 3 && !isComplete;
 
 	const airLabel = episode.air_date
 		? new Date(episode.air_date).toLocaleDateString('en-US', {
@@ -54,22 +60,26 @@ function EpisodeListRowComponent({
 			type="button"
 			onClick={handleClick}
 			disabled={!isReleased}
-			initial={{ opacity: 0, y: 8 }}
+			initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{
 				...itemTransition,
-				delay: Math.min(index * 0.035, 0.35),
+				delay: reducedMotion ? 0 : Math.min(index * 0.035, 0.35),
 			}}
-			whileTap={isReleased ? { scale: 0.99 } : undefined}
+			whileTap={isReleased && !reducedMotion ? { scale: 0.99 } : undefined}
+			aria-current={active ? 'true' : undefined}
 			className={cn(
-				'group relative w-full text-left will-change-transform',
+				'group relative w-full overflow-hidden rounded-xl text-left will-change-transform md:rounded-none',
 				'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
-				!isReleased && 'opacity-40 cursor-not-allowed'
+				active
+					? 'bg-[#0A84FF]/[0.08] ring-1 ring-inset ring-[#0A84FF]/30'
+					: 'bg-white/[0.035] ring-1 ring-inset ring-white/[0.06] md:bg-transparent md:ring-0',
+				!isReleased && 'cursor-not-allowed opacity-55'
 			)}
 		>
 			{/* Active left bar */}
 			<motion.div
-				className="absolute left-0 top-0 bottom-0 w-[2px] sm:w-[2.5px] rounded-full bg-[#0A84FF]"
+				className="absolute bottom-0 left-0 top-0 w-[3px] rounded-full bg-[#0A84FF]"
 				initial={false}
 				animate={active ? { opacity: 1 } : { opacity: 0 }}
 				transition={{ duration: 0.3 }}
@@ -77,14 +87,14 @@ function EpisodeListRowComponent({
 
 			<div
 				className={cn(
-					'flex items-center gap-2.5 sm:gap-3 md:gap-3.5 w-full px-2.5 sm:px-3 py-2.5 sm:py-3 rounded-lg sm:rounded-xl transition-colors duration-200 min-h-[44px]',
-					active ? 'bg-white/[0.08]' : 'hover:bg-white/[0.04]'
+					'flex min-h-[76px] w-full items-center gap-3 px-2.5 py-2 transition-colors duration-150 md:min-h-[44px] md:gap-3.5 md:rounded-xl md:px-3 md:py-3',
+					active ? 'md:bg-white/[0.08]' : 'md:hover:bg-white/[0.04]'
 				)}
 			>
 				{/* Episode number */}
 				<div
 					className={cn(
-						'flex-shrink-0 w-6 sm:w-7 text-center tabular-nums font-bold leading-none select-none transition-colors duration-300 text-sm',
+						'hidden w-7 flex-shrink-0 select-none text-center text-sm font-bold leading-none tabular-nums transition-colors duration-300 md:block',
 						active ? 'text-[#0A84FF]' : 'text-white/25 group-hover:text-white/40'
 					)}
 				>
@@ -94,7 +104,7 @@ function EpisodeListRowComponent({
 				{/* Thumbnail */}
 				<div
 					className={cn(
-						'relative flex-shrink-0 w-24 sm:w-28 md:w-32 aspect-video rounded-md sm:rounded-lg overflow-hidden bg-zinc-900',
+						'relative aspect-video w-28 flex-shrink-0 overflow-hidden rounded-lg bg-zinc-900 sm:w-32',
 						active ? 'ring-1 ring-white/20' : 'ring-1 ring-white/[0.06]'
 					)}
 				>
@@ -148,13 +158,15 @@ function EpisodeListRowComponent({
 									key={i}
 									className="w-[2px] rounded-full bg-[#0A84FF]"
 									style={{ opacity: 0.85 }}
-									animate={{
-										height: [`${h * 0.4}%`, `${h}%`, `${h * 0.4}%`],
-									}}
+									animate={
+										reducedMotion
+											? { height: `${h}%` }
+											: { height: [`${h * 0.4}%`, `${h}%`, `${h * 0.4}%`] }
+									}
 									transition={{
 										duration: 0.8,
 										ease: 'easeInOut',
-										repeat: Infinity,
+										repeat: reducedMotion ? 0 : Infinity,
 										delay: i * 0.15,
 									}}
 								/>
@@ -168,15 +180,40 @@ function EpisodeListRowComponent({
 						</div>
 					)}
 
+					<div className="absolute left-1.5 top-1.5 flex items-center gap-1 md:hidden">
+						<span className="rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-bold tracking-[0.04em] text-white backdrop-blur-md">
+							E{episode.episode_number}
+						</span>
+						{active && (
+							<span className="rounded bg-[#0A84FF] px-1.5 py-0.5 text-[9px] font-bold text-white">
+								PLAYING
+							</span>
+						)}
+						{isComplete && !active && (
+							<span className="flex items-center gap-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-md">
+								<CheckCircleIcon size={11} weight="fill" /> Watched
+							</span>
+						)}
+					</div>
+
+					{hasProgress && (
+						<div className="absolute inset-x-0 bottom-0 h-1 bg-black/35">
+							<div
+								className="h-full rounded-r-full bg-[#0A84FF]"
+								style={{ width: `${progress}%` }}
+							/>
+						</div>
+					)}
+
 					<div className="absolute inset-0 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] pointer-events-none" />
 				</div>
 
 				{/* Text content */}
-				<div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+				<div className="flex min-w-0 flex-1 flex-col justify-center gap-1 md:gap-0.5">
 					{/* Title */}
 					<h3
 						className={cn(
-							'text-sm sm:text-base font-semibold leading-snug line-clamp-1 transition-colors duration-200',
+							'line-clamp-1 text-sm font-semibold leading-snug tracking-[-0.01em] transition-colors duration-200 md:text-base',
 							active ? 'text-white' : 'text-zinc-200 group-hover:text-white'
 						)}
 					>
@@ -184,7 +221,7 @@ function EpisodeListRowComponent({
 					</h3>
 
 					{/* Metadata row */}
-					<div className="flex items-center gap-x-2 gap-y-0">
+					<div className="flex flex-wrap items-center gap-x-2 gap-y-0">
 						{episode.runtime != null && episode.runtime > 0 && (
 							<span className="text-[10px] sm:text-[11px] text-white/30 tabular-nums">
 								{episode.runtime}m
@@ -210,11 +247,17 @@ function EpisodeListRowComponent({
 							</span>
 						)}
 					</div>
+
+					{episode.overview && (
+						<p className="line-clamp-1 text-[11px] leading-snug text-white/35 md:hidden">
+							{episode.overview}
+						</p>
+					)}
 				</div>
 			</div>
 
 			{/* Separator */}
-			<div className="absolute bottom-0 left-[2.75rem] right-0 h-px bg-white/[0.05] pointer-events-none" />
+			<div className="pointer-events-none absolute bottom-0 left-[2.75rem] right-0 hidden h-px bg-white/[0.05] md:block" />
 		</motion.button>
 	);
 }

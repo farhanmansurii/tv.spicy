@@ -46,7 +46,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 	const activeEpisodeForShow =
 		activeEP && String(activeEP.tv_id) === String(showId) ? activeEP : null;
 	const hasActiveEpisode = !!activeEpisodeForShow;
-	const { addRecentlyWatched } = useTVShowStore();
+	const { addRecentlyWatched, recentlyWatched } = useTVShowStore();
 
 	const playerRef = useRef<HTMLDivElement>(null);
 	const [isStickyDismissed, setIsStickyDismissed] = useState(false);
@@ -97,6 +97,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		data: seasonData,
 		isFetching,
 		isError,
+		refetch,
 	} = useQuery<TMDBSeasonDetails>({
 		queryKey: ['episodes', showId, activeSeason],
 		queryFn: () => fetchSeasonEpisodesFromApi(showId, activeSeason as number),
@@ -108,6 +109,12 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 	const episodes = useMemo(
 		() => seasonData?.episodes?.map(hydrateEpisode) || [],
 		[seasonData, hydrateEpisode]
+	);
+	const savedProgress = recentlyWatched.find(
+		(item) =>
+			item.mediaType === 'tv' &&
+			String(item.mediaId) === String(showId) &&
+			item.seasonNumber === activeSeason
 	);
 
 	// Init from URL
@@ -156,6 +163,14 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			params.set('season', String(episode.season_number));
 			params.set('episode', String(episode.episode_number));
 			window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+			requestAnimationFrame(() => {
+				document.getElementById('media-player')?.scrollIntoView({
+					behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+						? 'auto'
+						: 'smooth',
+					block: 'start',
+				});
+			});
 		},
 		[pathname, searchParams, setActiveEP, addRecentlyWatched]
 	);
@@ -206,21 +221,20 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			params.set('episode', '1');
 			window.history.pushState(null, '', `${pathname}?${params.toString()}`);
 		}
-	}, [
-		activeEP,
-		episodes,
-		activeSeason,
-		validSeasons,
-		pathname,
-		searchParams,
-		onEpisodeClick,
-	]);
+	}, [activeEP, episodes, activeSeason, validSeasons, pathname, searchParams, onEpisodeClick]);
 
 	if (isError)
 		return (
 			<div className="flex flex-col items-center py-20 gap-4 text-destructive">
 				<WarningCircleIcon size={32} weight="fill" />
 				<p className="font-bold">Failed to load episodes. Please try again.</p>
+				<button
+					type="button"
+					onClick={() => refetch()}
+					className="min-h-11 rounded-full bg-white px-5 text-sm font-semibold text-black active:scale-[0.97]"
+				>
+					Try Again
+				</button>
 			</div>
 		);
 
@@ -231,6 +245,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 				<>
 					<div ref={stickySentinelRef} className="h-px w-full" />
 					<div
+						id="media-player"
 						ref={playerRef}
 						data-player-container
 						className={cn(
@@ -254,9 +269,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			)}
 
 			{/* SEASON SELECTOR + EPISODES */}
-			<div className="space-y-3 md:space-y-4">
-				{detailsPanel}
-
+			<div id="episodes-section" className="scroll-mt-24 space-y-3 md:space-y-4">
 				{/* Header row */}
 				<div className="flex items-center justify-between gap-3">
 					{/* Left: title + season info */}
@@ -280,7 +293,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 
 					{/* Right: view mode toggle */}
 					<div
-						className="flex items-center gap-0.5 p-[3px] rounded-[10px] flex-shrink-0"
+						className="flex flex-shrink-0 items-center gap-0.5 rounded-[10px] p-[3px]"
 						style={{
 							background: 'rgba(255,255,255,0.055)',
 							border: '1px solid rgba(255,255,255,0.07)',
@@ -329,16 +342,21 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 
 				{/* Episode strip — fades during season transition */}
 				<div
-					className="transition-opacity duration-300"
-					style={{ opacity: isFetching ? 0.45 : 1 }}
+					className="transition-opacity duration-200 motion-reduce:transition-none"
+					style={{ opacity: isFetching && episodes.length ? 0.72 : 1 }}
 				>
 					<EpisodeStrip
 						episodes={episodes}
-						activeEpisodeId={activeEP?.id}
+						activeEpisodeId={activeEpisodeForShow?.id}
 						onEpisodeClick={onEpisodeClick}
 						viewMode={viewMode}
+						isLoading={isFetching && !episodes.length}
+						progressEpisodeId={savedProgress?.episodeId}
+						progressPercent={savedProgress?.progressPercent}
 					/>
 				</div>
+
+				{detailsPanel}
 			</div>
 		</div>
 	);

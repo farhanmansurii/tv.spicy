@@ -644,3 +644,14 @@
 	width: 80vw !important;
 	max-width: 80vw !important;
 }
+@media (prefers-reduced-transparency: reduce) {
+	[data-mobile-detail-dock] > div {
+		background: rgb(9 9 11 / 0.98) !important;
+		backdrop-filter: none !important;
+	}
+
+	[data-season-sheet] {
+		background: rgb(9 9 11 / 0.99) !important;
+		backdrop-filter: none !important;
+	}
+}
