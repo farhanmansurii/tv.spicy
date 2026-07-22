@@ -1,16 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useHaptics } from '@/hooks/use-haptics';
 import { motion } from 'framer-motion';
 import { SquaresFourIcon, ListBulletsIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { useSearchParams, usePathname } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { useInView } from 'react-intersection-observer';
-import { toast } from 'sonner';
 import { fetchSeasonEpisodesFromApi } from '@/lib/api/tmdb-row-client';
 import { useEpisodeStore } from '@/store/episodeStore';
-import { usePlayerPrefsStore } from '@/store/playerPrefsStore';
 import useTVShowStore from '@/store/recentsStore';
 import { TVContainer } from '@/components/features/media/player/tv-container';
 import { cn } from '@/lib/utils';
@@ -42,47 +39,26 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 	);
 
 	const { activeEP, setActiveEP, setIsPlayerSticky } = useEpisodeStore();
-	const { stickyEnabled, setStickyEnabled } = usePlayerPrefsStore();
 	const activeEpisodeForShow =
 		activeEP && String(activeEP.tv_id) === String(showId) ? activeEP : null;
 	const hasActiveEpisode = !!activeEpisodeForShow;
 	const { addRecentlyWatched, recentlyWatched } = useTVShowStore();
 
-	const playerRef = useRef<HTMLDivElement>(null);
-	const [isStickyDismissed, setIsStickyDismissed] = useState(false);
-	const [isPortrait, setIsPortrait] = useState(true);
 	const [isMobile, setIsMobile] = useState(false);
 
-	// Detect mobile + orientation
+	// Detect mobile for the default episode layout. The player remains in-flow on phones.
 	useEffect(() => {
-		const check = () => {
-			setIsMobile(window.innerWidth < 768);
-			setIsPortrait(window.matchMedia('(orientation: portrait)').matches);
-		};
-		const handleOrientationChange = (event: MediaQueryListEvent) => {
-			setIsPortrait(event.matches);
-		};
+		const check = () => setIsMobile(window.innerWidth < 768);
 
 		check();
-		const mq = window.matchMedia('(orientation: portrait)');
-		mq.addEventListener('change', handleOrientationChange);
 		window.addEventListener('resize', check, { passive: true });
-		return () => {
-			mq.removeEventListener('change', handleOrientationChange);
-			window.removeEventListener('resize', check);
-		};
+		return () => window.removeEventListener('resize', check);
 	}, []);
 
-	const { ref: stickySentinelRef, inView: stickySentinelInView } = useInView({
-		threshold: 0,
-		rootMargin: '-68px 0px 0px 0px',
-	});
-	const isSticky =
-		hasActiveEpisode && stickyEnabled && !stickySentinelInView && isMobile && isPortrait;
-
 	useEffect(() => {
-		setIsPlayerSticky(isSticky && !isStickyDismissed);
-	}, [isSticky, isStickyDismissed, setIsPlayerSticky]);
+		setIsPlayerSticky(false);
+		return () => setIsPlayerSticky(false);
+	}, [setIsPlayerSticky]);
 
 	// State
 	const validSeasons = useMemo(
@@ -175,17 +151,6 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		[pathname, searchParams, setActiveEP, addRecentlyWatched]
 	);
 
-	const handleStickyClose = useCallback(() => {
-		setIsStickyDismissed(true);
-		toast('Sticky player hidden', {
-			description: 'Turn off sticky player for this device?',
-			action: {
-				label: 'Disable',
-				onClick: () => setStickyEnabled(false),
-			},
-		});
-	}, [setStickyEnabled]);
-
 	// Next episode
 	const handleNextEpisode = useCallback(() => {
 		let current = activeEP;
@@ -239,34 +204,15 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		);
 
 	return (
-		<div className="w-full flex flex-col gap-6 md:gap-10">
+		<div className="flex w-full flex-col gap-4 md:gap-6">
 			{/* PLAYER */}
 			{hasActiveEpisode && (
-				<>
-					<div ref={stickySentinelRef} className="h-px w-full" />
-					<div
-						id="media-player"
-						ref={playerRef}
-						data-player-container
-						className={cn(
-							'w-full',
-							stickyEnabled && isMobile && isPortrait
-								? 'sticky top-[68px] z-30'
-								: 'relative z-10',
-							isSticky &&
-								isStickyDismissed &&
-								'opacity-0 pointer-events-none max-h-0 overflow-hidden p-0'
-						)}
-					>
-						<TVContainer
-							showId={showId}
-							getNextEp={handleNextEpisode}
-							isSticky={isSticky && !isStickyDismissed}
-							onCloseSticky={handleStickyClose}
-						/>
-					</div>
-				</>
+				<div id="media-player" data-player-container className="relative z-10 w-full">
+					<TVContainer showId={showId} getNextEp={handleNextEpisode} />
+				</div>
 			)}
+
+			{detailsPanel}
 
 			{/* SEASON SELECTOR + EPISODES */}
 			<div id="episodes-section" className="scroll-mt-24 space-y-3 md:space-y-4">
@@ -355,8 +301,6 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 						progressPercent={savedProgress?.progressPercent}
 					/>
 				</div>
-
-				<div className="pt-1 md:pt-2">{detailsPanel}</div>
 			</div>
 		</div>
 	);

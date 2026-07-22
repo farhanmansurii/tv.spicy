@@ -4,25 +4,15 @@
  */
 
 import { DEFAULT_PROVIDER_ID, PROVIDER_DEFINITIONS, validateRegistry } from './registry';
-import type {
-	ProviderDefinition,
-	ProviderMedia,
-	ProviderSummary,
-	ResolvedProvider,
-} from './types';
+import type { ProviderDefinition, ProviderMedia, ProviderSummary, ResolvedProvider } from './types';
 import { buildUrl } from './url-builders';
 import type { ProgressAdapter, ProgressAdapterId } from './progress/types';
 import { parseVidking } from './progress/vidking';
 import { parseVidlink } from './progress/vidlink';
 import { parseVidsrcFamily } from './progress/vidsrc-family';
-import { parseMediaData } from './progress/media-data';
 import { parseCineSrc } from './progress/cinesrc';
 
-export type {
-	ParsedProgressEvent,
-	ProgressAdapter,
-	ProgressContext,
-} from './progress/types';
+export type { ParsedProgressEvent, ProgressAdapter, ProgressContext } from './progress/types';
 export type { ProviderMedia, ProviderSummary, ResolvedProvider } from './types';
 export { DEFAULT_PROVIDER_ID } from './registry';
 
@@ -30,7 +20,6 @@ export const PROGRESS_ADAPTERS: Record<ProgressAdapterId, ProgressAdapter> = {
 	vidking: parseVidking,
 	vidlink: parseVidlink,
 	'vidsrc-family': parseVidsrcFamily,
-	'media-data': parseMediaData,
 	cinesrc: parseCineSrc,
 };
 
@@ -67,7 +56,7 @@ export function listEnabledProviders(): ProviderSummary[] {
 
 /**
  * Resolve a persisted provider ID to an enabled provider. Unknown, candidate,
- * and disabled IDs all fall back to the default (VidCore).
+ * and disabled IDs all fall back to the default provider.
  */
 export function resolveProvider(id: string): ResolvedProvider {
 	const def =

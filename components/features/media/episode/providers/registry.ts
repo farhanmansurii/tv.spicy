@@ -8,10 +8,8 @@
  *  'disabled'  — hidden because broken/blocked/retired; reason required
  *
  * HTTP reachability alone does not promote a provider to 'enabled'. Promotion
- * requires a browser check from the application origin (see the checklist in
- * docs/superpowers/specs/2026-07-14-provider-registry-redesign.md), or an
- * explicit product-owner decision to launch with `playback: 'pending'`.
- * Research basis: docs/research/provider-candidates-2026-07-14.md
+ * requires a browser check from the application origin or an explicit
+ * product-owner decision to launch with `playback: 'pending'`.
  */
 
 import type { ProviderDefinition } from './types';
@@ -24,7 +22,7 @@ import {
 	encodeSegment as enc,
 } from './url-builders';
 
-export const DEFAULT_PROVIDER_ID = 'cinesrc';
+export const DEFAULT_PROVIDER_ID = 'vidfast';
 
 const VIDKING_QUERY = {
 	color: 'ef4444',
@@ -36,27 +34,6 @@ const VIDKING_QUERY = {
 export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 	// ── Enabled ──────────────────────────────────────────────────────────────
 
-	{
-		id: 'vidcore',
-		label: 'VidCore',
-		status: 'enabled',
-		rank: 1,
-		urls: standardEmbedUrls('https://www.vidcore.org'),
-		resume: queryResume('startAt'),
-		// Docs show a PLAYER_EVENT listener with play/pause/seeked/ended/
-		// timeupdate; exact payload capture is still pending browser QA.
-		progress: { origin: 'https://www.vidcore.org', adapter: 'vidsrc-family' },
-		verification: {
-			checkedAt: '2026-07-14',
-			// Local check observed intermittent 404 + frame-ancestors 'none'
-			// on the TV route alongside 200 responses; watch during browser QA.
-			movieRoute: 'reachable',
-			tvRoute: 'reachable',
-			// Product-owner exception: launched as default before browser
-			// playback confirmation.
-			playback: 'pending',
-		},
-	},
 	{
 		id: 'vidking',
 		label: 'Vidking',
@@ -98,44 +75,12 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 		id: 'vidfast',
 		label: 'Vidfast',
 		status: 'enabled',
-		rank: 4,
+		rank: 1,
 		// vidfast.net now redirects to vidfast.vc (observed 2026-07-14); embed
 		// the final domain directly so the postMessage origin matches.
 		urls: pathEmbedUrls('https://vidfast.vc'),
 		resume: queryResume('t'),
 		progress: { origin: 'https://vidfast.vc', adapter: 'vidsrc-family' },
-		verification: {
-			checkedAt: '2026-07-14',
-			movieRoute: 'reachable',
-			tvRoute: 'reachable',
-			playback: 'confirmed',
-		},
-	},
-	{
-		id: 'vidsrc',
-		label: 'Vidsrc',
-		// vidsrc.pro is an alias of the same family; the direct player domain
-		// avoids extra redirects and keeps the postMessage origin stable.
-		status: 'enabled',
-		rank: 6,
-		urls: standardEmbedUrls('https://vidsrc.sbs'),
-		progress: { origin: 'https://embed.su', adapter: 'vidsrc-family' },
-		verification: {
-			checkedAt: '2026-07-14',
-			movieRoute: 'reachable',
-			tvRoute: 'reachable',
-			playback: 'confirmed',
-		},
-	},
-	{
-		id: 'vidzen',
-		label: 'VidZen',
-		status: 'enabled',
-		rank: 7,
-		urls: pathEmbedUrls('https://vidzen.fun'),
-		resume: queryResume('startAt'),
-		// Unique MEDIA_DATA snapshot model, posted from the backend domain
-		progress: { origin: 'https://www.vidsrc.wtf', adapter: 'media-data' },
 		verification: {
 			checkedAt: '2026-07-14',
 			movieRoute: 'reachable',
@@ -157,24 +102,6 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 			playback: 'confirmed',
 		},
 	},
-	{
-		id: '111movies',
-		label: '111Movies',
-		status: 'enabled',
-		rank: 9,
-		urls: customEmbedUrls(
-			'https://111movies.com',
-			(id) => `https://111movies.com/movie/${enc(id)}`,
-			(id, s, e) => `https://111movies.com/tv/${enc(id)}/${enc(s)}/${enc(e)}?title=true`
-		),
-		verification: {
-			checkedAt: '2026-07-14',
-			movieRoute: 'reachable',
-			tvRoute: 'reachable',
-			playback: 'confirmed',
-		},
-	},
-
 	{
 		id: 'embedmaster',
 		label: 'EmbedMaster',
@@ -213,41 +140,11 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 	},
 
 	{
-		id: 'vidphantom',
-		label: 'VidPhantom',
-		status: 'enabled',
-		rank: 13,
-		urls: pathEmbedUrls('https://vidphantom.com'),
-		resume: queryResume('startAt'),
-		// Documented PLAYER_EVENT/MEDIA_DATA contract appears vidsrc-family
-		// compatible, but no browser message has been captured yet.
-		progress: { origin: 'https://vidphantom.com', adapter: 'vidsrc-family' },
-		verification: {
-			checkedAt: '2026-07-14',
-			movieRoute: 'reachable',
-			tvRoute: 'reachable',
-			playback: 'pending',
-		},
-	},
-	{
 		id: 'videasy',
 		label: 'VidEasy',
 		status: 'enabled',
 		rank: 10,
 		urls: pathEmbedUrls('https://player.videasy.to'),
-		verification: {
-			checkedAt: '2026-07-14',
-			movieRoute: 'reachable',
-			tvRoute: 'reachable',
-			playback: 'confirmed',
-		},
-	},
-	{
-		id: 'moviepire',
-		label: 'MoviePire',
-		status: 'enabled',
-		rank: 11,
-		urls: standardEmbedUrls('https://video.moviepire.co'),
 		verification: {
 			checkedAt: '2026-07-14',
 			movieRoute: 'reachable',
@@ -265,20 +162,6 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 			(id) => `https://zxcstream.xyz/player/movie/${enc(id)}`,
 			(id, s, e) => `https://zxcstream.xyz/player/tv/${enc(id)}/${enc(s)}/${enc(e)}`
 		),
-		resume: queryResume('startAt'),
-		verification: {
-			checkedAt: '2026-07-14',
-			movieRoute: 'reachable',
-			tvRoute: 'reachable',
-			playback: 'confirmed',
-		},
-	},
-	{
-		id: 'vidnest',
-		label: 'Vidnest',
-		status: 'enabled',
-		rank: 15,
-		urls: pathEmbedUrls('https://vidnest.fun'),
 		resume: queryResume('startAt'),
 		verification: {
 			checkedAt: '2026-07-14',

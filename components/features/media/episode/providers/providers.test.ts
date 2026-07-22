@@ -39,7 +39,7 @@ function def(overrides: Partial<ProviderDefinition>): ProviderDefinition {
 
 test('validation rejects duplicate ids', () => {
 	assert.throws(
-		() => validateRegistry([...PROVIDER_DEFINITIONS, def({ id: 'vidcore', rank: 999 })]),
+		() => validateRegistry([...PROVIDER_DEFINITIONS, def({ id: 'vidfast', rank: 999 })]),
 		/duplicate id/
 	);
 });
@@ -86,27 +86,20 @@ test('validation rejects enabled providers without verification', () => {
 
 // ── Selector list ────────────────────────────────────────────────────────────
 
-test('enabled providers are rank-sorted with VidCore first', () => {
+test('enabled providers are rank-sorted with Vidfast first', () => {
 	const list = listEnabledProviders();
-	assert.equal(list[0].id, 'vidcore');
+	assert.equal(list[0].id, 'vidfast');
 	assert.deepEqual(
 		list.map((p) => p.id),
 		[
-			'vidcore',
+			'vidfast',
 			'cinesrc',
 			'vidlink',
-			'vidfast',
 			'vidapi',
-			'vidsrc',
-			'vidzen',
 			'vidzee',
-			'111movies',
 			'videasy',
-			'moviepire',
 			'embedmaster',
-			'vidphantom',
 			'zxcstream',
-			'vidnest',
 			'vidking',
 		]
 	);
@@ -122,23 +115,14 @@ test('candidate and disabled providers never appear in selector results', () => 
 // ── Resolution ───────────────────────────────────────────────────────────────
 
 test('unknown and disabled ids resolve to the default', () => {
-	assert.equal(DEFAULT_PROVIDER_ID, 'vidcore');
+	assert.equal(DEFAULT_PROVIDER_ID, 'vidfast');
 	for (const id of ['nope', 'rivestream', 'toustream', '']) {
-		assert.equal(resolveProvider(id).id, 'vidcore');
+		assert.equal(resolveProvider(id).id, 'vidfast');
 	}
 	assert.equal(resolveProvider('vidking').id, 'vidking');
 });
 
 // ── URL building ─────────────────────────────────────────────────────────────
-
-test('vidcore urls follow the documented contracts', () => {
-	assert.equal(buildProviderUrl('vidcore', movie), 'https://www.vidcore.org/embed/movie/27205');
-	assert.equal(buildProviderUrl('vidcore', tv), 'https://www.vidcore.org/embed/tv/1399/1/1');
-	assert.equal(
-		buildProviderUrl('vidcore', { ...movie, resumeSeconds: 90 }),
-		'https://www.vidcore.org/embed/movie/27205?startAt=90'
-	);
-});
 
 test('movie and tv builders encode identifiers', () => {
 	assert.equal(
@@ -149,7 +133,10 @@ test('movie and tv builders encode identifiers', () => {
 
 test('cinesrc keeps its query-based tv route and resume composes with it', () => {
 	const cinesrc = PROVIDER_DEFINITIONS.find((d) => d.id === 'cinesrc')!;
-	assert.equal(buildUrl(cinesrc.urls, cinesrc.resume, tv), 'https://cinesrc.st/embed/tv/1399?s=1&e=1');
+	assert.equal(
+		buildUrl(cinesrc.urls, cinesrc.resume, tv),
+		'https://cinesrc.st/embed/tv/1399?s=1&e=1'
+	);
 	assert.equal(
 		buildUrl(cinesrc.urls, cinesrc.resume, { ...tv, resumeSeconds: 61 }),
 		'https://cinesrc.st/embed/tv/1399?s=1&e=1&startAt=61'
@@ -175,9 +162,9 @@ test('tv urls require positive season and episode', () => {
 		{ ...tv, episodeNumber: -1 },
 		{ ...tv, seasonNumber: undefined },
 	]) {
-		assert.throws(() => buildProviderUrl('vidcore', bad), /season\/episode/);
+		assert.throws(() => buildProviderUrl('cinesrc', bad), /season\/episode/);
 	}
-	assert.throws(() => buildProviderUrl('vidcore', { type: 'movie', id: '' }), /media id/);
+	assert.throws(() => buildProviderUrl('cinesrc', { type: 'movie', id: '' }), /media id/);
 });
 
 test('withQuery composes with existing query strings', () => {
@@ -270,22 +257,4 @@ test('vidsrc-family adapter accepts both event vocabularies', () => {
 		ctx
 	);
 	assert.equal(standard?.eventName, 'timeupdate');
-});
-
-test('media-data adapter prefers per-episode tv progress', () => {
-	const parsed = PROGRESS_ADAPTERS['media-data'](
-		{
-			type: 'MEDIA_DATA',
-			data: {
-				'1399': {
-					progress: { watched: 5, duration: 100 },
-					show_progress: { s1e2: { progress: { watched: 40, duration: 80 } } },
-				},
-			},
-		},
-		ctx
-	);
-	assert.equal(parsed?.currentTime, 40);
-	assert.equal(parsed?.duration, 80);
-	assert.equal(parsed?.progress, 50);
 });

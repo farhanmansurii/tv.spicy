@@ -2,7 +2,6 @@ export * from './authStore';
 export * from './episodeStore';
 export * from './favoritesStore';
 export * from './mediaQueryStore';
-export * from './playerPrefsStore';
 export * from './providerStore';
 export * from './recentsSearchStore';
 export * from './recentsStore';

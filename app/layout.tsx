@@ -8,6 +8,7 @@ import { AuthSync } from '@/components/auth/auth-sync';
 import { Toaster } from '@/components/ui/sonner';
 import { AccessibilityProvider } from '@/components/providers/accessibility-provider';
 import type { Metadata, Viewport } from 'next';
+import { DetailScrollRestoration } from '@/components/providers/detail-scroll-restoration';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://spicy-tv.vercel.app';
 
@@ -68,11 +69,7 @@ export const generateViewport = (): Viewport => ({
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html
-			lang="en"
-			suppressHydrationWarning
-			className={`${GeistSans.variable} antialiased`}
-		>
+		<html lang="en" suppressHydrationWarning className={`${GeistSans.variable} antialiased`}>
 			<head>
 				<link rel="dns-prefetch" href="https://image.tmdb.org" />
 				<link rel="preconnect" href="https://image.tmdb.org" crossOrigin="anonymous" />
@@ -87,13 +84,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					<AuthProvider>
 						<TanstackQueryProvider>
 							<SidebarProvider>
-								<AccessibilityProvider>
-									{children}
-								</AccessibilityProvider>
+								<DetailScrollRestoration />
+								<AccessibilityProvider>{children}</AccessibilityProvider>
 							</SidebarProvider>
 						</TanstackQueryProvider>
-							<Toaster />
-						</AuthProvider>
+						<Toaster />
+					</AuthProvider>
 				</ThemeProvider>
 			</body>
 		</html>

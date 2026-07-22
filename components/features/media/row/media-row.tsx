@@ -38,9 +38,12 @@ function MediaRowComponent({
 	ranked = false,
 }: MediaRowProps) {
 	const effectiveIsVertical = isVertical ?? false;
-	const carouselItemBasis = effectiveIsVertical
-		? 'basis-[46%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
-		: 'basis-[82%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4';
+	const visualIsVertical = effectiveIsVertical || ranked;
+	const carouselItemBasis = ranked
+		? 'basis-[40%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
+		: effectiveIsVertical
+			? 'basis-[40%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
+			: 'basis-[70%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4';
 
 	const validShows = useMemo(() => {
 		if (!shows) return [];
@@ -58,7 +61,7 @@ function MediaRowComponent({
 		<div
 			className={cn(
 				'grid gap-4 md:gap-6',
-				effectiveIsVertical
+				visualIsVertical
 					? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
 					: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
 			)}
@@ -69,7 +72,7 @@ function MediaRowComponent({
 					type={type as 'movie' | 'tv'}
 					show={show}
 					index={index}
-					isVertical={effectiveIsVertical}
+					isVertical={visualIsVertical}
 					rank={ranked ? index + 1 : undefined}
 				/>
 			))}
@@ -77,11 +80,11 @@ function MediaRowComponent({
 	);
 
 	const renderCarousel = () => (
-		<div className="relative group/row">
+		<div className="group/row relative">
 			{/* Left edge gradient fade */}
-			<div className="absolute left-0 top-0 bottom-0 w-8 md:w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none opacity-0 group-hover/row:opacity-100 transition-opacity duration-500" />
+			<div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 hidden w-10 bg-gradient-to-r from-background to-transparent opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 motion-reduce:transition-none md:block" />
 			{/* Right edge gradient fade */}
-			<div className="absolute right-0 top-0 bottom-0 w-8 md:w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+			<div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-7 bg-gradient-to-l from-background to-transparent md:w-12" />
 
 			<Carousel
 				opts={{
@@ -89,39 +92,37 @@ function MediaRowComponent({
 					dragFree: true,
 					containScroll: 'trimSnaps',
 				}}
-				className="w-full relative"
+				className="relative w-full"
 			>
-				<CarouselContent className="-ml-3 md:-ml-5 overflow-visible cursor-grab active:cursor-grabbing">
+				<CarouselContent className="-ml-3 cursor-grab touch-pan-y overflow-visible transform-gpu will-change-transform active:cursor-grabbing md:-ml-5">
 					{validShows.map((show: Show, index: number) => (
 						<CarouselItem
 							key={show.id}
-							className={cn(
-								'pl-3 md:pl-5 select-none',
-								carouselItemBasis
-							)}
+							className={cn('select-none pl-3 md:pl-5', carouselItemBasis)}
 						>
 							<MediaCard
 								type={type as 'movie' | 'tv'}
 								show={show}
 								index={index}
-								isVertical={effectiveIsVertical}
+								isVertical={visualIsVertical}
 								rank={ranked ? index + 1 : undefined}
 							/>
 						</CarouselItem>
 					))}
-
 				</CarouselContent>
 
 				{/* Keep controls discoverable on touch and visible when reached by keyboard. */}
-				<div className="absolute -left-1 top-1/2 -translate-y-1/2 z-20 opacity-100 md:opacity-0 md:group-hover/row:opacity-100 md:group-focus-within/row:opacity-100 transition-opacity duration-300">
+				<div className="absolute -left-1 top-1/2 z-20 hidden -translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover/row:opacity-100 group-focus-within/row:opacity-100 motion-reduce:transition-none md:block">
 					<CarouselPrevious
-						className="static translate-y-0 h-9 w-9 bg-black/60 border-white/10 text-white hover:bg-white hover:text-black transition-all backdrop-blur-md"
+						data-media-row-control
+						className="static h-11 w-11 translate-y-0 border-white/10 bg-black/68 text-white backdrop-blur-xl transition-colors hover:bg-white hover:text-black"
 						icon={<CaretLeftIcon size={16} weight="bold" />}
 					/>
 				</div>
-				<div className="absolute -right-1 top-1/2 -translate-y-1/2 z-20 opacity-100 md:opacity-0 md:group-hover/row:opacity-100 md:group-focus-within/row:opacity-100 transition-opacity duration-300">
+				<div className="absolute -right-1 top-1/2 z-20 hidden -translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover/row:opacity-100 group-focus-within/row:opacity-100 motion-reduce:transition-none md:block">
 					<CarouselNext
-						className="static translate-y-0 h-9 w-9 bg-black/60 border-white/10 text-white hover:bg-white hover:text-black transition-all backdrop-blur-md"
+						data-media-row-control
+						className="static h-11 w-11 translate-y-0 border-white/10 bg-black/68 text-white backdrop-blur-xl transition-colors hover:bg-white hover:text-black"
 						icon={<CaretRightIcon size={16} weight="bold" />}
 					/>
 				</div>
@@ -130,10 +131,15 @@ function MediaRowComponent({
 	);
 
 	return (
-		<div className="w-full py-3 md:py-5 group/row overflow-visible">
+		<div
+			className={cn(
+				'group/row w-full overflow-visible',
+				hideHeader ? 'py-0' : 'py-3 md:py-5'
+			)}
+		>
 			{!hideHeader && (
-				<div className="flex items-center justify-between gap-4 px-1 mb-3 md:mb-4">
-					<h2 className="text-base md:text-lg font-semibold text-white hover:text-white transition-colors duration-300 cursor-default">
+				<div className="mb-3 flex items-center justify-between gap-4 px-1 md:mb-4">
+					<h2 className="cursor-default text-lg font-bold tracking-[-0.02em] text-white md:text-xl">
 						{text || ''}
 					</h2>
 					<div className="flex shrink-0 items-center gap-3">
@@ -141,9 +147,10 @@ function MediaRowComponent({
 							<Link
 								href={viewAllLink}
 								aria-label={`See all titles in ${text || 'this collection'}`}
-								className="rounded-sm text-sm font-medium text-zinc-400 underline-offset-4 transition-colors hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+								className="inline-flex min-h-11 items-center gap-0.5 px-1 text-[13px] font-semibold text-white/48 transition-colors hover:text-white focus-visible:rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70"
 							>
-								See all
+								See All
+								<CaretRightIcon size={13} weight="bold" aria-hidden="true" />
 							</Link>
 						)}
 						{headerAction && <div className="flex items-center">{headerAction}</div>}

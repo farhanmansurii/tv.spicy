@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserIcon, CaretLeft } from '@phosphor-icons/react';
+import { UserIcon, CaretLeft, HouseIcon } from '@phosphor-icons/react';
 import { SearchTrigger } from '@/components/features/search/search-trigger';
 import { LiquidGlass } from '@/components/ui/liquid-glass';
 
@@ -24,7 +24,7 @@ const headerFocus =
 	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black';
 
 const mobileAction = cn(
-	'flex h-11 w-11 shrink-0 items-center justify-center rounded-full',
+	'flex h-11 w-11 shrink-0 items-center justify-center rounded-full max-[359px]:h-10 max-[359px]:w-10',
 	'text-white/90 [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.55))] hover:bg-white/[0.07] hover:text-white active:bg-white/[0.11]',
 	'touch-manipulation select-none transition-[color,background-color,transform] duration-200 ease-out active:scale-[0.96] motion-reduce:active:scale-100',
 	headerFocus
@@ -121,15 +121,16 @@ export function Header({ className }: HeaderProps) {
 				    MOBILE — detached floating glass controls
 			   ═══════════════════════════════════════════ */}
 			<header
-				className={cn(
-					'fixed left-0 right-0 z-50 px-3 lg:hidden',
-					isPlayerSticky && 'absolute'
-				)}
-				style={{ top: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+				className={cn('fixed left-0 right-0 z-50 lg:hidden', isPlayerSticky && 'absolute')}
+				style={{
+					top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+					paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 12px)',
+					paddingRight: 'calc(env(safe-area-inset-right, 0px) + 20px)',
+				}}
 				role="banner"
 				aria-label="Mobile navigation"
 			>
-				<div className="flex items-center justify-between gap-3">
+				<div className="flex w-full min-w-0 items-center justify-between gap-2 min-[375px]:gap-3">
 					{/* ── Left: brand orb (home) or back orb (detail) ── */}
 					{pathname === '/' ? (
 						/* Home → logo + Spicy TV text */
@@ -150,25 +151,34 @@ export function Header({ className }: HeaderProps) {
 							</Link>
 						</LiquidGlass>
 					) : (
-						/* Detail → back */
+						/* Inner pages → back + home */
 						<LiquidGlass
 							strength={scrolled ? 'protective' : 'regular'}
-							className="h-12 w-12 rounded-full"
+							className="h-12 rounded-full px-0.5"
 						>
-							<button
-								onClick={() => window.history.back()}
-								className={cn(mobileAction, 'h-12 w-12 text-white/85')}
-								aria-label="Go back"
-							>
-								<CaretLeft size={20} weight="bold" />
-							</button>
+							<div className="flex h-12 items-center">
+								<button
+									onClick={() => window.history.back()}
+									className={mobileAction}
+									aria-label="Go back"
+								>
+									<CaretLeft size={20} weight="bold" />
+								</button>
+								<Link
+									href="/"
+									className={mobileAction}
+									aria-label="Go to home page"
+								>
+									<HouseIcon size={19} weight="fill" />
+								</Link>
+							</div>
 						</LiquidGlass>
 					)}
 
 					{/* ── Right: actions pill (plain icons, no nested borders) ── */}
 					<LiquidGlass
 						strength={scrolled ? 'protective' : 'regular'}
-						className="h-12 rounded-full px-0.5"
+						className="mr-2 h-12 shrink-0 rounded-full px-0.5"
 					>
 						<div className="flex h-12 items-center">
 							{/* Search — plain icon, no individual background */}

@@ -1,4 +1,4 @@
-export type StreamingProvider = 'vidsrc' | 'susflix' | 'consumet';
+export type StreamingProvider = 'susflix' | 'consumet';
 
 export interface StreamingSource {
 	url: string;

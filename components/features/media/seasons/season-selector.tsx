@@ -32,14 +32,30 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 
 	useEffect(() => {
 		if (!isOpen) return;
+		const scrollY = window.scrollY;
 		const previousOverflow = document.body.style.overflow;
+		const previousPosition = document.body.style.position;
+		const previousTop = document.body.style.top;
+		const previousWidth = document.body.style.width;
+		const previousHtmlOverflow = document.documentElement.style.overflow;
 		const closeOnEscape = (event: KeyboardEvent) => {
 			if (event.key === 'Escape') setIsOpen(false);
 		};
+
+		document.documentElement.style.overflow = 'hidden';
 		document.body.style.overflow = 'hidden';
+		document.body.style.position = 'fixed';
+		document.body.style.top = `-${scrollY}px`;
+		document.body.style.width = '100%';
 		window.addEventListener('keydown', closeOnEscape);
+
 		return () => {
+			document.documentElement.style.overflow = previousHtmlOverflow;
 			document.body.style.overflow = previousOverflow;
+			document.body.style.position = previousPosition;
+			document.body.style.top = previousTop;
+			document.body.style.width = previousWidth;
+			window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
 			window.removeEventListener('keydown', closeOnEscape);
 		};
 	}, [isOpen]);
@@ -48,11 +64,12 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 
 	if (!useSheet) {
 		return (
-			<div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none">
+			<div className="w-full pb-1">
 				<div
 					role="tablist"
 					aria-label="Seasons"
-					className="flex min-w-max gap-1 rounded-2xl bg-white/[0.045] p-1 ring-1 ring-inset ring-white/[0.07]"
+					className="grid w-full gap-1 rounded-2xl bg-white/[0.035] p-1 ring-1 ring-inset ring-white/[0.065]"
+					style={{ gridTemplateColumns: `repeat(${seasons.length}, minmax(0, 1fr))` }}
 				>
 					{seasons.map((season) => {
 						const isActive = season.season_number === activeSeason;
@@ -64,15 +81,19 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 								aria-selected={isActive}
 								onClick={() => onSeasonChange(season.season_number)}
 								className={cn(
-									'relative flex h-11 min-w-[6.5rem] items-center justify-center rounded-xl px-4 text-[13px] font-semibold tracking-[-0.01em] outline-none transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70',
-									isActive ? 'text-zinc-950' : 'text-white/55 hover:text-white'
+									'isolate relative flex h-11 min-w-0 items-center justify-center rounded-xl px-2 text-[13px] font-semibold tracking-[-0.01em] outline-none transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70 motion-reduce:active:scale-100',
+									isActive ? 'text-white' : 'text-white/42 hover:text-white/75'
 								)}
 							>
 								{isActive && (
 									<motion.span
 										layoutId="season-selection"
-										className="absolute inset-0 rounded-xl bg-white shadow-[0_5px_18px_rgba(0,0,0,0.28)]"
-										transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
+										className="absolute inset-0 -z-10 rounded-xl bg-white/[0.115] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_5px_18px_rgba(0,0,0,0.18)] ring-1 ring-inset ring-white/[0.10]"
+										transition={
+											reducedMotion
+												? { duration: 0 }
+												: { type: 'spring', bounce: 0, duration: 0.32 }
+										}
 									/>
 								)}
 								<span className="relative z-10">Season {season.season_number}</span>
@@ -87,7 +108,10 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 	const sheet = (
 		<AnimatePresence>
 			{isOpen && (
-				<div className="fixed inset-0 z-[80]" role="presentation">
+				<div
+					className="fixed inset-0 z-[80] overflow-hidden overscroll-none"
+					role="presentation"
+				>
 					<motion.button
 						type="button"
 						aria-label="Close season selector"
@@ -106,7 +130,7 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 						animate={{ opacity: 1, y: 0 }}
 						exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
 						transition={{ type: 'spring', bounce: 0, duration: 0.38 }}
-						className="absolute inset-x-0 bottom-0 max-h-[78dvh] overflow-hidden rounded-t-[28px] border-t border-white/12 bg-zinc-950/88 shadow-[0_-24px_80px_rgba(0,0,0,0.65)] backdrop-blur-3xl md:inset-x-auto md:bottom-8 md:left-1/2 md:ml-[-15rem] md:w-[30rem] md:rounded-[28px] md:border"
+						className="absolute inset-x-0 bottom-0 flex max-h-[78dvh] flex-col overflow-hidden overscroll-none rounded-t-[28px] border-t border-white/12 bg-zinc-950/88 shadow-[0_-24px_80px_rgba(0,0,0,0.65)] backdrop-blur-3xl md:inset-x-auto md:bottom-8 md:left-1/2 md:ml-[-15rem] md:w-[30rem] md:rounded-[28px] md:border"
 					>
 						<div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-white/20" />
 						<div className="flex items-center justify-between px-5 pb-3 pt-4">
@@ -130,7 +154,7 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 								<XIcon size={18} weight="bold" />
 							</button>
 						</div>
-						<div className="overflow-y-auto px-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+						<div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-3 pb-[calc(1rem+env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch]">
 							{seasons.map((season) => {
 								const isActive = season.season_number === activeSeason;
 								return (

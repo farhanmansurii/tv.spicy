@@ -8,6 +8,7 @@ import DataRow from '@/components/features/media/row/data-row';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { Suspense } from 'react';
 import { HomePersonalizedRows } from '@/components/features/home/home-personalized-rows';
+import { BROWSE_CATEGORIES } from '@/lib/browse-categories';
 
 // Public catalog content can be reused safely; avoid re-rendering the full
 // homepage and its hero/detail requests for every visitor.
@@ -51,7 +52,10 @@ function HomePageContent({
 	return (
 		<div className="min-h-screen bg-background text-foreground pb-20">
 			<div className="-mt-16 lg:mt-0">
-				<HeroCarousel shows={heroShows as unknown as HeroCarouselProps['shows']} type="tv" />
+				<HeroCarousel
+					shows={heroShows as unknown as HeroCarouselProps['shows']}
+					type="tv"
+				/>
 			</div>
 
 			{/* Apple TV-style content rows with negative margin overlap for cinematic feel */}
@@ -65,7 +69,7 @@ function HomePageContent({
 
 					<DataRow
 						endpoint="tv/popular"
-						text="Popular Tonight"
+						text={BROWSE_CATEGORIES['popular-tonight'].title}
 						type="tv"
 						viewAllLink="/browse/popular-tonight"
 						initialData={tvPopular as unknown as Show[]}
@@ -76,7 +80,7 @@ function HomePageContent({
 					{/* Pre-fetched rows */}
 					<DataRow
 						endpoint="trending/tv/week"
-						text="Binge-Worthy Series"
+						text={BROWSE_CATEGORIES['binge-worthy-series'].title}
 						type="tv"
 						viewAllLink="/browse/binge-worthy-series"
 						initialData={trendingTV as unknown as Show[]}
@@ -85,7 +89,7 @@ function HomePageContent({
 					<Suspense fallback={<MediaLoader withHeader />}>
 						<DataRow
 							endpoint="tv/on_the_air"
-							text="Airing This Week"
+							text={BROWSE_CATEGORIES['airing-this-week'].title}
 							type="tv"
 							viewAllLink="/browse/airing-this-week"
 						/>
@@ -94,7 +98,7 @@ function HomePageContent({
 					<Suspense fallback={<MediaLoader withHeader />}>
 						<DataRow
 							endpoint="tv/top_rated"
-							text="Critically Acclaimed TV"
+							text={BROWSE_CATEGORIES['critically-acclaimed-tv'].title}
 							type="tv"
 							viewAllLink="/browse/critically-acclaimed-tv"
 						/>
@@ -102,7 +106,7 @@ function HomePageContent({
 
 					<DataRow
 						endpoint="trending/movie/week"
-						text="Blockbuster Hits"
+						text={BROWSE_CATEGORIES['blockbuster-hits'].title}
 						type="movie"
 						showRank
 						viewAllLink="/browse/blockbuster-hits"
@@ -112,7 +116,7 @@ function HomePageContent({
 					<Suspense fallback={<MediaLoader withHeader />}>
 						<DataRow
 							endpoint="movie/now_playing"
-							text="Fresh in Theaters"
+							text={BROWSE_CATEGORIES['fresh-in-theaters'].title}
 							type="movie"
 							viewAllLink="/browse/fresh-in-theaters"
 						/>
@@ -121,7 +125,7 @@ function HomePageContent({
 					<Suspense fallback={<MediaLoader withHeader />}>
 						<DataRow
 							endpoint="movie/popular"
-							text="Cult Classics & Fan Favorites"
+							text={BROWSE_CATEGORIES['cult-classics-fan-favorites'].title}
 							type="movie"
 							viewAllLink="/browse/cult-classics-fan-favorites"
 						/>
@@ -130,7 +134,7 @@ function HomePageContent({
 					<Suspense fallback={<MediaLoader withHeader />}>
 						<DataRow
 							endpoint="movie/top_rated"
-							text="Cinema Hall of Fame"
+							text={BROWSE_CATEGORIES['cinema-hall-of-fame'].title}
 							type="movie"
 							viewAllLink="/browse/cinema-hall-of-fame"
 						/>

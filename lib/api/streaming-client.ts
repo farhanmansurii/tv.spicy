@@ -3,7 +3,6 @@
  * For various streaming sources
  */
 
-
 /**
  * Fetch links from Susflix
  */
@@ -22,44 +21,5 @@ export async function fetchSusflixLinks(movie: string) {
 	} catch (error) {
 		console.error('Error fetching Susflix links:', error);
 		return null;
-	}
-}
-
-/**
- * Fetch VidSrc links
- */
-export async function fetchVidSrc(
-	type: 'movie' | 'tv',
-	id: string,
-	season: number | null = null,
-	episode: number | null = null,
-	callback?: (error: any, data?: any) => void
-) {
-	const apiBaseUrl = 'https://spicy-vidsrc-api.vercel.app/';
-	const baseURL =
-		type === 'movie'
-			? `${apiBaseUrl}vsrcme/${id}`
-			: `${apiBaseUrl}vsrcme/${id}?s=${season}&e=${episode}`;
-
-	try {
-		const response = await fetch(baseURL, {
-			next: { revalidate: 3600 },
-		});
-
-		if (!response.ok) {
-			throw new Error('Failed to fetch VidSrc links');
-		}
-
-		const data = await response.json();
-		if (callback) {
-			callback(null, data);
-		}
-		return data;
-	} catch (error) {
-		console.error('Error fetching VidSrc links:', error);
-		if (callback) {
-			callback(error);
-		}
-		throw error;
 	}
 }

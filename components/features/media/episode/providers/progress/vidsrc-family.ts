@@ -1,6 +1,5 @@
 /**
- * Adapter for the VidSrc-family PLAYER_EVENT format shared by Vidfast,
- * Vidsrc/embed.su/autoembed, VidCore, and (per its docs) VidPhantom:
+ * Adapter for the PLAYER_EVENT format shared by Vidfast, VidAPI, and AutoEmbed:
  *  • ID field: `tmdbId`
  *  • Event vocabulary varies — some emit "time"/"complete" instead of
  *    "timeupdate"/"ended"; both are accepted and normalized
@@ -12,7 +11,10 @@ import { playerEventData, type ProgressAdapter } from './types';
 
 const EVENTS = ['timeupdate', 'pause', 'seeked', 'ended', 'play', 'time', 'complete'];
 
-export const parseVidsrcFamily: ProgressAdapter = (data, { numericMediaId, type, season, episode }) => {
+export const parseVidsrcFamily: ProgressAdapter = (
+	data,
+	{ numericMediaId, type, season, episode }
+) => {
 	const evt = playerEventData(data);
 	if (!evt) return null;
 

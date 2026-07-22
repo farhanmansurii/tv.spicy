@@ -48,8 +48,7 @@ export interface ResumeConfig {
 /** postMessage progress support: expected origin plus a named adapter. */
 export interface ProgressConfig {
 	/**
-	 * Exact origin the provider posts events from. May differ from the embed
-	 * origin (e.g. VidZen embeds from vidzen.fun but posts from vidsrc.wtf).
+	 * Exact origin the provider posts events from. It may differ from the embed origin.
 	 */
 	origin: string;
 	adapter: ProgressAdapterId;

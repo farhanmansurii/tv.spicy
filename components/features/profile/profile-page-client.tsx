@@ -28,8 +28,6 @@ import { cn } from '@/lib/utils';
 import { Show } from '@/lib/types';
 import MediaRow from '@/components/features/media/row/media-row';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { usePlayerPrefsStore } from '@/store/playerPrefsStore';
 import RecentlyWatchedComponent from '@/components/features/watchlist/recently-watched';
 import type { Session } from '@/lib/auth';
 
@@ -86,8 +84,6 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 	const recentlyWatched = useTVShowStore((s) => s.recentlyWatched);
 	const favoriteMovies = useFavoritesStore((s) => s.favoriteMovies);
 	const favoriteTV = useFavoritesStore((s) => s.favoriteTV);
-	const stickyEnabled = usePlayerPrefsStore((s) => s.stickyEnabled);
-	const setStickyEnabled = usePlayerPrefsStore((s) => s.setStickyEnabled);
 
 	const totalWatchlist = (watchlist?.length || 0) + (tvwatchlist?.length || 0);
 	const totalWatched = recentlyWatched?.length || 0;
@@ -235,23 +231,6 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 									</div>
 								)}
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
-									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-left">
-										<div className="flex items-center justify-between">
-											<div>
-												<p className="text-xs text-muted-foreground">
-													Sticky Player
-												</p>
-												<p className="text-sm font-semibold text-foreground">
-													{stickyEnabled ? 'On' : 'Off'}
-												</p>
-											</div>
-											<Switch
-												checked={stickyEnabled}
-												onCheckedChange={setStickyEnabled}
-												className="data-[state=checked]:bg-primary"
-											/>
-										</div>
-									</Card>
 									<Card className="bg-foreground/[0.03] border-border/50 p-3 md:p-4 text-center">
 										<FilmSlateIcon className="w-5 h-5 text-foreground mx-auto mb-2" />
 										<p className="text-xl md:text-2xl font-bold text-foreground">

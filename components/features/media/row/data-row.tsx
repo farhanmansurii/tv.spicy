@@ -83,6 +83,7 @@ export default function DataRow({
 					withHeader={!hideHeader}
 					layout={gridLayout ? 'grid' : 'carousel'}
 					isVertical={isVertical}
+					ranked={showRank}
 				/>
 			</div>
 		);
@@ -102,6 +103,7 @@ export default function DataRow({
 						withHeader={!hideHeader}
 						layout={gridLayout ? 'grid' : 'carousel'}
 						isVertical={isVertical}
+						ranked={showRank}
 					/>
 				</div>
 			);
