@@ -1,6 +1,5 @@
 'use client';
 
-import { useInView } from 'react-intersection-observer';
 import { useEffect, useState } from 'react';
 import { fetchGenreByIdFromApi } from '@/lib/api/tmdb-row-client';
 import { Show } from '@/lib/types';
@@ -9,7 +8,6 @@ import { MediaLoader } from '@/components/shared/loaders/media-loader';
 
 function LoadMore(props: { params: any }) {
 	const { params } = props;
-	const { ref, inView } = useInView();
 
 	const [data, setData] = useState<Show[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +19,7 @@ function LoadMore(props: { params: any }) {
 	} | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasInitialLoad, setHasInitialLoad] = useState(false);
+	const [hasMore, setHasMore] = useState(true);
 
 	// Handle async params
 	useEffect(() => {
@@ -59,44 +58,26 @@ function LoadMore(props: { params: any }) {
 		}
 	}, [searchParams, hasInitialLoad]);
 
-	// Load more pages when in view
-	useEffect(() => {
-		if (
-			inView &&
-			searchParams?.type &&
-			searchParams?.id &&
-			hasInitialLoad &&
-			!isLoadingMore &&
-			data.length > 0
-		) {
-			setIsLoadingMore(true);
-			const nextPage = currentPage + 1;
-
-			const timeoutId = setTimeout(async () => {
-				try {
-					// Normalize type to 'movie' or 'tv'
-					const normalizedType =
-						searchParams.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
-					const res = await fetchGenreByIdFromApi(
-						normalizedType,
-						searchParams.id!,
-						nextPage
-					);
-					const nextBatch = (res as Show[]) || [];
-					if (nextBatch.length > 0) {
-						setData((prev) => [...prev, ...nextBatch]);
-						setCurrentPage(nextPage);
-					}
-				} catch (error) {
-					console.error('Error loading more:', error);
-				} finally {
-					setIsLoadingMore(false);
-				}
-			}, 500);
-
-			return () => clearTimeout(timeoutId);
+	const loadNextPage = async () => {
+		if (!searchParams?.type || !searchParams.id || isLoadingMore || !hasMore) return;
+		setIsLoadingMore(true);
+		const nextPage = currentPage + 1;
+		try {
+			const normalizedType = searchParams.type.toLowerCase() === 'movie' ? 'movie' : 'tv';
+			const res = await fetchGenreByIdFromApi(normalizedType, searchParams.id, nextPage);
+			const nextBatch = (res as Show[]) || [];
+			if (nextBatch.length === 0) {
+				setHasMore(false);
+				return;
+			}
+			setData((prev) => [...prev, ...nextBatch]);
+			setCurrentPage(nextPage);
+		} catch (error) {
+			console.error('Error loading more:', error);
+		} finally {
+			setIsLoadingMore(false);
 		}
-	}, [inView, searchParams, hasInitialLoad, currentPage, isLoadingMore, data.length]);
+	};
 
 	// Reset when params change
 	useEffect(() => {
@@ -104,6 +85,7 @@ function LoadMore(props: { params: any }) {
 		setData([]);
 		setHasInitialLoad(false);
 		setIsLoadingMore(false);
+		setHasMore(true);
 	}, [searchParams?.id, searchParams?.type]);
 
 	if (!searchParams?.type || !searchParams?.id) {
@@ -126,9 +108,18 @@ function LoadMore(props: { params: any }) {
 				gridLayout={true}
 				type={normalizedType}
 			/>
-			<div ref={ref}>
-				{inView && isLoadingMore && <MediaLoader layout="grid" isVertical />}
-			</div>
+			{hasMore && (
+				<div className="flex justify-center py-4">
+					<button
+						type="button"
+						onClick={loadNextPage}
+						disabled={isLoadingMore}
+						className="rounded-full border border-white/10 bg-white/[0.06] px-6 py-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/[0.1] disabled:cursor-wait disabled:opacity-50"
+					>
+						{isLoadingMore ? 'Loading…' : 'Load more'}
+					</button>
+				</div>
+			)}
 		</div>
 	);
 }

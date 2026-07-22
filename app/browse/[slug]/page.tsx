@@ -8,6 +8,8 @@ import { Show } from '@/lib/types';
 import CommonTitle from '@/components/shared/animated/common-title';
 import SectionWrapper from '@/components/shared/animated/section-layout';
 
+export const revalidate = 3600;
+
 interface PageProps {
     params: Promise<{ slug: string }>;
 }

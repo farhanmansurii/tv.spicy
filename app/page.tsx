@@ -9,6 +9,10 @@ import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { Suspense } from 'react';
 import { HomePersonalizedRows } from '@/components/features/home/home-personalized-rows';
 
+// Public catalog content can be reused safely; avoid re-rendering the full
+// homepage and its hero/detail requests for every visitor.
+export const revalidate = 3600;
+
 async function fetchHomePageData() {
 	const [trendingTV, trendingMovies, tvPopular] = await Promise.all([
 		fetchRowData('trending/tv/week'),

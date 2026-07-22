@@ -10,6 +10,8 @@ import {
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
+export const revalidate = 604800;
+
 interface Genre {
     id: number;
     name: string;

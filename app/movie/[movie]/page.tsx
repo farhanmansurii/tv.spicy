@@ -20,6 +20,8 @@ import {
 	StorylineSkeleton,
 } from '@/components/features/media/details/detail-skeletons';
 
+export const revalidate = 604800;
+
 /* ────────────────────────────────────────────────────────────
    Metadata
    ──────────────────────────────────────────────────────────── */

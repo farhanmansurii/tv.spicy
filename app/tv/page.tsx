@@ -12,6 +12,8 @@ import type { Genre } from '@/lib/types/tmdb';
 import type { Show } from '@/lib/types';
 import ProgressiveGenreRows from '@/components/features/media/genre/progressive-genre-rows';
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = {
 	title: 'Spicy TV',
 	description: 'Watch any TV or Movies with Spicy TV',

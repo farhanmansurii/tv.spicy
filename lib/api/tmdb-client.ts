@@ -45,7 +45,7 @@ const CACHE_DURATIONS = {
 const REQUEST_TIMEOUT = 10000; // 10 seconds
 
 // Retry configuration
-const MAX_RETRIES = 2;
+const MAX_RETRIES = 1;
 const RETRY_DELAY = 1000; // 1 second
 
 // ============================================================================
@@ -73,15 +73,6 @@ interface TMDBError {
 // ============================================================================
 
 /**
- * Create a timeout promise that rejects after specified milliseconds
- */
-function createTimeout(ms: number): Promise<never> {
-	return new Promise((_, reject) => {
-		setTimeout(() => reject(new Error(`Request timeout after ${ms}ms`)), ms);
-	});
-}
-
-/**
  * Delay execution for specified milliseconds
  */
 function delay(ms: number): Promise<void> {
@@ -93,9 +84,15 @@ function delay(ms: number): Promise<void> {
  */
 function isRetryableError(error: any): boolean {
 	if (!error) return false;
+	const message = String(error.message ?? '').toLowerCase();
 
 	// Retry on network errors or 5xx server errors
-	if (error.message?.includes('timeout') || error.message?.includes('network')) {
+	if (
+		error.name === 'AbortError' ||
+		error.name === 'TimeoutError' ||
+		message.includes('timeout') ||
+		message.includes('network')
+	) {
 		return true;
 	}
 
@@ -155,16 +152,13 @@ async function tmdbFetch<T>(endpoint: string, options: FetchOptions = {}): Promi
 	// Retry logic
 	for (let attempt = 0; attempt <= retries; attempt++) {
 		try {
-			// Create fetch with timeout
-			const fetchPromise = fetch(url.toString(), {
+			// Abort the upstream request itself when it times out. Promise.race
+			// alone leaves the fetch consuming serverless CPU in the background.
+			const response = await fetch(url.toString(), {
 				headers: defaultHeaders,
 				next: { revalidate },
+				signal: AbortSignal.timeout(timeout),
 			});
-
-			const response = (await Promise.race([
-				fetchPromise,
-				createTimeout(timeout),
-			])) as Response;
 
 			if (!response.ok) {
 				let errorData: TMDBError | string;
@@ -597,7 +591,32 @@ export async function fetchHeroItemsWithDetails(
 
 		const enhancedShows = detailsResults.map((result, index) => {
 			if (result.status === 'fulfilled' && result.value) {
-				return { ...topShows[index], ...result.value } as TMDBBaseMedia;
+				const fullShow = { ...topShows[index], ...result.value } as TMDBBaseMedia & {
+					images?: TMDBImagesResponse;
+					videos?: unknown;
+					keywords?: unknown;
+					external_ids?: unknown;
+					'watch/providers'?: unknown;
+				};
+				const {
+					videos: _videos,
+					keywords: _keywords,
+					external_ids: _externalIds,
+					'watch/providers': _watchProviders,
+					images,
+					...compactShow
+				} = fullShow;
+
+				return {
+					...compactShow,
+					images: images
+						? {
+								backdrops: images.backdrops.slice(0, 3),
+								posters: images.posters.slice(0, 3),
+								logos: images.logos.slice(0, 2),
+							}
+						: undefined,
+				} as TMDBBaseMedia;
 			}
 			return topShows[index];
 		});

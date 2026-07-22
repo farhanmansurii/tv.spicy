@@ -18,6 +18,9 @@ export async function GET(request: NextRequest) {
 	}
 
 	return NextResponse.json(await searchTMDB(query, page), {
-		headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=3600' },
+		headers: {
+			'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+			'Vercel-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+		},
 	});
 }
