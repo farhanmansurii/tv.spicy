@@ -33,7 +33,8 @@ export default function Episode({
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const { selectedProvider, setProvider } = useProviderStore();
 	const { setIsPlaying } = useEpisodeStore();
-	const { recentlyWatched, updatePlaybackProgress } = useTVShowStore();
+	const { recentlyWatched, updatePlaybackProgress, flushPlaybackProgress } =
+		useTVShowStore();
 
 	const numericMediaId = Number(id);
 	const numericSeasonNumber =
@@ -132,6 +133,7 @@ export default function Episode({
 		provider: currentProvider,
 		currentWatchItem,
 		updatePlaybackProgress,
+		flushPlaybackProgress,
 	});
 
 	return (

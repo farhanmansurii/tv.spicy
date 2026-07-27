@@ -1,6 +1,7 @@
 'use client';
 
-import { useSession, signIn, signOut } from '@/lib/auth-client';
+import { signOut } from '@/lib/auth-client';
+import { useAuthStore } from '@/store/authStore';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -25,7 +26,9 @@ import { cn } from '@/lib/utils';
  * - Touch-friendly sizing (44px minimum)
  */
 export function AuthButton() {
-	const { data: session, isPending } = useSession();
+	const session = useAuthStore((state) => state.session);
+	const isPending = useAuthStore((state) => state.isLoading);
+	const clearSession = useAuthStore((state) => state.clearSession);
 	const router = useRouter();
 
 	// Loading state with refined spinner
@@ -194,6 +197,7 @@ export function AuthButton() {
 				<DropdownMenuItem
 					onClick={async () => {
 						await signOut();
+						clearSession();
 						router.push('/');
 					}}
 					className={cn(

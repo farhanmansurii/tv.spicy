@@ -14,7 +14,7 @@ import { HeaderNavigation } from './header-navigation';
 import { navigationItems } from './navigation-data';
 import { cn } from '@/lib/utils';
 import { useEpisodeStore } from '@/store/episodeStore';
-import { useSession } from '@/lib/auth-client';
+import { useAuthStore } from '@/store/authStore';
 
 interface HeaderProps {
 	className?: string;
@@ -35,7 +35,7 @@ export function Header({ className }: HeaderProps) {
 	const pathname = usePathname();
 	const { toggleSidebar, openMobile } = useSidebar();
 	const isPlayerSticky = useEpisodeStore((state) => state.isPlayerSticky);
-	const { data: session } = useSession();
+	const user = useAuthStore((state) => state.user);
 
 	React.useEffect(() => {
 		let ticking = false;
@@ -189,14 +189,14 @@ export function Header({ className }: HeaderProps) {
 
 							{/* Profile — plain icon, no individual background */}
 							<Link
-								href={session?.user ? '/profile' : '/auth/signin'}
+								href={user ? '/profile' : '/auth/signin'}
 								prefetch={false}
 								className={mobileAction}
 								aria-label="Profile"
 							>
-								{session?.user?.image ? (
+								{user?.image ? (
 									<img
-										src={session.user.image}
+										src={user.image}
 										alt=""
 										className="w-7 h-7 rounded-full object-cover"
 									/>

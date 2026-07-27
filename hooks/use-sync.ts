@@ -1,24 +1,24 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useSession } from '@/lib/auth-client';
 import { syncLocalToDatabase } from '@/lib/sync/local-to-db';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/authStore';
 
 export function useSync() {
-	const { data: session } = useSession();
+	const userId = useAuthStore((state) => state.userId);
 	const [isSyncing, setIsSyncing] = useState(false);
 	const [lastSync, setLastSync] = useState<Date | null>(null);
 
 	const sync = useCallback(async () => {
-		if (!session?.user?.id) {
+		if (!userId) {
 			toast.error('Please sign in to sync your data');
 			return;
 		}
 
 		setIsSyncing(true);
 		try {
-			const result = await syncLocalToDatabase(session.user.id);
+			const result = await syncLocalToDatabase();
 			if (result.success) {
 				setLastSync(new Date());
 				toast.success('Data synced successfully', {
@@ -37,7 +37,7 @@ export function useSync() {
 		} finally {
 			setIsSyncing(false);
 		}
-	}, [session]);
+	}, [userId]);
 
 	return { sync, isSyncing, lastSync };
 }

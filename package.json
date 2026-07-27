@@ -4,9 +4,9 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev --turbopack",
-		"build": "next build",
+		"build": "next build --webpack",
 		"start": "next start",
-		"test": "tsx --test components/features/media/episode/providers/providers.test.ts lib/api/tmdb-client.test.ts",
+		"test": "tsx --test components/features/media/episode/providers/providers.test.ts lib/api/tmdb-client.test.ts lib/auth-session-options.test.ts lib/sync/bootstrap-user-data.test.ts lib/sync/write-coordinator.test.ts",
 		"lint": "eslint .",
 		"postinstall": "prisma generate"
 	},

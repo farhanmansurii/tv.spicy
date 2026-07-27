@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { useAuthStore } from '@/store/authStore';
-import { invalidateUserQueries } from '@/lib/query-client';
+import { updatePersonalizedHomeQuery } from '@/lib/query-client';
+import type { PersonalizedFavoriteItem } from '@/lib/types/personalized-home';
 
 export interface FavoriteItem {
 	id: number;
@@ -27,6 +28,7 @@ interface FavoritesActions {
 	loadFromDatabase: () => Promise<void>;
 	syncWithDatabase: () => Promise<void>;
 	initialize: () => Promise<void>;
+	mergeRemoteData: (items: PersonalizedFavoriteItem[]) => void;
 	resetInitialization: () => void;
 }
 
@@ -100,7 +102,19 @@ export const useFavoritesStore = create<FavoritesStore>()(
 					],
 				}));
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						favorites: [
+							{ ...item, media_type: mediaType },
+							...data.favorites.filter(
+								(favorite) =>
+									!(
+										favorite.id === item.id &&
+										favorite.media_type === mediaType
+									)
+							),
+						],
+					}));
 				}
 				syncFavoriteToDatabase(item.id, mediaType, 'add');
 			},
@@ -114,7 +128,16 @@ export const useFavoritesStore = create<FavoritesStore>()(
 					),
 				}));
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						favorites: data.favorites.filter(
+							(favorite) =>
+								!(
+									favorite.id === mediaId &&
+									favorite.media_type === mediaType
+								)
+						),
+					}));
 				}
 				syncFavoriteToDatabase(mediaId, mediaType, 'remove');
 			},
@@ -122,7 +145,14 @@ export const useFavoritesStore = create<FavoritesStore>()(
 			clearFavorites: (mediaType?: 'movie' | 'tv') => {
 				const authState = useAuthStore.getState();
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						favorites: mediaType
+							? data.favorites.filter(
+									(favorite) => favorite.media_type !== mediaType
+								)
+							: [],
+					}));
 				}
 				if (mediaType) {
 					const key = mediaType === 'movie' ? 'favoriteMovies' : 'favoriteTV';
@@ -136,16 +166,10 @@ export const useFavoritesStore = create<FavoritesStore>()(
 				} else {
 					set({ favoriteMovies: [], favoriteTV: [] });
 					if (authState.isAuthenticated) {
-						Promise.all([
-							fetch('/api/favorites?mediaType=movie', {
-								method: 'DELETE',
-								credentials: 'include',
-							}),
-							fetch('/api/favorites?mediaType=tv', {
-								method: 'DELETE',
-								credentials: 'include',
-							}),
-						]).catch(console.error);
+						fetch('/api/favorites', {
+							method: 'DELETE',
+							credentials: 'include',
+						}).catch(console.error);
 					}
 				}
 			},
@@ -216,6 +240,28 @@ export const useFavoritesStore = create<FavoritesStore>()(
 					return;
 				}
 				await get().loadFromDatabase();
+			},
+
+			mergeRemoteData: (items) => {
+				const remoteMovies = items.filter((item) => item.media_type === 'movie');
+				const remoteTV = items.filter((item) => item.media_type === 'tv');
+
+				set((state) => {
+					const localMovieIds = new Set(state.favoriteMovies.map((item) => item.id));
+					const localTVIds = new Set(state.favoriteTV.map((item) => item.id));
+					return {
+						favoriteMovies: [
+							...state.favoriteMovies,
+							...remoteMovies.filter((item) => !localMovieIds.has(item.id)),
+						],
+						favoriteTV: [
+							...state.favoriteTV,
+							...remoteTV.filter((item) => !localTVIds.has(item.id)),
+						],
+						isInitialized: true,
+						isLoading: false,
+					};
+				});
 			},
 
 			resetInitialization: () => {

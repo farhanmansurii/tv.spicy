@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useSession } from '@/lib/auth-client';
+import { useAuthStore } from '@/store/authStore';
 
 const getTimeOfDay = (): 'morning' | 'afternoon' | 'evening' => {
 	const hour = new Date().getHours();
@@ -11,13 +11,13 @@ const getTimeOfDay = (): 'morning' | 'afternoon' | 'evening' => {
 };
 
 export function usePersonalizedGreeting() {
-	const { data: session } = useSession();
+	const name = useAuthStore((state) => state.userName);
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
 	const firstName = useMemo(() => {
-		const name = session?.user?.name;
 		if (!name) return null;
 		return name.split(' ')[0];
-	}, [session?.user?.name]);
+	}, [name]);
 
 	const message = useMemo(() => {
 		if (!firstName) return null;
@@ -34,6 +34,6 @@ export function usePersonalizedGreeting() {
 	return {
 		message,
 		firstName,
-		isAuthenticated: !!session?.user,
+		isAuthenticated,
 	};
 }

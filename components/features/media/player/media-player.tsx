@@ -41,7 +41,28 @@ export default function MediaPlayer({
 		return null; // Return null when totalTime is not available or percentage is invalid
 	}
 
-	const { updateTimeWatched } = useTVShowStore();
+	const { updateTimeWatched, flushPlaybackProgress } = useTVShowStore();
+
+	useEffect(() => {
+		if (!activeEP?.tv_id) return;
+		const mediaId = String(activeEP.tv_id);
+		const flush = () => {
+			void flushPlaybackProgress(mediaId, 'tv');
+		};
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'hidden') {
+				flush();
+			}
+		};
+
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+		window.addEventListener('pagehide', flush);
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			window.removeEventListener('pagehide', flush);
+			flush();
+		};
+	}, [activeEP?.tv_id, flushPlaybackProgress]);
 	function findAutoQualityUrl(videoUrls: StreamingSource[]) {
 		const autoQualityVideos = videoUrls.filter((video) => video.quality === 'auto');
 		return autoQualityVideos[0]?.url || videoUrls[0]?.url;

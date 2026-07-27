@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useSession } from '@/lib/auth-client';
 import Container from '@/components/shared/containers/container';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -22,6 +21,7 @@ import useWatchListStore from '@/store/watchlistStore';
 import useTVShowStore from '@/store/recentsStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import { usePersonalizedGreeting } from '@/hooks/use-personalized-greeting';
+import { useAuthStore } from '@/store/authStore';
 
 type TabValue = 'continue' | 'watchlist' | 'favorites';
 
@@ -77,7 +77,8 @@ function TabButton({
 }
 
 export default function LibraryPage() {
-	const { data: session, isPending } = useSession();
+	const session = useAuthStore((state) => state.session);
+	const isPending = useAuthStore((state) => state.isLoading);
 	const watchlist = useWatchListStore((s) => s.watchlist);
 	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist);
 	const favoriteMovies = useFavoritesStore((s) => s.favoriteMovies);

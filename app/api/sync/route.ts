@@ -4,6 +4,7 @@ import { addToWatchlist } from '@/lib/db/watchlist';
 import { mergeRecentlyWatchedBatch } from '@/lib/db/recently-watched';
 import { addFavorite } from '@/lib/db/favorites';
 import { addRecentSearch } from '@/lib/db/recent-searches';
+import { fetchUserHomeData } from '@/lib/db/home-data';
 
 export async function POST(request: NextRequest) {
 	try {
@@ -106,7 +107,8 @@ export async function POST(request: NextRequest) {
 			}
 		}
 
-		return NextResponse.json({ success: true, results });
+		const data = await fetchUserHomeData(session.user.id);
+		return NextResponse.json({ success: true, results, data });
 	} catch (error) {
 		console.error('Error syncing data:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

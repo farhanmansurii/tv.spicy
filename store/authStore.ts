@@ -21,9 +21,13 @@ interface AuthStore {
 	userEmail: string | null;
 	userName: string | null;
 	userImage: string | null;
+	isBootstrapping: boolean;
+	bootstrappedUserId: string | null;
 	// Actions
 	setSession: (session: Session | null) => void;
 	setLoading: (isLoading: boolean) => void;
+	beginBootstrap: (userId: string) => void;
+	completeBootstrap: (userId: string) => void;
 	clearSession: () => void;
 	// Legacy methods for backward compatibility
 	setUser: (user: {
@@ -53,23 +57,51 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 	userEmail: null,
 	userName: null,
 	userImage: null,
+	isBootstrapping: false,
+	bootstrappedUserId: null,
 
 	setSession: (session) => {
 		const user = session?.user || null;
-		set({
-			session,
-			isAuthenticated: !!session,
-			user,
-			userId: user?.id || null,
-			userEmail: user?.email || null,
-			userName: user?.name || null,
-			userImage: user?.image || null,
-			isLoading: false,
+		set((state) => {
+			const userId = user?.id || null;
+			const changedUser = state.userId !== userId;
+			return {
+				session,
+				isAuthenticated: !!session,
+				user,
+				userId,
+				userEmail: user?.email || null,
+				userName: user?.name || null,
+				userImage: user?.image || null,
+				isLoading: false,
+				isBootstrapping: userId
+					? changedUser
+						? true
+						: state.isBootstrapping
+					: false,
+				bootstrappedUserId: changedUser ? null : state.bootstrappedUserId,
+			};
 		});
 	},
 
 	setLoading: (isLoading) => {
 		set({ isLoading });
+	},
+
+	beginBootstrap: (userId) => {
+		set((state) =>
+			state.userId === userId
+				? { isBootstrapping: true, bootstrappedUserId: null }
+				: {}
+		);
+	},
+
+	completeBootstrap: (userId) => {
+		set((state) =>
+			state.userId === userId
+				? { isBootstrapping: false, bootstrappedUserId: userId }
+				: {}
+		);
 	},
 
 	clearSession: () => {
@@ -82,6 +114,8 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 			userName: null,
 			userImage: null,
 			isLoading: false,
+			isBootstrapping: false,
+			bootstrappedUserId: null,
 		});
 	},
 
@@ -116,6 +150,7 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 				createdAt: session?.user?.createdAt || new Date().toISOString(),
 				updatedAt: session?.user?.updatedAt || new Date().toISOString(),
 			},
+			isBootstrapping: false,
 		});
 	},
 
@@ -128,7 +163,8 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 			userImage: null,
 			session: null,
 			user: null,
+			isBootstrapping: false,
+			bootstrappedUserId: null,
 		});
 	},
 }));
-

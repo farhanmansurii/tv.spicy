@@ -12,7 +12,8 @@ import {
 } from '@/lib/continue-watching';
 import type { Episode } from '@/lib/types';
 import { useAuthStore } from '@/store/authStore';
-import { invalidateUserQueries } from '@/lib/query-client';
+import { updatePersonalizedHomeQuery } from '@/lib/query-client';
+import { WriteCoordinator } from '@/lib/sync/write-coordinator';
 
 type RecentsEpisode = Episode & { time?: number };
 
@@ -38,9 +39,17 @@ interface TVShowStore {
 		episodeNumber?: number | null;
 	}) => Promise<void>;
 	deleteRecentlyWatched: (mediaId?: number, mediaType?: 'movie' | 'tv') => Promise<void>;
+	flushPlaybackProgress: (mediaId: string, mediaType?: 'movie' | 'tv') => Promise<void>;
 	syncWithDatabase: () => Promise<void>;
 	loadFromDatabase: () => Promise<void>;
+	mergeRemoteData: (items: ContinueWatchingItem[], userId: string) => void;
 	initialize: () => Promise<void>;
+}
+
+const progressWrites = new WriteCoordinator({ intervalMs: 60_000 });
+
+function getProgressWriteKey(mediaType: 'movie' | 'tv', mediaId: number): string {
+	return `${mediaType}:${mediaId}`;
 }
 
 async function fetchRecentlyWatchedFromDatabase(): Promise<ContinueWatchingItem[]> {
@@ -138,7 +147,10 @@ const useTVShowStore = create<TVShowStore>()(
 
 				const authState = useAuthStore.getState();
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						recentlyWatched: nextItems,
+					}));
 				}
 
 				if (!authState.isAuthenticated) {
@@ -228,23 +240,39 @@ const useTVShowStore = create<TVShowStore>()(
 
 				const authState = useAuthStore.getState();
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						recentlyWatched: nextItems,
+					}));
 				}
 
 				if (!authState.isAuthenticated) {
 					return;
 				}
 
-				try {
-					if (nextProgressPercent >= 95) {
+				const writeKey = getProgressWriteKey(updatedItem.mediaType, updatedItem.mediaId);
+				if (nextProgressPercent >= 95) {
+					progressWrites.cancel(writeKey);
+					try {
 						await removeItemFromDatabase(updatedItem.mediaId, updatedItem.mediaType);
-						return;
+					} catch (error) {
+						console.error('Failed to complete continue watching item:', error);
 					}
-
-					await persistProgress(updatedItem, nextProgressPercent);
-				} catch (error) {
-					console.error('Failed to update continue watching progress:', error);
+					return;
 				}
+
+				const fingerprint = [
+					Math.floor(nextProgressPercent),
+					updatedItem.seasonNumber ?? '',
+					updatedItem.episodeNumber ?? '',
+				].join(':');
+				void progressWrites
+					.schedule(writeKey, fingerprint, () =>
+						persistProgress(updatedItem, nextProgressPercent)
+					)
+					.catch((error) => {
+						console.error('Failed to update continue watching progress:', error);
+					});
 			},
 
 			deleteRecentlyWatched: async (mediaId, mediaType = 'tv') => {
@@ -259,11 +287,18 @@ const useTVShowStore = create<TVShowStore>()(
 
 				const authState = useAuthStore.getState();
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						recentlyWatched: nextItems,
+					}));
 				}
 
 				if (!authState.isAuthenticated) {
 					return;
+				}
+
+				if (mediaId) {
+					progressWrites.cancel(getProgressWriteKey(mediaType, mediaId));
 				}
 
 				try {
@@ -271,6 +306,12 @@ const useTVShowStore = create<TVShowStore>()(
 				} catch (error) {
 					console.error('Failed to delete continue watching item:', error);
 				}
+			},
+
+			flushPlaybackProgress: async (mediaId, mediaType = 'tv') => {
+				await progressWrites.flush(
+					getProgressWriteKey(mediaType, Number(mediaId))
+				);
 			},
 
 			syncWithDatabase: async () => {
@@ -339,6 +380,15 @@ const useTVShowStore = create<TVShowStore>()(
 				}
 
 				await get().loadFromDatabase();
+			},
+
+			mergeRemoteData: (items, userId) => {
+				set({
+					recentlyWatched: mergeLocalAndRemote(get().recentlyWatched, items),
+					isInitialized: true,
+					isLoading: false,
+					lastUserId: userId,
+				});
 			},
 		}),
 		{

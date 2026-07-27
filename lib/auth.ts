@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '@/lib/db/prisma';
+import { AUTH_SERVER_COOKIE_CACHE } from '@/lib/auth-session-options';
 
 // Get baseURL from environment or auto-detect from request
 function getBaseURL(): string {
@@ -71,6 +72,9 @@ export const auth = betterAuth({
 	basePath: '/api/auth',
 	secret: process.env.BETTER_AUTH_SECRET || process.env.NEXTAUTH_SECRET || '',
 	trustedOrigins,
+	session: {
+		cookieCache: AUTH_SERVER_COOKIE_CACHE,
+	},
 });
 
 export type Session = typeof auth.$Infer.Session;

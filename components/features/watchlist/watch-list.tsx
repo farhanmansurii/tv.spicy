@@ -4,11 +4,9 @@ import React, { useMemo, memo } from 'react';
 import useWatchListStore from '@/store/watchlistStore';
 import MediaRow from '@/components/features/media/row/media-row';
 import { useHasMounted } from '@/hooks/use-has-mounted';
-import { useSession } from '@/lib/auth-client';
 
 function WatchListComponent({ type }: { type: string }) {
 	const hasMounted = useHasMounted();
-	const { data: session } = useSession();
 	const watchlist = useWatchListStore((s) => s.watchlist);
 	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist);
 

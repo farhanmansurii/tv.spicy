@@ -4,6 +4,7 @@ import { loadRecentlySearchedFromDB } from '@/lib/indexedDB';
 import useWatchListStore from '@/store/watchlistStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import useTVShowStore from '@/store/recentsStore';
+import type { UserSyncResponse } from '@/lib/types/personalized-home';
 
 interface SyncWatchlistItem {
 	mediaId: number;
@@ -34,7 +35,7 @@ interface SyncFavoriteItem {
 	mediaType: 'movie' | 'tv';
 }
 
-interface SyncData {
+export interface SyncData {
 	watchlist: SyncWatchlistItem[];
 	recentlyWatched: SyncRecentlyWatchedItem[];
 	favorites: SyncFavoriteItem[];
@@ -120,28 +121,34 @@ export async function collectLocalData(): Promise<SyncData> {
 	return data;
 }
 
-export async function syncLocalToDatabase(
-	userId: string
-): Promise<{ success: boolean; results?: unknown }> {
+export async function syncLocalToDatabase(): Promise<{
+	success: boolean;
+	results?: unknown;
+	data?: UserSyncResponse['data'];
+}> {
 	try {
 		const localData = await collectLocalData();
-
-		const response = await fetch('/api/sync', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(localData),
-		});
-
-		if (!response.ok) {
-			throw new Error('Failed to sync data');
-		}
-
-		const results = await response.json();
-		return { success: true, results };
+		const response = await requestUserSync(localData);
+		return { success: true, results: response.results, data: response.data };
 	} catch (error) {
 		console.error('Error syncing to database:', error);
 		return { success: false };
 	}
+}
+
+export async function requestUserSync(localData: SyncData): Promise<UserSyncResponse> {
+	const response = await fetch('/api/sync', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		credentials: 'include',
+		body: JSON.stringify(localData),
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to sync data (${response.status})`);
+	}
+
+	return response.json();
 }

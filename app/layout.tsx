@@ -82,6 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				>
 					<AuthProvider>
 						<TanstackQueryProvider>
+							<AuthSync />
 							<SidebarProvider>
 								<DetailScrollRestoration />
 								<AccessibilityProvider>{children}</AccessibilityProvider>

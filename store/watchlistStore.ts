@@ -1,7 +1,8 @@
 import { StateCreator, create } from 'zustand';
 import { createJSONStorage, persist, PersistOptions } from 'zustand/middleware';
 import { useAuthStore } from '@/store/authStore';
-import { invalidateUserQueries } from '@/lib/query-client';
+import { updatePersonalizedHomeQuery } from '@/lib/query-client';
+import type { PersonalizedWatchlistItem } from '@/lib/types/personalized-home';
 
 interface Show {
 	id: number;
@@ -30,6 +31,7 @@ interface WatchlistActions {
 	loadFromDatabase: () => Promise<void>;
 	syncWithDatabase: () => Promise<void>;
 	initialize: () => Promise<void>;
+	mergeRemoteData: (items: PersonalizedWatchlistItem[]) => void;
 	resetInitialization: () => void;
 }
 
@@ -98,6 +100,15 @@ const convertToLocalFormat = (item: any): Show => ({
 	media_type: item.mediaType?.toLowerCase(),
 });
 
+const toPersonalizedItem = (item: Show, mediaType: 'movie' | 'tv') => ({
+	mediaId: item.id,
+	mediaType,
+	title: item.title || item.name || '',
+	posterPath: item.poster_path || null,
+	backdropPath: item.backdrop_path || null,
+	overview: item.overview || null,
+});
+
 const useWatchListStore = create<WatchlistStore>()(
 	(persist as MyPersist)(
 		(set, get) => ({
@@ -112,7 +123,19 @@ const useWatchListStore = create<WatchlistStore>()(
 					watchlist: [show, ...state.watchlist.filter((s) => s.id !== show.id)],
 				}));
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						watchlist: [
+							toPersonalizedItem(show, 'movie'),
+							...data.watchlist.filter(
+								(item) =>
+									!(
+										item.mediaId === show.id &&
+										item.mediaType.toLowerCase() === 'movie'
+									)
+							),
+						],
+					}));
 				}
 				syncToDatabase('movie', show, 'add');
 			},
@@ -125,7 +148,16 @@ const useWatchListStore = create<WatchlistStore>()(
 					watchlist: state.watchlist.filter((s) => s.id !== id),
 				}));
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						watchlist: data.watchlist.filter(
+							(item) =>
+								!(
+									item.mediaId === id &&
+									item.mediaType.toLowerCase() === 'movie'
+								)
+						),
+					}));
 				}
 				if (show) {
 					syncToDatabase('movie', show, 'remove');
@@ -136,7 +168,12 @@ const useWatchListStore = create<WatchlistStore>()(
 				set({ watchlist: [] });
 				const authState = useAuthStore.getState();
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						watchlist: data.watchlist.filter(
+							(item) => item.mediaType.toLowerCase() !== 'movie'
+						),
+					}));
 				}
 				if (authState.isAuthenticated) {
 					fetch('/api/watchlist?mediaType=movie', {
@@ -152,7 +189,19 @@ const useWatchListStore = create<WatchlistStore>()(
 					tvwatchlist: [show, ...state.tvwatchlist.filter((s) => s.id !== show.id)],
 				}));
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						watchlist: [
+							toPersonalizedItem(show, 'tv'),
+							...data.watchlist.filter(
+								(item) =>
+									!(
+										item.mediaId === show.id &&
+										item.mediaType.toLowerCase() === 'tv'
+									)
+							),
+						],
+					}));
 				}
 				syncToDatabase('tv', show, 'add');
 			},
@@ -165,7 +214,16 @@ const useWatchListStore = create<WatchlistStore>()(
 					tvwatchlist: state.tvwatchlist.filter((s) => s.id !== id),
 				}));
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						watchlist: data.watchlist.filter(
+							(item) =>
+								!(
+									item.mediaId === id &&
+									item.mediaType.toLowerCase() === 'tv'
+								)
+						),
+					}));
 				}
 				if (show) {
 					syncToDatabase('tv', show, 'remove');
@@ -176,7 +234,12 @@ const useWatchListStore = create<WatchlistStore>()(
 				set({ tvwatchlist: [] });
 				const authState = useAuthStore.getState();
 				if (authState.userId) {
-					invalidateUserQueries(authState.userId);
+					updatePersonalizedHomeQuery(authState.userId, (data) => ({
+						...data,
+						watchlist: data.watchlist.filter(
+							(item) => item.mediaType.toLowerCase() !== 'tv'
+						),
+					}));
 				}
 				if (authState.isAuthenticated) {
 					fetch('/api/watchlist?mediaType=tv', {
@@ -250,6 +313,32 @@ const useWatchListStore = create<WatchlistStore>()(
 					return;
 				}
 				await get().loadFromDatabase();
+			},
+
+			mergeRemoteData: (items) => {
+				const remoteMovies = items
+					.filter((item) => item.mediaType.toLowerCase() === 'movie')
+					.map(convertToLocalFormat);
+				const remoteTV = items
+					.filter((item) => item.mediaType.toLowerCase() === 'tv')
+					.map(convertToLocalFormat);
+
+				set((state) => {
+					const localMovieIds = new Set(state.watchlist.map((item) => item.id));
+					const localTVIds = new Set(state.tvwatchlist.map((item) => item.id));
+					return {
+						watchlist: [
+							...state.watchlist,
+							...remoteMovies.filter((item) => !localMovieIds.has(item.id)),
+						],
+						tvwatchlist: [
+							...state.tvwatchlist,
+							...remoteTV.filter((item) => !localTVIds.has(item.id)),
+						],
+						isInitialized: true,
+						isLoading: false,
+					};
+				});
 			},
 
 			resetInitialization: () => {

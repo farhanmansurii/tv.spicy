@@ -1,6 +1,7 @@
 'use client';
 
 import { createAuthClient } from 'better-auth/react';
+import { AUTH_CLIENT_SESSION_OPTIONS } from '@/lib/auth-session-options';
 
 // Get baseURL from environment or auto-detect
 function getBaseURL(): string {
@@ -21,6 +22,7 @@ const baseURL = getBaseURL();
 export const authClient = createAuthClient({
 	baseURL,
 	basePath: '/api/auth',
+	sessionOptions: AUTH_CLIENT_SESSION_OPTIONS,
 });
 
 export const { signIn, signOut, signUp, useSession } = authClient;

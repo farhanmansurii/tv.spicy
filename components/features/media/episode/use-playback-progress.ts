@@ -22,6 +22,10 @@ interface UsePlaybackProgressParams {
 		seasonNumber?: number | null;
 		episodeNumber?: number | null;
 	}) => Promise<void>;
+	flushPlaybackProgress: (
+		mediaId: string,
+		mediaType?: 'movie' | 'tv'
+	) => Promise<void>;
 }
 
 /**
@@ -45,10 +49,30 @@ export function usePlaybackProgress({
 	provider,
 	currentWatchItem,
 	updatePlaybackProgress,
+	flushPlaybackProgress,
 }: UsePlaybackProgressParams): void {
 	const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
 	const progressOrigin = provider.progress?.origin;
+
+	useEffect(() => {
+		const flush = () => {
+			void flushPlaybackProgress(id, type as 'movie' | 'tv');
+		};
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'hidden') {
+				flush();
+			}
+		};
+
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+		window.addEventListener('pagehide', flush);
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			window.removeEventListener('pagehide', flush);
+			flush();
+		};
+	}, [flushPlaybackProgress, id, type]);
 
 	// ── 1. postMessage progress tracking ─────────────────────────────────────
 	useEffect(() => {

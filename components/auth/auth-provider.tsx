@@ -1,20 +1,26 @@
 'use client';
 
-import { ReactNode } from 'react';
-import { AuthSync } from './auth-sync';
+import { ReactNode, useEffect } from 'react';
+import { useSession } from '@/lib/auth-client';
+import { useAuthStore } from '@/store/authStore';
 
 /**
  * Auth provider wrapper.
  *
- * Mounts AuthSync (db/local sync) and provides the auth context tree.
- * Better Auth itself doesn't need a provider, but we use this shell
- * to keep auth-related side effects in one place.
+ * Owns the application's single Better Auth session subscription and mirrors
+ * its result into the shared auth store.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-	return (
-		<>
-			<AuthSync />
-			{children}
-		</>
-	);
+	const { data: session, isPending } = useSession();
+	const setSession = useAuthStore((state) => state.setSession);
+	const setLoading = useAuthStore((state) => state.setLoading);
+
+	useEffect(() => {
+		setLoading(isPending);
+		if (!isPending) {
+			setSession(session ?? null);
+		}
+	}, [isPending, session, setLoading, setSession]);
+
+	return children;
 }
