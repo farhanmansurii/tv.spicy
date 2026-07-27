@@ -68,6 +68,16 @@ interface TMDBError {
 	status_message: string;
 }
 
+class TMDBRequestError extends Error {
+	constructor(
+		message: string,
+		readonly status: number
+	) {
+		super(message);
+		this.name = 'TMDBRequestError';
+	}
+}
+
 // ============================================================================
 // Utility Functions
 // ============================================================================
@@ -85,6 +95,10 @@ function delay(ms: number): Promise<void> {
 function isRetryableError(error: any): boolean {
 	if (!error) return false;
 	const message = String(error.message ?? '').toLowerCase();
+
+	if (error instanceof TMDBRequestError) {
+		return error.status >= 500 && error.status < 600;
+	}
 
 	// Retry on network errors or 5xx server errors
 	if (
@@ -173,7 +187,7 @@ async function tmdbFetch<T>(endpoint: string, options: FetchOptions = {}): Promi
 						? errorData
 						: `TMDB API Error (${response.status}): ${errorData.status_message || response.statusText}`;
 
-				const error = new Error(errorMessage);
+				const error = new TMDBRequestError(errorMessage, response.status);
 
 				// Don't retry on 4xx errors (client errors)
 				if (response.status >= 400 && response.status < 500) {
@@ -272,8 +286,13 @@ export async function fetchDetailsTMDB(
 			revalidate: CACHE_DURATIONS.SHORT, // Details change more frequently
 		});
 	} catch (error) {
+		// A missing TMDB record is a stable not-found result. Operational
+		// failures must escape so ISR does not persist a transient outage as 404.
+		if (error instanceof TMDBRequestError && error.status === 404) {
+			return null;
+		}
 		console.error(`Error fetching details for ${type}/${id}:`, error);
-		return null;
+		throw error;
 	}
 }
 

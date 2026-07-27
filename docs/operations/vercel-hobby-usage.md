@@ -30,19 +30,20 @@ Runtime logs on Hobby retain only the most recent hour. Use them for a currently
 Run each command twice. The first response may be a miss; the second should be a hit.
 
 ```bash
-curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/movie/550
-curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/movie/550
+rtk curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/movie/550
+rtk curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/movie/550
 
-curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/tv/1399
-curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/tv/1399
+rtk curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/tv/1399
+rtk curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/tv/1399
 
-curl -sS -D - -o /dev/null \
+rtk curl -sS -D - -o /dev/null \
   'https://spicy-tv.vercel.app/api/tmdb/search?query=batman&page=1'
-curl -sS -D - -o /dev/null \
+rtk curl -sS -D - -o /dev/null \
   'https://spicy-tv.vercel.app/api/tmdb/search?query=batman&page=1'
 ```
 
-On Vercel, inspect `x-vercel-cache`. Locally after `next build && next start`, inspect `x-nextjs-cache`.
+On Vercel, inspect `x-vercel-cache`. Locally, run `rtk npm run build` followed by
+`rtk npm start`, then inspect `x-nextjs-cache`.
 
 ## Firewall configuration
 

@@ -146,11 +146,11 @@ test('cinesrc keeps its query-based tv route and resume composes with it', () =>
 	const cinesrc = PROVIDER_DEFINITIONS.find((d) => d.id === 'cinesrc')!;
 	assert.equal(
 		buildUrl(cinesrc.urls, cinesrc.resume, tv),
-		'https://cinesrc.st/embed/tv/1399?s=1&e=1'
+		'https://cinesrc.st/embed/tv/1399?s=1&e=1&autoplay=true&autonext=false&autoskip=true&seek=10&prioritize=true&color=%23ef4444'
 	);
 	assert.equal(
 		buildUrl(cinesrc.urls, cinesrc.resume, { ...tv, resumeSeconds: 61 }),
-		'https://cinesrc.st/embed/tv/1399?s=1&e=1&startAt=61'
+		'https://cinesrc.st/embed/tv/1399?s=1&e=1&autoplay=true&autonext=false&autoskip=true&seek=10&prioritize=true&color=%23ef4444&t=61'
 	);
 });
 
