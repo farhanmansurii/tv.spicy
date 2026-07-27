@@ -27,23 +27,31 @@ Runtime logs on Hobby retain only the most recent hour. Use them for a currently
 
 ## Cache spot check
 
-Run each command twice. The first response may be a miss; the second should be a hit.
+Bot Protection intentionally challenges command-line requests to production. A production
+`rtk curl` request may therefore return `429` with `x-vercel-mitigated: challenge`; do not
+disable the firewall to run a cache check.
+
+For a deterministic check, run a production build locally:
 
 ```bash
-rtk curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/movie/550
-rtk curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/movie/550
-
-rtk curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/tv/1399
-rtk curl -sS -D - -o /dev/null https://spicy-tv.vercel.app/tv/1399
-
-rtk curl -sS -D - -o /dev/null \
-  'https://spicy-tv.vercel.app/api/tmdb/search?query=batman&page=1'
-rtk curl -sS -D - -o /dev/null \
-  'https://spicy-tv.vercel.app/api/tmdb/search?query=batman&page=1'
+rtk npm run build
+rtk npm start
 ```
 
-On Vercel, inspect `x-vercel-cache`. Locally, run `rtk npm run build` followed by
-`rtk npm start`, then inspect `x-nextjs-cache`.
+Then run each local request twice. The first response may be a miss; the second
+should contain `x-nextjs-cache: HIT`.
+
+```bash
+rtk curl -sS -D - -o /dev/null http://127.0.0.1:3000/movie/550
+rtk curl -sS -D - -o /dev/null http://127.0.0.1:3000/movie/550
+
+rtk curl -sS -D - -o /dev/null http://127.0.0.1:3000/tv/1399
+rtk curl -sS -D - -o /dev/null http://127.0.0.1:3000/tv/1399
+```
+
+For production, use a normal browser and inspect the document response in DevTools
+Network. Repeated detail requests should be served from Vercel's cache. Firewall
+Traffic and project Observability provide the durable production signal.
 
 ## Firewall configuration
 
