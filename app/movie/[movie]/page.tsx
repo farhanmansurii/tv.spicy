@@ -20,6 +20,9 @@ import {
 	StorylineSkeleton,
 } from '@/components/features/media/details/detail-skeletons';
 
+// Detail pages only contain public TMDB catalog data. Force the route shell
+// into ISR so repeated bot and user visits are served from Vercel's CDN.
+export const dynamic = 'force-static';
 export const revalidate = 604800;
 
 /* ────────────────────────────────────────────────────────────
