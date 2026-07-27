@@ -37,6 +37,7 @@ async function GenreList({ type }: { type: 'movie' | 'tv' }) {
 				{genres.map((genre) => (
 					<Link
 						href={`/discover/${genre.id}?type=${type}&id=${genre.id}&title=${genre.name}`}
+						prefetch={false}
 						key={genre.id}
 						className="p-3 hover:bg-primary/20 hover:scale-95 duration-300 border rounded-lg "
 					>

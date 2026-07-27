@@ -51,7 +51,7 @@ const NavigationSidebar = (props: { tvGenre: any; movieGenre: any }) => {
 const renderButtons = (genres: any[], type: string) => {
 	return (
 		<div>
-			<Link href={`/discover/trending?type=${type}&title=Trending`}>
+			<Link href={`/discover/trending?type=${type}&title=Trending`} prefetch={false}>
 				<SheetTrigger className="w-full">
 					<div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
 						Trending
@@ -59,7 +59,7 @@ const renderButtons = (genres: any[], type: string) => {
 				</SheetTrigger>
 			</Link>
 
-			<Link href={`/discover/airing-today?type=${type}&title=Airing Today`}>
+			<Link href={`/discover/airing-today?type=${type}&title=Airing Today`} prefetch={false}>
 				<SheetTrigger className="w-full">
 					<div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
 						Airing Today
@@ -67,7 +67,7 @@ const renderButtons = (genres: any[], type: string) => {
 				</SheetTrigger>
 			</Link>
 
-			<Link href={`/discover/on-the-air?type=${type}&title=On The Air`}>
+			<Link href={`/discover/on-the-air?type=${type}&title=On The Air`} prefetch={false}>
 				<SheetTrigger className="w-full">
 					<div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
 						On The Air
@@ -75,7 +75,7 @@ const renderButtons = (genres: any[], type: string) => {
 				</SheetTrigger>
 			</Link>
 
-			<Link href={`/discover/popular?type=${type}&title=Popular`}>
+			<Link href={`/discover/popular?type=${type}&title=Popular`} prefetch={false}>
 				<SheetTrigger className="w-full">
 					<div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
 						Popular
@@ -83,7 +83,7 @@ const renderButtons = (genres: any[], type: string) => {
 				</SheetTrigger>
 			</Link>
 
-			<Link href={`/discover/top-rated?type=${type}&title=Top Rated`}>
+			<Link href={`/discover/top-rated?type=${type}&title=Top Rated`} prefetch={false}>
 				<SheetTrigger className="w-full">
 					<div className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 ">
 						Top Rated
@@ -93,6 +93,7 @@ const renderButtons = (genres: any[], type: string) => {
 			{genres?.map((genre: any, index: number) => (
 				<Link
 					key={index}
+					prefetch={false}
 					className=" cursor-pointer hover:bg-muted rounded  text-start flex p-2 "
 					href={`/discover/${genre.name.toLowerCase()}?type=${type}&id=${
 						genre.id

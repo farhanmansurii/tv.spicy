@@ -112,6 +112,7 @@ export function SearchTrigger({ variant = 'default', className }: SearchTriggerP
 		return (
 			<Link
 				href="/search"
+				prefetch={false}
 				className={cn(
 					'flex items-center justify-center',
 					'w-11 h-11',

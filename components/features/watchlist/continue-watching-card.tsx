@@ -85,6 +85,7 @@ function ContinueWatchingCardComponent({ item, index }: ContinueWatchingCardProp
 			{/* Main card link */}
 			<Link
 				href={href}
+				prefetch={false}
 				onMouseDown={() => setIsPressed(true)}
 				onMouseUp={() => setIsPressed(false)}
 				onMouseLeave={() => setIsPressed(false)}

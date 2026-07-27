@@ -41,6 +41,7 @@ function MediaCardComponent({ show, isVertical = false, type, onClick, rank }: M
 	return (
 		<Link
 			href={`/${mediaType}/${show.id}`}
+			prefetch={false}
 			onClick={() => onClick?.(show)}
 			aria-label={ranked ? `Rank ${rank}: ${title}` : title}
 			className="group block w-full select-none rounded-2xl outline-none transition-transform duration-100 active:scale-[0.975] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black motion-reduce:transition-none motion-reduce:active:scale-100"

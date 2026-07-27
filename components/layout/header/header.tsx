@@ -81,6 +81,7 @@ export function Header({ className }: HeaderProps) {
 					<div className="flex h-14 items-center justify-between gap-6">
 						<Link
 							href="/"
+							prefetch={false}
 							className={cn(
 								'group -ml-1.5 flex h-11 items-center gap-2 rounded-md px-1.5',
 								'transition-colors duration-200',
@@ -140,6 +141,7 @@ export function Header({ className }: HeaderProps) {
 						>
 							<Link
 								href="/"
+								prefetch={false}
 								className={cn(
 									'flex h-12 w-12 items-center justify-center rounded-full touch-manipulation select-none',
 									'active:scale-[0.94] transition-transform duration-200 ease-out',
@@ -166,6 +168,7 @@ export function Header({ className }: HeaderProps) {
 								</button>
 								<Link
 									href="/"
+									prefetch={false}
 									className={mobileAction}
 									aria-label="Go to home page"
 								>
@@ -187,6 +190,7 @@ export function Header({ className }: HeaderProps) {
 							{/* Profile — plain icon, no individual background */}
 							<Link
 								href={session?.user ? '/profile' : '/auth/signin'}
+								prefetch={false}
 								className={mobileAction}
 								aria-label="Profile"
 							>

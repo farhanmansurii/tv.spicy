@@ -26,7 +26,7 @@ export default function AuthErrorPage() {
 					<AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
 					<h1 className="text-2xl font-bold text-white mb-2">Authentication Error</h1>
 					<p className="text-white/60 mb-6">{errorMessage}</p>
-					<Link href="/auth/signin">
+					<Link href="/auth/signin" prefetch={false}>
 						<Button className="w-full">Try Again</Button>
 					</Link>
 				</div>

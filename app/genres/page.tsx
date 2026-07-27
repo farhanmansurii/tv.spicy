@@ -47,6 +47,7 @@ const GenreCard = ({ genre, type }: { genre: Genre; type: 'movie' | 'tv' }) => {
     return (
         <Link
             href={`/discover/${genre.id}?type=${type}&title=${genre.name}`}
+            prefetch={false}
             className={cn(
                 'group relative aspect-[16/10] w-full overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-900/20 transition-all duration-700',
                 'hover:scale-[1.03] hover:bg-zinc-900/60 hover:border-primary/30 shadow-2xl backdrop-blur-3xl'

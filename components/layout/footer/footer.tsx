@@ -46,7 +46,12 @@ export default function Footer() {
 
 					{/* Left — brand block */}
 					<div className="flex flex-col gap-4 max-w-sm">
-						<Link href="/" className="flex items-center gap-2 w-fit group" aria-label="Spicy TV home">
+						<Link
+							href="/"
+							prefetch={false}
+							className="flex items-center gap-2 w-fit group"
+							aria-label="Spicy TV home"
+						>
 							<div className="relative h-7 w-7 flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
 								<img src="/logo.webp" alt="" className="h-full w-full object-contain" />
 							</div>
@@ -77,6 +82,7 @@ export default function Footer() {
 									<li key={link.href}>
 										<Link
 											href={link.href}
+											prefetch={false}
 											className="text-[13px] font-medium text-zinc-500 hover:text-white transition-colors duration-150"
 										>
 											{link.label}

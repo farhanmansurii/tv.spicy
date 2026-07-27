@@ -161,7 +161,7 @@ export default function LibraryPage() {
 								asChild
 								className="gap-2 rounded-lg h-10 px-4"
 							>
-								<Link href="/auth/signin?callbackUrl=/library">
+								<Link href="/auth/signin?callbackUrl=/library" prefetch={false}>
 									<LogIn className="h-4 w-4" />
 									Sign in to sync
 								</Link>

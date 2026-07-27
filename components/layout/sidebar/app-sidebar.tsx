@@ -51,6 +51,7 @@ export function AppSidebar() {
 				<div className="flex items-center justify-between">
 					<Link
 						href="/"
+						prefetch={false}
 						onClick={handleLinkClick}
 						className={cn(
 							'flex items-center gap-3',
@@ -108,6 +109,7 @@ export function AppSidebar() {
 							<Link
 								key={item.href}
 								href={item.href}
+								prefetch={false}
 								onClick={handleLinkClick}
 								className={cn(
 									'group flex items-center gap-3 px-3 py-3 rounded-xl',

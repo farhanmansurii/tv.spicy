@@ -120,6 +120,7 @@ export function Breadcrumbs({ showName, showType, className }: BreadcrumbsProps)
 							) : (
 								<Link
 									href={item.href}
+									prefetch={false}
 									className={cn(
 										'px-3 py-1 rounded-full text-xs font-medium transition-all',
 										'bg-white/15 backdrop-blur-md border border-white/20',

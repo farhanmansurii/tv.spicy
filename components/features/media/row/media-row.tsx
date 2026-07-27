@@ -146,6 +146,7 @@ function MediaRowComponent({
 						{viewAllLink && (
 							<Link
 								href={viewAllLink}
+								prefetch={false}
 								aria-label={`See all titles in ${text || 'this collection'}`}
 								className="inline-flex min-h-11 items-center gap-0.5 px-1 text-[13px] font-semibold text-white/48 transition-colors hover:text-white focus-visible:rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70"
 							>

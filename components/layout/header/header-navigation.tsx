@@ -19,6 +19,7 @@ export function HeaderNavigation({ items, isActive }: HeaderNavigationProps) {
 					<li key={item.href} className="relative">
 						<Link
 							href={item.href}
+							prefetch={false}
 							aria-current={active ? 'page' : undefined}
 							className={cn(
 								'relative flex h-11 items-center rounded-md px-0.5',
