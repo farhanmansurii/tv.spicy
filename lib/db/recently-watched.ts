@@ -1,9 +1,10 @@
-import { MediaType } from '@prisma/client';
+import { MediaType, type Prisma } from '@prisma/client';
 
 import {
 	clampProgress,
 	dbRowToContinueWatchingItem,
 	mergeContinueWatchingItems,
+	normalizeContinueWatchingItem,
 	sanitizeContinueWatchingItems,
 	type ContinueWatchingItem,
 	type ContinueWatchingPayload,
@@ -34,6 +35,60 @@ export async function getRecentlyWatched(
 	return typeof limit === 'number' ? sanitizedItems.slice(0, limit) : sanitizedItems;
 }
 
+async function upsertRecentlyWatchedRow(
+	tx: Prisma.TransactionClient,
+	userId: string,
+	item: ContinueWatchingPayload
+) {
+	const mediaType = item.mediaType;
+	const mediaId = Number(item.mediaId);
+
+	if (!mediaId || !mediaType) {
+		return null;
+	}
+
+	const existing = await tx.recentlyWatched.findFirst({
+		where: {
+			userId,
+			mediaId,
+			mediaType: toMediaType(mediaType),
+		},
+	});
+
+	if (existing) {
+		return tx.recentlyWatched.update({
+			where: { id: existing.id },
+			data: {
+				seasonNumber: item.seasonNumber ?? null,
+				episodeNumber: item.episodeNumber ?? null,
+				episodeId: item.episodeId ?? null,
+				stillPath: item.stillPath ?? null,
+				episodeName: item.episodeName ?? null,
+				showName: item.showName ?? item.title ?? null,
+				progress: clampProgress(item.progressPercent ?? 0),
+				updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+			},
+		});
+	}
+
+	return tx.recentlyWatched.create({
+		data: {
+			userId,
+			mediaId,
+			mediaType: toMediaType(mediaType),
+			seasonNumber: item.seasonNumber ?? null,
+			episodeNumber: item.episodeNumber ?? null,
+			episodeId: item.episodeId ?? null,
+			stillPath: item.stillPath ?? null,
+			episodeName: item.episodeName ?? null,
+			showName: item.showName ?? item.title ?? null,
+			progress: clampProgress(item.progressPercent ?? 0),
+			watchedAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+			updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+		},
+	});
+}
+
 export async function saveRecentlyWatched(
 	userId: string,
 	item: ContinueWatchingPayload
@@ -45,48 +100,10 @@ export async function saveRecentlyWatched(
 		return null;
 	}
 
-	const updatedRow = await prisma.$transaction(async (tx) => {
-		const existing = await tx.recentlyWatched.findFirst({
-			where: {
-				userId,
-				mediaId,
-				mediaType: toMediaType(mediaType),
-			},
-		});
-
-		if (existing) {
-			return tx.recentlyWatched.update({
-				where: { id: existing.id },
-				data: {
-					seasonNumber: item.seasonNumber ?? null,
-					episodeNumber: item.episodeNumber ?? null,
-					episodeId: item.episodeId ?? null,
-					stillPath: item.stillPath ?? null,
-					episodeName: item.episodeName ?? null,
-					showName: item.showName ?? item.title ?? null,
-					progress: clampProgress(item.progressPercent ?? 0),
-					updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
-				},
-			});
-		}
-
-		return tx.recentlyWatched.create({
-			data: {
-				userId,
-				mediaId,
-				mediaType: toMediaType(mediaType),
-				seasonNumber: item.seasonNumber ?? null,
-				episodeNumber: item.episodeNumber ?? null,
-				episodeId: item.episodeId ?? null,
-				stillPath: item.stillPath ?? null,
-				episodeName: item.episodeName ?? null,
-				showName: item.showName ?? item.title ?? null,
-				progress: clampProgress(item.progressPercent ?? 0),
-				watchedAt: item.createdAt ? new Date(item.createdAt) : new Date(),
-				updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
-			},
-		});
-	});
+	const updatedRow = await prisma.$transaction((tx) => upsertRecentlyWatchedRow(tx, userId, item));
+	if (!updatedRow) {
+		return null;
+	}
 
 	return dbRowToContinueWatchingItem(updatedRow);
 }
@@ -124,32 +141,44 @@ export async function updateWatchProgress(
 	return dbRowToContinueWatchingItem(updatedRow);
 }
 
+/**
+ * Union-merge an incoming batch into the user's history.
+ *
+ * Rows absent from `items` are NEVER deleted here: deletion only happens on an
+ * explicit user delete request (see deleteRecentlyWatched). The 24-item cap and
+ * completion filters are display concerns applied by getRecentlyWatched, not
+ * predicates for persistence. Returns the merged row count.
+ */
 export async function mergeRecentlyWatchedBatch(
 	userId: string,
 	items: ContinueWatchingPayload[]
-): Promise<ContinueWatchingItem[]> {
-	const existingItems = await getRecentlyWatched(userId);
-	const mergedItems = mergeContinueWatchingItems(items, existingItems);
-
-	for (const item of mergedItems) {
-		await saveRecentlyWatched(userId, item);
+): Promise<number> {
+	if (items.length === 0) {
+		return 0;
 	}
 
-	const mergedIds = new Set(mergedItems.map((item) => `${item.mediaType}:${item.mediaId}`));
 	const existingRows = await listRawRecentlyWatched(userId);
-	const staleIds = existingRows
-		.filter((row) => !mergedIds.has(`${row.mediaType.toLowerCase()}:${row.mediaId}`))
-		.map((row) => row.id);
+	const existingItems = existingRows
+		.map((row) => dbRowToContinueWatchingItem(row))
+		.filter((item): item is ContinueWatchingItem => !!item);
 
-	if (staleIds.length > 0) {
-		await prisma.recentlyWatched.deleteMany({
-			where: {
-				id: { in: staleIds },
-			},
-		});
-	}
+	const mergedItems = mergeContinueWatchingItems(items, existingItems, { mode: 'persist' });
 
-	return getRecentlyWatched(userId);
+	const incomingKeys = new Set(
+		items
+			.map((item) => normalizeContinueWatchingItem(item))
+			.filter((item): item is ContinueWatchingItem => !!item)
+			.map((item) => item.id)
+	);
+	const writes = mergedItems.filter((item) => incomingKeys.has(item.id));
+
+	await prisma.$transaction(async (tx) => {
+		for (const item of writes) {
+			await upsertRecentlyWatchedRow(tx, userId, item);
+		}
+	});
+
+	return mergedItems.length;
 }
 
 export async function deleteRecentlyWatched(

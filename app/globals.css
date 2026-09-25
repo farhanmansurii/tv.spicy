@@ -595,6 +595,10 @@
 	.liquid-glass-touch {
 		display: none;
 	}
+
+	.grain-overlay::before {
+		animation: none;
+	}
 }
 
 /* Pure black cinematic background */

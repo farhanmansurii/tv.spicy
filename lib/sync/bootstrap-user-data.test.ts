@@ -66,3 +66,86 @@ test('concurrent and repeated bootstrap calls collapse to one request per user s
 	assert.equal(collections, 2);
 	assert.equal(requests, 2);
 });
+
+test('failed uploads are retried with backoff and only a success is cached', async () => {
+	let requests = 0;
+	const result = await bootstrapUserData(
+		'user-retry',
+		{
+			collectLocalData: async () => ({ local: true }),
+			request: async () => {
+				requests += 1;
+				if (requests < 3) {
+					throw new Error('upload failed');
+				}
+				return { marker: 'recovered' };
+			},
+		},
+		{ retryDelaysMs: [1, 1] }
+	);
+
+	assert.deepEqual(result, { marker: 'recovered' });
+	assert.equal(requests, 3);
+
+	// The successful result is now cached: no further request is made.
+	assert.deepEqual(
+		await bootstrapUserData('user-retry', {
+			collectLocalData: async () => {
+				throw new Error('should not collect again');
+			},
+			request: async () => {
+				throw new Error('should not request again');
+			},
+		}),
+		{ marker: 'recovered' }
+	);
+});
+
+test('bootstrap rejects after exhausting retries without caching the failure', async () => {
+	let requests = 0;
+	const failing = {
+		collectLocalData: async () => ({}),
+		request: async (): Promise<never> => {
+			requests += 1;
+			throw new Error('still down');
+		},
+	};
+
+	await assert.rejects(
+		bootstrapUserData('user-down', failing, { retryDelaysMs: [1, 1] }),
+		/still down/
+	);
+	assert.equal(requests, 3);
+
+	// Failure was not cached: a later call with a healthy request succeeds.
+	assert.deepEqual(
+		await bootstrapUserData('user-down', {
+			collectLocalData: async () => ({}),
+			request: async () => ({ marker: 'recovered' }),
+		}),
+		{ marker: 'recovered' }
+	);
+});
+
+test('retries stop once isCurrent reports the user is no longer active', async () => {
+	let requests = 0;
+	let active = true;
+
+	await assert.rejects(
+		bootstrapUserData(
+			'user-churn',
+			{
+				collectLocalData: async () => ({}),
+				request: async () => {
+					requests += 1;
+					active = false;
+					throw new Error('upload failed');
+				},
+			},
+			{ retryDelaysMs: [1, 1], isCurrent: () => active }
+		),
+		/upload failed/
+	);
+
+	assert.equal(requests, 1);
+});

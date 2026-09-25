@@ -6,6 +6,14 @@ import {
 	removeFromWatchlist,
 	clearWatchlist,
 } from '@/lib/db/watchlist';
+import {
+	listFilterQuerySchema,
+	removeItemQuerySchema,
+	watchlistAddBodySchema,
+	firstValidationError,
+} from '@/lib/validation/api-schemas';
+import { badRequest, tooManyRequests } from '@/lib/api/route-responses';
+import { rateLimitRetryAfter } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -14,10 +22,14 @@ export async function GET(request: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const searchParams = request.nextUrl.searchParams;
-		const mediaType = searchParams.get('type') as 'movie' | 'tv' | null;
+		const parsed = listFilterQuerySchema.safeParse(
+			Object.fromEntries(request.nextUrl.searchParams)
+		);
+		if (!parsed.success) {
+			return badRequest(firstValidationError(parsed.error));
+		}
 
-		const watchlist = await getWatchlist(session.user.id, mediaType || undefined);
+		const watchlist = await getWatchlist(session.user.id, parsed.data.type);
 		return NextResponse.json(watchlist);
 	} catch (error) {
 		console.error('Error fetching watchlist:', error);
@@ -32,25 +44,39 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const body = await request.json();
+		const retryAfter = rateLimitRetryAfter(`watchlist:post:${session.user.id}`);
+		if (retryAfter !== null) {
+			return tooManyRequests(retryAfter);
+		}
+
+		let body: unknown;
+		try {
+			body = await request.json();
+		} catch {
+			return badRequest('Invalid JSON body');
+		}
+
+		const parsed = watchlistAddBodySchema.safeParse(body);
+		if (!parsed.success) {
+			return badRequest(firstValidationError(parsed.error));
+		}
+
+		// The schema's refine guarantees an id and a title are present.
+		const mediaId = parsed.data.mediaId ?? parsed.data.id;
+		const title = parsed.data.title || parsed.data.name || '';
+		if (!mediaId || !title) {
+			return badRequest('Missing required fields: mediaId and title are required');
+		}
 
 		// Normalize the item structure to match WatchlistItem interface
 		const normalizedItem = {
-			mediaId: body.mediaId || body.id,
-			mediaType: body.mediaType || 'movie',
-			posterPath: body.posterPath || body.poster_path || null,
-			backdropPath: body.backdropPath || body.backdrop_path || null,
-			title: body.title || body.name || '',
-			overview: body.overview || null,
+			mediaId,
+			mediaType: parsed.data.mediaType ?? 'movie',
+			posterPath: parsed.data.posterPath ?? parsed.data.poster_path ?? null,
+			backdropPath: parsed.data.backdropPath ?? parsed.data.backdrop_path ?? null,
+			title,
+			overview: parsed.data.overview ?? null,
 		};
-
-		// Validate required fields
-		if (!normalizedItem.mediaId || !normalizedItem.title) {
-			return NextResponse.json(
-				{ error: 'Missing required fields: mediaId and title are required' },
-				{ status: 400 }
-			);
-		}
 
 		const item = await addToWatchlist(session.user.id, normalizedItem);
 		return NextResponse.json(item, { status: 201 });
@@ -67,18 +93,24 @@ export async function DELETE(request: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const searchParams = request.nextUrl.searchParams;
-		const mediaId = searchParams.get('mediaId');
-		const mediaType = searchParams.get('mediaType') as 'movie' | 'tv' | null;
+		const retryAfter = rateLimitRetryAfter(`watchlist:delete:${session.user.id}`);
+		if (retryAfter !== null) {
+			return tooManyRequests(retryAfter);
+		}
+
+		const parsed = removeItemQuerySchema.safeParse(
+			Object.fromEntries(request.nextUrl.searchParams)
+		);
+		if (!parsed.success) {
+			return badRequest(firstValidationError(parsed.error));
+		}
+
+		const { mediaId, mediaType } = parsed.data;
 
 		if (mediaId && mediaType) {
-			const parsedMediaId = parseInt(mediaId, 10);
-			if (isNaN(parsedMediaId)) {
-				return NextResponse.json({ error: 'Invalid mediaId' }, { status: 400 });
-			}
-			await removeFromWatchlist(session.user.id, parsedMediaId, mediaType);
+			await removeFromWatchlist(session.user.id, mediaId, mediaType);
 		} else {
-			await clearWatchlist(session.user.id, mediaType || undefined);
+			await clearWatchlist(session.user.id, mediaType);
 		}
 
 		return NextResponse.json({ success: true });

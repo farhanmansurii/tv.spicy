@@ -83,42 +83,95 @@ export default function ContinueWatchingButton({
 	}, [recentlyWatched, id]);
 
 	const handleAddOrRemove = useCallback(
-		(e: React.MouseEvent) => {
+		async (e: React.MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
 
+			const label = show?.name || show?.title || 'Item';
 			if (isAdded) {
 				haptic('soft');
-				type === 'movie'
-					? removeFromWatchList(Number(id))
-					: removeFromTvWatchList(Number(id));
-				toast.info('Removed from watchlist', {
-					description: `${show?.name || show?.title || 'Item'} has been removed from your watchlist.`,
-				});
+				const ok =
+					type === 'movie'
+						? await removeFromWatchList(Number(id))
+						: await removeFromTvWatchList(Number(id));
+				if (ok) {
+					toast.info('Removed from watchlist', {
+						description: `${label} has been removed from your watchlist.`,
+					});
+				} else {
+					toast.error('Could not update watchlist', {
+						description: 'The change is saved on this device and will sync on retry.',
+						action: {
+							label: 'Retry',
+							onClick: () => {
+								void useWatchListStore.getState().retryFailedSync();
+							},
+						},
+					});
+				}
 			} else {
 				haptic('success');
-				type === 'movie' ? addToWatchlist(show) : addToTvWatchlist(show);
-				toast.success('Added to watchlist', {
-					description: `${show?.name || show?.title || 'Item'} has been added to your watchlist.`,
-				});
+				const ok =
+					type === 'movie'
+						? await addToWatchlist(show)
+						: await addToTvWatchlist(show);
+				if (ok) {
+					toast.success('Added to watchlist', {
+						description: `${label} has been added to your watchlist.`,
+					});
+				} else {
+					toast.error('Could not update watchlist', {
+						description: 'The change is saved on this device and will sync on retry.',
+						action: {
+							label: 'Retry',
+							onClick: () => {
+								void useWatchListStore.getState().retryFailedSync();
+							},
+						},
+					});
+				}
 			}
 		},
 		[isAdded, type, id, show, haptic, addToWatchlist, addToTvWatchlist, removeFromWatchList, removeFromTvWatchList]
 	);
 
 	const handleLike = useCallback(
-		(e: React.MouseEvent) => {
+		async (e: React.MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
 
 			if (isLiked) {
 				haptic('soft');
-				removeFavorite(Number(id), type);
-				toast.info('Removed from favorites');
+				const ok = await removeFavorite(Number(id), type);
+				if (ok) {
+					toast.info('Removed from favorites');
+				} else {
+					toast.error('Could not update favorites', {
+						description: 'The change is saved on this device and will sync on retry.',
+						action: {
+							label: 'Retry',
+							onClick: () => {
+								void useFavoritesStore.getState().retryFailedSync();
+							},
+						},
+					});
+				}
 			} else {
 				haptic('success');
-				addFavorite(show, type);
-				toast.success('Added to favorites');
+				const ok = await addFavorite(show, type);
+				if (ok) {
+					toast.success('Added to favorites');
+				} else {
+					toast.error('Could not update favorites', {
+						description: 'The change is saved on this device and will sync on retry.',
+						action: {
+							label: 'Retry',
+							onClick: () => {
+								void useFavoritesStore.getState().retryFailedSync();
+							},
+						},
+					});
+				}
 			}
 		},
 		[id, isLiked, show, type, haptic, addFavorite, removeFavorite]

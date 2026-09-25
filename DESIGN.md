@@ -107,23 +107,26 @@ Purpose: named editorial collections linked from home rows.
 
 Route contract:
 
-- `params.slug` must exist in local `categoryMap`.
+- `params.slug` must exist in `BROWSE_CATEGORIES` in `lib/browse-categories.ts`.
 - Unknown slugs call `notFound()`.
-- Each category maps to `{ endpoint, title, type, description, label }`.
+- Each category maps to `{ slug, endpoint, title, type, description }`.
 
 Current supported slugs:
 
+- `popular-tonight` -> `tv/popular`
 - `binge-worthy-series` -> `trending/tv/week`
 - `crowd-favorites-tv` -> `tv/popular`
+- `airing-this-week` -> `tv/on_the_air`
 - `critically-acclaimed-tv` -> `tv/top_rated`
 - `blockbuster-hits` -> `trending/movie/week`
 - `fresh-in-theaters` -> `movie/now_playing`
+- `cult-classics-fan-favorites` -> `movie/popular`
 - `cinema-hall-of-fame` -> `movie/top_rated`
 
 Rendering flow:
 
 1. `generateMetadata` reads `slug` and returns collection metadata.
-2. Page reads `slug`, validates `categoryMap`.
+2. Page reads `slug`, resolves it with `getBrowseCategory(slug)`, and calls `notFound()` when unresolved.
 3. Server fetches `fetchRowData(category.endpoint)`.
 4. Fetch errors render a full-page sync error.
 5. Empty results render a full-page empty state.
@@ -307,7 +310,7 @@ Image policy:
 1. Create a shared `MediaDetailPage` server helper that accepts `{ id, type, labels }` and powers both `/movie/[movie]` and `/tv/[tv]`.
 2. Replace `LoadMore` props with explicit props: `{ genreId, mediaType, title }`.
 3. Change discover URLs to encode type in the path: `/discover/movie/28/action` or `/discover/tv/10759/action-adventure`.
-4. Move `categoryMap` from `app/browse/[slug]/page.tsx` into a shared typed module such as `lib/routes/browse-categories.ts`.
+4. Slugs live in the shared typed module `lib/browse-categories.ts` (`BROWSE_CATEGORIES`, `getBrowseCategory`) instead of an inline `categoryMap` in `app/browse/[slug]/page.tsx`.
 5. Add Zod schemas for API route bodies and query params: watchlist, favorites, recently watched, recent searches, sync.
 6. Split oversized client components by responsibility: shell, tabs, lists, modals, item cards, and data hooks.
 7. Consolidate design tokens: define card radius, hero radius, section spacing, text colors, and focus rings once, then remove repeated raw arbitrary classes where possible.
@@ -435,7 +438,13 @@ All motion MUST use one of these canonical durations. Do not invent timing.
 - `power2.out` / `power3.out` / `power4.out` — GSAP hierarchy for staggered entrances
 - `back.out(1.8)` — play-button pop-in on card hover
 
-**Reduced motion:** `@media (prefers-reduced-motion: reduce)` in `app/globals.css` lines 345–366 forces `animation-duration: 0.01ms` and disables grain overlay and liquid-glass blur. All animations MUST respect this.
+**Reduced motion:** three layers honour `prefers-reduced-motion: reduce`, and every animation MUST respect them.
+
+1. **CSS** — the `@media (prefers-reduced-motion: reduce)` block in `app/globals.css` (line 587) zeroes `animation-duration` and `transition-duration` on `.liquid-glass-surface`, hides `.liquid-glass-touch`, and sets `animation: none` on `.grain-overlay::before` so the grain overlay freezes on a static frame.
+2. **framer-motion** — `app/layout.tsx` wraps the app in `<MotionConfig reducedMotion="user">` (rendered by `components/providers/motion-provider.tsx`), so transform animations collapse to opacity.
+3. **GSAP** — the detail-page sections (`video-section.tsx`, `storyline-section.tsx`, `cast-crew-section.tsx`, `more-details-container.tsx`) register their timelines with `gsap.matchMedia()` and branch on `(prefers-reduced-motion: reduce)`: entrances keep an opacity-only reveal capped at `0.2s`, staggers collapse to `0`, and expand/collapse helpers skip transforms.
+
+Reduced motion means fewer and gentler animations: keep opacity and colour transitions, drop transform movement, and keep interactive UI motion under 300ms.
 
 ### Image Policy
 
@@ -518,8 +527,8 @@ These invariants are named, non-negotiable rules for every dynamic route in the 
 
 **Named editorial collections (`/browse/[slug]`) MUST have their slugs defined in a shared typed module. Unknown slugs call `notFound()`.**
 
-- `categoryMap` currently lives in `app/browse/[slug]/page.tsx` lines 15–61. This is a **violation** of this rule.
-- The **target** location is `lib/routes/browse-categories.ts` (or equivalent), exported as a typed `Record<string, CategoryConfig>`.
+- **Satisfied.** The map now lives in `lib/browse-categories.ts` as the typed `BROWSE_CATEGORIES` record with a `getBrowseCategory()` helper; `app/browse/[slug]/page.tsx` no longer defines an inline `categoryMap`.
+- The module is `lib/browse-categories.ts`, exported as a typed `Record<string, BrowseCategory>` with a derived `BrowseCategorySlug` union.
 - Any page that links to `/browse/[slug]` (e.g., `app/page.tsx`, `app/movie/page.tsx`, `app/tv/page.tsx`) MUST import slugs from that shared module, never hardcode them inline.
 - Unknown slugs MUST call `notFound()` at the route boundary before any data fetch.
 
@@ -527,23 +536,19 @@ These invariants are named, non-negotiable rules for every dynamic route in the 
 
 | Slug | Endpoint | Type | Title |
 |------|----------|------|-------|
+| `popular-tonight` | `tv/popular` | `tv` | Popular Tonight |
 | `binge-worthy-series` | `trending/tv/week` | `tv` | Binge-Worthy Series |
 | `crowd-favorites-tv` | `tv/popular` | `tv` | Crowd Favorites |
-| `critically-acclaimed-tv` | `tv/top_rated` | `tv` | Critically Acclaimed |
+| `airing-this-week` | `tv/on_the_air` | `tv` | Airing This Week |
+| `critically-acclaimed-tv` | `tv/top_rated` | `tv` | Critically Acclaimed TV |
 | `blockbuster-hits` | `trending/movie/week` | `movie` | Blockbuster Hits |
 | `fresh-in-theaters` | `movie/now_playing` | `movie` | Fresh in Theaters |
-| `cinema-hall-of-fame` | `movie/top_rated` | `movie` | Hall of Fame |
+| `cult-classics-fan-favorites` | `movie/popular` | `movie` | Cult Classics & Fan Favorites |
+| `cinema-hall-of-fame` | `movie/top_rated` | `movie` | Cinema Hall of Fame |
 
-**Missing slugs (linked from home but not in `categoryMap`):**
+**Formerly missing slugs:** `airing-this-week` and `cult-classics-fan-favorites` were linked from `app/page.tsx` but absent from the map. Both now exist in `lib/browse-categories.ts` (lines 31 and 59), so nothing is missing today.
 
-| Slug | Endpoint | Type | Title | Location Linked |
-|------|----------|------|-------|-----------------|
-| `airing-this-week` | `tv/on_the_air` | `tv` | Airing This Week | `app/page.tsx` line 82 |
-| `cult-classics-fan-favorites` | `movie/popular` | `movie` | Cult Classics & Fan Favorites | `app/page.tsx` line 118 |
-
-**Action:** Add these two missing slugs to the shared module and ensure `categoryMap` is deleted from `app/browse/[slug]/page.tsx`.
-
-**Source:** `app/browse/[slug]/page.tsx` lines 15–61; `app/page.tsx` lines 82, 118.
+**Source:** `lib/browse-categories.ts` (`BROWSE_CATEGORIES`, `getBrowseCategory`); `app/browse/[slug]/page.tsx` (resolves the slug and calls `notFound()` for unknown values).
 
 ### The Param Parse Rule
 

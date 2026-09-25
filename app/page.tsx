@@ -6,6 +6,8 @@ import HeroCarousel, {
 } from '@/components/features/media/carousel/hero-carousel';
 import DataRow from '@/components/features/media/row/data-row';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
+import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
+import { unstable_noStore } from 'next/cache';
 import { Suspense } from 'react';
 import { HomePersonalizedRows } from '@/components/features/home/home-personalized-rows';
 import { BROWSE_CATEGORIES } from '@/lib/browse-categories';
@@ -147,14 +149,10 @@ function HomePageContent({
 
 function HomePageError() {
 	return (
-		<div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-			<Container>
-				<div className="text-center">
-					<h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
-					<p className="text-zinc-500">Please try refreshing the page.</p>
-				</div>
-			</Container>
-		</div>
+		<PageFetchError
+			title="Couldn’t load the homepage"
+			description="We couldn’t reach the catalog. Try again in a moment."
+		/>
 	);
 }
 
@@ -164,7 +162,17 @@ export default async function HomePage() {
 		return null;
 	});
 
-	if (!dataResult) {
+	// fetchRowData swallows upstream failures into [], so an empty payload here
+	// means the load failed rather than an empty catalog. Opt out of ISR so the
+	// error render is not cached.
+	const loadFailed =
+		!dataResult ||
+		dataResult.trendingTV.length === 0 ||
+		dataResult.trendingMovies.length === 0 ||
+		dataResult.tvPopular.length === 0;
+
+	if (loadFailed) {
+		unstable_noStore();
 		return <HomePageError />;
 	}
 

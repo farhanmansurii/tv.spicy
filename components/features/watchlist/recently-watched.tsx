@@ -4,8 +4,11 @@ import React, { useEffect, useMemo, useState, memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { TrashIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useHasMounted } from '@/hooks/use-has-mounted';
+import { toast } from 'sonner';
 import { ContinueWatchingCard } from './continue-watching-card';
+import { DestructiveConfirm } from './destructive-confirm';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
+import type { ContinueWatchingItem } from '@/lib/continue-watching';
 import {
 	Carousel,
 	CarouselContent,
@@ -18,11 +21,28 @@ import { cn } from '@/lib/utils';
 const RecentlyWatchedComponent = () => {
 	const hasMounted = useHasMounted();
 	const recentlyWatched = useTVShowStore((s) => s.recentlyWatched);
+	const [confirmOpen, setConfirmOpen] = useState(false);
 
-	const clearRecentlyWatched = useCallback(() => {
+	const clearRecentlyWatched = useCallback(async () => {
+		setConfirmOpen(false);
+		const snapshot: ContinueWatchingItem[] = [...recentlyWatched];
+		if (snapshot.length === 0) return;
+
 		const store = useTVShowStore.getState();
-		store.deleteRecentlyWatched();
-	}, []);
+		const ok = await store.deleteRecentlyWatched();
+		if (!ok) return;
+
+		toast('History cleared', {
+			description: 'Your continue watching history was removed.',
+			duration: 8000,
+			action: {
+				label: 'Undo',
+				onClick: () => {
+					void useTVShowStore.getState().restoreRecentlyWatched(snapshot);
+				},
+			},
+		});
+	}, [recentlyWatched]);
 
 	const episodes = useMemo(() => {
 		if (!hasMounted || recentlyWatched.length === 0) return [];
@@ -45,13 +65,22 @@ const RecentlyWatchedComponent = () => {
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={clearRecentlyWatched}
+					onClick={() => setConfirmOpen(true)}
 					className="text-zinc-600 hover:text-red-400 transition-colors gap-2 text-xs"
 				>
 					<TrashIcon size={14} />
 					<span className="hidden sm:inline">Clear</span>
 				</Button>
 			</div>
+
+			<DestructiveConfirm
+				open={confirmOpen}
+				title="Clear continue watching?"
+				description={`This removes all ${recentlyWatched.length} items from your history on this device and every signed-in device. You can undo right after.`}
+				confirmLabel="Clear all"
+				onConfirm={() => void clearRecentlyWatched()}
+				onCancel={() => setConfirmOpen(false)}
+			/>
 
 			{/* Scrollable Carousel — compact horizontal cards */}
 			<div className="relative group/carousel">

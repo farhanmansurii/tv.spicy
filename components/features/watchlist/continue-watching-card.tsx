@@ -3,6 +3,7 @@
 import React, { memo, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PlayIcon, ArrowCounterClockwiseIcon, XIcon } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 import type { ContinueWatchingItem } from '@/lib/continue-watching';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { cn } from '@/lib/utils';
@@ -31,10 +32,23 @@ function ContinueWatchingCardComponent({ item, index }: ContinueWatchingCardProp
 		return null;
 	}, [item]);
 
-	const handleRemove = (event: React.MouseEvent<HTMLButtonElement>) => {
+	const handleRemove = async (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.preventDefault();
 		event.stopPropagation();
-		deleteRecentlyWatched(item.mediaId, item.mediaType);
+		const snapshot: ContinueWatchingItem[] = [{ ...item }];
+		const ok = await deleteRecentlyWatched(item.mediaId, item.mediaType);
+		if (!ok) return;
+
+		toast('Removed from history', {
+			description: item.showName || item.title || 'Item',
+			duration: 8000,
+			action: {
+				label: 'Undo',
+				onClick: () => {
+					void useTVShowStore.getState().restoreRecentlyWatched(snapshot);
+				},
+			},
+		});
 	};
 
 	const handleRestart = (event: React.MouseEvent<HTMLButtonElement>) => {

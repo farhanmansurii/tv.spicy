@@ -1,14 +1,22 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSearchParams } from 'next/navigation';
 import Episode from '@/components/features/media/episode/episode';
+import {
+	parseEpisodeParam,
+	parseSeasonParam,
+} from '@/components/features/media/player/deep-link-params';
 
 interface TVContainerProps {
 	showId: string;
 	getNextEp: any;
 	isSticky?: boolean;
 	onCloseSticky?: () => void;
+	/** Season numbers the show actually has; out-of-list deep links are ignored. */
+	seasons?: readonly number[];
+	/** Episode count of the deep-linked season, when it is loaded. */
+	episodeCount?: number;
 }
 
 export const TVContainer: React.FC<TVContainerProps> = ({
@@ -16,12 +24,14 @@ export const TVContainer: React.FC<TVContainerProps> = ({
 	getNextEp,
 	isSticky,
 	onCloseSticky,
+	seasons,
+	episodeCount,
 }) => {
 	const searchParams = useSearchParams();
-	const season = searchParams.get('season');
-	const episode = searchParams.get('episode');
+	const season = parseSeasonParam(searchParams.get('season'), seasons);
+	const episode = parseEpisodeParam(searchParams.get('episode'), episodeCount);
 
-	return season && episode ? (
+	return season !== null && episode !== null ? (
 		<div className="w-full">
 			<Episode
 				episodeNumber={episode}

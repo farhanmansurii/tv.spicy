@@ -1,26 +1,54 @@
 {
-    "theme_color": "#383849",
-    "background_color": "#383849",
-    "icons": [
-        {
-            "purpose": "maskable",
-            "sizes": "512x512",
-            "src": "icon512_maskable.png",
-            "type": "image/png"
-        },
-        {
-            "purpose": "any",
-            "sizes": "512x512",
-            "src": "icon512_rounded.png",
-            "type": "image/png"
-        }
-    ],
-    "orientation": "portrait",
-    "display": "fullscreen",
-    "dir": "rtl",
-    "lang": "en-GB",
-    "name": "Spicy TV",
-    "short_name": "Spicy TV",
-    "scope": "000026",
-    "description": "Discover and stream your favorite movies, TV series, and anime on Spicy TV. Enjoy unlimited entertainment with our vast library of content."
+	"name": "Spicy TV - Stream Movies and TV Shows",
+	"short_name": "Spicy TV",
+	"description": "Discover and stream movies and TV shows. Browse the catalog, keep a watchlist and continue watching where you left off.",
+	"id": "/",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"dir": "ltr",
+	"lang": "en",
+	"background_color": "#000000",
+	"theme_color": "#000000",
+	"categories": ["entertainment", "video"],
+	"icons": [
+		{
+			"src": "/icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icon512_maskable.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Movies",
+			"short_name": "Movies",
+			"url": "/movie",
+			"icons": [{ "src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+		},
+		{
+			"name": "TV shows",
+			"short_name": "TV",
+			"url": "/tv",
+			"icons": [{ "src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+		},
+		{
+			"name": "Search",
+			"short_name": "Search",
+			"url": "/search",
+			"icons": [{ "src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+		}
+	]
 }

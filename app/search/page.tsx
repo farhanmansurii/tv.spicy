@@ -13,6 +13,7 @@ import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { fetchRowDataFromApi, searchTMDBFromApi } from '@/lib/api/tmdb-row-client';
 import { tmdbImage } from '@/lib/tmdb-image';
 import useSearchStore from '@/store/recentsSearchStore';
+import { useHasMounted } from '@/hooks/use-has-mounted';
 import { cn } from '@/lib/utils';
 import type { Show } from '@/lib/types';
 
@@ -50,7 +51,7 @@ function FilterTabs({
 							onClick={() => onChange(f.id)}
 							className={cn(
 								'relative pb-3 text-[13px] font-semibold transition-colors duration-200',
-								isActive ? 'text-white' : 'text-white/30 hover:text-white/60'
+								isActive ? 'text-white' : 'text-white/70 hover:text-white'
 							)}
 						>
 							{f.label}
@@ -92,7 +93,7 @@ function RecentSearches({
 				</h2>
 				<button
 					onClick={onClear}
-					className="text-[11px] font-medium text-white/25 hover:text-white/60 transition-colors"
+					className="text-[11px] font-medium text-white/70 hover:text-white transition-colors"
 				>
 					Clear all
 				</button>
@@ -111,7 +112,7 @@ function RecentSearches({
 									/>
 								) : (
 									<div className="w-full h-full flex items-center justify-center">
-										<span className="text-[10px] text-white/15">No image</span>
+										<span className="text-[10px] text-white/70">No image</span>
 									</div>
 								)}
 							</div>
@@ -120,6 +121,7 @@ function RecentSearches({
 							</p>
 						</button>
 						<button
+							aria-label={`Remove ${item.title || item.name} from recent searches`}
 							onClick={(e) => {
 								e.stopPropagation();
 								onRemove(item.id);
@@ -129,7 +131,7 @@ function RecentSearches({
 								'w-6 h-6 rounded-full',
 								'bg-[#1c1c1e] border border-white/[0.08]',
 								'flex items-center justify-center',
-								'text-white/30 hover:text-white/70',
+								'text-white/70 hover:text-white',
 								'opacity-0 group-hover:opacity-100',
 								'transition-all duration-200'
 							)}
@@ -175,12 +177,12 @@ function EmptyResults({ query }: { query: string }) {
 	return (
 		<div className="flex flex-col items-center justify-center py-24 text-center">
 			<div className="h-14 w-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-5">
-				<MagnifyingGlassIcon className="w-6 h-6 text-white/20" />
+				<MagnifyingGlassIcon className="w-6 h-6 text-white/70" />
 			</div>
 			<p className="text-base font-semibold text-white/80 mb-1">
 				No results for &ldquo;{query}&rdquo;
 			</p>
-			<p className="text-sm text-white/30 max-w-xs leading-relaxed">
+			<p className="text-sm text-white/70 max-w-xs leading-relaxed">
 				Try a different search term or check your spelling.
 			</p>
 		</div>
@@ -204,28 +206,30 @@ function Pagination({
 	return (
 		<div className="flex justify-center items-center gap-5 pt-10">
 			<button
+				aria-label="Previous page"
 				onClick={() => onPageChange(page - 1)}
 				disabled={page === 1}
 				className={cn(
 					'flex items-center justify-center w-10 h-10 rounded-full',
 					'bg-white/[0.04] border border-white/[0.08]',
-					'text-white/50 hover:text-white hover:bg-white/[0.06]',
+					'text-white/70 hover:text-white hover:bg-white/[0.06]',
 					'transition-all duration-200',
 					'disabled:opacity-30 disabled:pointer-events-none'
 				)}
 			>
 				<ArrowLeftIcon className="w-4 h-4" />
 			</button>
-			<span className="text-xs font-medium text-white/30 tabular-nums">
+			<span className="text-xs font-medium text-white/70 tabular-nums">
 				Page {page} of {totalPages}
 			</span>
 			<button
+				aria-label="Next page"
 				onClick={() => onPageChange(page + 1)}
 				disabled={page === totalPages}
 				className={cn(
 					'flex items-center justify-center w-10 h-10 rounded-full',
 					'bg-white/[0.04] border border-white/[0.08]',
-					'text-white/50 hover:text-white hover:bg-white/[0.06]',
+					'text-white/70 hover:text-white hover:bg-white/[0.06]',
 					'transition-all duration-200',
 					'disabled:opacity-30 disabled:pointer-events-none'
 				)}
@@ -251,6 +255,7 @@ export default function SearchPage() {
 	const [page, setPage] = useState(1);
 	const [scrolled, setScrolled] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
+	const isMounted = useHasMounted();
 
 	const {
 		recentlySearched,
@@ -328,8 +333,9 @@ export default function SearchPage() {
 	);
 
 	const hasQuery = query.length >= 2;
-	const showRecents = !hasQuery && recentlySearched.length > 0;
-	const showTrending = !hasQuery && recentlySearched.length === 0;
+	const hasRecents = isMounted && recentlySearched.length > 0;
+	const showRecents = !hasQuery && hasRecents;
+	const showTrending = !hasQuery && !hasRecents;
 	const showResults = hasQuery && results.length > 0;
 	const showEmpty = hasQuery && results.length === 0 && !isFetching;
 	const showLoader = hasQuery && isFetching && results.length === 0;
@@ -356,24 +362,26 @@ export default function SearchPage() {
 								'transition-all duration-200'
 							)}
 						>
-							<MagnifyingGlassIcon className="w-5 h-5 text-white/25 shrink-0" />
+							<MagnifyingGlassIcon className="w-5 h-5 text-white/70 shrink-0" />
 							<input
 								ref={inputRef}
+								aria-label="Search movies and TV shows"
 								type="text"
 								placeholder="Search movies, TV shows..."
 								value={inputValue}
 								onChange={(e) => setInputValue(e.target.value)}
-								className="flex-1 min-w-0 bg-transparent text-[15px] text-white/90 placeholder:text-white/20 outline-none h-full"
+								className="flex-1 min-w-0 bg-transparent text-[15px] text-white/90 placeholder:text-white/70 outline-none h-full"
 							/>
 							{inputValue && (
 								<button
+									aria-label="Clear search"
 									onClick={() => setInputValue('')}
-									className="p-1.5 rounded-full text-white/25 hover:bg-white/[0.08] hover:text-white/60 transition-colors shrink-0"
+									className="p-1.5 rounded-full text-white/70 hover:bg-white/[0.08] hover:text-white transition-colors shrink-0"
 								>
 									<XIcon className="w-4 h-4" weight="bold" />
 								</button>
 							)}
-							<kbd className="pointer-events-none hidden lg:flex h-5 items-center gap-0.5 rounded-md bg-white/[0.06] border border-white/[0.08] px-1.5 font-mono text-[10px] font-medium text-white/20">
+							<kbd className="pointer-events-none hidden lg:flex h-5 items-center gap-0.5 rounded-md bg-white/[0.06] border border-white/[0.08] px-1.5 font-mono text-[10px] font-medium text-white/70">
 								<span className="text-[11px]">⌘</span>K
 							</kbd>
 						</div>
@@ -420,14 +428,14 @@ export default function SearchPage() {
 				{showResults && (
 					<div className="space-y-6">
 						{query && (
-							<p className="text-sm text-white/30">
+							<p className="text-sm text-white/70">
 								{results.length > 0 && (
 									<>
-										<span className="text-white/60 font-semibold">
+										<span className="text-white/90 font-semibold">
 											{results.length}
 										</span>{' '}
 										results for{' '}
-										<span className="text-white/60 font-semibold">
+										<span className="text-white/90 font-semibold">
 											&ldquo;{query}&rdquo;
 										</span>
 									</>

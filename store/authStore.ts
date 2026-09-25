@@ -23,11 +23,14 @@ interface AuthStore {
 	userImage: string | null;
 	isBootstrapping: boolean;
 	bootstrappedUserId: string | null;
+	bootstrapError: string | null;
 	// Actions
 	setSession: (session: Session | null) => void;
 	setLoading: (isLoading: boolean) => void;
 	beginBootstrap: (userId: string) => void;
 	completeBootstrap: (userId: string) => void;
+	failBootstrap: (userId: string, message: string) => void;
+	clearBootstrapError: () => void;
 	clearSession: () => void;
 	// Legacy methods for backward compatibility
 	setUser: (user: {
@@ -59,6 +62,7 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 	userImage: null,
 	isBootstrapping: false,
 	bootstrappedUserId: null,
+	bootstrapError: null,
 
 	setSession: (session) => {
 		const user = session?.user || null;
@@ -80,6 +84,7 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 						: state.isBootstrapping
 					: false,
 				bootstrappedUserId: changedUser ? null : state.bootstrappedUserId,
+				bootstrapError: changedUser ? null : state.bootstrapError,
 			};
 		});
 	},
@@ -91,7 +96,7 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 	beginBootstrap: (userId) => {
 		set((state) =>
 			state.userId === userId
-				? { isBootstrapping: true, bootstrappedUserId: null }
+				? { isBootstrapping: true, bootstrappedUserId: null, bootstrapError: null }
 				: {}
 		);
 	},
@@ -99,9 +104,23 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 	completeBootstrap: (userId) => {
 		set((state) =>
 			state.userId === userId
-				? { isBootstrapping: false, bootstrappedUserId: userId }
+				? { isBootstrapping: false, bootstrappedUserId: userId, bootstrapError: null }
 				: {}
 		);
+	},
+
+	// Only reached when the upload failed for good: the bootstrap stays
+	// incomplete (bootstrappedUserId untouched) so it can be retried.
+	failBootstrap: (userId, message) => {
+		set((state) =>
+			state.userId === userId
+				? { isBootstrapping: false, bootstrapError: message }
+				: {}
+		);
+	},
+
+	clearBootstrapError: () => {
+		set({ bootstrapError: null });
 	},
 
 	clearSession: () => {
@@ -116,6 +135,7 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 			isLoading: false,
 			isBootstrapping: false,
 			bootstrappedUserId: null,
+			bootstrapError: null,
 		});
 	},
 
@@ -165,6 +185,7 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 			user: null,
 			isBootstrapping: false,
 			bootstrappedUserId: null,
+			bootstrapError: null,
 		});
 	},
 }));

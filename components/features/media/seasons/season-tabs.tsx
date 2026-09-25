@@ -10,6 +10,10 @@ import { fetchSeasonEpisodesFromApi } from '@/lib/api/tmdb-row-client';
 import { useEpisodeStore } from '@/store/episodeStore';
 import useTVShowStore from '@/store/recentsStore';
 import { TVContainer } from '@/components/features/media/player/tv-container';
+import {
+	parseEpisodeParam,
+	parseSeasonParam,
+} from '@/components/features/media/player/deep-link-params';
 import { cn } from '@/lib/utils';
 import type { Episode as EpisodeType, SeasonTabsProps } from '@/lib/types';
 import type { TMDBEpisode, TMDBSeasonDetails } from '@/lib/types/tmdb';
@@ -65,6 +69,10 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		() => seasons?.filter((s) => s.season_number > 0) || seasons || [],
 		[seasons]
 	);
+	const validSeasonNumbers = useMemo(
+		() => validSeasons.map((s) => s.season_number),
+		[validSeasons]
+	);
 	const [activeSeason, setActiveSeason] = useState<number | null>(null);
 	const [viewMode, setViewMode] = useState<EpisodeViewMode>(isMobile ? 'list' : 'grid');
 
@@ -93,31 +101,38 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			item.seasonNumber === activeSeason
 	);
 
-	// Init from URL
+	// Init from URL — invalid or out-of-range values fall back to the first season
 	useEffect(() => {
-		const sParam = searchParams.get('season');
-		if (sParam) {
-			setActiveSeason(parseInt(sParam));
+		const sParam = parseSeasonParam(searchParams.get('season'), validSeasonNumbers);
+		if (sParam !== null) {
+			setActiveSeason(sParam);
 		} else if (validSeasons.length > 0) {
 			setActiveSeason(validSeasons[0].season_number);
 		}
-	}, [validSeasons, searchParams]);
+	}, [validSeasons, validSeasonNumbers, searchParams]);
 
 	// Init active episode from URL when episodes loaded
 	useEffect(() => {
-		const sParam = searchParams.get('season');
-		const eParam = searchParams.get('episode');
-		if (episodes.length && eParam && sParam && parseInt(sParam) === activeSeason) {
+		const sParam = parseSeasonParam(searchParams.get('season'), validSeasonNumbers);
+		const eParam = parseEpisodeParam(searchParams.get('episode'), episodes.length);
+		if (episodes.length && eParam !== null && sParam !== null && sParam === activeSeason) {
 			const ep = episodes.find(
-				(ep) =>
-					ep.season_number === parseInt(sParam) && ep.episode_number === parseInt(eParam)
+				(ep) => ep.season_number === sParam && ep.episode_number === eParam
 			);
 			if (ep && activeEP?.id !== ep.id) {
 				setActiveEP(ep);
 				addRecentlyWatched(ep);
 			}
 		}
-	}, [episodes, searchParams, activeSeason, activeEP, setActiveEP, addRecentlyWatched]);
+	}, [
+		episodes,
+		searchParams,
+		validSeasonNumbers,
+		activeSeason,
+		activeEP,
+		setActiveEP,
+		addRecentlyWatched,
+	]);
 
 	const handleSeasonChange = useCallback(
 		(sNum: number) => {
@@ -155,13 +170,11 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 	const handleNextEpisode = useCallback(() => {
 		let current = activeEP;
 		if (!current && episodes.length > 0) {
-			const sParam = searchParams.get('season');
-			const eParam = searchParams.get('episode');
-			if (sParam && eParam) {
+			const sParam = parseSeasonParam(searchParams.get('season'), validSeasonNumbers);
+			const eParam = parseEpisodeParam(searchParams.get('episode'), episodes.length);
+			if (sParam !== null && eParam !== null) {
 				const found = episodes.find(
-					(ep) =>
-						ep.season_number === parseInt(sParam) &&
-						ep.episode_number === parseInt(eParam)
+					(ep) => ep.season_number === sParam && ep.episode_number === eParam
 				);
 				if (found) current = found;
 			}
@@ -186,7 +199,9 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			params.set('episode', '1');
 			window.history.pushState(null, '', `${pathname}?${params.toString()}`);
 		}
-	}, [activeEP, episodes, activeSeason, validSeasons, pathname, searchParams, onEpisodeClick]);
+	}, [activeEP, episodes, activeSeason, validSeasons, validSeasonNumbers, pathname, searchParams, onEpisodeClick]);
+
+	const urlSeason = parseSeasonParam(searchParams.get('season'), validSeasonNumbers);
 
 	if (isError)
 		return (
@@ -208,7 +223,16 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			{/* PLAYER */}
 			{hasActiveEpisode && (
 				<div id="media-player" data-player-container className="relative z-10 w-full">
-					<TVContainer showId={showId} getNextEp={handleNextEpisode} />
+					<TVContainer
+						showId={showId}
+						getNextEp={handleNextEpisode}
+						seasons={validSeasonNumbers}
+						episodeCount={
+							urlSeason !== null && urlSeason === activeSeason
+								? episodes.length
+								: undefined
+						}
+					/>
 				</div>
 			)}
 

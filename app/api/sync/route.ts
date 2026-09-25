@@ -5,6 +5,13 @@ import { mergeRecentlyWatchedBatch } from '@/lib/db/recently-watched';
 import { addFavorite } from '@/lib/db/favorites';
 import { addRecentSearch } from '@/lib/db/recent-searches';
 import { fetchUserHomeData } from '@/lib/db/home-data';
+import {
+	syncBodySchema,
+	SYNC_MAX_BODY_BYTES,
+	firstValidationError,
+} from '@/lib/validation/api-schemas';
+import { badRequest, payloadTooLarge, tooManyRequests } from '@/lib/api/route-responses';
+import { rateLimitRetryAfter } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
 	try {
@@ -13,8 +20,43 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const body = await request.json();
-		const { watchlist, recentlyWatched, favorites, recentSearches } = body;
+		// ---- request validation (everything below this block is merge logic) ----
+		const retryAfter = rateLimitRetryAfter(`sync:post:${session.user.id}`);
+		if (retryAfter !== null) {
+			return tooManyRequests(retryAfter);
+		}
+
+		const declaredLength = Number(request.headers.get('content-length') ?? '0');
+		if (Number.isFinite(declaredLength) && declaredLength > SYNC_MAX_BODY_BYTES) {
+			return payloadTooLarge('Sync payload too large');
+		}
+
+		const rawBody = await request.text();
+		if (Buffer.byteLength(rawBody, 'utf8') > SYNC_MAX_BODY_BYTES) {
+			return payloadTooLarge('Sync payload too large');
+		}
+
+		let parsedBody: unknown;
+		try {
+			parsedBody = JSON.parse(rawBody);
+		} catch {
+			return badRequest('Invalid JSON body');
+		}
+
+		const validatedBody = syncBodySchema.safeParse(parsedBody);
+		if (!validatedBody.success) {
+			// Arrays past SYNC_MAX_ITEMS_PER_LIST are oversized payloads (413);
+			// anything else malformed is a 400.
+			const oversized = validatedBody.error.issues.some(
+				(issue) => issue.code === 'too_big'
+			);
+			return oversized
+				? payloadTooLarge('Sync payload too large')
+				: badRequest(firstValidationError(validatedBody.error));
+		}
+		// -------------------------------------------------------------------------
+
+		const { watchlist, recentlyWatched, favorites, recentSearches } = validatedBody.data;
 
 		const results = {
 			watchlist: { added: 0, errors: 0 },
@@ -53,8 +95,9 @@ export async function POST(request: NextRequest) {
 			}
 		}
 
-		// Sync recently watched
-		if (recentlyWatched && Array.isArray(recentlyWatched)) {
+		// Sync recently watched (empty payloads are skipped: they must never trigger
+		// a merge that could touch rows the client didn't send)
+		if (recentlyWatched && Array.isArray(recentlyWatched) && recentlyWatched.length > 0) {
 			for (const item of recentlyWatched) {
 				if (!item?.mediaId) {
 					results.recentlyWatched.errors++;
@@ -62,8 +105,8 @@ export async function POST(request: NextRequest) {
 			}
 
 			try {
-				const mergedItems = await mergeRecentlyWatchedBatch(session.user.id, recentlyWatched);
-				results.recentlyWatched.added = mergedItems.length;
+				const mergedCount = await mergeRecentlyWatchedBatch(session.user.id, recentlyWatched);
+				results.recentlyWatched.added = mergedCount;
 			} catch (error) {
 				console.error('Error syncing recently watched:', error);
 				results.recentlyWatched.errors = recentlyWatched.length;

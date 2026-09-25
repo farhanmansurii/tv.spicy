@@ -18,6 +18,8 @@ export interface ContinueWatchingItem {
 	durationSeconds?: number | null;
 	updatedAt: string;
 	createdAt: string;
+	/** Last time the server confirmed this row exists; unset means pending upload. */
+	syncedAt?: string | null;
 }
 
 export interface ContinueWatchingPayload {
@@ -35,6 +37,7 @@ export interface ContinueWatchingPayload {
 	durationSeconds?: number | null;
 	updatedAt?: string;
 	createdAt?: string;
+	syncedAt?: string | null;
 }
 
 export function getContinueWatchingId(
@@ -118,12 +121,16 @@ export function normalizeContinueWatchingItem(
 				: null,
 		updatedAt: item.updatedAt || now,
 		createdAt: item.createdAt || item.updatedAt || now,
+		syncedAt: item.syncedAt ?? null,
 	};
 }
 
 export function mergeContinueWatchingItems(
 	localItems: ContinueWatchingPayload[],
-	remoteItems: ContinueWatchingPayload[]
+	remoteItems: ContinueWatchingPayload[],
+	// 'display' applies the 24-item cap and completion filters; 'persist' keeps
+	// the full union so a merge can never delete rows the caller didn't send.
+	options: { mode?: 'display' | 'persist' } = {}
 ): ContinueWatchingItem[] {
 	const merged = new Map<string, ContinueWatchingItem>();
 
@@ -155,7 +162,12 @@ export function mergeContinueWatchingItems(
 		});
 	}
 
-	return sanitizeContinueWatchingItems(Array.from(merged.values()));
+	const mergedItems = Array.from(merged.values()).sort(compareByUpdatedAtDesc);
+	if (options.mode === 'persist') {
+		return mergedItems;
+	}
+
+	return sanitizeContinueWatchingItems(mergedItems);
 }
 
 export function sanitizeContinueWatchingItems(

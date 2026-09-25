@@ -3,6 +3,8 @@ import Container from '@/components/shared/containers/container';
 import DataRow from '@/components/features/media/row/data-row';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { fetchGenres, fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
+import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
+import { unstable_noStore } from 'next/cache';
 import { Metadata } from 'next';
 import React, { Suspense } from 'react';
 import HeroCarousel, {
@@ -52,6 +54,19 @@ export default async function Page() {
 		>;
 	} catch (error) {
 		console.error('Failed to load movie page data:', error);
+	}
+
+	// The fetch helpers swallow upstream failures into empty arrays, so an empty
+	// critical payload means the load failed. Opt out of ISR: a degraded or error
+	// render must never be cached for 24h.
+	if (topRatedMovies.length === 0 || genres.length === 0) {
+		unstable_noStore();
+		return (
+			<PageFetchError
+				title="Couldn’t load movies"
+				description="We couldn’t reach the catalog. Try again in a moment."
+			/>
+		);
 	}
 
 	return (

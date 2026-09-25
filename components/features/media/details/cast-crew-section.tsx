@@ -33,49 +33,59 @@ function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
 	useEffect(() => {
 		if (!sectionRef.current) return;
 
-		const ctx = gsap.context(() => {
-			// Header entrance
-			if (headerRef.current) {
-				gsap.fromTo(
-					headerRef.current,
-					{ y: 24, opacity: 0 },
-					{
-						y: 0,
-						opacity: 1,
-						duration: 0.8,
-						ease: 'power3.out',
-						scrollTrigger: {
-							trigger: headerRef.current,
-							start: 'top 85%',
-							toggleActions: 'play none none none',
-						},
-					}
-				);
-			}
+		const mm = gsap.matchMedia(sectionRef.current);
 
-			// Grid cards stagger entrance
-			if (gridRef.current) {
-				const cards = gridRef.current.querySelectorAll('[data-cast-card]');
-				gsap.fromTo(
-					cards,
-					{ y: 40, opacity: 0 },
-					{
-						y: 0,
-						opacity: 1,
-						duration: 0.7,
-						stagger: 0.06,
-						ease: 'power3.out',
-						scrollTrigger: {
-							trigger: gridRef.current,
-							start: 'top 85%',
-							toggleActions: 'play none none none',
-						},
-					}
-				);
-			}
-		}, sectionRef);
+		mm.add(
+			{
+				reduce: '(prefers-reduced-motion: reduce)',
+				motion: '(prefers-reduced-motion: no-preference)',
+			},
+			(context) => {
+				const reduce = context.conditions?.reduce === true;
 
-		return () => ctx.revert();
+				// Header entrance
+				if (headerRef.current) {
+					gsap.fromTo(
+						headerRef.current,
+						reduce ? { opacity: 0 } : { y: 24, opacity: 0 },
+						{
+							opacity: 1,
+							...(reduce ? {} : { y: 0 }),
+							duration: reduce ? 0.2 : 0.8,
+							ease: 'power3.out',
+							scrollTrigger: {
+								trigger: headerRef.current,
+								start: 'top 85%',
+								toggleActions: 'play none none none',
+							},
+						}
+					);
+				}
+
+				// Grid cards stagger entrance
+				if (gridRef.current) {
+					const cards = gridRef.current.querySelectorAll('[data-cast-card]');
+					gsap.fromTo(
+						cards,
+						reduce ? { opacity: 0 } : { y: 40, opacity: 0 },
+						{
+							opacity: 1,
+							...(reduce ? {} : { y: 0 }),
+							duration: reduce ? 0.2 : 0.7,
+							stagger: reduce ? 0 : 0.06,
+							ease: 'power3.out',
+							scrollTrigger: {
+								trigger: gridRef.current,
+								start: 'top 85%',
+								toggleActions: 'play none none none',
+							},
+						}
+					);
+				}
+			}
+		);
+
+		return () => mm.revert();
 	}, []);
 
 	/* ── Animate newly revealed cards on expand ── */
@@ -85,14 +95,21 @@ function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
 			return;
 		}
 
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		const cards = gridRef.current.querySelectorAll('[data-cast-card]');
 		// Animate only the last N cards that were just added
 		const newCards = Array.from(cards).slice(8);
 		if (newCards.length > 0) {
 			gsap.fromTo(
 				newCards,
-				{ y: 30, opacity: 0 },
-				{ y: 0, opacity: 1, duration: 0.6, stagger: 0.05, ease: 'power3.out' }
+				reduce ? { opacity: 0 } : { y: 30, opacity: 0 },
+				{
+					opacity: 1,
+					...(reduce ? {} : { y: 0 }),
+					duration: reduce ? 0.2 : 0.6,
+					stagger: reduce ? 0 : 0.05,
+					ease: 'power3.out',
+				}
 			);
 		}
 	}, [displayedCast.length]);

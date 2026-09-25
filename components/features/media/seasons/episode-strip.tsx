@@ -146,13 +146,13 @@ function EmptyEpisodes() {
 					fill="none"
 					stroke="currentColor"
 					strokeWidth="1.5"
-					className="text-white/25"
+					className="text-white/50"
 				>
 					<path d="M7 4v16M17 4v16M3 8h4M3 16h4M17 8h4M17 16h4" strokeLinecap="round" />
 				</svg>
 			</div>
-			<p className="text-sm font-medium text-white/40">No episodes available</p>
-			<p className="text-xs text-white/20">Try selecting a different season</p>
+			<p className="text-sm font-medium text-white/70">No episodes available</p>
+			<p className="text-xs text-white/55">Try selecting a different season</p>
 		</motion.div>
 	);
 }

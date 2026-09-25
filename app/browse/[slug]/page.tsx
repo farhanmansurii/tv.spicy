@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { unstable_noStore } from 'next/cache';
 import Container from '@/components/shared/containers/container';
 import { fetchRowData } from '@/lib/api';
+import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
 import MediaRow from '@/components/features/media/row/media-row';
 import { BrowseCollectionHeader } from '@/components/features/media/row/browse-collection-header';
 import { getBrowseCategory } from '@/lib/browse-categories';
@@ -28,13 +30,19 @@ export default async function BrowsePage({ params }: PageProps) {
 	if (!category) return notFound();
 
 	let shows: Show[] = [];
-	let error = false;
+	let fetchThrew = false;
 	try {
 		const data = await fetchRowData(category.endpoint);
 		shows = Array.isArray(data) ? (data as Show[]) : [];
 	} catch {
-		error = true;
+		fetchThrew = true;
 	}
+
+	// fetchRowData swallows upstream failures into [] and these endpoints never
+	// legitimately return zero results, so empty means the load failed. Opt out
+	// of ISR so the error render is not cached for an hour.
+	const loadFailed = fetchThrew || shows.length === 0;
+	if (loadFailed) unstable_noStore();
 
 	return (
 		<main className="min-h-screen bg-background pb-24 pt-[calc(6rem+env(safe-area-inset-top))] text-foreground md:pb-28 md:pt-28">
@@ -42,32 +50,16 @@ export default async function BrowsePage({ params }: PageProps) {
 				<BrowseCollectionHeader
 					title={category.title}
 					description={category.description}
-					count={error ? undefined : shows.length}
+					count={loadFailed ? undefined : shows.length}
 				/>
 
 				<section aria-label={`${category.title} titles`} className="mt-6 md:mt-8">
-					{error ? (
-						<div className="flex min-h-48 items-center justify-center rounded-3xl bg-white/[0.025] px-6 text-center ring-1 ring-inset ring-white/[0.06]">
-							<div className="max-w-sm">
-								<h2 className="text-lg font-semibold tracking-[-0.02em] text-white">
-									Couldn’t load this collection
-								</h2>
-								<p className="mt-2 text-sm leading-relaxed text-white/42">
-									Check your connection and try refreshing the page.
-								</p>
-							</div>
-						</div>
-					) : shows.length === 0 ? (
-						<div className="flex min-h-48 items-center justify-center rounded-3xl bg-white/[0.025] px-6 text-center ring-1 ring-inset ring-white/[0.06]">
-							<div className="max-w-sm">
-								<h2 className="text-lg font-semibold tracking-[-0.02em] text-white">
-									No titles available
-								</h2>
-								<p className="mt-2 text-sm text-white/42">
-									This collection is empty right now. Check back later.
-								</p>
-							</div>
-						</div>
+					{loadFailed ? (
+						<PageFetchError
+							title="Couldn’t load this collection"
+							description="Check your connection and try again."
+							className="min-h-48 px-0 py-0"
+						/>
 					) : (
 						<MediaRow
 							shows={shows}

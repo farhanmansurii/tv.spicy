@@ -6,10 +6,31 @@ import { useState } from 'react';
 import { SignInPage } from '@/components/ui/sign-in';
 import { toast } from 'sonner';
 
+/**
+ * Only same-origin relative paths may be used as a post-sign-in redirect.
+ * Protocol-relative URLs (`//evil.com`), backslash tricks (`/\evil.com`) and
+ * control characters (browsers strip tabs/newlines before URL parsing, turning
+ * `/\t/evil.com` into `//evil.com`) are rejected — fall back to the home page
+ * so `callbackUrl` can never become an open redirect.
+ */
+const UNSAFE_CALLBACK = /[\u0000-\u001F\u007F\\]/;
+
+function safeCallbackUrl(value: string | null): string {
+	if (
+		!value ||
+		!value.startsWith('/') ||
+		value.startsWith('//') ||
+		UNSAFE_CALLBACK.test(value)
+	) {
+		return '/';
+	}
+	return value;
+}
+
 export default function SignInPageWrapper() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
-	const callbackUrl = searchParams.get('callbackUrl') || '/';
+	const callbackUrl = safeCallbackUrl(searchParams.get('callbackUrl'));
 	const errorParam = searchParams.get('error');
 	const [isLoading, setIsLoading] = useState(false);
 

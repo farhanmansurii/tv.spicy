@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { CaretDownIcon, CheckIcon, XIcon } from '@phosphor-icons/react';
@@ -29,6 +29,54 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 	const reducedMotion = useReducedMotion();
 	const active = seasons.find((season) => season.season_number === activeSeason) ?? seasons[0];
 	const useSheet = seasons.length >= 5;
+	const triggerRef = useRef<HTMLButtonElement>(null);
+	const dialogRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!isOpen) return;
+		const trigger = triggerRef.current;
+		const dialog = dialogRef.current;
+		dialog?.focus();
+
+		const focusables = () =>
+			dialog
+				? Array.from(
+						dialog.querySelectorAll<HTMLElement>(
+							'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+						)
+					)
+				: [];
+
+		const trapFocus = (event: KeyboardEvent) => {
+			if (event.key !== 'Tab') return;
+			const items = focusables();
+			if (!items.length) {
+				event.preventDefault();
+				return;
+			}
+			const first = items[0];
+			const last = items[items.length - 1];
+			const current = document.activeElement;
+			const isInside = current instanceof HTMLElement && dialog!.contains(current);
+
+			if (event.shiftKey) {
+				if (!isInside || current === first) {
+					event.preventDefault();
+					last.focus();
+				}
+			} else if (!isInside || current === last) {
+				event.preventDefault();
+				first.focus();
+			}
+		};
+
+		document.addEventListener('keydown', trapFocus, true);
+
+		return () => {
+			document.removeEventListener('keydown', trapFocus, true);
+			if (trigger && document.contains(trigger)) trigger.focus();
+		};
+	}, [isOpen]);
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -122,15 +170,17 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 						onClick={() => setIsOpen(false)}
 					/>
 					<motion.div
+						ref={dialogRef}
 						role="dialog"
 						aria-modal="true"
 						aria-labelledby="season-sheet-title"
 						data-season-sheet
+						tabIndex={-1}
 						initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
 						animate={{ opacity: 1, y: 0 }}
 						exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
 						transition={{ type: 'spring', bounce: 0, duration: 0.38 }}
-						className="absolute inset-x-0 bottom-0 flex max-h-[78dvh] flex-col overflow-hidden overscroll-none rounded-t-[28px] border-t border-white/12 bg-zinc-950/88 shadow-[0_-24px_80px_rgba(0,0,0,0.65)] backdrop-blur-3xl md:inset-x-auto md:bottom-8 md:left-1/2 md:ml-[-15rem] md:w-[30rem] md:rounded-[28px] md:border"
+						className="absolute inset-x-0 bottom-0 flex max-h-[78dvh] flex-col overflow-hidden overscroll-none rounded-t-[28px] border-t border-white/12 bg-zinc-950/88 shadow-[0_-24px_80px_rgba(0,0,0,0.65)] backdrop-blur-3xl focus:outline-none md:inset-x-auto md:bottom-8 md:left-1/2 md:ml-[-15rem] md:w-[30rem] md:rounded-[28px] md:border"
 					>
 						<div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-white/20" />
 						<div className="flex items-center justify-between px-5 pb-3 pt-4">
@@ -181,7 +231,7 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 												<span
 													className={cn(
 														'block text-xs',
-														isActive ? 'text-black/50' : 'text-white/35'
+														isActive ? 'text-black/60' : 'text-white/55'
 													)}
 												>
 													{season.episode_count} episodes
@@ -203,6 +253,7 @@ function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: Seas
 		<>
 			<button
 				type="button"
+				ref={triggerRef}
 				onClick={() => setIsOpen(true)}
 				aria-haspopup="dialog"
 				aria-expanded={isOpen}

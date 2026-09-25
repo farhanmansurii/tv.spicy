@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchRowData } from '@/lib/api/tmdb-client';
-import { cachedResponseHeaders, TMDB_CACHE_SECONDS } from '../cache';
+import { fetchRowDataStrict } from '@/lib/api/tmdb-client';
+import { tmdbRowQuerySchema } from '@/lib/validation/api-schemas';
+import { badRequest, upstreamErrorResponse } from '@/lib/api/route-responses';
+import { cachedResponseHeaders } from '../cache';
 
 export const revalidate = 86400;
 
-const rowEndpointPattern =
-	/^(?:trending\/(?:all|movie|tv)\/(?:day|week)|(?:movie|tv)\/(?:airing_today|on_the_air|popular|top_rated|upcoming|now_playing))$/;
-
-function isValidRowEndpoint(endpoint: string) {
-	return rowEndpointPattern.test(endpoint);
-}
-
 export async function GET(request: NextRequest) {
-	const endpoint = request.nextUrl.searchParams.get('endpoint')?.trim() ?? '';
-
-	if (!isValidRowEndpoint(endpoint)) {
-		return NextResponse.json(
-			{ error: 'Invalid TMDB row endpoint' },
-			{ status: 400, headers: cachedResponseHeaders() }
-		);
+	const parsed = tmdbRowQuerySchema.safeParse(
+		Object.fromEntries(request.nextUrl.searchParams)
+	);
+	if (!parsed.success) {
+		return badRequest('Invalid TMDB row endpoint');
 	}
 
-	const data = await fetchRowData(endpoint);
-	return NextResponse.json(data, { headers: cachedResponseHeaders() });
+	try {
+		const data = await fetchRowDataStrict(parsed.data.endpoint);
+		return NextResponse.json(data, { headers: cachedResponseHeaders() });
+	} catch (error) {
+		// Upstream failure: 502/503 + no-store so the CDN keeps serving the
+		// last good copy instead of caching an empty row for seven days.
+		return upstreamErrorResponse(error, 'tmdb/row');
+	}
 }

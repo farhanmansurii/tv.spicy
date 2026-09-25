@@ -145,7 +145,7 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 
 				{!isReleased && (
 					<div className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-sm z-[4]">
-						<LockSimpleIcon size={16} className="text-white/25" weight="bold" />
+						<LockSimpleIcon size={16} className="text-white/50" weight="bold" />
 					</div>
 				)}
 
@@ -175,22 +175,22 @@ function EpisodeCardComponent({ episode, active = false, onClick, index = 0 }: E
 					<span
 						className={cn(
 							'text-[10px] sm:text-xs font-bold tabular-nums transition-colors duration-200',
-							active ? 'text-[#0A84FF]' : 'text-white/35 group-hover:text-white/50'
+							active ? 'text-[#0A84FF]' : 'text-white/55 group-hover:text-white'
 						)}
 					>
 						E{epNum}
 					</span>
 					{hasRuntime && (
 						<>
-							<span className="text-white/15 text-[8px]">&middot;</span>
-							<span className="text-[10px] sm:text-xs text-white/30 tabular-nums">
+							<span className="text-white/50 text-[8px]" aria-hidden="true">&middot;</span>
+							<span className="text-[10px] sm:text-xs text-white/55 tabular-nums">
 								{episode.runtime}m
 							</span>
 						</>
 					)}
 					{hasRating && (
 						<>
-							<span className="text-white/15 text-[8px]">&middot;</span>
+							<span className="text-white/50 text-[8px]" aria-hidden="true">&middot;</span>
 							<span
 								className="inline-flex items-center gap-0.5 text-[10px] sm:text-xs font-bold tabular-nums"
 								style={{ color: '#FFD60A' }}

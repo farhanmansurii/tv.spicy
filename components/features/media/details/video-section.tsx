@@ -59,47 +59,57 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 	useEffect(() => {
 		if (!sectionRef.current) return;
 
-		const ctx = gsap.context(() => {
-			if (headerRef.current) {
-				gsap.fromTo(
-					headerRef.current,
-					{ y: 24, opacity: 0 },
-					{
-						y: 0,
-						opacity: 1,
-						duration: 0.8,
-						ease: 'power3.out',
-						scrollTrigger: {
-							trigger: headerRef.current,
-							start: 'top 85%',
-							toggleActions: 'play none none none',
-						},
-					}
-				);
-			}
+		const mm = gsap.matchMedia(sectionRef.current);
 
-			if (gridRef.current) {
-				const items = gridRef.current.querySelectorAll('[data-video-card]');
-				gsap.fromTo(
-					items,
-					{ y: 40, opacity: 0 },
-					{
-						y: 0,
-						opacity: 1,
-						duration: 0.7,
-						stagger: 0.08,
-						ease: 'power3.out',
-						scrollTrigger: {
-							trigger: gridRef.current,
-							start: 'top 85%',
-							toggleActions: 'play none none none',
-						},
-					}
-				);
-			}
-		}, sectionRef);
+		mm.add(
+			{
+				reduce: '(prefers-reduced-motion: reduce)',
+				motion: '(prefers-reduced-motion: no-preference)',
+			},
+			(context) => {
+				const reduce = context.conditions?.reduce === true;
 
-		return () => ctx.revert();
+				if (headerRef.current) {
+					gsap.fromTo(
+						headerRef.current,
+						reduce ? { opacity: 0 } : { y: 24, opacity: 0 },
+						{
+							opacity: 1,
+							...(reduce ? {} : { y: 0 }),
+							duration: reduce ? 0.2 : 0.8,
+							ease: 'power3.out',
+							scrollTrigger: {
+								trigger: headerRef.current,
+								start: 'top 85%',
+								toggleActions: 'play none none none',
+							},
+						}
+					);
+				}
+
+				if (gridRef.current) {
+					const items = gridRef.current.querySelectorAll('[data-video-card]');
+					gsap.fromTo(
+						items,
+						reduce ? { opacity: 0 } : { y: 40, opacity: 0 },
+						{
+							opacity: 1,
+							...(reduce ? {} : { y: 0 }),
+							duration: reduce ? 0.2 : 0.7,
+							stagger: reduce ? 0 : 0.08,
+							ease: 'power3.out',
+							scrollTrigger: {
+								trigger: gridRef.current,
+								start: 'top 85%',
+								toggleActions: 'play none none none',
+							},
+						}
+					);
+				}
+			}
+		);
+
+		return () => mm.revert();
 	}, []);
 
 	/* ── Animate newly revealed cards on expand ── */
@@ -108,13 +118,20 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 			hasAnimated.current = true;
 			return;
 		}
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		const items = gridRef.current.querySelectorAll('[data-video-card]');
 		const newItems = Array.from(items).slice(5);
 		if (newItems.length > 0) {
 			gsap.fromTo(
 				newItems,
-				{ y: 30, opacity: 0 },
-				{ y: 0, opacity: 1, duration: 0.6, stagger: 0.06, ease: 'power3.out' }
+				reduce ? { opacity: 0 } : { y: 30, opacity: 0 },
+				{
+					opacity: 1,
+					...(reduce ? {} : { y: 0 }),
+					duration: reduce ? 0.2 : 0.6,
+					stagger: reduce ? 0 : 0.06,
+					ease: 'power3.out',
+				}
 			);
 		}
 	}, [displayed.length]);
@@ -122,21 +139,29 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 	/* ── Modal Open / Close Animation ── */
 	useEffect(() => {
 		if (!modalRef.current || !modalContentRef.current) return;
+		if (!activeVideo) return;
+
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 		const ctx = gsap.context(() => {
-			if (activeVideo) {
-				// Open
-				gsap.fromTo(
-					modalRef.current,
-					{ opacity: 0 },
-					{ opacity: 1, duration: 0.35, ease: 'power2.out' }
-				);
-				gsap.fromTo(
-					modalContentRef.current,
-					{ scale: 0.92, opacity: 0, y: 20 },
-					{ scale: 1, opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.2)', delay: 0.05 }
-				);
-			}
+			gsap.fromTo(
+				modalRef.current,
+				{ opacity: 0 },
+				{ opacity: 1, duration: reduce ? 0.15 : 0.25, ease: 'power2.out' }
+			);
+			gsap.fromTo(
+				modalContentRef.current,
+				reduce
+					? { opacity: 0 }
+					: { scale: 0.95, opacity: 0, y: 20 },
+				{
+					opacity: 1,
+					...(reduce ? {} : { scale: 1, y: 0 }),
+					duration: reduce ? 0.15 : 0.28,
+					ease: 'power3.out',
+					delay: reduce ? 0 : 0.05,
+				}
+			);
 		});
 
 		return () => ctx.revert();
@@ -145,7 +170,11 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 	if (!allItems.length) return null;
 
 	const closeModal = () => {
-		if (!modalRef.current || !modalContentRef.current) {
+		if (
+			!modalRef.current ||
+			!modalContentRef.current ||
+			window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		) {
 			setActiveVideo(null);
 			return;
 		}
@@ -156,13 +185,13 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 			scale: 0.95,
 			opacity: 0,
 			y: 10,
-			duration: 0.25,
+			duration: 0.18,
 			ease: 'power2.in',
 		});
 		tl.to(
 			modalRef.current,
-			{ opacity: 0, duration: 0.2, ease: 'power2.in' },
-			0.1
+			{ opacity: 0, duration: 0.14, ease: 'power2.in' },
+			0.06
 		);
 	};
 
@@ -223,7 +252,7 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 								<div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]">
 									<img
 										src={item.poster}
-										alt="Backdrop"
+										alt=""
 										loading="lazy"
 										className="h-full w-full object-cover"
 									/>

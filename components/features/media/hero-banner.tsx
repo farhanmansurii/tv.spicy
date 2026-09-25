@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/store/mediaQueryStore';
 import Container from '@/components/shared/containers/container';
 import ContinueWatchingButton from '@/components/features/watchlist/continue-watching-button';
+import { HERO_HEIGHT_CLASS } from '@/components/features/media/hero-height';
 import type { TMDBImagesResponse, TMDBMovie, TMDBTVShow } from '@/lib/types/tmdb';
 
 interface HeroBannerProps {
@@ -69,6 +70,8 @@ export function HeroBanner({
 	// On detail pages, use backdrop everywhere — let CSS object-fit handle mobile cropping.
 	// This avoids hydration mismatches from useMediaQuery defaulting to false on server.
 	const currentImage = (isDetailsPage ? backdrop : isMobile ? poster : backdrop) || '';
+	// Reveal is driven by whether there is data to reveal, never by an image event.
+	const hasImage = currentImage !== '';
 	const nextEpisodeDate = show.next_episode_to_air?.air_date;
 	const nextEpisodeLabel = (() => {
 		if (!nextEpisodeDate) return null;
@@ -98,6 +101,9 @@ export function HeroBanner({
 		requestAnimationFrame(() => setShouldAnimate(true));
 	}, []);
 
+	// No image means there is nothing to wait for: copy is visible on first render.
+	const showRevealed = !hasImage || shouldAnimate;
+
 	// Failsafe: if image already loaded before hydration (cached/priority), trigger onLoad manually
 	useEffect(() => {
 		const img = imageContainerRef.current?.querySelector('img');
@@ -117,12 +123,7 @@ export function HeroBanner({
 	}, [isActive, isDetailsPage, prefersReducedMotion]);
 
 	return (
-		<section
-			className={cn(
-				'relative w-full overflow-hidden bg-background',
-				'h-[62dvh] min-h-[430px] max-h-[620px] md:h-[72dvh] md:min-h-[540px] lg:max-h-[760px]'
-			)}
-		>
+		<section className={cn('relative w-full overflow-hidden bg-background', HERO_HEIGHT_CLASS)}>
 			{/* Background Image with Ken Burns */}
 			<div className="absolute inset-0 z-0">
 				{/* Fallback dark surface — visible when image is missing or fails */}
@@ -145,7 +146,7 @@ export function HeroBanner({
 							)}
 							srcSet={tmdbImageSrcSet(currentImage)}
 							sizes="100vw"
-							alt={`${title} backdrop`}
+							alt=""
 							loading={priority ? 'eager' : loading}
 							fetchPriority={priority ? 'high' : undefined}
 							className={cn(
@@ -191,8 +192,10 @@ export function HeroBanner({
 						ref={contentRef}
 						className={cn(
 							'max-w-4xl flex flex-col items-center md:items-start text-center md:text-left',
-							shouldAnimate ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
-							'motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none transition-all duration-500 ease-out'
+							showRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
+							hasImage &&
+								'transition-[opacity,transform] duration-[280ms] ease-[cubic-bezier(0.23,1,0.32,1)]',
+							'motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none'
 						)}
 					>
 						{/* Metadata — clean, minimal, Apple TV style */}

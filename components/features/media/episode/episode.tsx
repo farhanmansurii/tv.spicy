@@ -1,13 +1,20 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CircleNotchIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import useProviderStore from '@/store/providerStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import useTVShowStore from '@/store/recentsStore';
+import { cn } from '@/lib/utils';
 
 import { listEnabledProviders, resolveProvider } from './providers';
 import { usePlaybackProgress } from './use-playback-progress';
 import { PlayerControls } from './player-controls';
+
+// A dead provider must surface as a failure instead of a black rectangle.
+const PLAYER_LOAD_TIMEOUT_MS = 15_000;
+
+type PlayerStatus = 'loading' | 'ready' | 'failed';
 
 interface EpisodeProps {
 	episodeId: string;
@@ -123,6 +130,49 @@ export default function Episode({
 		]
 	);
 
+	// ── Player status ─────────────────────────────────────────────────────────
+	// Every URL change (provider switch, retry, resume) remounts the iframe, so
+	// the load cycle starts over.
+	const [status, setStatus] = useState<PlayerStatus>('loading');
+
+	useEffect(() => {
+		setStatus('loading');
+	}, [currentUrl]);
+
+	useEffect(() => {
+		if (status !== 'loading') return;
+		const timer = setTimeout(() => setStatus('failed'), PLAYER_LOAD_TIMEOUT_MS);
+		return () => clearTimeout(timer);
+	}, [status, currentUrl]);
+
+	const handleIframeLoad = useCallback(() => setStatus('ready'), []);
+
+	const handleRetry = useCallback(() => {
+		setStatus('loading');
+		setIframeKey((k) => k + 1);
+	}, []);
+
+	// ── Document title ────────────────────────────────────────────────────────
+	useEffect(() => {
+		const previousTitle = document.title;
+		const showLabel = currentWatchItem?.showName?.trim();
+		const episodeNameLabel = currentWatchItem?.episodeName?.trim();
+		const itemTitle = currentWatchItem?.title?.trim();
+		const episodeLabel =
+			type === 'tv' && numericSeasonNumber > 0 && numericEpisodeNumber > 0
+				? `S${numericSeasonNumber} E${numericEpisodeNumber}`
+				: null;
+		const subject = showLabel
+			? episodeLabel
+				? `${showLabel} ${episodeLabel}`
+				: showLabel
+			: episodeLabel || episodeNameLabel || itemTitle || 'Now playing';
+		document.title = `${subject} · Spicy TV`;
+		return () => {
+			document.title = previousTitle;
+		};
+	}, [currentWatchItem, type, numericSeasonNumber, numericEpisodeNumber]);
+
 	// ── Progress tracking ────────────────────────────────────────────────────
 	usePlaybackProgress({
 		id,
@@ -160,9 +210,77 @@ export default function Episode({
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
 						className="block h-full w-full bg-transparent"
 						src={currentUrl}
-						title="Media Player"
+						title={`${currentProvider.label} player`}
 						loading="eager"
+						onLoad={handleIframeLoad}
 					/>
+
+					{/* State overlay — occupies the player box so loading, failure and
+					    playback reserve identical height. */}
+					<div
+						className={cn(
+							'absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black px-6 text-center transition-opacity motion-reduce:transition-none',
+							status === 'ready'
+								? 'pointer-events-none opacity-0 duration-[120ms]'
+								: 'opacity-100 duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)]'
+						)}
+						aria-hidden={status === 'ready' ? true : undefined}
+					>
+						{status === 'loading' && (
+							<div className="flex flex-col items-center gap-3">
+								<CircleNotchIcon
+									size={32}
+									weight="bold"
+									aria-hidden="true"
+									className="animate-spin text-white/70 motion-reduce:animate-none"
+								/>
+								<p aria-hidden="true" className="text-sm font-medium text-white/70">
+									Loading player…
+								</p>
+							</div>
+						)}
+
+						{status === 'failed' && (
+							<div
+								role="alert"
+								aria-live="assertive"
+								className="flex max-w-sm flex-col items-center gap-3"
+							>
+								<WarningCircleIcon
+									size={32}
+									weight="fill"
+									aria-hidden="true"
+									className="text-[#FF453A]"
+								/>
+								<h3 className="text-base font-semibold text-white md:text-lg">
+									Playback failed
+								</h3>
+								<p className="text-sm leading-relaxed text-white/70">
+									This source didn’t respond in time. Retry it, or pick another
+									source above.
+								</p>
+								<button
+									type="button"
+									onClick={handleRetry}
+									className={cn(
+										'min-h-11 rounded-full bg-white px-5 text-sm font-semibold text-black',
+										'transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:active:scale-100',
+										'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black'
+									)}
+								>
+									Retry
+								</button>
+							</div>
+						)}
+					</div>
+
+					<p className="sr-only" role="status" aria-live="polite">
+						{status === 'loading'
+							? 'Loading the player.'
+							: status === 'ready'
+								? 'Player loaded.'
+								: ''}
+					</p>
 				</div>
 			</div>
 		</>

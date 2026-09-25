@@ -1,30 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchGenreById } from '@/lib/api/tmdb-client';
-import { cachedResponseHeaders, TMDB_CACHE_SECONDS } from '../cache';
+import { fetchGenreByIdStrict } from '@/lib/api/tmdb-client';
+import { tmdbGenreQuerySchema } from '@/lib/validation/api-schemas';
+import { badRequest, upstreamErrorResponse } from '@/lib/api/route-responses';
+import { cachedResponseHeaders } from '../cache';
 
 export const revalidate = 86400;
 
 export async function GET(request: NextRequest) {
-	const searchParams = request.nextUrl.searchParams;
-	const type = searchParams.get('type');
-	const genreId = searchParams.get('genreId');
-	const pageValue = searchParams.get('page') ?? '1';
-	const page = Number(pageValue);
-
-	if (
-		(type !== 'movie' && type !== 'tv') ||
-		!genreId ||
-		!/^[1-9]\d*$/.test(genreId) ||
-		!Number.isInteger(page) ||
-		page < 1 ||
-		page > 500
-	) {
-		return NextResponse.json(
-			{ error: 'Invalid TMDB genre parameters' },
-			{ status: 400, headers: cachedResponseHeaders() }
-		);
+	const parsed = tmdbGenreQuerySchema.safeParse(
+		Object.fromEntries(request.nextUrl.searchParams)
+	);
+	if (!parsed.success) {
+		return badRequest('Invalid TMDB genre parameters');
 	}
 
-	const data = await fetchGenreById(type, genreId, page);
-	return NextResponse.json(data, { headers: cachedResponseHeaders() });
+	try {
+		const data = await fetchGenreByIdStrict(parsed.data.type, parsed.data.genreId, parsed.data.page);
+		return NextResponse.json(data, { headers: cachedResponseHeaders() });
+	} catch (error) {
+		// Upstream failure must never be cached as an empty genre page.
+		return upstreamErrorResponse(error, 'tmdb/genre');
+	}
 }

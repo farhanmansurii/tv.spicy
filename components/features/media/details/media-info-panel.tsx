@@ -131,14 +131,14 @@ function uniqueProviders(providers: WatchProvider[]) {
 	});
 }
 
-const SECTION_LABEL = 'text-[10px] font-bold uppercase tracking-[0.16em] text-white/25';
+const SECTION_LABEL = 'text-[10px] font-bold uppercase tracking-[0.16em] text-white/55';
 
 function SectionHeading({ title, kicker }: { title: string; kicker?: string }) {
 	return (
 		<div className="flex items-baseline gap-2.5">
 			<h3 className="text-sm font-bold tracking-tight text-white md:text-base">{title}</h3>
 			{kicker && (
-				<span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/25 tabular-nums">
+				<span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/55 tabular-nums">
 					{kicker}
 				</span>
 			)}
@@ -224,7 +224,7 @@ function ProviderLogo({
 				) : null}
 			</span>
 			{provider.provider_name}
-			<ArrowSquareOutIcon size={11} weight="bold" className="text-white/30" />
+			<ArrowSquareOutIcon size={11} weight="bold" className="text-white/50" />
 		</a>
 	);
 }
@@ -406,7 +406,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 			: 'About this show';
 
 	return (
-		<section className="w-full" data-information-shelf>
+		<section className="w-full" data-information-shelf aria-label={triggerLabel}>
 			<motion.div
 				variants={panelVariants}
 				initial={reducedMotion ? false : 'hidden'}
@@ -430,7 +430,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 						<h2 className="truncate text-[15px] font-semibold tracking-[-0.015em] text-white">
 							{triggerLabel}
 						</h2>
-						<p className="truncate text-xs text-white/38">
+						<p className="truncate text-xs text-white/55">
 							{activeEpisode?.name || title}
 						</p>
 					</div>
@@ -483,11 +483,12 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 												id={`media-info-tab-${tab.id}`}
 												aria-selected={activeTab === tab.id}
 												aria-controls="media-info-tabpanel"
+												tabIndex={activeTab === tab.id ? 0 : -1}
 												onClick={() => setActiveTab(tab.id)}
 												className={`isolate relative flex h-11 items-center justify-center rounded-xl px-4 text-[13px] font-semibold outline-none transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70 ${
 													activeTab === tab.id
 														? 'text-zinc-950'
-														: 'text-white/45 hover:text-white/75'
+														: 'text-white/55 hover:text-white'
 												}`}
 											>
 												{tab.label}
@@ -495,8 +496,8 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 													<span
 														className={
 															activeTab === tab.id
-																? 'ml-1 text-black/45'
-																: 'ml-1 text-white/25'
+																? 'ml-1 text-black/60'
+																: 'ml-1 text-white/55'
 														}
 													>
 														{tab.count}
@@ -544,7 +545,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 												{/* Tagline + overview */}
 												<div className="flex flex-col gap-3">
 													{data?.tagline && (
-														<p className="text-[15px] font-medium leading-snug text-white/40">
+														<p className="text-[15px] font-medium leading-snug text-white/55">
 															&ldquo;{data.tagline}&rdquo;
 														</p>
 													)}
@@ -553,7 +554,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 															{data.overview}
 														</p>
 													) : (
-														<p className="text-[13px] text-white/30">
+														<p className="text-[13px] text-white/55">
 															No overview available.
 														</p>
 													)}
@@ -571,7 +572,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 																	<div className="flex items-center gap-1.5">
 																		<Icon
 																			size={11}
-																			className="text-white/25"
+																			className="text-white/50"
 																		/>
 																		<p
 																			className={
@@ -607,7 +608,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 																: undefined
 														}
 													/>
-													<p className="mt-1 text-[12.5px] text-white/35">
+													<p className="mt-1 text-[12.5px] text-white/55">
 														Provider availability via TMDB watch
 														providers, region IN.
 													</p>
@@ -687,7 +688,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 																/>
 															) : (
 																<div className="flex h-full w-full items-center justify-center">
-																	<span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">
+																	<span className="text-[10px] font-bold text-white/55 uppercase tracking-wider">
 																		{person.name
 																			?.split(' ')
 																			.map((n) => n[0])
@@ -700,7 +701,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 														<h4 className="mt-2 truncate text-[12px] font-semibold text-white/80">
 															{person.name}
 														</h4>
-														<p className="truncate text-[11px] text-white/30">
+														<p className="truncate text-[11px] text-white/55">
 															{person.role}
 														</p>
 													</div>
@@ -799,7 +800,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 																{link.label}
 															</span>
 															{link.detail && (
-																<span className="text-[11px] text-white/25">
+																<span className="text-[11px] text-white/55">
 																	{link.detail}
 																</span>
 															)}
@@ -807,7 +808,7 @@ function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfo
 														<ArrowSquareOutIcon
 															size={14}
 															weight="bold"
-															className="text-white/25 transition-colors duration-200 group-hover:text-white/70"
+															className="text-white/50 transition-colors duration-200 group-hover:text-white"
 														/>
 													</motion.a>
 												))}

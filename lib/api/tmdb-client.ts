@@ -44,9 +44,10 @@ const CACHE_DURATIONS = {
 // Request timeout (in milliseconds)
 const REQUEST_TIMEOUT = 10000; // 10 seconds
 
-// Retry configuration
-const MAX_RETRIES = 1;
-const RETRY_DELAY = 1000; // 1 second
+// Retry configuration (idempotent requests only — see tmdbFetch)
+const MAX_RETRIES = 2; // retries after the initial attempt
+const RETRY_DELAY = 1000; // base backoff delay, doubles per attempt
+const MAX_RETRY_DELAY = 10_000; // never wait longer than this, even for Retry-After
 
 // ============================================================================
 // Types
@@ -60,6 +61,11 @@ interface FetchOptions {
 	headers?: Record<string, string>;
 	timeout?: number;
 	retries?: number;
+	/**
+	 * HTTP method. Only idempotent methods (GET/HEAD) are ever retried, so a
+	 * future non-idempotent caller cannot silently opt into replay.
+	 */
+	method?: 'GET' | 'HEAD';
 }
 
 interface TMDBError {
@@ -68,7 +74,11 @@ interface TMDBError {
 	status_message: string;
 }
 
-class TMDBRequestError extends Error {
+/**
+ * Exported so route handlers can distinguish an upstream TMDB failure
+ * (answer with 502/503 + no-store) from a genuine empty/missing result.
+ */
+export class TMDBRequestError extends Error {
 	constructor(
 		message: string,
 		readonly status: number
@@ -90,6 +100,14 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
+ * Statuses worth retrying: upstream server errors and rate limiting.
+ * (429 is retried with its Retry-After honoured — see tmdbFetch.)
+ */
+function isRetryableStatus(status: number): boolean {
+	return status === 429 || (status >= 500 && status < 600);
+}
+
+/**
  * Check if error is retryable
  */
 function isRetryableError(error: any): boolean {
@@ -97,10 +115,10 @@ function isRetryableError(error: any): boolean {
 	const message = String(error.message ?? '').toLowerCase();
 
 	if (error instanceof TMDBRequestError) {
-		return error.status >= 500 && error.status < 600;
+		return isRetryableStatus(error.status);
 	}
 
-	// Retry on network errors or 5xx server errors
+	// Retry on network errors, timeouts and 429/5xx server errors
 	if (
 		error.name === 'AbortError' ||
 		error.name === 'TimeoutError' ||
@@ -112,11 +130,31 @@ function isRetryableError(error: any): boolean {
 
 	const statusCode = error.message?.match(/\((\d+)\)/)?.[1];
 	if (statusCode) {
-		const code = parseInt(statusCode, 10);
-		return code >= 500 && code < 600;
+		return isRetryableStatus(parseInt(statusCode, 10));
 	}
 
 	return false;
+}
+
+/**
+ * Real exponential backoff: RETRY_DELAY * 2^attempt, capped (1s, 2s, 4s, …).
+ * `attempt` is zero-based.
+ */
+function backoffDelayMs(attempt: number): number {
+	return Math.min(RETRY_DELAY * 2 ** attempt, MAX_RETRY_DELAY);
+}
+
+/**
+ * Parse a `Retry-After` header (delta-seconds or HTTP-date) into milliseconds.
+ * Returns null when absent or unparsable.
+ */
+function parseRetryAfterMs(value: string | null): number | null {
+	if (!value) return null;
+	const seconds = Number(value.trim());
+	if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
+	const dateMs = Date.parse(value);
+	if (!Number.isNaN(dateMs)) return Math.max(0, dateMs - Date.now());
+	return null;
 }
 
 // ============================================================================
@@ -132,7 +170,14 @@ async function tmdbFetch<T>(endpoint: string, options: FetchOptions = {}): Promi
 		headers = {},
 		timeout = REQUEST_TIMEOUT,
 		retries = MAX_RETRIES,
+		method = 'GET',
 	} = options;
+
+	// Retries are only safe for idempotent requests. A non-idempotent request
+	// must never be replayed, so it is attempted exactly once.
+	const normalizedMethod = method.toUpperCase();
+	const idempotent = normalizedMethod === 'GET' || normalizedMethod === 'HEAD';
+	const maxRetries = idempotent ? retries : 0;
 
 	// Ensure endpoint starts with /
 	const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -164,43 +209,48 @@ async function tmdbFetch<T>(endpoint: string, options: FetchOptions = {}): Promi
 	let lastError: Error | null = null;
 
 	// Retry logic
-	for (let attempt = 0; attempt <= retries; attempt++) {
+	for (let attempt = 0; attempt <= maxRetries; attempt++) {
 		try {
 			// Abort the upstream request itself when it times out. Promise.race
 			// alone leaves the fetch consuming serverless CPU in the background.
 			const response = await fetch(url.toString(), {
+				method: normalizedMethod,
 				headers: defaultHeaders,
 				next: { revalidate },
 				signal: AbortSignal.timeout(timeout),
 			});
 
 			if (!response.ok) {
-				let errorData: TMDBError | string;
+				// Read the body exactly once: a failed response.json() consumes the
+				// stream, and a second read() would throw a Body-is-unusable error
+				// that hides the real upstream status.
+				const rawBody = await response.text();
+				let statusMessage = response.statusText;
 				try {
-					errorData = await response.json();
+					const parsed = JSON.parse(rawBody) as Partial<TMDBError> | null;
+					if (parsed?.status_message) statusMessage = parsed.status_message;
 				} catch {
-					errorData = await response.text();
+					// Non-JSON error body (e.g. an HTML proxy page); keep statusText.
 				}
 
-				const errorMessage =
-					typeof errorData === 'string'
-						? errorData
-						: `TMDB API Error (${response.status}): ${errorData.status_message || response.statusText}`;
+				const error = new TMDBRequestError(
+					`TMDB API Error (${response.status}): ${statusMessage}`,
+					response.status
+				);
 
-				const error = new TMDBRequestError(errorMessage, response.status);
-
-				// Don't retry on 4xx errors (client errors)
-				if (response.status >= 400 && response.status < 500) {
-					throw error;
-				}
-
-				// Retry on 5xx errors
-				if (isRetryableError(error) && attempt < retries) {
+				// Retry idempotent requests on 429 (honouring Retry-After) and 5xx.
+				if (idempotent && attempt < maxRetries && isRetryableStatus(response.status)) {
 					lastError = error;
-					await delay(RETRY_DELAY * (attempt + 1)); // Exponential backoff
+					const retryAfterMs = parseRetryAfterMs(response.headers.get('retry-after'));
+					const waitMs = Math.min(
+						Math.max(backoffDelayMs(attempt), retryAfterMs ?? 0),
+						MAX_RETRY_DELAY
+					);
+					await delay(waitMs);
 					continue;
 				}
 
+				// Don't retry on 4xx errors (except 429, handled above)
 				throw error;
 			}
 
@@ -209,21 +259,21 @@ async function tmdbFetch<T>(endpoint: string, options: FetchOptions = {}): Promi
 			lastError = error;
 
 			// Don't retry on non-retryable errors
-			if (!isRetryableError(error) || attempt >= retries) {
+			if (!idempotent || !isRetryableError(error) || attempt >= maxRetries) {
 				console.error(
-					`Error fetching ${cleanEndpoint} (attempt ${attempt + 1}/${retries + 1}):`,
+					`Error fetching ${cleanEndpoint} (attempt ${attempt + 1}/${maxRetries + 1}):`,
 					error
 				);
 				throw error;
 			}
 
-			// Wait before retrying
-			await delay(RETRY_DELAY * (attempt + 1));
+			// Exponential backoff between retries (429s carry Retry-After above)
+			await delay(backoffDelayMs(attempt));
 		}
 	}
 
 	// If we get here, all retries failed
-	throw lastError || new Error(`Failed to fetch ${cleanEndpoint} after ${retries + 1} attempts`);
+	throw lastError || new Error(`Failed to fetch ${cleanEndpoint} after ${maxRetries + 1} attempts`);
 }
 
 // ============================================================================
@@ -232,32 +282,49 @@ async function tmdbFetch<T>(endpoint: string, options: FetchOptions = {}): Promi
 
 /**
  * Fetch list data (trending, popular, etc.)
+ *
+ * Lenient variant for server-rendered pages: an upstream failure degrades to
+ * an empty row instead of erroring the page. API routes must use
+ * `fetchRowDataStrict` so an outage is never cached as an empty result.
  */
 export async function fetchRowData(endpoint: string): Promise<TMDBBaseMedia[]> {
 	try {
-		// Ensure endpoint starts with /
-		const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-
-		// Parse existing query params if any
-		const url = new URL(cleanEndpoint, 'http://dummy.com');
-
-		// Set default query parameters (will override if already present)
-		url.searchParams.set('language', 'en-US');
-		url.searchParams.set('include_adult', 'false');
-		url.searchParams.set('include_video', 'false');
-
-		// Get the path and query string (without the dummy domain)
-		const fullEndpoint = url.pathname + url.search;
-
-		const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(fullEndpoint, {
-			revalidate: CACHE_DURATIONS.LONG,
-		});
-
-		return data.results || [];
+		return await fetchRowDataStrict(endpoint);
 	} catch (error) {
 		console.error(`Error fetching row data for ${endpoint}:`, error);
 		return [];
 	}
+}
+
+/**
+ * Strict variant of {@link fetchRowData}: rejects when TMDB cannot be reached
+ * or answers with an error, and resolves to `[]` only when TMDB genuinely
+ * returned no results — so callers can keep the two cases apart.
+ */
+export async function fetchRowDataStrict(endpoint: string): Promise<TMDBBaseMedia[]> {
+	// Ensure endpoint starts with /
+	const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+	// Parse existing query params if any
+	const url = new URL(cleanEndpoint, 'http://dummy.com');
+
+	// Set default query parameters (will override if already present)
+	url.searchParams.set('language', 'en-US');
+	url.searchParams.set('include_adult', 'false');
+	url.searchParams.set('include_video', 'false');
+
+	// Get the path and query string (without the dummy domain)
+	const fullEndpoint = url.pathname + url.search;
+
+	const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(fullEndpoint, {
+		revalidate: CACHE_DURATIONS.LONG,
+	});
+
+	if (!data || !Array.isArray(data.results)) {
+		throw new TMDBRequestError('TMDB returned a malformed list response', 502);
+	}
+
+	return data.results;
 }
 
 /**
@@ -299,6 +366,10 @@ export async function fetchDetailsTMDB(
 /**
  * Fetch only the fields needed to render a media card. Unlike fetchDetailsTMDB,
  * this deliberately avoids the large appended videos/providers/images payload.
+ *
+ * A missing TMDB record resolves to null (a stable not-found result); any
+ * operational failure throws so callers can answer 502/503 instead of
+ * misreporting an outage as a cacheable 404.
  */
 export async function fetchBasicDetailsTMDB(
 	id: string,
@@ -309,8 +380,11 @@ export async function fetchBasicDetailsTMDB(
 			revalidate: CACHE_DURATIONS.LONG,
 		});
 	} catch (error) {
+		if (error instanceof TMDBRequestError && error.status === 404) {
+			return null;
+		}
 		console.error(`Error fetching basic ${type} details for ${id}:`, error);
-		return null;
+		throw error;
 	}
 }
 
@@ -390,15 +464,12 @@ export async function fetchVideos(id: string, type: MediaType): Promise<TMDBVide
 
 /**
  * Fetch genres list
+ *
+ * Lenient variant for pages; API routes should use `fetchGenresStrict`.
  */
 export async function fetchGenres(type: MediaType): Promise<Genre[]> {
-	const endpoint = `/genre/${type}/list?language=en`;
-
 	try {
-		const data = await tmdbFetch<{ genres: Genre[] }>(endpoint, {
-			revalidate: CACHE_DURATIONS.VERY_LONG, // Genres rarely change
-		});
-		return data.genres || [];
+		return await fetchGenresStrict(type);
 	} catch (error) {
 		console.error(`Error fetching ${type} genres:`, error);
 		return [];
@@ -406,9 +477,46 @@ export async function fetchGenres(type: MediaType): Promise<Genre[]> {
 }
 
 /**
+ * Strict variant of {@link fetchGenres}: rejects on upstream failure,
+ * resolves to `[]` only when TMDB genuinely returned no genres.
+ */
+export async function fetchGenresStrict(type: MediaType): Promise<Genre[]> {
+	const endpoint = `/genre/${type}/list?language=en`;
+
+	const data = await tmdbFetch<{ genres: Genre[] }>(endpoint, {
+		revalidate: CACHE_DURATIONS.VERY_LONG, // Genres rarely change
+	});
+
+	if (!data || !Array.isArray(data.genres)) {
+		throw new TMDBRequestError('TMDB returned a malformed genre response', 502);
+	}
+
+	return data.genres;
+}
+
+/**
  * Fetch media by genre
+ *
+ * Lenient variant for pages; API routes should use `fetchGenreByIdStrict`.
  */
 export async function fetchGenreById(
+	type: MediaType,
+	genreId: string,
+	page: number = 1
+): Promise<TMDBBaseMedia[]> {
+	try {
+		return await fetchGenreByIdStrict(type, genreId, page);
+	} catch (error) {
+		console.error(`Error fetching genre ${genreId} for ${type}:`, error);
+		return [];
+	}
+}
+
+/**
+ * Strict variant of {@link fetchGenreById}: rejects on upstream failure,
+ * resolves to `[]` only when TMDB genuinely returned no results.
+ */
+export async function fetchGenreByIdStrict(
 	type: MediaType,
 	genreId: string,
 	page: number = 1
@@ -424,21 +532,39 @@ export async function fetchGenreById(
 
 	const endpoint = `/discover/${type}?${params.toString()}`;
 
-	try {
-		const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
-			revalidate: CACHE_DURATIONS.MEDIUM,
-		});
-		return data.results || [];
-	} catch (error) {
-		console.error(`Error fetching genre ${genreId} for ${type}:`, error);
-		return [];
+	const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
+		revalidate: CACHE_DURATIONS.MEDIUM,
+	});
+
+	if (!data || !Array.isArray(data.results)) {
+		throw new TMDBRequestError('TMDB returned a malformed discover response', 502);
 	}
+
+	return data.results;
 }
 
 /**
  * Search media
+ *
+ * Lenient variant for pages; API routes should use `searchTMDBStrict`.
  */
 export async function searchTMDB(
+	query: string,
+	page: number = 1
+): Promise<TMDBListResponse<TMDBBaseMedia>> {
+	try {
+		return await searchTMDBStrict(query, page);
+	} catch (error) {
+		console.error('Error searching TMDB:', error);
+		return { results: [], page: 1, total_pages: 0, total_results: 0 };
+	}
+}
+
+/**
+ * Strict variant of {@link searchTMDB}: rejects on upstream failure and only
+ * resolves to an empty result set when TMDB genuinely matched nothing.
+ */
+export async function searchTMDBStrict(
 	query: string,
 	page: number = 1
 ): Promise<TMDBListResponse<TMDBBaseMedia>> {
@@ -451,22 +577,21 @@ export async function searchTMDB(
 
 	const endpoint = `/search/multi?${params.toString()}`;
 
-	try {
-		const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
-			revalidate: CACHE_DURATIONS.SHORT, // Search results change frequently
-		});
+	const data = await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
+		revalidate: CACHE_DURATIONS.SHORT, // Search results change frequently
+	});
 
-		// Filter to only movies and TV shows
-		return {
-			...data,
-			results: data.results.filter(
-				(item) => item.media_type === 'movie' || item.media_type === 'tv'
-			),
-		};
-	} catch (error) {
-		console.error('Error searching TMDB:', error);
-		return { results: [], page: 1, total_pages: 0, total_results: 0 };
+	if (!data || !Array.isArray(data.results)) {
+		throw new TMDBRequestError('TMDB returned a malformed search response', 502);
 	}
+
+	// Filter to only movies and TV shows
+	return {
+		...data,
+		results: data.results.filter(
+			(item) => item.media_type === 'movie' || item.media_type === 'tv'
+		),
+	};
 }
 
 /**

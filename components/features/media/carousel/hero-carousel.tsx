@@ -123,7 +123,7 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 			</Carousel>
 
 			<div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 md:bottom-6">
-				<div className="pointer-events-auto flex items-center gap-1.5 md:gap-2 md:rounded-full md:border md:border-white/10 md:bg-black/45 md:px-3 md:py-2 md:backdrop-blur-md">
+				<div className="pointer-events-auto flex items-center gap-5 md:rounded-full md:border md:border-white/10 md:bg-black/45 md:px-3 md:py-2 md:backdrop-blur-md">
 					{validShows.map((show, index) => {
 						const isActive = index === activeIndex;
 						const title = show.title || show.name || 'Untitled';
@@ -134,6 +134,7 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 								onClick={() => scrollTo(index)}
 								className={cn(
 									'h-1.5 rounded-full transition-[width,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black md:h-2',
+									'relative after:absolute after:left-1/2 after:top-[-26px] after:bottom-[-12px] after:w-6 after:-translate-x-1/2 after:content-[""]',
 									isActive
 										? 'w-5 bg-white md:w-6'
 										: 'w-1.5 bg-white/40 hover:bg-white/70 md:w-2'

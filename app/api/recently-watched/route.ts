@@ -70,6 +70,10 @@ export async function PUT(request: NextRequest) {
 			seasonNumber,
 			episodeNumber
 		);
+		if (!item) {
+			// No row to update: the client should retry with POST (create/upsert).
+			return NextResponse.json({ error: 'No watch progress found', code: 'not_found' }, { status: 404 });
+		}
 		return NextResponse.json({ success: true, item });
 	} catch (error) {
 		console.error('Error updating watch progress:', error);
@@ -87,6 +91,14 @@ export async function DELETE(request: NextRequest) {
 		const searchParams = request.nextUrl.searchParams;
 		const mediaId = searchParams.get('mediaId');
 		const mediaType = searchParams.get('mediaType');
+
+		// A wipe of the whole history must be explicit; single-item deletes pass mediaId.
+		if (!mediaId && searchParams.get('confirm') !== 'all') {
+			return NextResponse.json(
+				{ error: 'Bulk delete requires confirm=all' },
+				{ status: 400 }
+			);
+		}
 
 		await deleteRecentlyWatched(session.user.id, {
 			mediaId: mediaId ? Number(mediaId) : undefined,

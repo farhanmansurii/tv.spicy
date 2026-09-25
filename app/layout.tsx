@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans';
 import { ThemeProvider } from '@/components/layout/providers/theme-provider';
 import TanstackQueryProvider from '@/components/providers/tanstack-query-provider';
 import SidebarProvider from '@/components/providers/sidebar-provider';
+import { MotionProvider } from '@/components/providers/motion-provider';
 import { AuthProvider } from '@/components/auth/auth-provider';
 import { AuthSync } from '@/components/auth/auth-sync';
 import { Toaster } from '@/components/ui/sonner';
@@ -18,6 +19,7 @@ export const generateMetadata = (): Metadata => ({
 	description:
 		'Discover and stream your favorite movies and TV series on Spicy TV. Enjoy unlimited entertainment with our vast library of content.',
 	applicationName: 'Spicy TV',
+	manifest: '/manifest.json',
 	keywords: ['streaming', 'movies', 'TV shows', 'entertainment', 'Spicy TV'],
 	authors: [{ name: 'Spicy TV Team' }],
 	creator: 'Spicy TV',
@@ -80,16 +82,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					enableSystem
 					disableTransitionOnChange
 				>
-					<AuthProvider>
-						<TanstackQueryProvider>
-							<AuthSync />
-							<SidebarProvider>
-								<DetailScrollRestoration />
-								<AccessibilityProvider>{children}</AccessibilityProvider>
-							</SidebarProvider>
-						</TanstackQueryProvider>
-						<Toaster />
-					</AuthProvider>
+					<MotionProvider>
+						<AuthProvider>
+							<TanstackQueryProvider>
+								<AuthSync />
+								<SidebarProvider>
+									<DetailScrollRestoration />
+									<AccessibilityProvider>{children}</AccessibilityProvider>
+								</SidebarProvider>
+							</TanstackQueryProvider>
+							<Toaster />
+						</AuthProvider>
+					</MotionProvider>
 				</ThemeProvider>
 			</body>
 		</html>

@@ -2,6 +2,7 @@
 
 import { signOut } from '@/lib/auth-client';
 import { useAuthStore } from '@/store/authStore';
+import { adoptAuthScope } from '@/lib/sync/auth-scope';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -198,6 +199,9 @@ export function AuthButton() {
 					onClick={async () => {
 						await signOut();
 						clearSession();
+						// Move every persisted store back to the anonymous scope so the
+						// signed-out view never shows the account's private lists.
+						await adoptAuthScope(null);
 						router.push('/');
 					}}
 					className={cn(

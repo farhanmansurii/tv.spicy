@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchSeasonEpisodes } from '@/lib/api/tmdb-client';
+import { tmdbSeasonQuerySchema } from '@/lib/validation/api-schemas';
+import { badRequest, upstreamErrorResponse } from '@/lib/api/route-responses';
 import { cachedResponseHeaders } from '../cache';
 
 export const revalidate = 86400;
 
 export async function GET(request: NextRequest) {
-	const showId = request.nextUrl.searchParams.get('showId') ?? '';
-	const season = Number(request.nextUrl.searchParams.get('season'));
-
-	if (!/^[1-9]\d*$/.test(showId) || !Number.isInteger(season) || season < 0) {
-		return NextResponse.json({ error: 'Invalid season parameters' }, { status: 400 });
+	const parsed = tmdbSeasonQuerySchema.safeParse(
+		Object.fromEntries(request.nextUrl.searchParams)
+	);
+	if (!parsed.success) {
+		return badRequest('Invalid season parameters');
 	}
 
 	try {
-		return NextResponse.json(await fetchSeasonEpisodes(showId, season), {
+		return NextResponse.json(await fetchSeasonEpisodes(parsed.data.showId, parsed.data.season), {
 			headers: cachedResponseHeaders(),
 		});
-	} catch {
-		return NextResponse.json({ error: 'Unable to load season' }, { status: 502 });
+	} catch (error) {
+		// Never cache a season load failure as data.
+		return upstreamErrorResponse(error, 'tmdb/season');
 	}
 }

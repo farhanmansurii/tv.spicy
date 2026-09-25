@@ -94,7 +94,9 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	const removeFromWatchList = useWatchListStore((s) => s.removeFromWatchList);
 	const addToTvWatchlist = useWatchListStore((s) => s.addToTvWatchlist);
 	const removeFromTvWatchList = useWatchListStore((s) => s.removeFromTvWatchList);
+	const retryFailedSync = useWatchListStore((s) => s.retryFailedSync);
 	const [isHeroVisible, setIsHeroVisible] = useState(true);
+	const [logoFailed, setLogoFailed] = useState(false);
 
 	const title = show.title || show.name || 'Untitled';
 	const releaseDate = show.first_air_date || show.release_date || null;
@@ -144,6 +146,11 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 		[prefersReducedMotion]
 	);
 
+	// A new show gets a fresh logo attempt after a previous one failed.
+	useEffect(() => {
+		setLogoFailed(false);
+	}, [logo]);
+
 	const handlePrimaryAction = useCallback(() => {
 		haptic('medium');
 		if (type === 'tv' && !activeEpisodeForShow) {
@@ -153,7 +160,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 		scrollToSection('media-player');
 	}, [activeEpisodeForShow, haptic, scrollToSection, type]);
 
-	const handleWatchlist = useCallback(() => {
+	const handleWatchlist = useCallback(async () => {
 		if (!show.id) return;
 		const watchlistItem = {
 			id: show.id,
@@ -164,13 +171,29 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 			overview: show.overview ?? null,
 			media_type: type,
 		};
-		haptic(isInWatchlist ? 'soft' : 'success');
-		if (type === 'movie') {
-			isInWatchlist ? removeFromWatchList(show.id) : addToWatchlist(watchlistItem);
+		const removing = isInWatchlist;
+		haptic(removing ? 'soft' : 'success');
+		const ok =
+			type === 'movie'
+				? removing
+					? await removeFromWatchList(show.id)
+					: await addToWatchlist(watchlistItem)
+				: removing
+					? await removeFromTvWatchList(show.id)
+					: await addToTvWatchlist(watchlistItem);
+		if (ok) {
+			toast(removing ? 'Removed from Watchlist' : 'Added to Watchlist');
 		} else {
-			isInWatchlist ? removeFromTvWatchList(show.id) : addToTvWatchlist(watchlistItem);
+			toast.error('Could not update Watchlist', {
+				description: 'Your change is saved on this device and will sync on retry.',
+				action: {
+					label: 'Retry',
+					onClick: () => {
+						void retryFailedSync();
+					},
+				},
+			});
 		}
-		toast(isInWatchlist ? 'Removed from Watchlist' : 'Added to Watchlist');
 	}, [
 		addToTvWatchlist,
 		addToWatchlist,
@@ -178,6 +201,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 		isInWatchlist,
 		removeFromTvWatchList,
 		removeFromWatchList,
+		retryFailedSync,
 		show,
 		type,
 	]);
@@ -445,20 +469,21 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							data-hero-title
 							className="flex flex-col items-start gap-2.5 md:gap-3 w-full"
 						>
-							{logo ? (
-								<img
-									src={tmdbImage(logo, 'w500')}
-									alt={title}
-									width={720}
-									height={360}
-									loading="eager"
-									fetchPriority="high"
-									className="h-auto w-[min(72vw,330px)] max-h-[120px] sm:w-[min(68vw,390px)] md:w-auto md:max-w-xl md:max-h-[160px] lg:max-h-[200px] object-contain object-left drop-shadow-[0_16px_48px_rgba(0,0,0,0.9)]"
-									onError={(e) => {
-										(e.currentTarget as HTMLImageElement).style.display =
-											'none';
-									}}
-								/>
+							{logo && !logoFailed ? (
+								<>
+									{/* Decorative logo: keep the page h1 in the accessibility tree. */}
+									<h1 className="sr-only">{title}</h1>
+									<img
+										src={tmdbImage(logo, 'w500')}
+										alt=""
+										width={720}
+										height={360}
+										loading="eager"
+										fetchPriority="high"
+										className="h-auto w-[min(72vw,330px)] max-h-[120px] sm:w-[min(68vw,390px)] md:w-auto md:max-w-xl md:max-h-[160px] lg:max-h-[200px] object-contain object-left drop-shadow-[0_16px_48px_rgba(0,0,0,0.9)]"
+										onError={() => setLogoFailed(true)}
+									/>
+								</>
 							) : (
 								<h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-bold text-white leading-[0.9] tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
 									{title}

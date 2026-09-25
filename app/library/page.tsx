@@ -22,6 +22,7 @@ import useTVShowStore from '@/store/recentsStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import { usePersonalizedGreeting } from '@/hooks/use-personalized-greeting';
 import { useAuthStore } from '@/store/authStore';
+import { useHasMounted } from '@/hooks/use-has-mounted';
 
 type TabValue = 'continue' | 'watchlist' | 'favorites';
 
@@ -42,6 +43,10 @@ function TabButton({
 }) {
 	return (
 		<button
+			type="button"
+			id={`library-tab-${value}`}
+			aria-controls="library-tabpanel"
+			tabIndex={active ? 0 : -1}
 			onClick={() => onClick(value)}
 			className={cn(
 				'relative flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3',
@@ -49,13 +54,13 @@ function TabButton({
 				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
 				active
 					? 'text-foreground'
-					: 'text-muted-foreground/60 hover:text-muted-foreground'
+					: 'text-muted-foreground hover:text-foreground'
 			)}
 			aria-selected={active}
 			role="tab"
 		>
 			{icon}
-			<span className="hidden sm:inline">{label}</span>
+			<span className="sr-only sm:not-sr-only">{label}</span>
 			{count > 0 && (
 				<span
 					className={cn(
@@ -63,7 +68,7 @@ function TabButton({
 						'min-w-[1.25rem] h-5 px-1 rounded-full text-[11px] font-semibold tabular-nums',
 						active
 							? 'bg-white/[0.10] text-foreground'
-							: 'bg-white/[0.06] text-muted-foreground/70'
+							: 'bg-white/[0.06] text-muted-foreground'
 					)}
 				>
 					{count > 99 ? '99+' : count}
@@ -79,18 +84,20 @@ function TabButton({
 export default function LibraryPage() {
 	const session = useAuthStore((state) => state.session);
 	const isPending = useAuthStore((state) => state.isLoading);
+	const isMounted = useHasMounted();
 	const watchlist = useWatchListStore((s) => s.watchlist);
 	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist);
 	const favoriteMovies = useFavoritesStore((s) => s.favoriteMovies);
 	const favoriteTV = useFavoritesStore((s) => s.favoriteTV);
 	const recentlyWatched = useTVShowStore((s) => s.recentlyWatched);
 	const { message: greetingMessage, isAuthenticated } = usePersonalizedGreeting();
-	const isSignedIn = Boolean(session?.user?.id);
+	const isSignedIn = isMounted && Boolean(session?.user?.id);
 
 	const [activeTab, setActiveTab] = React.useState<TabValue>('continue');
 
 	// Counts from the same stores the sub-components render from
 	const counts = React.useMemo(() => {
+		if (!isMounted) return { watchlist: 0, favorites: 0, recent: 0 };
 		const watchlistItems = (watchlist?.length || 0) + (tvwatchlist?.length || 0);
 		const favoritesItems = (favoriteMovies?.length || 0) + (favoriteTV?.length || 0);
 		const recentItems = recentlyWatched?.length || 0;
@@ -99,12 +106,12 @@ export default function LibraryPage() {
 			favorites: favoritesItems,
 			recent: recentItems,
 		};
-	}, [watchlist, tvwatchlist, favoriteMovies, favoriteTV, recentlyWatched]);
+	}, [isMounted, watchlist, tvwatchlist, favoriteMovies, favoriteTV, recentlyWatched]);
 
 	// Auto-switch to the first non-empty tab once on initial load only
 	const didAutoSwitch = React.useRef(false);
 	React.useEffect(() => {
-		if (didAutoSwitch.current || isPending) return;
+		if (didAutoSwitch.current || isPending || !isMounted) return;
 		if (counts.recent === 0 && activeTab === 'continue') {
 			if (counts.watchlist > 0) {
 				setActiveTab('watchlist');
@@ -119,7 +126,26 @@ export default function LibraryPage() {
 			didAutoSwitch.current = true;
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [counts.recent, counts.watchlist, counts.favorites, isPending]);
+	}, [counts.recent, counts.watchlist, counts.favorites, isPending, isMounted]);
+
+		const tabValues: TabValue[] = ['continue', 'watchlist', 'favorites'];
+	const handleTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+		if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+		event.preventDefault();
+		const current = tabValues.indexOf(activeTab);
+		let next = current;
+		if (event.key === 'ArrowLeft') {
+			next = (current - 1 + tabValues.length) % tabValues.length;
+		} else if (event.key === 'ArrowRight') {
+			next = (current + 1) % tabValues.length;
+		} else if (event.key === 'Home') {
+			next = 0;
+		} else if (event.key === 'End') {
+			next = tabValues.length - 1;
+		}
+		setActiveTab(tabValues[next]);
+		document.getElementById(`library-tab-${tabValues[next]}`)?.focus();
+	};
 
 	if (isPending) {
 		return (
@@ -135,11 +161,11 @@ export default function LibraryPage() {
 			<Container className="pt-8 pb-6 md:pt-12 md:pb-8">
 				<div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
 					<div className="max-w-2xl">
-						<div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-[0.2em]">
+						<div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
 							<Clapperboard className="h-3.5 w-3.5" />
 							<span>{isSignedIn ? 'Library · Synced' : 'Library · Local'}</span>
 						</div>
-						{isAuthenticated && greetingMessage ? (
+						{isMounted && isAuthenticated && greetingMessage ? (
 							<h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
 								{greetingMessage}
 							</h1>
@@ -171,7 +197,7 @@ export default function LibraryPage() {
 					)}
 
 					{isSignedIn && (
-						<div className="flex items-center gap-2 text-xs text-muted-foreground/60 shrink-0">
+						<div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
 							<Sparkles className="h-3.5 w-3.5" />
 							<span>Synced across devices</span>
 						</div>
@@ -182,7 +208,7 @@ export default function LibraryPage() {
 			{/* Tabs */}
 			<Container className="pb-10 md:pb-16">
 				<div className="border-b border-white/[0.06]">
-					<div className="flex items-center gap-1 -mb-px">
+					<div className="flex items-center gap-1 -mb-px" role="tablist" aria-label="Library sections" onKeyDown={handleTabKeyDown}>
 						<TabButton
 							active={activeTab === 'continue'}
 							value="continue"
@@ -211,7 +237,7 @@ export default function LibraryPage() {
 				</div>
 
 				{/* Tab Panels */}
-				<div className="pt-6 md:pt-8" role="tabpanel">
+				<div className="pt-6 md:pt-8" role="tabpanel" id="library-tabpanel" aria-labelledby={`library-tab-${activeTab}`}>
 					{activeTab === 'continue' && (
 						<section>
 							<LibraryContinueWatching />

@@ -21,60 +21,77 @@ function MoreDetailsContainerComponent({ type, similar, recommendations }: MoreD
 	const relatedPanelRef = useRef<HTMLDivElement>(null);
 	const recsPanelRef = useRef<HTMLDivElement>(null);
 
-	const handleTabChange = useCallback((val: 'related' | 'recommendations') => {
-		if (val === selected) return;
+	const handleTabChange = useCallback(
+		(val: 'related' | 'recommendations') => {
+			if (val === selected) return;
 
-		const outgoing = val === 'related' ? recsPanelRef.current : relatedPanelRef.current;
-		const incoming = val === 'related' ? relatedPanelRef.current : recsPanelRef.current;
+			const reduce =
+				typeof window !== 'undefined' &&
+				window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		if (outgoing && incoming) {
-			const tl = gsap.timeline();
-			tl.to(outgoing, {
-				opacity: 0,
-				y: -8,
-				duration: 0.25,
-				ease: 'power2.in',
-				onComplete: () => {
-					gsap.set(outgoing, { display: 'none' });
-					gsap.set(incoming, { display: 'block', opacity: 0, y: 12 });
-					gsap.to(incoming, {
-						opacity: 1,
-						y: 0,
-						duration: 0.35,
-						ease: 'power2.out',
-					});
-				},
-			});
-		}
+			const outgoing = val === 'related' ? recsPanelRef.current : relatedPanelRef.current;
+			const incoming = val === 'related' ? relatedPanelRef.current : recsPanelRef.current;
 
-		setSelected(val);
-	}, [selected]);
+			if (outgoing && incoming && !reduce) {
+				const tl = gsap.timeline();
+				tl.to(outgoing, {
+					opacity: 0,
+					y: -8,
+					duration: 0.2,
+					ease: 'power2.in',
+					onComplete: () => {
+						gsap.set(outgoing, { display: 'none' });
+						gsap.set(incoming, { display: 'block', opacity: 0, y: 12 });
+						gsap.to(incoming, {
+							opacity: 1,
+							y: 0,
+							duration: 0.24,
+							ease: 'power3.out',
+						});
+					},
+				});
+			}
+
+			setSelected(val);
+		},
+		[selected]
+	);
 
 	/* ── ScrollTrigger Entrance ── */
 	useEffect(() => {
 		if (!sectionRef.current) return;
 
-		const ctx = gsap.context(() => {
-			if (headerRef.current) {
-				gsap.fromTo(
-					headerRef.current,
-					{ y: 20, opacity: 0 },
-					{
-						y: 0,
-						opacity: 1,
-						duration: 0.7,
-						ease: 'power3.out',
-						scrollTrigger: {
-							trigger: headerRef.current,
-							start: 'top 88%',
-							toggleActions: 'play none none none',
-						},
-					}
-				);
-			}
-		}, sectionRef);
+		const mm = gsap.matchMedia(sectionRef.current);
 
-		return () => ctx.revert();
+		mm.add(
+			{
+				reduce: '(prefers-reduced-motion: reduce)',
+				motion: '(prefers-reduced-motion: no-preference)',
+			},
+			(context) => {
+				const reduce = context.conditions?.reduce === true;
+
+				if (headerRef.current) {
+					gsap.fromTo(
+						headerRef.current,
+						reduce ? { opacity: 0 } : { y: 20, opacity: 0 },
+						{
+							opacity: 1,
+							...(reduce ? {} : { y: 0 }),
+							duration: reduce ? 0.2 : 0.7,
+							ease: 'power3.out',
+							scrollTrigger: {
+								trigger: headerRef.current,
+								start: 'top 88%',
+								toggleActions: 'play none none none',
+							},
+						}
+					);
+				}
+			}
+		);
+
+		return () => mm.revert();
 	}, []);
 
 	if (!similar.length && !recommendations.length) return null;

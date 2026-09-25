@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import useTVShowStore from '@/store/recentsStore';
 import {
 	TrashIcon,
@@ -8,8 +8,11 @@ import {
 	CaretLeftIcon,
 	CaretRightIcon,
 } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { ContinueWatchingCard } from './continue-watching-card';
+import { DestructiveConfirm } from './destructive-confirm';
+import type { ContinueWatchingItem } from '@/lib/continue-watching';
 import {
 	Carousel,
 	CarouselContent,
@@ -21,10 +24,26 @@ import {
 export function LibraryContinueWatching() {
 	const hasMounted = useHasMounted();
 	const recentlyWatched = useTVShowStore((s) => s.recentlyWatched);
+	const [confirmOpen, setConfirmOpen] = useState(false);
 
-	function clearRecentlyWatched() {
-		const store = useTVShowStore.getState();
-		store.deleteRecentlyWatched();
+	async function clearRecentlyWatched() {
+		setConfirmOpen(false);
+		const snapshot: ContinueWatchingItem[] = [...recentlyWatched];
+		if (snapshot.length === 0) return;
+
+		const ok = await useTVShowStore.getState().deleteRecentlyWatched();
+		if (!ok) return;
+
+		toast('History cleared', {
+			description: 'Your continue watching history was removed.',
+			duration: 8000,
+			action: {
+				label: 'Undo',
+				onClick: () => {
+					void useTVShowStore.getState().restoreRecentlyWatched(snapshot);
+				},
+			},
+		});
 	}
 
 	const episodes = useMemo(() => {
@@ -56,13 +75,22 @@ export function LibraryContinueWatching() {
 			{/* Subtle clear action */}
 			<div className="flex items-center justify-end">
 				<button
-					onClick={clearRecentlyWatched}
+					onClick={() => setConfirmOpen(true)}
 					className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground/60 hover:text-red-400 transition-colors duration-200"
 				>
 					<TrashIcon size={13} />
 					<span className="hidden sm:inline">Clear History</span>
 				</button>
 			</div>
+
+			<DestructiveConfirm
+				open={confirmOpen}
+				title="Clear continue watching?"
+				description={`This removes all ${recentlyWatched.length} items from your history on this device and every signed-in device. You can undo right after.`}
+				confirmLabel="Clear all"
+				onConfirm={() => void clearRecentlyWatched()}
+				onCancel={() => setConfirmOpen(false)}
+			/>
 
 			{/* Carousel */}
 			<Carousel

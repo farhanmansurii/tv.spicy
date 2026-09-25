@@ -90,7 +90,7 @@ function MediaCardComponent({ show, isVertical = false, type, onClick, rank }: M
 					</h3>
 					<div className="mt-1 flex min-h-4 items-center gap-2 tabular-nums">
 						{year && (
-							<span className="text-xs text-white/38 md:text-[13px]">{year}</span>
+							<span className="text-xs text-white/55 md:text-[13px]">{year}</span>
 						)}
 						{show.vote_average > 0 && (
 							<span className="inline-flex items-center gap-1 text-xs font-semibold text-[#FFD60A] md:text-[13px]">

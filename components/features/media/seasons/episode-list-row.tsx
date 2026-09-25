@@ -95,7 +95,7 @@ function EpisodeListRowComponent({
 				<div
 					className={cn(
 						'hidden w-7 flex-shrink-0 select-none text-center text-sm font-bold leading-none tabular-nums transition-colors duration-300 md:block',
-						active ? 'text-[#0A84FF]' : 'text-white/25 group-hover:text-white/40'
+						active ? 'text-[#0A84FF]' : 'text-white/55 group-hover:text-white'
 					)}
 				>
 					{epNum}
@@ -176,7 +176,7 @@ function EpisodeListRowComponent({
 
 					{!isReleased && (
 						<div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-							<LockSimpleIcon size={12} className="text-white/30" weight="bold" />
+							<LockSimpleIcon size={12} className="text-white/50" weight="bold" />
 						</div>
 					)}
 
@@ -223,7 +223,7 @@ function EpisodeListRowComponent({
 					{/* Metadata row */}
 					<div className="flex flex-wrap items-center gap-x-2 gap-y-0">
 						{episode.runtime != null && episode.runtime > 0 && (
-							<span className="text-[10px] sm:text-[11px] text-white/30 tabular-nums">
+							<span className="text-[10px] sm:text-[11px] text-white/55 tabular-nums">
 								{episode.runtime}m
 							</span>
 						)}
@@ -237,19 +237,19 @@ function EpisodeListRowComponent({
 							</span>
 						)}
 						{airLabel && (
-							<span className="text-[10px] sm:text-[11px] text-white/20 tabular-nums">
+							<span className="text-[10px] sm:text-[11px] text-white/55 tabular-nums">
 								{airLabel}
 							</span>
 						)}
 						{!isReleased && (
-							<span className="text-[10px] font-medium text-white/15 uppercase tracking-wider">
+							<span className="text-[10px] font-medium text-white/55 uppercase tracking-wider">
 								Upcoming
 							</span>
 						)}
 					</div>
 
 					{episode.overview && (
-						<p className="line-clamp-1 text-[11px] leading-snug text-white/35 md:hidden">
+						<p className="line-clamp-1 text-[11px] leading-snug text-white/55 md:hidden">
 							{episode.overview}
 						</p>
 					)}

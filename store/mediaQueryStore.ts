@@ -1,6 +1,10 @@
 'use client';
 import { create } from 'zustand';
 
+// Must stay the exact complement of Tailwind's `md` breakpoint (`md:` applies at
+// width >= 768px) so JS and CSS switch at the same pixel. Update both together.
+const MOBILE_QUERY = '(max-width: 767.98px)';
+
 interface MediaQueryStore {
 	isMobile: boolean;
 	init: () => (() => void) | undefined;
@@ -11,14 +15,14 @@ export const useMediaQueryStore = create<MediaQueryStore>((set) => ({
 	init: () => {
 		if (typeof window === 'undefined') return;
 
+		const mq = window.matchMedia(MOBILE_QUERY);
+
 		const checkMedia = () => {
-			const mobile = window.matchMedia('(max-width: 768px)').matches;
-			set({ isMobile: mobile });
+			set({ isMobile: mq.matches });
 		};
 
 		checkMedia();
 
-		const mq = window.matchMedia('(max-width: 768px)');
 		mq.addEventListener('change', checkMedia);
 
 		return () => {

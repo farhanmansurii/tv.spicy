@@ -33,7 +33,8 @@ const mobileAction = cn(
 export function Header({ className }: HeaderProps) {
 	const [scrolled, setScrolled] = React.useState(false);
 	const pathname = usePathname();
-	const { toggleSidebar, openMobile } = useSidebar();
+	const { toggleSidebar, openMobile, open, isMobile } = useSidebar();
+	const sidebarOpen = isMobile ? openMobile : open;
 	const isPlayerSticky = useEpisodeStore((state) => state.isPlayerSticky);
 	const user = useAuthStore((state) => state.user);
 
@@ -93,7 +94,7 @@ export function Header({ className }: HeaderProps) {
 							<div className="relative h-8 w-8 flex-shrink-0 transition-transform duration-200 ease-out group-hover:scale-[1.03] group-active:scale-[0.97]">
 								<img
 									src="/logo.webp"
-									alt="Spicy TV"
+									alt=""
 									loading="eager"
 									fetchPriority="high"
 									className="h-full w-full object-contain"
@@ -209,12 +210,12 @@ export function Header({ className }: HeaderProps) {
 							<button
 								onClick={toggleSidebar}
 								className={mobileAction}
-								aria-label={openMobile ? 'Close menu' : 'Open menu'}
-								aria-expanded={openMobile}
+								aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
+								aria-expanded={sidebarOpen}
 							>
 								<div className="relative w-5 h-5 flex items-center justify-center">
 									<AnimatePresence mode="wait" initial={false}>
-										{openMobile ? (
+										{sidebarOpen ? (
 											<motion.svg
 												key="close"
 												viewBox="0 0 24 24"

@@ -56,75 +56,85 @@ function StorylineSectionComponent({ data, type, credits }: StorylineSectionProp
 	useEffect(() => {
 		if (!sectionRef.current) return;
 
-		const ctx = gsap.context(() => {
-			if (headerRef.current) {
-				gsap.fromTo(
-					headerRef.current,
-					{ y: 20, opacity: 0 },
-					{
-						y: 0,
-						opacity: 1,
-						duration: 0.7,
-						ease: 'power3.out',
-						scrollTrigger: {
-							trigger: headerRef.current,
-							start: 'top 88%',
-							toggleActions: 'play none none none',
-						},
-					}
-				);
-			}
+		const mm = gsap.matchMedia(sectionRef.current);
 
-			if (synopsisRef.current) {
-				gsap.fromTo(
-					synopsisRef.current,
-					{ y: 24, opacity: 0 },
-					{
-						y: 0,
-						opacity: 1,
-						duration: 0.8,
-						ease: 'power3.out',
-						scrollTrigger: {
-							trigger: synopsisRef.current,
-							start: 'top 88%',
-							toggleActions: 'play none none none',
-						},
-					}
-				);
-			}
+		mm.add(
+			{
+				reduce: '(prefers-reduced-motion: reduce)',
+				motion: '(prefers-reduced-motion: no-preference)',
+			},
+			(context) => {
+				const reduce = context.conditions?.reduce === true;
 
-			if (pillsRef.current) {
-				const pills = pillsRef.current.querySelectorAll('[data-pill]');
-				gsap.fromTo(
-					pills,
-					{ scale: 0.9, opacity: 0, y: 10 },
-					{
-						scale: 1,
-						opacity: 1,
-						y: 0,
-						duration: 0.5,
-						stagger: 0.04,
-						ease: 'back.out(1.4)',
-						scrollTrigger: {
-							trigger: pillsRef.current,
-							start: 'top 88%',
-							toggleActions: 'play none none none',
-						},
-					}
-				);
-			}
-		}, sectionRef);
+				if (headerRef.current) {
+					gsap.fromTo(
+						headerRef.current,
+						reduce ? { opacity: 0 } : { y: 20, opacity: 0 },
+						{
+							opacity: 1,
+							...(reduce ? {} : { y: 0 }),
+							duration: reduce ? 0.2 : 0.7,
+							ease: 'power3.out',
+							scrollTrigger: {
+								trigger: headerRef.current,
+								start: 'top 88%',
+								toggleActions: 'play none none none',
+							},
+						}
+					);
+				}
 
-		return () => ctx.revert();
+				if (synopsisRef.current) {
+					gsap.fromTo(
+						synopsisRef.current,
+						reduce ? { opacity: 0 } : { y: 24, opacity: 0 },
+						{
+							opacity: 1,
+							...(reduce ? {} : { y: 0 }),
+							duration: reduce ? 0.2 : 0.8,
+							ease: 'power3.out',
+							scrollTrigger: {
+								trigger: synopsisRef.current,
+								start: 'top 88%',
+								toggleActions: 'play none none none',
+							},
+						}
+					);
+				}
+
+				if (pillsRef.current) {
+					const pills = pillsRef.current.querySelectorAll('[data-pill]');
+					gsap.fromTo(
+						pills,
+						reduce ? { opacity: 0 } : { scale: 0.95, opacity: 0, y: 10 },
+						{
+							opacity: 1,
+							...(reduce ? {} : { scale: 1, y: 0 }),
+							duration: reduce ? 0.2 : 0.5,
+							stagger: reduce ? 0 : 0.04,
+							ease: reduce ? 'power3.out' : 'back.out(1.4)',
+							scrollTrigger: {
+								trigger: pillsRef.current,
+								start: 'top 88%',
+								toggleActions: 'play none none none',
+							},
+						}
+					);
+				}
+			}
+		);
+
+		return () => mm.revert();
 	}, []);
 
 	/* ── Smooth expand/collapse animation ── */
 	useEffect(() => {
 		if (!synopsisRef.current) return;
 		if (synopsis.length <= 180) return;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
 		gsap.to(synopsisRef.current, {
-			duration: 0.4,
+			duration: 0.28,
 			ease: 'power2.out',
 		});
 	}, [isExpanded, synopsis.length]);
