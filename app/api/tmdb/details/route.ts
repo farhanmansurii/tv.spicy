@@ -15,7 +15,9 @@ export async function GET(request: NextRequest) {
 	}
 
 	try {
-		const details = await fetchBasicDetailsTMDB(parsed.data.id, parsed.data.type);
+		const details = await fetchBasicDetailsTMDB(parsed.data.id, parsed.data.type, {
+			withCast: true,
+		});
 		// null means TMDB definitively does not know this id (stable 404).
 		return details
 			? NextResponse.json(details, { headers: cachedResponseHeaders() })

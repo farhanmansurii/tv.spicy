@@ -1,36 +1,114 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 export function HeroSkeleton() {
 	return (
-		<section className="relative w-full h-[76dvh] min-h-[560px] max-h-[780px] md:h-[78dvh] md:min-h-[620px] lg:h-[82dvh] bg-background overflow-hidden">
-			{/* Backdrop placeholder */}
-			<div className="absolute inset-0 bg-white/[0.03] animate-pulse" />
-			<div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 via-[20%] to-transparent" />
+		<section className="relative isolate flex min-h-screen items-end overflow-hidden px-gutter pt-28 pb-16 md:pt-32 md:pb-20 bg-background">
+			{/* Backdrop art skeleton */}
+			<div
+				className="absolute inset-0 -z-10 overflow-hidden bg-surface shadow-inset-line animate-pulse"
+				aria-hidden="true"
+			/>
 
-			{/* Content skeleton */}
-			<div className="absolute inset-0 z-10 flex flex-col justify-end">
-				<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-8 md:pb-12 lg:pb-14">
-					<div className="max-w-xl md:max-w-2xl">
-						{/* Meta chips */}
-						<div className="flex items-center gap-2 mb-4 md:mb-5">
-							<div className="h-3.5 w-16 rounded-full bg-white/10 animate-pulse" />
-							<div className="h-3.5 w-2 rounded-full bg-white/10 animate-pulse" />
-							<div className="h-3.5 w-20 rounded-full bg-white/10 animate-pulse" />
-						</div>
-						{/* Title */}
-						<div className="h-10 md:h-14 w-3/4 rounded-lg bg-white/10 animate-pulse mb-3" />
-						<div className="h-10 md:h-14 w-1/2 rounded-lg bg-white/10 animate-pulse mb-6" />
-						{/* Actions */}
-						<div className="flex items-center gap-3 md:gap-4">
-							<div className="h-11 md:h-12 w-28 rounded-full bg-white/15 animate-pulse" />
-							<div className="h-11 md:h-12 w-32 rounded-full bg-white/10 animate-pulse" />
-							<div className="h-11 md:h-12 w-11 md:w-12 rounded-full bg-white/10 animate-pulse" />
-						</div>
-					</div>
+			{/* Shade overlay */}
+			<div
+				className="pointer-events-none absolute inset-0 -z-5 bg-gradient-to-t from-background via-background/60 to-transparent"
+				aria-hidden="true"
+			/>
+
+			{/* Back link placeholder */}
+			<div className="absolute top-20 left-4 sm:left-6 lg:left-8 z-10 h-5 w-28 rounded-full bg-surface animate-pulse" />
+
+			{/* Content column */}
+			<div className="relative z-10 w-full max-w-3xl">
+				{/* Overline placeholder */}
+				<div className="flex items-center gap-3 mb-4">
+					<span className="inline-block w-7 h-0.5 mr-1 bg-brand/50 shrink-0" />
+					<div className="h-3.5 w-16 rounded-full bg-surface animate-pulse" />
+					<div className="h-3.5 w-12 rounded-full bg-surface animate-pulse" />
+					<div className="h-3.5 w-20 rounded-full bg-surface animate-pulse" />
+				</div>
+
+				{/* Anton title placeholder */}
+				<div className="h-16 sm:h-20 md:h-24 w-4/5 rounded-sm bg-surface animate-pulse mb-3" />
+				<div className="h-10 sm:h-12 md:h-14 w-1/2 rounded-sm bg-surface animate-pulse mb-6" />
+
+				{/* Rating placeholder */}
+				<div className="flex items-baseline gap-2.5 mb-4">
+					<div className="h-7 w-12 rounded-sm bg-surface animate-pulse" />
+					<div className="h-4 w-32 rounded-sm bg-surface animate-pulse" />
+				</div>
+
+				{/* Overview placeholder */}
+				<div className="flex flex-col gap-2 mb-6 max-w-2xl">
+					<div className="h-4 w-full rounded-sm bg-surface animate-pulse" />
+					<div className="h-4 w-5/6 rounded-sm bg-surface animate-pulse" />
+					<div className="h-4 w-2/3 rounded-sm bg-surface animate-pulse" />
+				</div>
+
+				{/* Actions placeholder */}
+				<div className="flex items-center gap-3 mt-6">
+					<div className="h-12 w-36 rounded-full bg-brand/30 animate-pulse" />
+					<div className="h-12 w-32 rounded-full bg-surface animate-pulse" />
+					<div className="h-12 w-28 rounded-full bg-surface animate-pulse" />
 				</div>
 			</div>
 		</section>
 	);
+}
+
+export function EditorialHeroSkeleton() {
+	return <HeroSkeleton />;
+}
+
+export function AboutSkeleton({ type = 'tv' }: { type?: 'movie' | 'tv' }) {
+	const sectionIndex = type === 'tv' ? '02' : '01';
+
+	return (
+		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
+			{/* Section Heading */}
+			<div className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7">
+				<span
+					className="pb-1 font-mono text-caption uppercase text-brand tracking-label tabular-nums"
+					aria-hidden="true"
+				>
+					{sectionIndex}
+				</span>
+				<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
+					About
+				</h2>
+				<span className="ml-auto pb-1 text-right font-mono text-caption uppercase text-dim tracking-label tabular-nums">
+					The people / the picture
+				</span>
+			</div>
+
+			{/* Tabs skeleton */}
+			<div className="flex gap-6 mb-7 border-b border-line pb-3">
+				<div className="h-4 w-14 rounded-full bg-surface animate-pulse" />
+				<div className="h-4 w-14 rounded-full bg-surface animate-pulse" />
+				<div className="h-4 w-16 rounded-full bg-surface animate-pulse" />
+			</div>
+
+			{/* Portraits grid */}
+			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-x-4 gap-y-6">
+				{Array.from({ length: 8 }).map((_, i) => (
+					<div key={i} className="flex flex-col pb-4 border-b border-line">
+						<div className="aspect-2/3 w-24 mb-3 rounded-sm bg-surface shadow-inset-line animate-pulse" />
+						<div className="h-4 w-20 rounded bg-surface animate-pulse mb-1.5" />
+						<div className="h-3 w-16 rounded bg-surface animate-pulse" />
+					</div>
+				))}
+			</div>
+		</section>
+	);
+}
+
+export function CastCrewSkeleton() {
+	return <AboutSkeleton />;
+}
+
+export function StorylineSkeleton() {
+	return <AboutSkeleton />;
 }
 
 export function ShowContainerSkeleton({
@@ -41,71 +119,79 @@ export function ShowContainerSkeleton({
 }) {
 	const isTV = type === 'tv';
 	return (
-		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
-				{/* Header */}
-				<div className="mb-5 md:mb-6">
-					<div className="h-6 w-24 rounded-lg bg-white/10 animate-pulse mb-2" />
-					<div className="h-4 w-48 rounded-md bg-white/[0.06] animate-pulse" />
-				</div>
+		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
+			{isTV ? (
+				<>
+					{/* Episodes Section Heading */}
+					<div className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7">
+						<span
+							className="pb-1 font-mono text-caption uppercase text-brand tracking-label tabular-nums"
+							aria-hidden="true"
+						>
+							01
+						</span>
+						<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
+							Episodes
+						</h2>
+					</div>
 
-				{/* Season pills */}
-				{isTV && (
-					<div className="flex items-center gap-2 mb-5 md:mb-6">
-						{Array.from({ length: 3 }).map((_, i) => (
+					{/* Season tabs skeleton */}
+					<div className="flex gap-4 mb-7 border-b border-line pb-3">
+						<div className="h-8 w-24 rounded-full bg-surface animate-pulse" />
+						<div className="h-8 w-24 rounded-full bg-surface animate-pulse" />
+					</div>
+
+					{/* Episode rows skeleton */}
+					<div className="flex flex-col">
+						{Array.from({ length: 4 }).map((_, i) => (
 							<div
 								key={i}
-								className="h-9 w-24 rounded-full bg-white/[0.06] animate-pulse flex-shrink-0"
-							/>
+								className="flex items-center gap-6 py-4 border-b border-line"
+							>
+								<div className="h-8 w-8 rounded-sm bg-surface animate-pulse shrink-0" />
+								<div className="aspect-video w-36 sm:w-44 rounded-sm bg-surface animate-pulse shrink-0" />
+								<div className="flex-1 flex flex-col gap-2">
+									<div className="h-4 w-1/3 rounded bg-surface animate-pulse" />
+									<div className="h-3 w-2/3 rounded bg-surface animate-pulse" />
+								</div>
+							</div>
 						))}
 					</div>
-				)}
-
-				{/* Desktop: horizontal card skeletons */}
-				<div className="hidden md:flex gap-4 overflow-hidden">
-					{Array.from({ length: 4 }).map((_, i) => (
-						<div key={i} className="flex-shrink-0 w-[300px] lg:w-[340px]">
-							<div className="aspect-[16/10] rounded-2xl bg-white/[0.06] animate-pulse" />
-							<div className="h-3.5 w-16 rounded-md bg-white/[0.06] animate-pulse mt-2.5" />
-							<div className="h-4 w-3/4 rounded-md bg-white/[0.06] animate-pulse mt-1.5" />
-						</div>
-					))}
+				</>
+			) : (
+				<div className="w-full py-8">
+					<div className="aspect-video w-full rounded-sm bg-surface shadow-inset-line animate-pulse" />
 				</div>
-
-				{/* Mobile: list skeletons */}
-				<div className="flex md:hidden flex-col gap-2">
-					{Array.from({ length: 4 }).map((_, i) => (
-						<div key={i} className="flex items-center gap-3 p-2 rounded-2xl">
-							<div className="aspect-video w-28 rounded-xl bg-white/[0.06] animate-pulse flex-shrink-0" />
-							<div className="flex-1 space-y-2">
-								<div className="h-3 w-12 bg-white/[0.04] rounded" />
-								<div className="h-4 w-3/4 bg-white/[0.06] rounded" />
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
+			)}
 		</section>
 	);
 }
 
-export function CastCrewSkeleton() {
+export function RelatedSkeleton() {
 	return (
-		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between mb-5 md:mb-6">
-					<div className="h-6 w-32 rounded-lg bg-white/10 animate-pulse" />
-					<div className="h-5 w-20 rounded-md bg-white/10 animate-pulse" />
-				</div>
-				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-3 gap-y-6 md:gap-x-4 md:gap-y-8">
-					{Array.from({ length: 8 }).map((_, i) => (
-						<div key={i}>
-							<div className="aspect-[2/3] rounded-2xl bg-white/[0.06] animate-pulse mb-2.5 md:mb-3" />
-							<div className="h-3.5 w-20 rounded-md bg-white/[0.06] animate-pulse mb-1.5" />
-							<div className="h-3 w-16 rounded-md bg-white/[0.04] animate-pulse" />
-						</div>
-					))}
-				</div>
+		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
+			{/* Section Heading */}
+			<div className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7">
+				<span
+					className="pb-1 font-mono text-caption uppercase text-brand tracking-label tabular-nums"
+					aria-hidden="true"
+				>
+					03
+				</span>
+				<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
+					More like this
+				</h2>
+			</div>
+
+			{/* Cards scroller skeleton */}
+			<div className="flex gap-4 overflow-hidden pb-4">
+				{Array.from({ length: 6 }).map((_, i) => (
+					<div key={i} className="w-36 sm:w-44 md:w-48 shrink-0">
+						<div className="aspect-2/3 rounded-sm bg-surface animate-pulse mb-2.5 shadow-inset-line" />
+						<div className="h-4 w-3/4 rounded bg-surface animate-pulse mb-1.5" />
+						<div className="h-3 w-1/2 rounded bg-surface animate-pulse" />
+					</div>
+				))}
 			</div>
 		</section>
 	);
@@ -113,75 +199,19 @@ export function CastCrewSkeleton() {
 
 export function VideoSkeleton() {
 	return (
-		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between mb-5 md:mb-6">
-					<div className="h-6 w-40 rounded-lg bg-white/10 animate-pulse" />
-					<div className="h-5 w-16 rounded-md bg-white/10 animate-pulse" />
-				</div>
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-					{Array.from({ length: 3 }).map((_, i) => (
-						<div key={i}>
-							<div className="aspect-video rounded-2xl bg-white/[0.06] animate-pulse" />
-							<div className="h-3.5 w-24 rounded-md bg-white/[0.06] animate-pulse mt-2" />
-						</div>
-					))}
-				</div>
+		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
+			<div className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7">
+				<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
+					Videos
+				</h2>
 			</div>
-		</section>
-	);
-}
-
-export function RelatedSkeleton() {
-	return (
-		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between mb-5 md:mb-6">
-					<div className="h-6 w-36 rounded-lg bg-white/10 animate-pulse" />
-					<div className="flex items-center gap-1 bg-white/[0.06] rounded-full p-1">
-						<div className="h-7 w-20 rounded-full bg-white/10 animate-pulse" />
-						<div className="h-7 w-20 rounded-full bg-white/10 animate-pulse" />
-					</div>
-				</div>
-				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-					{Array.from({ length: 12 }).map((_, i) => (
-						<div key={i}>
-							<div className="aspect-[2/3] rounded-2xl bg-white/[0.06] animate-pulse mb-2" />
-							<div className="h-3.5 w-20 rounded-md bg-white/[0.06] animate-pulse mb-1" />
-							<div className="h-3 w-14 rounded-md bg-white/[0.04] animate-pulse" />
-						</div>
-					))}
-				</div>
-			</div>
-		</section>
-	);
-}
-
-export function StorylineSkeleton() {
-	return (
-		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between mb-5 md:mb-6">
-					<div className="h-6 w-24 rounded-lg bg-white/10 animate-pulse" />
-					<div className="h-8 w-20 rounded-full bg-white/10 animate-pulse" />
-				</div>
-				<div className="space-y-2 max-w-3xl">
-					{Array.from({ length: 4 }).map((_, i) => (
-						<div
-							key={i}
-							className="h-4 rounded-md bg-white/[0.06] animate-pulse"
-							style={{ width: i === 3 ? '60%' : '100%' }}
-						/>
-					))}
-				</div>
-				<div className="flex flex-wrap gap-2 mt-5 md:mt-6">
-					{Array.from({ length: 5 }).map((_, i) => (
-						<div
-							key={i}
-							className="h-7 w-24 rounded-full bg-white/[0.06] animate-pulse"
-						/>
-					))}
-				</div>
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+				{Array.from({ length: 3 }).map((_, i) => (
+					<div
+						key={i}
+						className="aspect-video rounded-sm bg-surface animate-pulse shadow-inset-line"
+					/>
+				))}
 			</div>
 		</section>
 	);

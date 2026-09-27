@@ -1,280 +1,68 @@
 'use client';
 
-import { memo, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { CaretDownIcon, CheckIcon, XIcon } from '@phosphor-icons/react';
+import React, { memo, useMemo } from 'react';
+import {
+	EditorialTabs,
+	EditorialTabList,
+	EditorialTabTrigger,
+} from '@/components/ui/editorial-tabs';
 import { cn } from '@/lib/utils';
 
-interface Season {
+export interface Season {
 	season_number: number;
 	name?: string;
 	episode_count?: number;
 }
 
-interface SeasonSelectorProps {
+export interface SeasonSelectorProps {
 	seasons: Season[];
 	activeSeason: number;
 	onSeasonChange: (seasonNumber: number) => void;
+	className?: string;
 }
 
-function seasonLabel(season: Season) {
-	return season.name && !/^Season \d+$/i.test(season.name)
-		? season.name
-		: `Season ${season.season_number}`;
-}
+function SeasonSelectorComponent({
+	seasons,
+	activeSeason,
+	onSeasonChange,
+	className,
+}: SeasonSelectorProps) {
+	const orderedSeasons = useMemo(() => {
+		const regular = seasons
+			.filter((s) => s.season_number > 0)
+			.sort((a, b) => a.season_number - b.season_number);
+		const specials = seasons.filter((s) => s.season_number === 0);
+		return [...regular, ...specials];
+	}, [seasons]);
 
-function SeasonSelectorComponent({ seasons, activeSeason, onSeasonChange }: SeasonSelectorProps) {
-	const [isOpen, setIsOpen] = useState(false);
-	const reducedMotion = useReducedMotion();
-	const active = seasons.find((season) => season.season_number === activeSeason) ?? seasons[0];
-	const useSheet = seasons.length >= 5;
-	const triggerRef = useRef<HTMLButtonElement>(null);
-	const dialogRef = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		if (!isOpen) return;
-		const trigger = triggerRef.current;
-		const dialog = dialogRef.current;
-		dialog?.focus();
-
-		const focusables = () =>
-			dialog
-				? Array.from(
-						dialog.querySelectorAll<HTMLElement>(
-							'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-						)
-					)
-				: [];
-
-		const trapFocus = (event: KeyboardEvent) => {
-			if (event.key !== 'Tab') return;
-			const items = focusables();
-			if (!items.length) {
-				event.preventDefault();
-				return;
-			}
-			const first = items[0];
-			const last = items[items.length - 1];
-			const current = document.activeElement;
-			const isInside = current instanceof HTMLElement && dialog!.contains(current);
-
-			if (event.shiftKey) {
-				if (!isInside || current === first) {
-					event.preventDefault();
-					last.focus();
-				}
-			} else if (!isInside || current === last) {
-				event.preventDefault();
-				first.focus();
-			}
-		};
-
-		document.addEventListener('keydown', trapFocus, true);
-
-		return () => {
-			document.removeEventListener('keydown', trapFocus, true);
-			if (trigger && document.contains(trigger)) trigger.focus();
-		};
-	}, [isOpen]);
-
-	useEffect(() => {
-		if (!isOpen) return;
-		const scrollY = window.scrollY;
-		const previousOverflow = document.body.style.overflow;
-		const previousPosition = document.body.style.position;
-		const previousTop = document.body.style.top;
-		const previousWidth = document.body.style.width;
-		const previousHtmlOverflow = document.documentElement.style.overflow;
-		const closeOnEscape = (event: KeyboardEvent) => {
-			if (event.key === 'Escape') setIsOpen(false);
-		};
-
-		document.documentElement.style.overflow = 'hidden';
-		document.body.style.overflow = 'hidden';
-		document.body.style.position = 'fixed';
-		document.body.style.top = `-${scrollY}px`;
-		document.body.style.width = '100%';
-		window.addEventListener('keydown', closeOnEscape);
-
-		return () => {
-			document.documentElement.style.overflow = previousHtmlOverflow;
-			document.body.style.overflow = previousOverflow;
-			document.body.style.position = previousPosition;
-			document.body.style.top = previousTop;
-			document.body.style.width = previousWidth;
-			window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
-			window.removeEventListener('keydown', closeOnEscape);
-		};
-	}, [isOpen]);
-
-	if (!active) return null;
-
-	if (!useSheet) {
-		return (
-			<div className="w-full pb-1">
-				<div
-					role="tablist"
-					aria-label="Seasons"
-					className="grid w-full gap-1 rounded-2xl bg-white/[0.035] p-1 ring-1 ring-inset ring-white/[0.065]"
-					style={{ gridTemplateColumns: `repeat(${seasons.length}, minmax(0, 1fr))` }}
-				>
-					{seasons.map((season) => {
-						const isActive = season.season_number === activeSeason;
-						return (
-							<button
-								key={season.season_number}
-								type="button"
-								role="tab"
-								aria-selected={isActive}
-								onClick={() => onSeasonChange(season.season_number)}
-								className={cn(
-									'isolate relative flex h-11 min-w-0 items-center justify-center rounded-xl px-2 text-[13px] font-semibold tracking-[-0.01em] outline-none transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70 motion-reduce:active:scale-100',
-									isActive ? 'text-white' : 'text-white/42 hover:text-white/75'
-								)}
-							>
-								{isActive && (
-									<motion.span
-										layoutId="season-selection"
-										className="absolute inset-0 -z-10 rounded-xl bg-white/[0.115] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_5px_18px_rgba(0,0,0,0.18)] ring-1 ring-inset ring-white/[0.10]"
-										transition={
-											reducedMotion
-												? { duration: 0 }
-												: { type: 'spring', bounce: 0, duration: 0.32 }
-										}
-									/>
-								)}
-								<span className="relative z-10">Season {season.season_number}</span>
-							</button>
-						);
-					})}
-				</div>
-			</div>
-		);
-	}
-
-	const sheet = (
-		<AnimatePresence>
-			{isOpen && (
-				<div
-					className="fixed inset-0 z-[80] overflow-hidden overscroll-none"
-					role="presentation"
-				>
-					<motion.button
-						type="button"
-						aria-label="Close season selector"
-						className="absolute inset-0 h-full w-full bg-black/60 backdrop-blur-[2px]"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						onClick={() => setIsOpen(false)}
-					/>
-					<motion.div
-						ref={dialogRef}
-						role="dialog"
-						aria-modal="true"
-						aria-labelledby="season-sheet-title"
-						data-season-sheet
-						tabIndex={-1}
-						initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
-						transition={{ type: 'spring', bounce: 0, duration: 0.38 }}
-						className="absolute inset-x-0 bottom-0 flex max-h-[78dvh] flex-col overflow-hidden overscroll-none rounded-t-[28px] border-t border-white/12 bg-zinc-950/88 shadow-[0_-24px_80px_rgba(0,0,0,0.65)] backdrop-blur-3xl focus:outline-none md:inset-x-auto md:bottom-8 md:left-1/2 md:ml-[-15rem] md:w-[30rem] md:rounded-[28px] md:border"
-					>
-						<div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-white/20" />
-						<div className="flex items-center justify-between px-5 pb-3 pt-4">
-							<div>
-								<h3
-									id="season-sheet-title"
-									className="text-xl font-bold tracking-[-0.025em] text-white"
-								>
-									Choose a Season
-								</h3>
-								<p className="mt-0.5 text-sm text-white/45">
-									{seasons.length} seasons available
-								</p>
-							</div>
-							<button
-								type="button"
-								onClick={() => setIsOpen(false)}
-								aria-label="Close"
-								className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white active:scale-[0.94]"
-							>
-								<XIcon size={18} weight="bold" />
-							</button>
-						</div>
-						<div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-3 pb-[calc(1rem+env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch]">
-							{seasons.map((season) => {
-								const isActive = season.season_number === activeSeason;
-								return (
-									<button
-										key={season.season_number}
-										type="button"
-										aria-current={isActive ? 'true' : undefined}
-										onClick={() => {
-											onSeasonChange(season.season_number);
-											setIsOpen(false);
-										}}
-										className={cn(
-											'flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left outline-none active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70',
-											isActive
-												? 'bg-white text-zinc-950'
-												: 'text-white hover:bg-white/[0.06]'
-										)}
-									>
-										<span className="min-w-0 flex-1">
-											<span className="block truncate text-[15px] font-semibold tracking-[-0.01em]">
-												{seasonLabel(season)}
-											</span>
-											{season.episode_count != null && (
-												<span
-													className={cn(
-														'block text-xs',
-														isActive ? 'text-black/60' : 'text-white/55'
-													)}
-												>
-													{season.episode_count} episodes
-												</span>
-											)}
-										</span>
-										{isActive && <CheckIcon size={19} weight="bold" />}
-									</button>
-								);
-							})}
-						</div>
-					</motion.div>
-				</div>
-			)}
-		</AnimatePresence>
-	);
+	if (orderedSeasons.length <= 1) return null;
 
 	return (
-		<>
-			<button
-				type="button"
-				ref={triggerRef}
-				onClick={() => setIsOpen(true)}
-				aria-haspopup="dialog"
-				aria-expanded={isOpen}
-				className="flex min-h-12 w-full items-center gap-3 rounded-2xl bg-white/[0.055] px-4 text-left ring-1 ring-inset ring-white/[0.08] active:scale-[0.985] md:w-auto"
+		<div className={cn('w-full', className)}>
+			<EditorialTabs
+				value={String(activeSeason)}
+				onValueChange={(val) => onSeasonChange(Number(val))}
+				ariaLabel="Seasons"
 			>
-				<span className="min-w-0 flex-1">
-					<span className="block truncate text-sm font-semibold tracking-[-0.01em] text-white">
-						{seasonLabel(active)}
-					</span>
-					{active.episode_count != null && (
-						<span className="block text-[11px] text-white/40">
-							{active.episode_count} episodes
-						</span>
-					)}
-				</span>
-				<CaretDownIcon size={16} weight="bold" className="text-white/55" />
-			</button>
-			{typeof document !== 'undefined' ? createPortal(sheet, document.body) : null}
-		</>
+				<EditorialTabList ariaLabel="Seasons">
+					{orderedSeasons.map((season) => {
+						const label =
+							season.season_number === 0
+								? 'SPECIALS'
+								: `SEASON ${String(season.season_number).padStart(2, '0')}`;
+						return (
+							<EditorialTabTrigger
+								key={season.season_number}
+								value={String(season.season_number)}
+							>
+								{label}
+							</EditorialTabTrigger>
+						);
+					})}
+				</EditorialTabList>
+			</EditorialTabs>
+		</div>
 	);
 }
 
 export const SeasonSelector = memo(SeasonSelectorComponent);
-SeasonSelectorComponent.displayName = 'SeasonSelector';

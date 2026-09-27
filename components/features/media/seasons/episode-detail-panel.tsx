@@ -48,17 +48,17 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 
 	return (
 		<div className="flex min-w-0 flex-col gap-5">
-			<header className="space-y-2">
-				<p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0A84FF]">
+			<header className="flex flex-col gap-2">
+				<p className="font-mono text-xs font-medium uppercase tracking-meta text-brand">
 					Season {episode.season_number} · Episode {episode.episode_number}
 				</p>
-				<h3 className="text-xl font-bold leading-tight tracking-[-0.025em] text-white md:text-2xl">
+				<h3 className="font-display text-4xl uppercase leading-none text-foreground md:text-5xl">
 					{episode.name || `Episode ${episode.episode_number}`}
 				</h3>
 				{(hasRating || hasRuntime || airLabel) && (
-					<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-white/48">
+					<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-xs uppercase tracking-meta text-muted-foreground">
 						{hasRating && (
-							<span className="inline-flex items-center gap-1 font-semibold text-[#FFD60A] tabular-nums">
+							<span className="inline-flex items-center gap-1 font-medium text-brand tabular-nums">
 								<StarIcon size={12} weight="fill" />
 								{episode.vote_average?.toFixed(1)}
 							</span>
@@ -78,7 +78,7 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 			</header>
 
 			{episode.overview && (
-				<p className="max-w-3xl text-[13.5px] leading-[1.65] text-white/62 md:text-sm">
+				<p className="max-w-3xl text-base leading-relaxed text-foreground/85 md:text-lg">
 					{episode.overview}
 				</p>
 			)}
@@ -89,10 +89,10 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 						<div className="flex min-h-16 items-center gap-3 rounded-2xl bg-white/[0.035] px-3.5 ring-1 ring-inset ring-white/[0.06]">
 							<FilmSlateIcon size={17} className="shrink-0 text-white/30" />
 							<div className="min-w-0">
-								<p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+								<p className="font-mono text-xs font-medium uppercase tracking-meta text-muted-foreground">
 									Director
 								</p>
-								<p className="truncate text-[13px] font-semibold text-white/80">
+								<p className="truncate text-sm font-semibold text-foreground">
 									{director.name}
 								</p>
 							</div>
@@ -102,10 +102,10 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 						<div className="flex min-h-16 items-center gap-3 rounded-2xl bg-white/[0.035] px-3.5 ring-1 ring-inset ring-white/[0.06]">
 							<PencilSimpleIcon size={17} className="shrink-0 text-white/30" />
 							<div className="min-w-0">
-								<p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+								<p className="font-mono text-xs font-medium uppercase tracking-meta text-muted-foreground">
 									Written by
 								</p>
-								<p className="line-clamp-2 text-[13px] font-semibold leading-snug text-white/80">
+								<p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
 									{writerNames}
 								</p>
 							</div>
@@ -120,18 +120,18 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 						<UserIcon size={14} className="text-white/30" />
 						<h4
 							id="guest-stars-heading"
-							className="text-sm font-semibold tracking-[-0.01em] text-white"
+							className="font-display text-2xl uppercase leading-none text-foreground"
 						>
 							Guest Cast
 						</h4>
 					</div>
-					<div className="-mx-1 flex gap-2.5 overflow-x-auto px-1 pb-1 scrollbar-none">
+					<div className="-mx-1 flex gap-2.5 overflow-x-auto px-1 pb-1 ">
 						{guests.map((guest, index) => (
 							<div
 								key={`${guest.name || 'guest'}-${index}`}
-								className="w-28 shrink-0 rounded-2xl bg-white/[0.035] p-2 ring-1 ring-inset ring-white/[0.06]"
+								className="w-28 shrink-0 rounded-sm border border-border bg-card p-2"
 							>
-								<div className="aspect-[4/3] overflow-hidden rounded-xl bg-white/[0.04]">
+								<div className="aspect-4/3 overflow-hidden rounded-xl bg-white/[0.04]">
 									{guest.profile_path ? (
 										<img
 											src={tmdbImage(guest.profile_path, 'w185')}
@@ -152,7 +152,7 @@ function EpisodeDetailPanelComponent({ episode }: EpisodeDetailPanelProps) {
 									{guest.name}
 								</p>
 								{guest.character && (
-									<p className="truncate text-[10px] text-white/35">
+									<p className="truncate text-xs text-white/35">
 										{guest.character}
 									</p>
 								)}

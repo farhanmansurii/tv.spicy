@@ -7,9 +7,8 @@ import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
 import { unstable_noStore } from 'next/cache';
 import { Metadata } from 'next';
 import React, { Suspense } from 'react';
-import HeroCarousel, {
-	type HeroCarouselProps,
-} from '@/components/features/media/carousel/hero-carousel';
+import { EditorialHero } from '@/components/features/home/editorial-hero';
+import type { HeroCarouselProps } from '@/components/features/media/carousel/hero-carousel';
 import type { Genre } from '@/lib/types/tmdb';
 import type { Show } from '@/lib/types';
 import ProgressiveGenreRows from '@/components/features/media/genre/progressive-genre-rows';
@@ -33,9 +32,6 @@ export const metadata: Metadata = {
 };
 
 const WatchList = dynamic(() => import('@/components/features/watchlist/watch-list'));
-const GenreGrid = dynamic(() => import('@/components/features/media/genre/genre-grid'), {
-	loading: () => <div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />,
-});
 
 export default async function Page() {
 	let genres: Genre[] = [];
@@ -70,16 +66,19 @@ export default async function Page() {
 	}
 
 	return (
-		<>
-			<HeroCarousel shows={heroShows as unknown as HeroCarouselProps['shows']} type="movie" />
+		<div className="min-h-screen bg-background text-foreground pb-20">
+			<div className="-mt-16 lg:mt-0">
+				<EditorialHero shows={heroShows as unknown as HeroCarouselProps['shows']} type="movie" />
+			</div>
 
-			<Container>
-				<div className="flex flex-col space-y-4 md:space-y-6">
-					<Suspense fallback={<MediaLoader withHeader className="min-h-[280px]" />}>
+			<Container className="relative z-10 w-full pt-7 md:pt-12">
+				<div className="flex flex-col">
+					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
 						<WatchList type="movie" />
 					</Suspense>
 
 					<DataRow
+						rowNumber={1}
 						endpoint="trending/movie/week"
 						text="Top Movies"
 						showRank={false}
@@ -87,23 +86,16 @@ export default async function Page() {
 					/>
 
 					<DataRow
+						rowNumber={2}
 						endpoint="movie/top_rated"
 						text="Top Rated Movies"
 						showRank={true}
 						type="movie"
 					/>
 
-					<ProgressiveGenreRows genres={genres} type="movie" />
+					<ProgressiveGenreRows genres={genres} type="movie" startRowNumber={3} />
 				</div>
-
-				{genres.length > 0 && (
-					<Suspense
-						fallback={<div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />}
-					>
-						<GenreGrid genres={genres} type="movie" />
-					</Suspense>
-				)}
 			</Container>
-		</>
+		</div>
 	);
 }

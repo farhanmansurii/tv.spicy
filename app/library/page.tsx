@@ -2,16 +2,14 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import Container from '@/components/shared/containers/container';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
 	Bookmark,
 	Heart,
 	History,
 	LogIn,
-	Clapperboard,
-	Sparkles,
 } from 'lucide-react';
 
 import { LibraryWatchlist } from '@/components/features/watchlist/library-watchlist';
@@ -49,12 +47,12 @@ function TabButton({
 			tabIndex={active ? 0 : -1}
 			onClick={() => onClick(value)}
 			className={cn(
-				'relative flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3',
-				'text-sm font-medium transition-colors duration-200',
-				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+				'relative flex min-h-11 items-center gap-2 px-3 py-2.5 md:px-4 md:py-3',
+				'text-ui font-semibold transition-colors duration-(--duration-ui) active:scale-97 motion-reduce:active:scale-100',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 				active
 					? 'text-foreground'
-					: 'text-muted-foreground hover:text-foreground'
+					: 'text-dim can-hover:text-foreground'
 			)}
 			aria-selected={active}
 			role="tab"
@@ -64,18 +62,16 @@ function TabButton({
 			{count > 0 && (
 				<span
 					className={cn(
-						'inline-flex items-center justify-center',
-						'min-w-[1.25rem] h-5 px-1 rounded-full text-[11px] font-semibold tabular-nums',
-						active
-							? 'bg-white/[0.10] text-foreground'
-							: 'bg-white/[0.06] text-muted-foreground'
+						'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1',
+						'font-mono text-micro font-medium tabular-nums',
+						active ? 'bg-brand text-brand-foreground' : 'bg-muted text-muted-foreground'
 					)}
 				>
 					{count > 99 ? '99+' : count}
 				</span>
 			)}
 			{active && (
-				<span className="absolute bottom-0 left-2 right-2 h-[2px] bg-foreground rounded-full" />
+				<span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-brand" />
 			)}
 		</button>
 	);
@@ -112,23 +108,16 @@ export default function LibraryPage() {
 	const didAutoSwitch = React.useRef(false);
 	React.useEffect(() => {
 		if (didAutoSwitch.current || isPending || !isMounted) return;
-		if (counts.recent === 0 && activeTab === 'continue') {
-			if (counts.watchlist > 0) {
-				setActiveTab('watchlist');
-				didAutoSwitch.current = true;
-			} else if (counts.favorites > 0) {
-				setActiveTab('favorites');
-				didAutoSwitch.current = true;
-			} else {
-				didAutoSwitch.current = true;
-			}
-		} else {
-			didAutoSwitch.current = true;
+		didAutoSwitch.current = true;
+		if (counts.recent > 0) return;
+		if (counts.watchlist > 0) {
+			setActiveTab('watchlist');
+		} else if (counts.favorites > 0) {
+			setActiveTab('favorites');
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [counts.recent, counts.watchlist, counts.favorites, isPending, isMounted]);
 
-		const tabValues: TabValue[] = ['continue', 'watchlist', 'favorites'];
+	const tabValues: TabValue[] = ['continue', 'watchlist', 'favorites'];
 	const handleTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
 		if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
 		event.preventDefault();
@@ -149,8 +138,33 @@ export default function LibraryPage() {
 
 	if (isPending) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
+			<div role="status" aria-label="Loading your library" className="min-h-screen mt-20 bg-background">
+				<div className="w-full px-gutter pt-8 pb-6 md:pt-12 md:pb-8">
+					<div className="flex flex-col gap-4">
+						<Skeleton className="h-3 w-36 rounded-sm" />
+						<Skeleton className="h-12 w-64 rounded-sm md:h-16 md:w-96" />
+						<Skeleton className="h-5 w-full max-w-md rounded-sm" />
+					</div>
+				</div>
+				<div className="w-full px-gutter pb-10 md:pb-16">
+					<div className="flex gap-2 border-b border-border pb-2">
+						<Skeleton className="h-11 w-28 rounded-full" />
+						<Skeleton className="h-11 w-28 rounded-full" />
+						<Skeleton className="h-11 w-28 rounded-full" />
+					</div>
+					<div className="flex gap-4 overflow-hidden pt-6 md:pt-8">
+						{Array.from({ length: 3 }, (_, index) => (
+							<div key={index} className="flex w-9/10 shrink-0 items-center gap-3 rounded-sm border border-border bg-card p-3 sm:w-7/12 lg:w-5/12">
+								<Skeleton className="aspect-video w-32 shrink-0 rounded-sm sm:w-36" />
+								<div className="flex min-w-0 flex-1 flex-col gap-2">
+									<Skeleton className="h-4 w-3/4 rounded-sm" />
+									<Skeleton className="h-3 w-1/2 rounded-sm" />
+									<Skeleton className="h-3 w-1/3 rounded-sm" />
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
 			</div>
 		);
 	}
@@ -158,36 +172,31 @@ export default function LibraryPage() {
 	return (
 		<div className="min-h-screen mt-20 bg-background">
 			{/* Header */}
-			<Container className="pt-8 pb-6 md:pt-12 md:pb-8">
+			<div className="w-full px-gutter pt-8 pb-6 md:pt-12 md:pb-8">
 				<div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
 					<div className="max-w-2xl">
-						<div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
-							<Clapperboard className="h-3.5 w-3.5" />
-							<span>{isSignedIn ? 'Library · Synced' : 'Library · Local'}</span>
-						</div>
+						<p className="font-mono text-caption uppercase tracking-label text-dim">
+							{isSignedIn ? 'Library · Synced' : 'Library · On this device'}
+						</p>
 						{isMounted && isAuthenticated && greetingMessage ? (
-							<h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+							<h1 className="mt-3 font-display text-display-2 text-balance uppercase leading-none text-foreground">
 								{greetingMessage}
 							</h1>
 						) : (
-							<h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+							<h1 className="mt-3 font-display text-display-2 text-balance uppercase leading-none text-foreground">
 								Your Library
 							</h1>
 						)}
-						<p className="mt-3 text-sm md:text-base text-muted-foreground max-w-xl leading-relaxed">
-							Everything you saved in one place.
+						<p className="mt-3 max-w-xl text-lede text-dim">
 							{isSignedIn
-								? ' Synced across your devices.'
-								: ' Stored on this device.'}
+								? 'Everything you saved, on every device you sign in on.'
+								: 'Everything you saved, kept on this device.'}
 						</p>
 					</div>
 
 					{!isSignedIn && (
-						<div className="flex items-center gap-3 shrink-0">
-							<Button
-								asChild
-								className="gap-2 rounded-lg h-10 px-4"
-							>
+						<div className="flex shrink-0 items-center gap-3">
+							<Button asChild size="sm" className="min-h-11">
 								<Link href="/auth/signin?callbackUrl=/library" prefetch={false}>
 									<LogIn className="h-4 w-4" />
 									Sign in to sync
@@ -195,19 +204,12 @@ export default function LibraryPage() {
 							</Button>
 						</div>
 					)}
-
-					{isSignedIn && (
-						<div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
-							<Sparkles className="h-3.5 w-3.5" />
-							<span>Synced across devices</span>
-						</div>
-					)}
 				</div>
-			</Container>
+			</div>
 
 			{/* Tabs */}
-			<Container className="pb-10 md:pb-16">
-				<div className="border-b border-white/[0.06]">
+			<div className="w-full px-gutter pb-10 md:pb-16">
+				<div className="border-b border-border">
 					<div className="flex items-center gap-1 -mb-px" role="tablist" aria-label="Library sections" onKeyDown={handleTabKeyDown}>
 						<TabButton
 							active={activeTab === 'continue'}
@@ -256,7 +258,7 @@ export default function LibraryPage() {
 						</section>
 					)}
 				</div>
-			</Container>
+			</div>
 		</div>
 	);
 }

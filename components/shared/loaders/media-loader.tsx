@@ -32,8 +32,8 @@ export function MediaLoader({
 		<div className={cn('w-full py-3 md:py-5 group/row overflow-visible', className)}>
 			{withHeader && (
 				<div className="flex items-end justify-between px-1 mb-3 md:mb-4">
-					<Skeleton className="h-4 w-40 md:h-5 md:w-56 rounded-ui" />
-					{withHeaderAction && <Skeleton className="h-7 w-20 rounded-lg" />}
+					<Skeleton className="h-4 w-40 md:h-5 md:w-56 rounded-sm" />
+					{withHeaderAction && <Skeleton className="h-7 w-20 rounded-sm" />}
 				</div>
 			)}
 
@@ -49,12 +49,12 @@ export function MediaLoader({
 					{Array.from({ length: resolvedCount }).map((_, index) => (
 						<div
 							key={index}
-							className="flex flex-col gap-3 w-full transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+							className="flex flex-col gap-3 w-full"
 						>
 							<Skeleton
 								className={cn(
-									'relative w-full overflow-hidden rounded-lg md:rounded-xl',
-									visualIsVertical ? 'aspect-[2/3]' : 'aspect-video'
+									'relative w-full overflow-hidden rounded-sm',
+									visualIsVertical ? 'aspect-2/3' : 'aspect-video'
 								)}
 							/>
 							<div className="flex flex-col gap-0.5 px-1">
@@ -84,21 +84,21 @@ export function MediaLoader({
 								className={cn(
 									'pl-3 md:pl-5 select-none',
 									ranked
-										? 'basis-[40%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
+										? 'basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
 										: effectiveIsVertical
-											? 'basis-[40%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
-											: 'basis-[70%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4'
+											? 'basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6'
+											: 'basis-7/10 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4'
 								)}
 							>
 								<div className="flex w-full flex-col gap-3">
 									<div className="relative">
 										{ranked && (
-											<Skeleton className="absolute left-2 top-2 z-10 h-8 w-10 rounded-full opacity-70" />
+											<Skeleton className="absolute left-2 top-2 z-10 h-8 w-10 rounded-full" />
 										)}
 										<Skeleton
 											className={cn(
-												'relative w-full overflow-hidden rounded-lg md:rounded-xl',
-												visualIsVertical ? 'aspect-[2/3]' : 'aspect-video'
+												'relative w-full overflow-hidden rounded-sm',
+												visualIsVertical ? 'aspect-2/3' : 'aspect-video'
 											)}
 										/>
 									</div>

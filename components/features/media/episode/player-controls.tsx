@@ -1,7 +1,12 @@
 'use client';
 
 import React from 'react';
-import { GearIcon, CaretRightIcon, XIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
+import {
+	CaretLeftIcon,
+	CaretRightIcon,
+	XIcon,
+	ArrowCounterClockwiseIcon,
+} from '@phosphor-icons/react';
 import {
 	Select,
 	SelectContent,
@@ -12,14 +17,12 @@ import {
 import { cn } from '@/lib/utils';
 import type { ProviderSummary } from './providers';
 
-/* ── Shared glass surface styles (matches header exactly) ── */
-const glassPill =
-	'rounded-full bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_4px_20px_rgba(0,0,0,0.35)]';
-
-const glassOrb =
-	'rounded-full bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_4px_20px_rgba(0,0,0,0.35)]';
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+const glassOrb = 'rounded-full border border-border-strong bg-card shadow-glass';
+
+const orbPress =
+	'transition-[background-color,color,transform] duration-(--duration-ui) motion-reduce:transition-none can-hover:bg-muted active:scale-97 motion-reduce:active:scale-100';
 
 /** Format raw seconds into H:MM:SS or M:SS */
 function formatTimestamp(seconds: number): string {
@@ -42,25 +45,54 @@ interface ResumeChipProps {
 function ResumeChip({ seconds, onResume }: ResumeChipProps) {
 	return (
 		<button
+			type="button"
 			onClick={onResume}
 			className={cn(
-				glassPill,
-				'inline-flex h-9 items-center gap-1.5 px-3',
-				'text-[11px] font-medium text-white/70',
-				'transition-[background-color,color,transform] duration-200',
-				'hover:bg-white/[0.10] hover:text-white active:scale-[0.98]',
-				'md:h-10 md:px-3.5 md:text-sm group/resume'
+				glassOrb,
+				orbPress,
+				'inline-flex min-h-11 items-center gap-1.5 px-3',
+				'font-mono text-caption font-medium tracking-meta text-muted-foreground',
+				'can-hover:text-foreground',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
 			)}
 			title={`Resume from ${formatTimestamp(seconds)}`}
 		>
-			<ArrowCounterClockwiseIcon
-				size={13}
-				className="text-white/40 group-hover/resume:text-white/70 transition-colors duration-200"
-			/>
+			<ArrowCounterClockwiseIcon size={13} aria-hidden="true" />
 			<span className="hidden sm:inline">Resume</span>
-			<span className="font-mono tracking-tight text-white/60 group-hover/resume:text-white transition-colors duration-200">
-				{formatTimestamp(seconds)}
-			</span>
+			<span className="tracking-meta text-muted-foreground">{formatTimestamp(seconds)}</span>
+		</button>
+	);
+}
+
+// ── EpisodePill ───────────────────────────────────────────────────────────────
+
+function EpisodePill({
+	label,
+	onClick,
+	disabled,
+	children,
+}: {
+	label: string;
+	onClick?: (() => void) | undefined;
+	disabled?: boolean;
+	children: React.ReactNode;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			disabled={disabled}
+			aria-label={label}
+			title={label}
+			className={cn(
+				glassOrb,
+				orbPress,
+				'flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-0 text-foreground md:w-auto md:px-4',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+				'disabled:pointer-events-none disabled:opacity-40'
+			)}
+		>
+			{children}
 		</button>
 	);
 }
@@ -79,6 +111,9 @@ interface PlayerControlsProps {
 	hasResumed: boolean;
 	/** Only rendered for TV shows */
 	onNextEpisode?: (() => void) | undefined;
+	onPreviousEpisode?: (() => void) | undefined;
+	/** False on the first episode of a season, where there is nothing to go back to. */
+	canGoPrevious?: boolean;
 	mediaType: string;
 	isSticky?: boolean;
 	onCloseSticky?: (() => void) | undefined;
@@ -92,103 +127,80 @@ export function PlayerControls({
 	onResume,
 	hasResumed,
 	onNextEpisode,
+	onPreviousEpisode,
+	canGoPrevious = false,
 	mediaType,
 	isSticky,
 	onCloseSticky,
 }: PlayerControlsProps) {
 	const showResumeChip = !hasResumed && savedPositionSeconds > 30;
+	const isSeries = mediaType === 'tv';
+	const showNavigation = isSeries && (onNextEpisode || onPreviousEpisode);
 
 	return (
 		<div className="flex flex-wrap items-center justify-between gap-2">
-			{/* Left side: provider selector + resume chip */}
-			<div className="flex min-w-0 flex-1 items-center gap-2">
-				<div className="flex min-w-0 items-center gap-2">
-					<span className="hidden text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40 sm:inline">
-						Source
-					</span>
-					<Select value={selectedProvider} onValueChange={onProviderChange}>
-						<SelectTrigger
-							className={cn(
-								glassPill,
-								'h-9 w-fit min-w-0 max-w-[52vw]',
-								'flex items-center gap-2 px-3',
-								'border-0 focus:ring-0 focus:ring-offset-0',
-								'text-xs text-white/80',
-								'transition-[background-color,color,transform] duration-200',
-								'hover:bg-white/[0.10] active:scale-[0.98]',
-								'md:h-10 md:max-w-none md:px-4'
-							)}
-						>
-							<GearIcon size={16} className="shrink-0 text-white/40" />
-							<SelectValue className="truncate text-xs font-medium text-white/80 md:text-sm" />
-						</SelectTrigger>
-						<SelectContent className="max-h-[300px] rounded-xl bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] p-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
-							{providers.map((provider) => (
-								<SelectItem
-									key={provider.id}
-									value={provider.id}
-									className="text-xs rounded-lg focus:bg-white/[0.08] focus:text-white hover:bg-white/[0.06] hover:text-white/90"
-								>
-									{provider.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-
+			{/* Left side: resume and episode navigation */}
+			<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
 				{showResumeChip && (
 					<ResumeChip seconds={savedPositionSeconds} onResume={onResume} />
 				)}
+
+				{showNavigation && (
+					<>
+						<EpisodePill
+							label="Previous episode"
+							onClick={onPreviousEpisode}
+							disabled={!canGoPrevious}
+						>
+							<CaretLeftIcon size={18} aria-hidden="true" />
+							<span className="hidden text-ui font-semibold md:inline">Previous</span>
+						</EpisodePill>
+						<EpisodePill label="Next episode" onClick={onNextEpisode}>
+							<span className="hidden text-ui font-semibold md:inline">Next</span>
+							<CaretRightIcon size={18} aria-hidden="true" />
+						</EpisodePill>
+					</>
+				)}
 			</div>
 
-			{/* Right side: next episode + close sticky — TV only */}
-			{onNextEpisode && mediaType === 'tv' && (
-				<div className="flex shrink-0 items-center gap-2">
-					{/* Mobile: circle orb | Desktop: full pill with text */}
-					<button
-						onClick={onNextEpisode}
-						className={cn(
-							/* Mobile: circle orb */
-							'h-9 w-9 flex items-center justify-center',
-							/* Desktop: pill with text */
-							'md:h-10 md:w-auto md:px-4 md:gap-1.5',
-							'text-white/80',
-							'transition-[background-color,transform] duration-200',
-							'hover:bg-white/[0.10] hover:text-white active:scale-[0.98]',
-							'group/next',
-							/* Glass */
-							glassOrb,
-							'md:' + glassPill
-						)}
-						aria-label="Next episode"
-						title="Next episode"
-					>
-						<span className="hidden md:inline text-xs font-semibold">Next</span>
-						<CaretRightIcon
-							size={18}
-							className="transition-transform group-hover/next:translate-x-0.5"
-						/>
-					</button>
-
-					{isSticky && onCloseSticky && (
-						<button
-							onClick={onCloseSticky}
-							className={cn(
-								glassOrb,
-								'h-9 w-9 flex items-center justify-center',
-								'text-white/70',
-								'transition-[background-color,color,transform] duration-200',
-								'hover:bg-white/[0.10] hover:text-white active:scale-[0.98]',
-								'md:h-10 md:w-10'
-							)}
-							aria-label="Hide sticky player"
-							title="Hide sticky player"
+			{/* Right side: the server menu and the sticky close */}
+			<div className="flex shrink-0 items-center gap-2">
+				<Select value={selectedProvider} onValueChange={onProviderChange}>
+					<SelectTrigger surface="field" aria-label="Streaming server">
+						<span
+							aria-hidden="true"
+							className="font-mono text-caption uppercase tracking-label text-muted-foreground"
 						>
-							<XIcon size={16} />
-						</button>
-					)}
-				</div>
-			)}
+							Server
+						</span>
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent surface="glass" align="end">
+						{providers.map((provider) => (
+							<SelectItem key={provider.id} value={provider.id} surface="glass">
+								{provider.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+
+				{isSticky && onCloseSticky && (
+					<button
+						type="button"
+						onClick={onCloseSticky}
+						aria-label="Hide sticky player"
+						title="Hide sticky player"
+						className={cn(
+							glassOrb,
+							orbPress,
+							'flex size-11 items-center justify-center text-muted-foreground can-hover:text-foreground',
+							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+						)}
+					>
+						<XIcon size={16} aria-hidden="true" />
+					</button>
+				)}
+			</div>
 		</div>
 	);
 }

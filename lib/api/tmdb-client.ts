@@ -4,6 +4,7 @@
  */
 
 import type {
+	TMDBCastMember,
 	TMDBCreditsResponse,
 	TMDBEpisodeDetails,
 	TMDBImagesResponse,
@@ -49,12 +50,16 @@ const MAX_RETRIES = 2; // retries after the initial attempt
 const RETRY_DELAY = 1000; // base backoff delay, doubles per attempt
 const MAX_RETRY_DELAY = 10_000; // never wait longer than this, even for Retry-After
 
+const BASIC_DETAILS_CAST_LIMIT = 20;
+
 // ============================================================================
 // Types
 // ============================================================================
 
 export type MediaType = 'movie' | 'tv';
 export type TimeWindow = 'day' | 'week';
+export type TMDBBasicDetails = TMDBMovie & TMDBTVShow;
+export type TMDBBasicDetailsWithCast = TMDBBasicDetails & { cast: TMDBCastMember[] };
 
 interface FetchOptions {
 	revalidate?: number;
@@ -91,6 +96,22 @@ export class TMDBRequestError extends Error {
 // ============================================================================
 // Utility Functions
 // ============================================================================
+
+/**
+ * Billing order first, capped to the card-sized limit, with only the fields the UI renders.
+ */
+function toBilledCast(cast: TMDBCastMember[]): TMDBCastMember[] {
+	return [...cast]
+		.sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER))
+		.slice(0, BASIC_DETAILS_CAST_LIMIT)
+		.map(({ id, name, character, order, profile_path }) => ({
+			id,
+			name,
+			character,
+			order,
+			profile_path,
+		}));
+}
 
 /**
  * Delay execution for specified milliseconds
@@ -273,7 +294,9 @@ async function tmdbFetch<T>(endpoint: string, options: FetchOptions = {}): Promi
 	}
 
 	// If we get here, all retries failed
-	throw lastError || new Error(`Failed to fetch ${cleanEndpoint} after ${maxRetries + 1} attempts`);
+	throw (
+		lastError || new Error(`Failed to fetch ${cleanEndpoint} after ${maxRetries + 1} attempts`)
+	);
 }
 
 // ============================================================================
@@ -370,15 +393,38 @@ export async function fetchDetailsTMDB(
  * A missing TMDB record resolves to null (a stable not-found result); any
  * operational failure throws so callers can answer 502/503 instead of
  * misreporting an outage as a cacheable 404.
+ *
+ * `withCast` appends credits to the same request and returns the billed cast
+ * only; the crew list is dropped to keep the payload card-sized.
  */
 export async function fetchBasicDetailsTMDB(
 	id: string,
 	type: MediaType
-): Promise<(TMDBMovie & TMDBTVShow) | null> {
+): Promise<TMDBBasicDetails | null>;
+export async function fetchBasicDetailsTMDB(
+	id: string,
+	type: MediaType,
+	options: { withCast: true }
+): Promise<TMDBBasicDetailsWithCast | null>;
+export async function fetchBasicDetailsTMDB(
+	id: string,
+	type: MediaType,
+	options: { withCast?: boolean } = {}
+): Promise<TMDBBasicDetails | TMDBBasicDetailsWithCast | null> {
+	const append = options.withCast ? '&append_to_response=credits' : '';
 	try {
-		return await tmdbFetch<TMDBMovie & TMDBTVShow>(`/${type}/${id}?language=en-US`, {
-			revalidate: CACHE_DURATIONS.LONG,
-		});
+		const details = await tmdbFetch<TMDBBasicDetails & { credits?: TMDBCreditsResponse }>(
+			`/${type}/${id}?language=en-US${append}`,
+			{ revalidate: CACHE_DURATIONS.LONG }
+		);
+		if (!options.withCast) return details;
+
+		const { credits, ...rest } = details;
+		const cast = credits?.cast;
+		if (!Array.isArray(cast)) {
+			throw new TMDBRequestError('TMDB returned a malformed credits response', 502);
+		}
+		return { ...rest, cast: toBilledCast(cast) };
 	} catch (error) {
 		if (error instanceof TMDBRequestError && error.status === 404) {
 			return null;

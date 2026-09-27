@@ -28,7 +28,7 @@ The app is mostly server-rendered at route boundaries, then hands interaction-he
 
 ## App Shell
 
-`app/layout.tsx` is the root shell. It installs the Geist font variable, global metadata, TMDB preconnect hints, dark theme defaults, auth provider, TanStack Query provider, sidebar provider, accessibility provider, and toaster.
+`app/layout.tsx` is the root shell. It installs font variables (`Inter_Tight`, `JetBrains_Mono`, `Anton`), global metadata, TMDB preconnect hints, dark theme defaults, auth provider, TanStack Query provider, sidebar provider, accessibility provider, and toaster.
 
 `app/template.tsx` wraps route transitions. `app/loading.tsx`, `app/error.tsx`, `app/not-found.tsx`, and `app/global-error.tsx` handle global loading/error surfaces.
 
@@ -44,12 +44,11 @@ The visible shell is implemented below the provider layer:
 
 Defined in `app/page.tsx`.
 
-The home page fetches `trending/tv/week`, `trending/movie/week`, and `tv/popular` on the server. It enhances the hero candidates with `fetchHeroItemsWithDetails`, renders `HeroCarousel`, then renders prefetched and lazy rows through `DataRow`.
+The home page fetches `trending/tv/week`, `trending/movie/week`, and `tv/popular` on the server. It enhances the hero candidates with `fetchHeroItemsWithDetails`, renders the editorial hero (`EditorialHero`), then renders prefetched and lazy rows through `DataRow` with `variant="editorial"` and a `rowNumber`. The editorial direction (Home A) is home-only: `/movie` and `/tv` keep `HeroCarousel` and the default row and card variants.
 
 Primary components:
 
-- `components/features/media/carousel/hero-carousel.tsx`
-- `components/features/media/hero-banner.tsx`
+- `components/features/home/editorial-hero.tsx` and `editorial-hero-rail.tsx`
 - `components/features/media/row/data-row.tsx`
 - `components/features/media/row/media-row.tsx`
 - `components/features/home/home-personalized-rows.tsx`
@@ -259,15 +258,43 @@ Client-side row loading is split:
 
 ## Visual System
 
-The dominant UI language is cinematic OLED:
+The UI language strictly follows the Home A reference system (`reference-system.md`):
 
-- Canvas: black/dark zinc surfaces.
-- Text: white primary, zinc/white alpha secondary.
-- Accent: mostly white and Apple-like blue for focus/progress states.
-- Radius: larger editorial radii for heroes/cards, smaller UI radii for controls.
-- Typography: Geist root font with occasional Apple system font styling in feature components.
-- Layout: max-width containers, horizontal carousels, poster/backdrop cards, large cinematic heroes.
-- Motion: GSAP for hero/card/details reveals, Framer Motion for episode UI, Embla for carousels.
+### Reference Token Source of Truth (Dark Theme)
+
+| Token | Reference Value | Role |
+|---|---|---|
+| `--canvas` / `--background` | `#0c0b0a` | Deep warm paper-black canvas (also painted on `html`) |
+| `--band` | `#141210` | Alternate section background, raised bars, muted surfaces |
+| `--surface` / `--card` / `--popover` | `#1c1916` | Card background, floating surfaces |
+| `--raised` | `#2a221d` | Card placeholder gradient top, hover surface |
+| `--line` / `--border` | `rgba(244,239,232,0.12)` | Subtle structural lines, card inset outline, dividers |
+| `--line-strong` / `--border-strong` / `--input` | `rgba(244,239,232,0.24)` | High-emphasis borders, ghost button borders, inputs |
+| `--text` / `--foreground` / `--primary` | `#f4efe8` | Warm text, headlines, titles, primary display copy |
+| `--primary-foreground` | `#1a0703` | Ink text on primary/accent |
+| `--soft` | `#ddd6cd` | Long-form reading / lede prose |
+| `--dim` / `--muted-foreground` | `#b3aaa1` | Dim labels, captions, metadata |
+| `--faint` | `rgba(244,239,232,0.4)` | Disabled elements only |
+| `--brand` / `--ring` | `#ff4d2e` | The only accent: primary action, current item, focus ring, numbers in captions, stars, progress |
+| `--brand-hover` | `#ff6a4f` | Accent hover state |
+| `--brand-foreground` | `#1a0703` | Text on brand accent |
+| `--destructive` | `#e5484d` | Errors and destructive actions only (always with icon and label) |
+| `--gutter` | `clamp(16px, 4vw, 56px)` | Fluid horizontal page padding (`.px-gutter`) |
+| `--radius` | `6px` | Media and card radius (`rounded-sm` = 6px) |
+| `--duration-image` | `250ms` | Image hover zoom transition |
+| `--duration-fade` | `280ms` | Image fade-in transition |
+| `--gradient-band` | `radial-gradient(120% 90% at 70% 30%, #3b1c12 0%, #1a110d 45%, var(--background) 80%)` | Hero and detail background band |
+| `--gradient-card-placeholder` | `linear-gradient(160deg, #2a221d 0%, #15120f 100%)` | Card image placeholder background |
+| `::selection` | `bg: var(--brand), color: var(--brand-foreground)` | App-wide selection style |
+| `:focus-visible` | `outline: 2px solid var(--brand); outline-offset: 3px;` | Keyboard focus ring |
+| `grain` | `body::after` fractal noise svg, opacity 0.05, fixed, z-90 | Global textured grain overlay |
+
+- Canvas: warm paper-black (`#0c0b0a`).
+- Text: warm off-white (`#f4efe8`), dim (`#b3aaa1`), soft (`#ddd6cd`).
+- Accent: vibrant red-orange (`#ff4d2e`, `--brand`). Rating yellow is retired; stars use `--brand`.
+- Destructive: crimson (`#e5484d`), distinct from brand accent.
+- Typography: Anton display font (uppercase), Inter Tight body font, JetBrains Mono captions.
+- Motion: fast instant touch (150ms), reveal cascade (450ms, ease-entrance), 250ms image zoom, 280ms image fade.
 
 Important local primitives:
 
@@ -347,104 +374,183 @@ When adding a dynamic route:
 
 This section is enforceable. Every screen MUST comply with these exact values. Deviations require explicit design review.
 
+### Token Source
+
+`app/globals.css` is the only source of design tokens. The project has no JavaScript Tailwind config; Tailwind v4 reads tokens from CSS:
+
+- `:root` and `.dark` hold the raw colour variables that switch per theme.
+- `@theme inline` maps those variables to utilities (`bg-background`, `text-muted-foreground`, `bg-brand`), and holds the font stacks and the radius scale, which derive from other variables.
+- `@theme` holds static tokens: the type-scale overrides, tracking, shadows, easing, durations and the rail animation.
+
+Add a token by declaring it in one of these blocks; never add raw values to components when a token exists. Tailwind only emits a static `@theme` variable once a class or `var()` uses it.
+
 ### Canvas / Surface Colors
 
-All colors reference CSS custom properties defined in `app/globals.css`. The app runs in dark mode only; the `:root` light theme is inherited from the shadcn base and MUST NOT be used for product surfaces.
+The app runs in dark mode; the `:root` light values are the shadcn base and MUST NOT be used for product surfaces.
 
-| Token | CSS Variable | Dark Value | Usage |
-|-------|--------------|------------|-------|
-| Background | `--background` | `#000000` | Page canvas, hero backdrop, empty states |
-| Foreground | `--foreground` | `#ffffff` | Primary text, icons on dark |
-| Card | `--card` | `#0a0a0a` | Card shells, popovers, elevated surfaces |
-| Card Foreground | `--card-foreground` | `#ffffff` | Text on card surfaces |
-| Muted | `--muted` | `#1c1c1e` | Secondary surfaces, input backgrounds, skeletons |
-| Muted Foreground | `--muted-foreground` | `#8e8e93` | Secondary text, placeholders, disabled states |
-| Border | `--border` | `rgba(255,255,255,0.1)` | Dividers, card rings, subtle outlines |
-| Input | `--input` | `rgba(255,255,255,0.15)` | Form field backgrounds |
-| Ring | `--ring` | `#0a84ff` | Focus rings, active states, progress bars |
-| Destructive | `--destructive` | `#ff453a` | Errors, remove actions |
+| Token | Utility | Dark Value | Usage |
+|-------|---------|------------|-------|
+| `--canvas` / `--background` | `bg-canvas`, `bg-background` | `#0c0b0a` | Deep warm paper-black canvas, empty states; painted on `html` |
+| `--band` / `--muted` | `bg-band`, `bg-muted` | `#141210` | Raised bands, alternate section background, secondary surfaces |
+| `--surface` / `--card` / `--popover` | `bg-surface`, `bg-card`, `bg-popover` | `#1c1916` | Card shells, menus, floating surfaces |
+| `--raised` | `bg-raised` | `#2a221d` | Card placeholder gradient top, hover surface |
+| `--line` / `--border` | `border-line`, `border-border` | `rgba(244,239,232,0.12)` | Hairlines, card inset outline, dividers |
+| `--line-strong` / `--border-strong` / `--input` | `border-line-strong`, `border-border-strong`, `border-input` | `rgba(244,239,232,0.24)` | High-emphasis borders, ghost button borders, form field borders |
+| `--text` / `--foreground` | `text-text`, `text-foreground` | `#f4efe8` | Primary warm text, headlines, titles, icons on dark |
+| `--soft` | `text-soft` | `#ddd6cd` | Long-form reading / lede copy (13.7:1 contrast) |
+| `--dim` / `--muted-foreground` | `text-dim`, `text-muted-foreground` | `#b3aaa1` | Dim text, metadata, captions, secondary copy (8.6:1 contrast) |
+| `--faint` | `text-faint` | `rgba(244,239,232,0.4)` | Disabled elements only |
+| `--brand` / `--ring` | `bg-brand`, `text-brand`, `ring-ring` | `#ff4d2e` | The only accent: primary action, current item, focus ring, numbers in captions, stars, progress |
+| `--brand-hover` | `bg-brand-hover` | `#ff6a4f` | Brand CTA hover and press |
+| `--brand-foreground` | `text-brand-foreground` | `#1a0703` | Ink text on brand fills |
+| `--destructive` | `bg-destructive` | `#e5484d` | Errors and destructive actions only; always with icon and label |
 
-**Sources:** `app/globals.css` lines 113–158; `@theme inline` block lines 160–235.
+The brand colour is the same in both themes, so it lives only in `:root`. Destructive is `#e5484d` (shifted from old `#ff453a` to avoid colliding with brand accent). Separate rating yellow (`#ffd60a`) is retired; stars use `--brand` (`#ff4d2e`).
 
-### Text Hierarchy
+### Typography
 
-The typography scale is defined in `app/globals.css` as CSS variables and mapped through `tailwind.config.ts` under `theme.extend.fontSize`. NEVER use ad-hoc font sizes.
+Three families, all loaded in `app/layout.tsx`:
 
-| Level | Tailwind Class | CSS Variable | Value | Weight | Tracking | Usage |
-|-------|----------------|--------------|-------|--------|----------|-------|
-| Display | `text-5xl` to `text-7xl` | `--text-5xl`–`--text-7xl` | `3rem`–`4.5rem` | `font-bold` | `tracking-tight` | Hero titles (clamp override allowed) |
-| Headline | `text-3xl` to `text-4xl` | `--text-3xl`–`--text-4xl` | `1.875rem`–`2.25rem` | `font-bold` | `tracking-tight` | Section titles, browse headers |
-| Title | `text-xl` to `text-2xl` | `--text-xl`–`--text-2xl` | `1.25rem`–`1.5rem` | `font-semibold` | `tracking-normal` | Card titles, modal headers |
-| Body | `text-sm` to `text-base` | `--text-sm`–`--text-base` | `0.75rem`–`0.875rem` | `font-medium` | `tracking-normal` | Descriptions, metadata, overviews |
-| Label | `text-xs` | `--text-xs` | `0.625rem` | `font-semibold` | `tracking-wide` to `tracking-widest` | Badges, type labels, ratings |
+| Family Role | Font | Weights | Use |
+|-------------|------|---------|-----|
+| Display | Anton (`next/font/google`) | 400 | Headlines, titles, ghost numerals. Always uppercase, `letter-spacing: 0`, `text-wrap: balance`. Never used below 1.25rem (20px). |
+| Text | Inter Tight (`next/font/google`) | 400, 600, 700 | UI and body copy. `text-wrap: pretty` on paragraphs. |
+| Mono | JetBrains Mono (`next/font/google`) | 500 | Editorial captions: slate, row numbers, counts, card metadata. Always uppercase, `font-variant-numeric: tabular-nums`, tracked .1-.14em. Numbers in accent. |
 
-**Font stack:** `var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif` — declared in `app/globals.css` line 187 and consumed through Tailwind's `--font-sans` token.
+#### Complete Type Roles
+
+| Role | Utility | Size | Line Height | Tracking | Weight / Family | Use |
+|------|---------|------|-------------|----------|-----------------|-----|
+| `display-1` | `text-display-1` | `clamp(3.5rem, 10vw, 9rem)` | `0.88` | `0` | Anton | Hero / detail cover page title (<= 14 chars) |
+| `display-1-long` | `text-display-1-long` | `clamp(2.75rem, 7vw, 6.5rem)` | `0.88` | `0` | Anton | Titles 15 to 28 characters |
+| `display-1-extended` | `text-display-1-extended` | `clamp(2.25rem, 5vw, 4.5rem)` | `0.88` | `0` | Anton | Titles 29 to 48 characters |
+| `display-1-maximum` | `text-display-1-maximum` | `clamp(1.75rem, 3.6vw, 3rem)` | `0.88` | `0` | Anton | Titles over 48 characters |
+| `display-2` | `text-display-2` | `clamp(2rem, 4.4vw, 3.25rem)` | `0.95` | `0` | Anton | Section headings |
+| `display-3` | `text-display-3` | `1.75rem` | `1` | `0` | Anton | Score figure, fact values, episode numbers, subtitle split |
+| `display-4` | `text-display-4` | `1.25rem` | `1.05` | `0` | Anton | Overlay titles on wide cards, media fallbacks |
+| `lede` | `text-lede` | `1.125rem` | `1.6` | `0` | 400 / Inter Tight | Overview, story, lede prose; max 60ch |
+| `body` | `text-body` | `1rem` | `1.5` | `0` | 400 / Inter Tight | Default copy |
+| `title` | `text-title` | `0.9375rem` | `1.3` | `0` | 600 / Inter Tight | Card, episode and cast names |
+| `ui` | `text-ui` | `0.875rem` | `1` | `0` | 600 / Inter Tight | Buttons, tabs, nav, links |
+| `small` | `text-small` | `0.8125rem` | `1.45` | `0` | 400 / Inter Tight | Synopses under titles, secondary copy; max 56ch |
+| `caption` | `text-caption` | `0.75rem` | `1` | `0.14em` | 500 / JetBrains Mono | Slate lines, section index, counts, fact labels |
+| `micro` | `text-micro` | `0.6875rem` | `1` | `0.1em` | 500 / JetBrains Mono | Card meta, badges, durations |
+
+Tracking uses Tailwind defaults plus `tracking-label` (`0.14em`), `tracking-caps` (`0.2em`), `tracking-meta` (`0.08em`), and `tracking-meta-wide` (`0.12em`).
+
+When a `leading-*` class and a size class meet in `cn()`, put the size first; `tailwind-merge` drops a `leading-*` that precedes a font size because a v4 size also sets line height.
 
 ### Focus Ring
 
-The focus ring MUST be exactly:
+There is exactly one focus treatment, defined once in `app/globals.css`:
 
+```css
+:focus-visible {
+	outline: 2px solid var(--brand);
+	outline-offset: 3px;
+}
 ```
-focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black
-```
 
-**Source:** `components/features/media/card/media-card.tsx` line 101. The underlying token is `--ring: #0a84ff` (`app/globals.css` line 143). This is the ONLY permitted focus treatment for interactive cards, links, and buttons. Do not substitute arbitrary blue values.
+`--brand` is `#ff4d2e`, so the ring is the accent. Do not add a second recipe. A component that needs to suppress the global outline must re-declare the same outline explicitly, never substitute `ring-2 ring-ring ring-offset-2` (the older recipe, now removed from `Button`, `Input`, `SelectTrigger`, `Sheet`'s close button and the header controls). Editorial cards show focus with the 2px brand edge instead of an outline.
 
-### Radius Limits
+`outline` (not `box-shadow`) is deliberate: it follows `border-radius` and it is what the reference uses. Note that both forms are clipped by an ancestor with `overflow: hidden`, so a focus ring on a card edge must sit inside the card's own padding.
 
-Radius is stratified by surface type. Use the Tailwind custom radius tokens from `tailwind.config.ts` or the CSS variables from `app/globals.css`. NEVER invent radius values.
+### Touch Targets
 
-| Surface Type | Mobile Radius | Desktop Radius | CSS Variable | Example Usage |
-|--------------|---------------|----------------|--------------|---------------|
-| Cards | `rounded-xl` (`1rem`) | `rounded-2xl` (`1.25rem`) | `--radius-card` / `--radius-card-md` | `MediaCard`, row items |
-| Heroes | `rounded-none` | `rounded-none` | N/A | Hero banners are full-bleed; no radius |
-| Episode cards | `rounded-2xl` (`1.5rem`) | `rounded-3xl` (`1.875rem`) | `--radius-episode` / `--radius-episode-md` | Season episode thumbnails |
-| Episode images | `rounded-lg` (`0.75rem`) | `rounded-xl` (`1rem`) | `--radius-episode-image` / `--radius-episode-image-md` | Inner episode images |
-| UI controls | `rounded-md` (`0.5rem`) | `rounded-lg` (`0.625rem`) | `--radius-ui` / `--radius-ui-md` | Buttons, inputs, badges |
-| Dialogs | `rounded-2xl` (`1rem`) | `rounded-3xl` (`1.25rem`) | `--radius-dialog` / `--radius-dialog-md` | Modals, sheets, command palette |
-| Pills / tags | `rounded-full` | `rounded-full` | N/A | Genre tags, runtime badges |
+Two `@utility` rules in `app/globals.css` keep a control's visual size and grow its hit area on
+`(pointer: coarse)`. Each sets `position: relative` and a `::after` that is `display: none` on fine
+pointers, so neither adds layout or visual weight on desktop. Pick by the control's visual size:
 
-**Enforcement:** `components/features/media/card/media-card.tsx` lines 111 and 135 use `rounded-xl md:rounded-2xl`. `components/features/media/details/detail-hero.tsx` uses full-bleed images with no radius.
+| Utility | Inset per side | Use for | Result |
+|---|---|---|---|
+| `hit-target` | 4px | 40px and larger controls (icon buttons, arrows, close buttons) | 40 to 48 |
+| `hit-target-lg` | 8px | 32px controls (the footer social buttons) | 32 to 48 |
+
+`Button` applies `hit-target` automatically for `size="icon"` and `size="icon-lg"`. Icon buttons
+stay visually 40px, which is the system size. When adding one to a hand-rolled control, measure it:
+inflate the control's rect by the same amount as the `::after` and intersect it with every other
+control's rect, clipped to any scroll container, or the test will invent overlaps on off-screen
+pixels.
+
+`mt-section` (`clamp(48px, 6vw, 80px)`) is the margin form of `.section-spacing`'s bottom padding.
+Use it for the space above a page-closing band such as the footer, so the rhythm holds below 1440
+instead of breaking at a fixed 80px.
+
+### Radius
+
+The base token is `--radius: 6px`, and the rule is narrow: **`rounded-sm` (6px) is the only radius for media, cards and surfaces, and `rounded-full` (999px) is the only radius for pills and circular buttons.** Nothing in between is a design decision.
+
+The wider steps still exist in the `@theme inline` scale because older surfaces used them. Treat any use of `rounded-lg` and above as debt to be removed, not as a level:
+
+| Utility | Value | Status |
+|---------|-------|--------|
+| `rounded-sm` | `6px` | The only surface and media radius. Cards, posters, menus, sheets, inputs, tooltips, toasts, skeletons |
+| `rounded-full` | `999px` | The only other radius. Pills, circular icon buttons, avatars, badges |
+| `rounded-md` | `8px` | Base class on `Button`; overridden by every size. Avoid elsewhere |
+| `rounded-lg` and above | `10px`–`26px` | Legacy. No current surface is approved for these; see ds-ops/final/REQUESTS.md for the two open cases (wide media cards, account menu) |
+
+`--radius` is the exact reference token (`6px`); the `rounded-*` scale derives from it via `calc()`.
+
+The former per-surface variables (`--radius-hero`, `--radius-card`, `--radius-episode*`, `--radius-ui*`, `--radius-dialog*`, `--radius-small/medium/large`) were removed: no component used them except one `rounded-ui`, which is now `rounded-md` (the same 8px).
+
+### Measures
+
+Text measures are utilities, not arbitrary values, so the `shadcn/no-arbitrary-values` rule enforces them: `max-w-prose` is 60ch (prose: overviews, stories, ledes) and `max-w-prose-secondary` is 56ch (synopses and secondary copy). These are the only two measures; do not add a third and do not write `max-w-[60ch]`.
 
 ### Section Spacing
 
-Vertical rhythm between content rows MUST use one of these two patterns:
+One vertical scale, one token. `.section-spacing` in `app/globals.css` is the single source: `padding-top: clamp(28px, 4vw, 48px)` and `padding-bottom: clamp(48px, 6vw, 80px)`. Row stacks add their own `gap-*` on top of it. The older per-page `space-y-*` values that disagreed with each other are gone; do not reintroduce them.
 
-1. **Row stack gap:** `flex flex-col space-y-4 md:space-y-8` — observed in `app/page.tsx` line 57 and `app/movie/page.tsx` [verify]. This is the standard gap between `DataRow` sections on home, movie, and TV pages.
-2. **Section wrapper padding:** `.section-spacing` class in `app/globals.css` lines 509–525 provides:
-   - Mobile: `padding-top: 3rem; padding-bottom: 3rem`
-   - Tablet (`md`): `padding-top: 4rem; padding-bottom: 4rem`
-   - Desktop (`lg`): `padding-top: 5rem; padding-bottom: 5rem`
+### Error and Not-Found States
 
-NEVER mix arbitrary margin values (e.g., `mt-10`, `mb-14`) outside these two systems.
+`app/not-found.tsx` (404), `app/error.tsx` (route error), `app/global-error.tsx` (root error) and `components/shared/errors/page-fetch-error.tsx` (data fetch failure) are one recipe, not four:
 
-### Motion Durations
+- Mono uppercase caption with an icon, in `text-destructive` for a failure and `text-dim` for a dead address. Destructive is never a large fill and never appears without an icon and a label.
+- Anton uppercase title in its normal display role, never a body-font heading and never sentence case.
+- Lede copy in `text-soft`, measure `max-w-prose`, sentence case, editorial voice ("The projector jammed.", "Nothing here but dust.").
+- Actions are `Button` primitives. Never a hand-rolled `<button>` with a white fill.
+- Layout is gutter-aligned and left-aligned like every other page (`px-gutter pt-safe-header`), not centred in a card, and it sets no min-height beyond `min-h-error` so a short state never forces a second scroll.
 
-All motion MUST use one of these canonical durations. Do not invent timing.
+`global-error.tsx` renders its own `<html>` and `<body>`, so it must carry `bg-background text-foreground` itself: the root layout that normally supplies the canvas is not there to do it.
 
-| Duration | Tailwind / Code | Usage |
-|----------|-----------------|-------|
-| `0.22s` | `BlurFade duration={0.22}` | Card image fade-in on viewport entry |
-| `0.3s` | `duration-300`, `transition-duration: 300ms` | UI hover states, button scales, ring transitions |
-| `0.5s`–`0.55s` | GSAP `duration: 0.55` | Card hover scale, overlay fade |
-| `0.7s` | `duration-700` | Content opacity transitions |
-| `1.0s` | `duration-1000` | Hero content slide-up reveals |
-| `12.0s` | `duration-[12000ms]` | Ken Burns slow zoom on hero images |
-| `16.0s` | GSAP `duration: 16` | Detail hero Ken Burns zoom |
+### Motion
 
-**Easing curves:**
-- `cubic-bezier(0.22, 1, 0.36, 1)` — cinematic fade (hero reveals, Ken Burns)
-- `cubic-bezier(0.34, 1.56, 0.64, 1)` — spring bounce (button hovers)
-- `power2.out` / `power3.out` / `power4.out` — GSAP hierarchy for staggered entrances
-- `back.out(1.8)` — play-button pop-in on card hover
+Tokens (`app/globals.css` `@theme`, mirrored for framer-motion in `lib/motion.ts`):
 
-**Reduced motion:** three layers honour `prefers-reduced-motion: reduce`, and every animation MUST respect them.
+| Token | Value | Usage |
+|-------|-------|-------|
+| `ease-entrance` | `cubic-bezier(0.23, 1, 0.32, 1)` | Entrances, reveals, press feedback |
+| `ease-cinematic` | `cubic-bezier(0.22, 1, 0.36, 1)` | Liquid glass, Ken Burns |
+| `ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Detail-page hover pops |
+| `ease-sheet` | `cubic-bezier(0.32, 0.72, 0, 1)` | Sheet transitions |
+| `--duration-press` | `150ms` | Press feedback (`active:scale-[0.97]`) |
+| `--duration-ui` | `200ms` | Colour, border and opacity state changes |
+| `--duration-reveal` | `450ms` | Entrance reveals and backdrop crossfades |
+| `animate-rail-progress` | `8s linear` | Home hero autoplay progress |
+| `pressable` | scale transition at `--duration-press`, scale `.97` | Fine-grained press feedback, reduced-motion-safe |
+| `hit-target`, `hit-target-lg` | 48px hit area at `(pointer: coarse)` | Circular icon controls; visual size unchanged |
+| `max-w-prose`, `max-w-prose-secondary` | `60ch`, `56ch` | The only two text measures |
+| `shadow-glow-*` | white glow values by light/primary/accent | Button glow variants |
+| `shadow-glass`, `shadow-overlay`, `shadow-account-menu` | Named surface shadows | Glass, modal and account-menu surfaces |
+| `pt-safe-header`, `pb-safe` | Safe-area inset offsets | Notch-aware layout spacing |
 
-1. **CSS** — the `@media (prefers-reduced-motion: reduce)` block in `app/globals.css` (line 587) zeroes `animation-duration` and `transition-duration` on `.liquid-glass-surface`, hides `.liquid-glass-touch`, and sets `animation: none` on `.grain-overlay::before` so the grain overlay freezes on a static frame.
-2. **framer-motion** — `app/layout.tsx` wraps the app in `<MotionConfig reducedMotion="user">` (rendered by `components/providers/motion-provider.tsx`), so transform animations collapse to opacity.
-3. **GSAP** — the detail-page sections (`video-section.tsx`, `storyline-section.tsx`, `cast-crew-section.tsx`, `more-details-container.tsx`) register their timelines with `gsap.matchMedia()` and branch on `(prefers-reduced-motion: reduce)`: entrances keep an opacity-only reveal capped at `0.2s`, staggers collapse to `0`, and expand/collapse helpers skip transforms.
+Use durations as `duration-(--duration-ui)`. Rules for new motion:
 
-Reduced motion means fewer and gentler animations: keep opacity and colour transitions, drop transform movement, and keep interactive UI motion under 300ms.
+- Interaction transitions stay under 300ms; entrance reveals stay at or under 450ms.
+- Never `transition-all`. Name the properties: `transition-[color,background-color,border-color,transform]`, `transition-opacity`, `transition-transform`.
+- Animate `transform` and `opacity` (plus named colour or border properties). Never animate width, height, top, left or margin.
+- Press feedback is `active:scale-[0.97]` at `--duration-press` with `ease-out`. `Button` applies it by default.
+- Hover styles on editorial surfaces use `can-hover:` / `group-can-hover:`, which require `(hover: hover) and (pointer: fine)`. Core `hover:` only checks `(hover: hover)`.
+- Staggers: hero title words 55ms apart; row cards `180ms + min(i, 8) × 45ms` (`cardRiseDelay`).
+
+Existing longer durations (`duration-700`, `duration-1000`, `duration-[12000ms]` Ken Burns, GSAP `0.55`/`16`) are legacy detail-page motion; do not copy them into new work.
+
+**Reduced motion:** four layers honour `prefers-reduced-motion: reduce`. Reduced motion keeps opacity and colour changes, and removes movement and infinite loops.
+
+1. **CSS**: the `@media (prefers-reduced-motion: reduce)` block in `app/globals.css` zeroes animation and transition durations on `.liquid-glass-surface`, hides `.liquid-glass-touch`, and stops the `.grain-overlay` loop. Tailwind `motion-reduce:` / `motion-safe:` variants handle component-level cases (the hero rail's progress fill is static and its pause control is hidden, so the carousel never auto-advances).
+2. **framer-motion**: `components/providers/motion-provider.tsx` renders `<MotionConfig reducedMotion="user">`, so `riseVariants` reveals keep their fade and drop their `y` movement. Do not add a second motion system.
+3. **GSAP**: detail-page sections register timelines with `gsap.matchMedia()` and branch on `(prefers-reduced-motion: reduce)`.
+4. **Hero Ken Burns** (`hero-banner.tsx`) is skipped when `prefersReducedMotion` is true.
 
 ### Image Policy
 

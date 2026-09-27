@@ -44,66 +44,67 @@ export default function GlobalError({
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-background px-4">
-			<div className="max-w-md w-full text-center space-y-6">
-				<div className="flex justify-center">
-					<div className="h-16 w-16 rounded-2xl bg-destructive/10 flex items-center justify-center">
-						<AlertTriangle className="h-8 w-8 text-destructive" />
-					</div>
-				</div>
+		<main className="flex min-h-error flex-col justify-center px-gutter pt-safe-header pb-16">
+			<div className="max-w-prose">
+				<p className="flex items-center gap-2 font-mono text-caption uppercase tracking-label text-destructive">
+					<AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+					Error
+				</p>
 
-				<div className="space-y-2">
-					<h1 className="text-2xl font-semibold tracking-tight text-foreground">
-						Something went wrong
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						We encountered an unexpected error. Try again, or copy the error report and
-						send it to us so we can fix it.
+				<h1 className="mt-4 font-display text-display-2 uppercase text-text text-balance">
+					The projector jammed.
+				</h1>
+
+				<p className="mt-4 text-lede text-soft max-w-prose">
+					The reel stopped mid-frame. Try again, and if it keeps jamming send us the
+					report below.
+				</p>
+
+				{error.digest ? (
+					<p className="mt-3 font-mono text-micro uppercase tracking-label text-dim">
+						Reference: {error.digest}
 					</p>
-					{error.digest && (
-						<p className="text-xs font-mono text-muted-foreground">
-							Reference: {error.digest}
-						</p>
-					)}
-				</div>
+				) : null}
 
-				{process.env.NODE_ENV === 'development' && (
-					<div className="rounded-lg bg-muted/50 p-3 text-left">
-						<p className="text-xs font-mono text-destructive truncate">
-							{error.message}
-						</p>
-					</div>
-				)}
+				{process.env.NODE_ENV === 'development' ? (
+					<p className="mt-3 truncate font-mono text-micro text-destructive">
+						{error.message}
+					</p>
+				) : null}
 
-				{copyState === 'failed' && (
-					<pre className="rounded-lg bg-muted/50 p-3 text-left text-[10px] font-mono text-muted-foreground overflow-auto max-h-40">
+				{copyState === 'failed' ? (
+					<pre className="mt-3 max-h-40 overflow-auto rounded-sm border border-line bg-surface p-3 text-left font-mono text-micro leading-relaxed text-dim">
 						{buildErrorReport(error)}
 					</pre>
-				)}
+				) : null}
 
-				<div className="flex flex-col items-center gap-3">
-					<Button onClick={reset} variant="default" className="gap-2 w-full">
+				{copyState === 'failed' ? (
+					<p role="status" className="mt-3 font-mono text-micro uppercase tracking-label text-destructive">
+						Copy failed. Select the report and copy it by hand.
+					</p>
+				) : null}
+
+				<div className="mt-8 flex flex-wrap items-center gap-3">
+					<Button onClick={reset} variant="default">
 						<RefreshCw className="h-4 w-4" />
 						Try again
 					</Button>
-					<div className="flex items-center justify-center gap-3">
-						<Button onClick={copyReport} variant="outline" className="gap-2">
-							{copyState === 'copied' ? (
-								<Check className="h-4 w-4" />
-							) : (
-								<Copy className="h-4 w-4" />
-							)}
-							{copyState === 'copied' ? 'Copied' : 'Copy error report'}
-						</Button>
-						<Button asChild variant="outline" className="gap-2">
-							<Link href="/" prefetch={false}>
-								<Home className="h-4 w-4" />
-								Home
-							</Link>
-						</Button>
-					</div>
+					<Button onClick={copyReport} variant="outline">
+						{copyState === 'copied' ? (
+							<Check className="h-4 w-4" />
+						) : (
+							<Copy className="h-4 w-4" />
+						)}
+						{copyState === 'copied' ? 'Copied' : 'Copy error report'}
+					</Button>
+					<Button asChild variant="outline">
+						<Link href="/" prefetch={false}>
+							<Home className="h-4 w-4" />
+							Home
+						</Link>
+					</Button>
 				</div>
 			</div>
-		</div>
+		</main>
 	);
 }

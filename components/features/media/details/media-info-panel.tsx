@@ -1,27 +1,14 @@
 'use client';
 
-import React, { memo, useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
-	ArrowSquareOutIcon,
-	CalendarBlankIcon,
-	CaretDownIcon,
-	ClockIcon,
-	GlobeHemisphereWestIcon,
-	InfoIcon,
-	LinkIcon,
-	PlayIcon,
-	StarIcon,
-	TagIcon,
-	TelevisionIcon,
-	UsersThreeIcon,
-	XIcon,
-} from '@phosphor-icons/react';
-import { cn } from '@/lib/utils';
+	EditorialTabs,
+	EditorialTabList,
+	EditorialTabTrigger,
+	EditorialTabContent,
+} from '@/components/ui/editorial-tabs';
+import { MediaFallback } from '@/components/ui/media-fallback';
 import { tmdbImage } from '@/lib/tmdb-image';
-import { EpisodeDetailPanel } from '@/components/features/media/seasons/episode-detail-panel';
-import { useEpisodeStore } from '@/store/episodeStore';
-import { useMediaInfoPanelStore } from '@/store/mediaInfoPanelStore';
 
 interface CastMember {
 	id: number;
@@ -46,12 +33,6 @@ interface Video {
 	site: string;
 }
 
-interface WatchProvider {
-	provider_id: number;
-	provider_name: string;
-	logo_path?: string | null;
-}
-
 interface MediaInfoPanelProps {
 	data: any;
 	type: 'movie' | 'tv';
@@ -59,54 +40,11 @@ interface MediaInfoPanelProps {
 	videos?: Video[];
 }
 
-type PanelTab = 'details' | 'watch' | 'cast' | 'trailers' | 'links';
-
-const panelVariants = {
-	hidden: { opacity: 0, y: 12 },
-	visible: {
-		opacity: 1,
-		y: 0,
-		transition: { type: 'spring' as const, stiffness: 200, damping: 26 },
-	},
-};
-
-const stagger = {
-	hidden: {},
-	visible: { transition: { staggerChildren: 0.04, delayChildren: 0.06 } },
-};
-
-const fadeUp = {
-	hidden: { opacity: 0, y: 8 },
-	visible: {
-		opacity: 1,
-		y: 0,
-		transition: { type: 'spring' as const, stiffness: 300, damping: 28 },
-	},
-};
-
-const expandVariants = {
-	collapsed: {
-		height: 0,
-		opacity: 0,
-		transition: { type: 'spring' as const, bounce: 0, duration: 0.32 },
-	},
-	expanded: {
-		height: 'auto' as const,
-		opacity: 1,
-		transition: { type: 'spring' as const, bounce: 0, duration: 0.38 },
-	},
-};
-
-const reducedExpandVariants = {
-	collapsed: { height: 'auto' as const, opacity: 0, transition: { duration: 0.12 } },
-	expanded: { height: 'auto' as const, opacity: 1, transition: { duration: 0.16 } },
-};
-
-function formatDate(date?: string | null) {
-	if (!date) return null;
-	const parsed = new Date(date);
-	if (Number.isNaN(parsed.getTime())) return null;
-	return parsed.toLocaleDateString('en-US', {
+function formatDate(dateStr?: string | null) {
+	if (!dateStr) return null;
+	const date = new Date(dateStr);
+	if (Number.isNaN(date.getTime())) return null;
+	return date.toLocaleDateString('en-US', {
 		month: 'short',
 		day: 'numeric',
 		year: 'numeric',
@@ -118,737 +56,250 @@ function formatRuntime(minutes?: number | null) {
 	return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
 }
 
-function compactList(items: Array<string | null | undefined>, limit = 4) {
-	return items.filter(Boolean).slice(0, limit).join(', ');
+const CAST_PORTRAITS = 8;
+
+function getInitials(name?: string) {
+	if (!name) return '';
+	const parts = name.trim().split(/\s+/);
+	if (parts.length >= 2) {
+		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+	}
+	return (parts[0]?.[0] || '').toUpperCase();
 }
 
-function uniqueProviders(providers: WatchProvider[]) {
-	const seen = new Set<number>();
-	return providers.filter((provider) => {
-		if (seen.has(provider.provider_id)) return false;
-		seen.add(provider.provider_id);
-		return true;
-	});
-}
+function CastPortrait({ person }: { person: CastMember }) {
+	const [imageError, setImageError] = useState(false);
+	const hasImage = Boolean(person.profile_path) && !imageError;
 
-const SECTION_LABEL = 'text-[10px] font-bold uppercase tracking-[0.16em] text-white/55';
-
-function SectionHeading({ title, kicker }: { title: string; kicker?: string }) {
 	return (
-		<div className="flex items-baseline gap-2.5">
-			<h3 className="text-sm font-bold tracking-tight text-white md:text-base">{title}</h3>
-			{kicker && (
-				<span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/55 tabular-nums">
-					{kicker}
-				</span>
-			)}
-		</div>
-	);
-}
-
-type ProviderLinkBuilder = (title: string, year?: string) => string;
-
-const PROVIDER_LINKS: Record<number, ProviderLinkBuilder> = {
-	8: (t) => `https://www.netflix.com/search?q=${encodeURIComponent(t)}`,
-	119: (t) => `https://www.amazon.com/s?k=${encodeURIComponent(t)}&i=instant-video`,
-	337: (t) => `https://www.disneyplus.com/search?q=${encodeURIComponent(t)}`,
-	1899: (t) => `https://www.max.com/search?q=${encodeURIComponent(t)}`,
-	350: (t) => `https://tv.apple.com/search?term=${encodeURIComponent(t)}`,
-	2: (t) => `https://tv.apple.com/search?term=${encodeURIComponent(t)}`,
-	9: (t) => `https://www.amazon.com/s?k=${encodeURIComponent(t)}&i=instant-video`,
-	531: (t) => `https://www.paramountplus.com/shows/?q=${encodeURIComponent(t)}`,
-	386: (t) => `https://www.peacocktv.com/search?q=${encodeURIComponent(t)}`,
-	15: (t) => `https://www.hulu.com/search?q=${encodeURIComponent(t)}`,
-	387: (t) => `https://www.peacocktv.com/search?q=${encodeURIComponent(t)}`,
-	232: (t) => `https://www.zee5.com/search?q=${encodeURIComponent(t)}`,
-	220: (t) => `https://www.jiocinema.com/search/${encodeURIComponent(t)}`,
-	237: (t) => `https://www.sonyliv.com/search?searchTerm=${encodeURIComponent(t)}`,
-	121: (t) => `https://www.mxplayer.in/search?q=${encodeURIComponent(t)}`,
-	122: (t) => `https://www.hotstar.com/in/search?q=${encodeURIComponent(t)}`,
-	3: (t) => `https://play.google.com/store/search?q=${encodeURIComponent(t)}&c=movies`,
-	68: (t) => `https://store.google.com/search?q=${encodeURIComponent(t)}`,
-	10: (t) => `https://www.amazon.com/s?k=${encodeURIComponent(t)}&i=instant-video`,
-	192: (t) => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${t} movie`)}`,
-	188: (t) => `https://www.youtube.com/results?search_query=${encodeURIComponent(t)}`,
-	7: (t) => `https://www.vudu.com/content/movies/search?searchString=${encodeURIComponent(t)}`,
-	257: (t) => `https://www.fubo.tv/welcome/search?query=${encodeURIComponent(t)}`,
-	384: (t) => `https://www.max.com/search?q=${encodeURIComponent(t)}`,
-	1796: (t) => `https://www.netflix.com/search?q=${encodeURIComponent(t)}`,
-	283: (t) => `https://www.crunchyroll.com/search?q=${encodeURIComponent(t)}`,
-};
-
-function buildProviderUrl(
-	provider: WatchProvider,
-	title: string,
-	year: string | undefined,
-	fallback: string
-) {
-	const builder = PROVIDER_LINKS[provider.provider_id];
-	if (builder) return builder(title, year);
-	const slug = provider.provider_name.toLowerCase().replace(/[^a-z0-9]+/g, '');
-	const guess = `https://www.google.com/search?q=${encodeURIComponent(`${provider.provider_name} ${title} ${year || ''}`)}&btnI=1`;
-	return guess || fallback || slug;
-}
-
-function ProviderLogo({
-	provider,
-	title,
-	year,
-	fallback,
-}: {
-	provider: WatchProvider;
-	title: string;
-	year?: string;
-	fallback: string;
-}) {
-	const href = buildProviderUrl(provider, title, year, fallback);
-	return (
-		<a
-			href={href}
-			target="_blank"
-			rel="noreferrer"
-			title={`Open ${provider.provider_name}`}
-			className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] py-1.5 pl-1.5 pr-3 text-[12px] font-semibold text-white/70 transition-all duration-300 hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white active:scale-[0.97]"
-		>
-			<span className="relative h-6 w-6 overflow-hidden rounded-full bg-white/[0.06]">
-				{provider.logo_path ? (
+		<li className="w-28 shrink-0 snap-start md:w-auto">
+			<div className="relative mb-3 aspect-4/5 w-full overflow-hidden rounded-sm bg-gradient-card-placeholder shadow-inset-line">
+				{hasImage ? (
 					<img
-						src={tmdbImage(provider.logo_path, 'w92')}
+						src={tmdbImage(person.profile_path!, 'w185')}
 						alt=""
 						loading="lazy"
-						className="h-full w-full object-cover"
-						onError={(e) => {
-							(e.currentTarget as HTMLImageElement).style.display = 'none';
-						}}
+						decoding="async"
+						onError={() => setImageError(true)}
+						className="size-full object-cover object-top"
 					/>
-				) : null}
-			</span>
-			{provider.provider_name}
-			<ArrowSquareOutIcon size={11} weight="bold" className="text-white/50" />
-		</a>
+				) : (
+					<MediaFallback variant="portrait" initials={getInitials(person.name)} />
+				)}
+			</div>
+			<p className="line-clamp-2 text-small font-semibold leading-snug text-text">{person.name}</p>
+			{person.character && (
+				<p className="mt-1 line-clamp-2 font-mono text-micro uppercase leading-snug tracking-meta text-dim">
+					{person.character}
+				</p>
+			)}
+		</li>
 	);
 }
 
-function MediaInfoPanelComponent({ data, type, credits, videos = [] }: MediaInfoPanelProps) {
-	const reducedMotion = useReducedMotion();
-	const { activeEP } = useEpisodeStore();
-	const activeEpisode =
-		type === 'tv' && activeEP && String(activeEP.tv_id) === String(data?.id) ? activeEP : null;
+function MediaInfoPanelComponent({ data, type, credits }: MediaInfoPanelProps) {
+	const sectionRef = useRef<HTMLElement>(null);
+	const headRef = useRef<HTMLDivElement>(null);
+	const panelRef = useRef<HTMLDivElement>(null);
 
-	const isExpanded = useMediaInfoPanelStore((s) => s.isExpanded);
-	const storeTab = useMediaInfoPanelStore((s) => s.activeTab);
-	const openTick = useMediaInfoPanelStore((s) => s.openTick);
-	const toggleExpanded = useMediaInfoPanelStore((s) => s.toggle);
+	const cast = useMemo(() => credits?.cast ?? [], [credits?.cast]);
 
-	const [activeTab, setActiveTab] = useState<PanelTab>('details');
-	const [activeVideo, setActiveVideo] = useState<string | null>(null);
-
-	React.useEffect(() => {
-		if (storeTab) setActiveTab(storeTab === 'episode' ? 'details' : storeTab);
-	}, [storeTab, openTick]);
-
-	const lastEpisodeIdRef = React.useRef<number | string | null>(activeEpisode?.id ?? null);
-	React.useEffect(() => {
-		if (type !== 'tv') return;
-		const nextId = activeEpisode?.id ?? null;
-		if (nextId && nextId !== lastEpisodeIdRef.current) {
-			setActiveTab('details');
+	const crew = useMemo(() => {
+		const rawCrew = credits?.crew ?? [];
+		if (type === 'tv' && data?.created_by?.length) {
+			const creators = data.created_by.map((c: any) => ({
+				id: c.id,
+				name: c.name,
+				job: 'Creator',
+			}));
+			const otherCrew = rawCrew
+				.filter(
+					(c) =>
+						c.job === 'Executive Producer' ||
+						c.job === 'Director' ||
+						c.job === 'Writer'
+				)
+				.slice(0, 6);
+			return [...creators, ...otherCrew];
 		}
-		lastEpisodeIdRef.current = nextId;
-	}, [activeEpisode, type]);
 
-	const title = data?.title || data?.name || (type === 'tv' ? 'TV show' : 'Movie');
-	const releaseDate = data?.first_air_date || data?.release_date;
-	const releaseYear = releaseDate?.split('-')[0];
-	const releaseLabel = formatDate(releaseDate);
-	const runtimeLabel = formatRuntime(data?.episode_run_time?.[0] ?? data?.runtime);
-	const genreLabel = compactList(data?.genres?.map((genre: any) => genre.name) ?? [], 5);
-	const languageLabel = compactList(
-		data?.spoken_languages?.map((lang: any) => lang.english_name || lang.name) ?? [
-			data?.original_language?.toUpperCase(),
-		],
-		3
-	);
-	const creatorLabel = compactList(
-		data?.created_by?.map((creator: any) => creator.name) ?? [],
-		3
-	);
-	const productionLabel = compactList(
-		data?.production_companies?.map((company: any) => company.name) ?? [],
-		3
-	);
-	const networkLabel = compactList(data?.networks?.map((network: any) => network.name) ?? [], 3);
-	const countryLabel = compactList(
-		data?.origin_country ??
-			data?.production_countries?.map((country: any) => country.iso_3166_1),
-		3
-	);
-	const keywords = compactList(
-		(data?.keywords?.results ?? data?.keywords?.keywords ?? []).map(
-			(keyword: any) => keyword.name
-		),
-		6
-	);
-	const voteLabel =
-		typeof data?.vote_average === 'number' && data.vote_average > 0
-			? `${data.vote_average.toFixed(1)} / 10`
-			: null;
-	const imdbId = data?.external_ids?.imdb_id || data?.imdb_id;
-	const imdbUrl = imdbId ? `https://www.imdb.com/title/${imdbId}/` : null;
-	const letterboxdUrl =
-		type === 'movie'
-			? `https://letterboxd.com/search/${encodeURIComponent(`${title} ${releaseYear || ''}`.trim())}/`
-			: null;
+		const directors = rawCrew.filter((c) => c.job === 'Director');
+		const writers = rawCrew.filter((c) => c.job === 'Screenplay' || c.job === 'Writer');
+		const producers = rawCrew
+			.filter((c) => c.job === 'Producer' || c.job === 'Executive Producer')
+			.slice(0, 4);
 
-	const indiaProviders = data?.['watch/providers']?.results?.IN;
-	const providerGroups = [
-		{ label: 'Stream', items: uniqueProviders(indiaProviders?.flatrate ?? []) },
-		{ label: 'Rent', items: uniqueProviders(indiaProviders?.rent ?? []) },
-		{ label: 'Buy', items: uniqueProviders(indiaProviders?.buy ?? []) },
-	].filter((group) => group.items.length > 0);
-	const providerLink =
-		indiaProviders?.link || `https://www.themoviedb.org/${type}/${data?.id}/watch`;
-	const providerTotal = providerGroups.reduce((total, group) => total + group.items.length, 0);
+		const combined = [...directors, ...writers, ...producers];
+		return combined.length > 0 ? combined : rawCrew.slice(0, 8);
+	}, [credits?.crew, data?.created_by, type]);
 
-	const facts = [
-		{ label: 'Release', value: releaseLabel, icon: CalendarBlankIcon },
-		{ label: 'Genres', value: genreLabel, icon: TagIcon },
-		{
-			label: type === 'tv' ? 'Episode runtime' : 'Runtime',
-			value: runtimeLabel,
-			icon: ClockIcon,
-		},
-		{ label: 'Score', value: voteLabel, icon: StarIcon },
-		{ label: 'Status', value: data?.status, icon: InfoIcon },
-		{
-			label: type === 'tv' ? 'Seasons' : 'Language',
-			value:
-				type === 'tv' && data?.number_of_seasons && data?.number_of_episodes
-					? `${data.number_of_seasons} seasons, ${data.number_of_episodes} episodes`
-					: languageLabel,
-			icon: type === 'tv' ? TelevisionIcon : GlobeHemisphereWestIcon,
-		},
-		{
-			label: type === 'tv' ? 'Created by' : 'Production',
-			value: creatorLabel || productionLabel,
-			icon: UsersThreeIcon,
-		},
-		{
-			label: type === 'tv' ? 'Network' : 'Origin',
-			value: networkLabel || countryLabel,
-			icon: GlobeHemisphereWestIcon,
-		},
-		{ label: 'Keywords', value: keywords, icon: TagIcon },
-	].filter((item) => item.value);
+	const facts = useMemo(() => {
+		const list: Array<[string, string | null]> = [];
 
-	const people = useMemo(() => {
-		const castItems =
-			credits?.cast?.slice(0, 24).map((person) => ({
-				id: `cast-${person.id}`,
-				name: person.name,
-				role: person.character || 'Cast',
-				profile_path: person.profile_path,
-			})) ?? [];
-		const crewItems =
-			credits?.crew
-				?.filter((person) => person.job || person.department)
-				.slice(0, 12)
-				.map((person, index) => ({
-					id: `crew-${person.id ?? index}`,
-					name: person.name,
-					role: person.job || person.department || 'Crew',
-					profile_path: person.profile_path,
-				})) ?? [];
-		return [...castItems, ...crewItems];
-	}, [credits]);
+		if (data?.status) {
+			list.push(['Status', data.status]);
+		}
 
-	const externalLinks = [
-		{ label: 'IMDb', href: imdbUrl, detail: imdbId || null },
-		{
-			label: 'Letterboxd',
-			href: letterboxdUrl,
-			detail: type === 'movie' ? 'Search by title' : null,
-		},
-		{ label: 'Official site', href: data?.homepage || null, detail: 'Homepage' },
-		{ label: 'Where to watch', href: providerLink, detail: 'India providers' },
-	].filter((link) => link.href);
+		const releaseDate =
+			type === 'tv' ? formatDate(data?.first_air_date) : formatDate(data?.release_date);
+		if (releaseDate) {
+			list.push([type === 'tv' ? 'First aired' : 'Released', releaseDate]);
+		}
 
-	const tabs: Array<{ id: PanelTab; label: string; count?: number; disabled?: boolean }> = [
-		{ id: 'details', label: 'About' },
-		{
-			id: 'watch',
-			label: 'Watch',
-			count: providerTotal,
-			disabled: providerTotal === 0,
-		},
-		{ id: 'cast', label: 'Cast', count: people.length, disabled: people.length === 0 },
-		{ id: 'trailers', label: 'Trailers', count: videos.length, disabled: videos.length === 0 },
-		{
-			id: 'links',
-			label: 'Links',
-			count: externalLinks.length,
-			disabled: externalLinks.length === 0,
-		},
-	];
-	const availableTabs = tabs.filter((tab) => !tab.disabled);
-	React.useEffect(() => {
-		const unavailable =
-			(activeTab === 'watch' && providerTotal === 0) ||
-			(activeTab === 'cast' && people.length === 0) ||
-			(activeTab === 'trailers' && videos.length === 0) ||
-			(activeTab === 'links' && externalLinks.length === 0);
-		if (unavailable) setActiveTab('details');
-	}, [activeTab, people.length, providerTotal, videos.length, externalLinks.length]);
-	const triggerLabel = activeEpisode
-		? 'Episode details'
-		: type === 'movie'
-			? 'About this movie'
-			: 'About this show';
+		if (type === 'tv') {
+			const count =
+				data?.number_of_seasons ??
+				(data?.seasons ? data.seasons.filter((s: any) => s.season_number > 0).length : null);
+			if (count) {
+				list.push(['Seasons', `${count} ${count === 1 ? 'Season' : 'Seasons'}`]);
+			}
+		} else if (data?.runtime) {
+			const rt = formatRuntime(data.runtime);
+			if (rt) list.push(['Runtime', rt]);
+		}
+
+		if (data?.genres?.length) {
+			const topGenres = data.genres
+				.slice(0, 3)
+				.map((g: any) => g.name)
+				.join(' / ');
+			const extra = data.genres.length > 3 ? ` +${data.genres.length - 3}` : '';
+			list.push(['Genres', `${topGenres}${extra}`]);
+		}
+
+		const language =
+			data?.spoken_languages?.[0]?.english_name ||
+			(data?.original_language ? data.original_language.toUpperCase() : null);
+		if (language) {
+			list.push(['Language', language]);
+		}
+
+		const networksOrStudios =
+			type === 'tv' ? data?.networks : data?.production_companies;
+		if (networksOrStudios?.length) {
+			const topItems = networksOrStudios
+				.slice(0, 3)
+				.map((item: any) => item.name)
+				.join(' / ');
+			const extra =
+				networksOrStudios.length > 3 ? ` +${networksOrStudios.length - 3}` : '';
+			list.push([type === 'tv' ? 'Network' : 'Studio', `${topItems}${extra}`]);
+		}
+
+		return list.filter(([, value]) => Boolean(value)) as Array<[string, string]>;
+	}, [data, type]);
+
+	const hasCast = cast.length > 0;
+	const hasCrew = crew.length > 0;
+	const defaultTab = hasCast ? 'cast' : hasCrew ? 'crew' : 'details';
+
+	useEffect(() => {
+		if (!sectionRef.current) return;
+		sectionRef.current.classList.add('dv-section');
+		headRef.current?.classList.add('dv-head');
+		panelRef.current?.classList.add('dv-panel');
+	}, []);
+
+	const sectionIndex = type === 'tv' ? '02' : '01';
 
 	return (
-		<section className="w-full" data-information-shelf aria-label={triggerLabel}>
-			<motion.div
-				variants={panelVariants}
-				initial={reducedMotion ? false : 'hidden'}
-				animate="visible"
-				className={cn(
-					'w-full overflow-hidden rounded-[22px] ring-1 ring-inset transition-colors',
-					isExpanded
-						? 'bg-white/[0.035] ring-white/[0.09]'
-						: 'bg-white/[0.02] ring-white/[0.06]'
-				)}
+		<section
+			ref={sectionRef}
+			id="about"
+			aria-labelledby="about-title"
+			className="px-gutter mb-20 md:mb-28 scroll-mt-8"
+		>
+			{/* Section Heading */}
+			<div
+				ref={headRef}
+				className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7"
 			>
-				{/* Header Trigger */}
-				<button
-					type="button"
-					onClick={() => toggleExpanded()}
-					aria-expanded={isExpanded}
-					aria-controls="media-info-body"
-					className="group relative flex min-h-14 w-full items-center gap-3 px-4 text-left outline-none transition-colors active:bg-white/[0.055] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0A84FF]/70 md:px-5"
+				<span
+					className="pb-1 font-mono text-caption uppercase text-brand tracking-label tabular-nums"
+					aria-hidden="true"
 				>
-					<div className="min-w-0 flex-1">
-						<h2 className="truncate text-[15px] font-semibold tracking-[-0.015em] text-white">
-							{triggerLabel}
-						</h2>
-						<p className="truncate text-xs text-white/55">
-							{activeEpisode?.name || title}
-						</p>
-					</div>
+					{sectionIndex}
+				</span>
+				<h2
+					id="about-title"
+					className="font-display text-display-2 uppercase tracking-normal text-text text-balance"
+				>
+					About
+				</h2>
+				<span className="ml-auto pb-1 text-right font-mono text-caption uppercase text-dim tracking-label tabular-nums">
+					The people / the picture
+				</span>
+			</div>
 
-					{/* Chevron */}
-					<motion.span
-						animate={{ rotate: isExpanded ? 180 : 0 }}
-						transition={
-							reducedMotion
-								? { duration: 0 }
-								: { type: 'spring', bounce: 0, duration: 0.32 }
-						}
-						className={cn(
-							'inline-flex h-10 w-10 items-center justify-center rounded-full',
-							'bg-white/[0.07] text-white/60',
-							'transition-all duration-200',
-							'group-hover:border-white/[0.18] group-hover:bg-white/[0.10] group-hover:text-white',
-							isExpanded && 'border-white/[0.18] bg-white/[0.10] text-white'
-						)}
-					>
-						<CaretDownIcon size={14} weight="bold" />
-					</motion.span>
-				</button>
+			{/* Editorial Tabs */}
+			<div ref={panelRef}>
+				<EditorialTabs defaultValue={defaultTab} ariaLabel="About this title">
+					<EditorialTabList className="mb-7">
+						{hasCast && <EditorialTabTrigger value="cast">Cast</EditorialTabTrigger>}
+						{hasCrew && <EditorialTabTrigger value="crew">Crew</EditorialTabTrigger>}
+						<EditorialTabTrigger value="details">Details</EditorialTabTrigger>
+					</EditorialTabList>
 
-				{/* ── Expandable Body ── */}
-				<AnimatePresence initial={false}>
-					{isExpanded && (
-						<motion.div
-							key="media-info-body"
-							id="media-info-body"
-							variants={reducedMotion ? reducedExpandVariants : expandVariants}
-							initial="collapsed"
-							animate="expanded"
-							exit="collapsed"
-							style={{ overflow: 'hidden' }}
-						>
-							<div className="border-t border-white/[0.07] px-4 pb-4 pt-3 md:px-6 md:pb-6 md:pt-4">
-								{/* Tab nav */}
-								<div
-									className="overflow-x-auto scrollbar-none"
-									role="tablist"
-									aria-label="Information sections"
-								>
-									<div className="flex min-w-max gap-1 rounded-2xl bg-black/20 p-1 ring-1 ring-inset ring-white/[0.06]">
-										{availableTabs.map((tab) => (
-											<button
-												key={tab.id}
-												type="button"
-												role="tab"
-												id={`media-info-tab-${tab.id}`}
-												aria-selected={activeTab === tab.id}
-												aria-controls="media-info-tabpanel"
-												tabIndex={activeTab === tab.id ? 0 : -1}
-												onClick={() => setActiveTab(tab.id)}
-												className={`isolate relative flex h-11 items-center justify-center rounded-xl px-4 text-[13px] font-semibold outline-none transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/70 ${
-													activeTab === tab.id
-														? 'text-zinc-950'
-														: 'text-white/55 hover:text-white'
-												}`}
-											>
-												{tab.label}
-												{typeof tab.count === 'number' && tab.count > 0 && (
-													<span
-														className={
-															activeTab === tab.id
-																? 'ml-1 text-black/60'
-																: 'ml-1 text-white/55'
-														}
-													>
-														{tab.count}
-													</span>
-												)}
-												{activeTab === tab.id && (
-													<motion.div
-														layoutId="informationShelfTab"
-														className="absolute inset-0 -z-10 rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.24)]"
-														transition={
-															reducedMotion
-																? { duration: 0 }
-																: {
-																		type: 'spring',
-																		bounce: 0,
-																		duration: 0.34,
-																	}
-														}
-													/>
-												)}
-											</button>
-										))}
-									</div>
-								</div>
-
-								{/* Tab content */}
-								<motion.div
-									key={activeTab}
-									id="media-info-tabpanel"
-									role="tabpanel"
-									aria-labelledby={`media-info-tab-${activeTab}`}
-									variants={stagger}
-									initial={reducedMotion ? false : 'hidden'}
-									animate="visible"
-									className="flex min-w-0 flex-col gap-6 pt-5 md:pt-6"
-								>
-									{activeTab === 'details' &&
-										(activeEpisode ? (
-											<EpisodeDetailPanel episode={activeEpisode} />
-										) : (
-											<motion.div
-												variants={fadeUp}
-												className="flex flex-col gap-5"
-											>
-												{/* Tagline + overview */}
-												<div className="flex flex-col gap-3">
-													{data?.tagline && (
-														<p className="text-[15px] font-medium leading-snug text-white/55">
-															&ldquo;{data.tagline}&rdquo;
-														</p>
-													)}
-													{data?.overview ? (
-														<p className="text-[13.5px] leading-relaxed text-white/60 md:text-sm max-w-prose">
-															{data.overview}
-														</p>
-													) : (
-														<p className="text-[13px] text-white/55">
-															No overview available.
-														</p>
-													)}
-												</div>
-
-												{/* Fact grid */}
-												{facts.length > 0 && (
-													<div className="grid grid-cols-2 gap-2 md:gap-2.5 md:grid-cols-3">
-														{facts.map(
-															({ label, value, icon: Icon }) => (
-																<div
-																	key={label}
-																	className="flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-transparent p-3.5 transition-colors duration-300 hover:bg-white/[0.03]"
-																>
-																	<div className="flex items-center gap-1.5">
-																		<Icon
-																			size={11}
-																			className="text-white/50"
-																		/>
-																		<p
-																			className={
-																				SECTION_LABEL
-																			}
-																		>
-																			{label}
-																		</p>
-																	</div>
-																	<p className="text-[13px] font-semibold leading-snug text-white/80">
-																		{value}
-																	</p>
-																</div>
-															)
-														)}
-													</div>
-												)}
-											</motion.div>
-										))}
-
-									{activeTab === 'watch' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-5"
-										>
-											<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-												<div>
-													<SectionHeading
-														title="Watch in India"
-														kicker={
-															providerTotal
-																? `${providerTotal} providers`
-																: undefined
-														}
-													/>
-													<p className="mt-1 text-[12.5px] text-white/55">
-														Provider availability via TMDB watch
-														providers, region IN.
-													</p>
-												</div>
-												<a
-													href={providerLink}
-													target="_blank"
-													rel="noreferrer"
-													className="inline-flex h-9 w-fit items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 text-[12px] font-bold text-white/80 transition-all duration-300 hover:bg-white/[0.07] hover:text-white active:scale-[0.98]"
-												>
-													Open providers
-													<ArrowSquareOutIcon size={14} weight="bold" />
-												</a>
-											</div>
-
-											{providerGroups.length > 0 ? (
-												<div className="space-y-4 border-t border-white/[0.06] pt-4">
-													{providerGroups.map((group) => (
-														<div key={group.label}>
-															<p
-																className={`${SECTION_LABEL} mb-2.5`}
-															>
-																{group.label}
-															</p>
-															<div className="flex flex-wrap gap-2">
-																{group.items.map((provider) => (
-																	<ProviderLogo
-																		key={provider.provider_id}
-																		provider={provider}
-																		title={title}
-																		year={releaseYear}
-																		fallback={providerLink}
-																	/>
-																))}
-															</div>
-														</div>
-													))}
-												</div>
-											) : (
-												<div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-													<p className="text-sm font-medium text-white/50">
-														No India streaming providers are listed for
-														this title yet.
-													</p>
-												</div>
-											)}
-										</motion.div>
-									)}
-
-									{activeTab === 'cast' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-4"
-										>
-											<SectionHeading
-												title="Cast & crew"
-												kicker={`${people.length} people`}
-											/>
-											<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
-												{people.map((person) => (
-													<div key={person.id} className="group">
-														<div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-white/[0.04]">
-															{person.profile_path ? (
-																<img
-																	src={tmdbImage(
-																		person.profile_path,
-																		'w185'
-																	)}
-																	alt={person.name}
-																	loading="lazy"
-																	className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-																	onError={(e) => {
-																		(
-																			e.currentTarget as HTMLImageElement
-																		).style.display = 'none';
-																	}}
-																/>
-															) : (
-																<div className="flex h-full w-full items-center justify-center">
-																	<span className="text-[10px] font-bold text-white/55 uppercase tracking-wider">
-																		{person.name
-																			?.split(' ')
-																			.map((n) => n[0])
-																			.join('')}
-																	</span>
-																</div>
-															)}
-															<div className="absolute inset-0 pointer-events-none rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" />
-														</div>
-														<h4 className="mt-2 truncate text-[12px] font-semibold text-white/80">
-															{person.name}
-														</h4>
-														<p className="truncate text-[11px] text-white/55">
-															{person.role}
-														</p>
-													</div>
-												))}
-											</div>
-										</motion.div>
-									)}
-
-									{activeTab === 'trailers' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-4"
-										>
-											<SectionHeading
-												title="Trailers & previews"
-												kicker={`${videos.length} videos`}
-											/>
-											<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-												{videos.map((video, i) => (
-													<motion.div
-														key={video.id}
-														initial={{ opacity: 0, y: 8 }}
-														animate={{ opacity: 1, y: 0 }}
-														transition={{
-															delay: 0.05 + i * 0.04,
-															type: 'spring',
-															stiffness: 300,
-															damping: 28,
-														}}
-													>
-														<button
-															type="button"
-															onClick={() =>
-																setActiveVideo(video.key)
-															}
-															className="group relative aspect-video w-full overflow-hidden rounded-xl bg-white/[0.04] text-left transition-transform duration-200 active:scale-[0.98]"
-														>
-															<img
-																src={`https://img.youtube.com/vi/${video.key}/hqdefault.jpg`}
-																alt={video.name}
-																loading="lazy"
-																className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-																onError={(e) => {
-																	(
-																		e.currentTarget as HTMLImageElement
-																	).style.display = 'none';
-																}}
-															/>
-															<div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-															<div className="absolute inset-0 flex items-center justify-center">
-																<div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-transform duration-300 group-hover:scale-110">
-																	<PlayIcon
-																		weight="fill"
-																		size={16}
-																	/>
-																</div>
-															</div>
-														</button>
-														<p className="mt-2 text-[13px] font-medium text-white/60 line-clamp-1">
-															{video.name}
-														</p>
-													</motion.div>
-												))}
-											</div>
-										</motion.div>
-									)}
-
-									{activeTab === 'links' && (
-										<motion.div
-											variants={fadeUp}
-											className="flex flex-col gap-4"
-										>
-											<SectionHeading
-												title="External pages"
-												kicker={`${externalLinks.length} sources`}
-											/>
-											<div className="flex flex-col gap-1">
-												{externalLinks.map((link, i) => (
-													<motion.a
-														key={link.label}
-														href={link.href || '#'}
-														target="_blank"
-														rel="noreferrer"
-														initial={{ opacity: 0, x: -4 }}
-														animate={{ opacity: 1, x: 0 }}
-														transition={{
-															delay: 0.04 + i * 0.03,
-															type: 'spring',
-															stiffness: 300,
-															damping: 28,
-														}}
-														className="group flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2.5 transition-colors duration-200 hover:bg-white/[0.03]"
-													>
-														<span className="flex flex-col">
-															<span className="text-[13px] font-semibold text-white/70 transition-colors duration-200 group-hover:text-white">
-																{link.label}
-															</span>
-															{link.detail && (
-																<span className="text-[11px] text-white/55">
-																	{link.detail}
-																</span>
-															)}
-														</span>
-														<ArrowSquareOutIcon
-															size={14}
-															weight="bold"
-															className="text-white/50 transition-colors duration-200 group-hover:text-white"
-														/>
-													</motion.a>
-												))}
-											</div>
-										</motion.div>
-									)}
-								</motion.div>
-							</div>
-						</motion.div>
+					{/* Cast Tab Content */}
+					{hasCast && (
+						<EditorialTabContent value="cast">
+							<ul className="-mx-(--gutter) flex snap-x snap-mandatory scroll-px-(--gutter) gap-3 overflow-x-auto px-(--gutter) scrollbar-none md:mx-0 md:grid md:grid-cols-4 md:gap-x-5 md:gap-y-8 md:overflow-visible md:px-0 lg:grid-cols-8">
+								{cast.slice(0, CAST_PORTRAITS).map((person) => (
+									<CastPortrait key={person.id} person={person} />
+								))}
+							</ul>
+							{cast.length > CAST_PORTRAITS && (
+								<p className="mt-8 max-w-prose text-small leading-relaxed text-dim">
+									<span className="mr-3 font-mono text-micro uppercase tracking-label text-muted-foreground">
+										Also starring
+									</span>
+									{cast
+										.slice(CAST_PORTRAITS)
+										.map((p) => p.name)
+										.join(', ')}
+								</p>
+							)}
+						</EditorialTabContent>
 					)}
-				</AnimatePresence>
-			</motion.div>
 
-			{activeVideo && (
-				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-background/92 px-4 backdrop-blur-sm"
-					onClick={() => setActiveVideo(null)}
-				>
-					<div
-						className="relative aspect-video w-full max-w-5xl"
-						onClick={(event) => event.stopPropagation()}
-					>
-						<button
-							type="button"
-							onClick={() => setActiveVideo(null)}
-							className="absolute -top-11 right-0 inline-flex items-center gap-1.5 text-sm font-medium text-white/60 transition-colors duration-200 hover:text-white"
-						>
-							<XIcon size={16} />
-							Close
-						</button>
-						<iframe
-							src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1&rel=0`}
-							title="Trailer"
-							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-							allowFullScreen
-							className="h-full w-full rounded-2xl border border-white/10"
-						/>
-					</div>
-				</div>
-			)}
+					{/* Crew Tab Content */}
+					{hasCrew && (
+						<EditorialTabContent value="crew">
+							<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-8 gap-y-6">
+								{crew.map((member, idx) => (
+									<div
+										key={`${member.name}-${idx}`}
+										className="pb-4 border-b border-line"
+									>
+										<span className="block mb-2 font-mono text-caption text-dim uppercase tracking-label truncate">
+											{member.job || 'Crew'}
+										</span>
+										<span className="font-semibold text-title text-text line-clamp-2">
+											{member.name}
+										</span>
+									</div>
+								))}
+							</div>
+						</EditorialTabContent>
+					)}
+
+					{/* Details Tab Content */}
+					<EditorialTabContent value="details">
+						<dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-0">
+							{facts.map(([label, value]) => (
+								<div key={label} className="py-3.5 border-b border-line">
+									<dt className="font-mono text-caption uppercase text-dim tracking-label">
+										{label}
+									</dt>
+									<dd className="mt-2.5 font-sans text-body text-text tabular-nums">
+										{value}
+									</dd>
+								</div>
+							))}
+						</dl>
+					</EditorialTabContent>
+				</EditorialTabs>
+			</div>
 		</section>
 	);
 }

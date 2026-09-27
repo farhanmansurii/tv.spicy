@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { WarningCircleIcon } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface PageFetchErrorProps {
@@ -11,8 +12,8 @@ interface PageFetchErrorProps {
 }
 
 export function PageFetchError({
-	title = 'Something went wrong',
-	description = 'We couldn’t load this page’s content. Try again in a moment.',
+	title = 'The projector jammed.',
+	description = 'We couldn’t load this page from the shelf. Try again in a moment.',
 	className,
 }: PageFetchErrorProps) {
 	const [isRetrying, setIsRetrying] = useState(false);
@@ -28,31 +29,28 @@ export function PageFetchError({
 		<div
 			role="alert"
 			aria-live="assertive"
-			className={cn('flex min-h-[60vh] items-center justify-center px-4 py-16', className)}
+			className={cn(
+				'flex min-h-error items-center justify-center px-gutter py-16',
+				className
+			)}
 		>
-			<div className="w-full max-w-md rounded-3xl bg-white/[0.025] px-6 py-10 text-center ring-1 ring-inset ring-white/[0.06]">
-				<WarningCircleIcon
-					size={36}
-					weight="fill"
-					aria-hidden="true"
-					className="mx-auto text-[#FF453A]"
-				/>
-				<h1 className="mt-4 text-2xl font-bold tracking-[-0.02em] text-white">{title}</h1>
-				<p className="mt-2 text-sm leading-relaxed text-white/70">{description}</p>
-				<button
-					type="button"
-					onClick={handleRetry}
-					disabled={isRetrying}
-					aria-busy={isRetrying}
-					className={cn(
-						'mt-6 min-h-11 rounded-full bg-white px-6 text-sm font-semibold text-black',
-						'disabled:opacity-60',
-						'transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:active:scale-100',
-						'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black'
-					)}
-				>
-					{isRetrying ? 'Trying…' : 'Try again'}
-				</button>
+			<div className="w-full max-w-prose">
+				<p className="flex items-center gap-2 font-mono text-caption uppercase tracking-label text-destructive">
+					<WarningCircleIcon size={16} weight="fill" aria-hidden="true" />
+					Error
+				</p>
+
+				<h1 className="mt-4 font-display text-display-3 uppercase text-text text-balance">
+					{title}
+				</h1>
+
+				<p className="mt-3 text-lede text-soft max-w-prose-secondary">{description}</p>
+
+				<div className="mt-6 flex flex-wrap items-center gap-3">
+					<Button onClick={handleRetry} disabled={isRetrying} aria-busy={isRetrying}>
+						{isRetrying ? 'Trying…' : 'Try again'}
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

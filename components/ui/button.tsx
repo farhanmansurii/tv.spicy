@@ -1,108 +1,106 @@
 import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
+import { Slot } from 'radix-ui';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 export type GlowVariant = 'light' | 'primary' | 'accent';
 
 const buttonVariants = cva(
-	// Base: cinematic character — tight tracking, semibold, purposeful transitions
 	[
 		'inline-flex items-center justify-center gap-2 whitespace-nowrap',
-		'rounded-md text-sm font-semibold tracking-tight',
-		'transition-all duration-150 ease-out',
-		'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+		'rounded-full text-sm font-semibold tracking-tight',
+		'transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-150 ease-out',
 		'disabled:pointer-events-none disabled:opacity-40',
 		'[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
-		// Tactile feedback: subtle press-down
-		'active:scale-[0.98]',
+		'active:scale-97 motion-reduce:active:scale-100',
 	],
 	{
 		variants: {
 			variant: {
-				// Primary CTA: white on black. The hero action.
 				default:
-					'bg-primary text-primary-foreground hover:bg-primary/[0.92] active:bg-primary/[0.85]',
-				// Destructive: red signal. Use sparingly.
+					'bg-brand text-brand-foreground can-hover:bg-brand-hover active:bg-brand-hover',
+				brand: 'bg-brand text-brand-foreground can-hover:bg-brand-hover active:bg-brand-hover',
 				destructive:
-					'bg-destructive text-destructive-foreground hover:bg-destructive/[0.92] active:bg-destructive/[0.85]',
-				// Outline: border-only for secondary actions on dark surfaces.
+					'bg-destructive text-destructive-foreground can-hover:bg-destructive/[0.92] active:bg-destructive/[0.85]',
 				outline:
-					'border border-white/10 bg-transparent text-foreground hover:bg-white/[0.06] hover:border-white/20 hover:text-white active:bg-white/[0.10]',
-				// Secondary: dark surface with subtle border. For grouped actions.
+					'border border-border-strong bg-transparent text-foreground can-hover:bg-foreground/[0.06] can-hover:border-foreground/20 can-hover:text-foreground active:bg-foreground/[0.10]',
 				secondary:
-					'bg-secondary text-secondary-foreground border border-white/[0.08] hover:bg-secondary/80 hover:border-white/[0.12] active:bg-secondary/70',
-				// Ghost: minimal. For icon buttons, toolbar actions, low-emphasis.
+					'bg-secondary text-secondary-foreground border border-border can-hover:bg-secondary/80 can-hover:border-border-strong active:bg-secondary/70',
 				ghost:
-					'text-foreground hover:bg-white/[0.06] hover:text-white active:bg-white/[0.10]',
-				// Link: text-only navigation. No bg, no border.
-				link: 'text-primary underline-offset-4 hover:underline',
+					'bg-foreground/[0.08] border border-border-strong text-foreground backdrop-blur-md can-hover:bg-foreground/[0.14] can-hover:border-foreground/40 active:bg-foreground/[0.10]',
+				link: 'text-primary underline-offset-4 can-hover:underline',
+				glass: 'rounded-full border border-border bg-foreground/[0.06] text-foreground/70 can-hover:bg-foreground/[0.10] can-hover:text-foreground can-hover:border-border-strong active:bg-foreground/[0.14]',
 			},
+			shape: { default: '', pill: 'rounded-full' },
 			size: {
-				// Touch target: 44px minimum
-				default: 'h-11 px-6',
-				sm: 'h-9 px-4 text-xs',
-				lg: 'h-12 px-8 text-base',
-				// Icon-only: square, still 44px
-				icon: 'h-11 w-11 p-0',
+				default: 'h-12 px-6 rounded-full font-semibold text-base gap-2.5',
+				sm: 'h-9 px-4 text-micro rounded-full',
+				lg: 'h-12 px-8 text-base rounded-full',
+				xl: 'h-12 px-5 text-base rounded-full md:h-13 md:px-8',
+				icon: 'hit-target h-10 w-10 p-0 rounded-full',
+				'icon-lg': 'hit-target size-12 p-0 rounded-full',
 			},
 		},
+		compoundVariants: [
+			{
+				variant: 'ghost',
+				size: 'icon',
+				className:
+					'border border-border-strong bg-background/40 can-hover:bg-foreground/[0.14] can-hover:border-foreground/50 disabled:text-muted-foreground disabled:opacity-50',
+			},
+			{
+				variant: 'ghost',
+				size: 'icon-lg',
+				className:
+					'border border-border-strong bg-background/40 can-hover:bg-foreground/[0.14] can-hover:border-foreground/50 disabled:text-muted-foreground disabled:opacity-50',
+			},
+		],
 		defaultVariants: {
 			variant: 'default',
 			size: 'default',
+			shape: 'default',
 		},
 	}
 );
 
 const glowStyles: Record<GlowVariant, string> = {
-	light: 'shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_28px_rgba(255,255,255,0.22)] hover:-translate-y-px active:translate-y-0',
-	primary:
-		'shadow-[0_0_20px_rgba(255,255,255,0.12)] hover:shadow-[0_0_28px_rgba(255,255,255,0.18)] hover:-translate-y-px active:translate-y-0',
-	accent:
-		'shadow-[0_0_20px_rgba(255,255,255,0.10)] hover:shadow-[0_0_28px_rgba(255,255,255,0.16)] hover:-translate-y-px active:translate-y-0',
+	light: 'shadow-glow-light can-hover:shadow-glow-light-hover can-hover:-translate-y-px active:translate-y-0',
+	primary: 'shadow-glow-primary can-hover:shadow-glow-primary-hover can-hover:-translate-y-px active:translate-y-0',
+	accent: 'shadow-glow-accent can-hover:shadow-glow-accent-hover can-hover:-translate-y-px active:translate-y-0',
 };
 
-export interface ButtonProps
-	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-		VariantProps<typeof buttonVariants> {
-	asChild?: boolean;
-	/** Purposeful glow for hero CTAs. Never default. */
-	glow?: boolean;
-	glowVariant?: GlowVariant;
+type ButtonProps = React.ComponentProps<'button'> &
+	VariantProps<typeof buttonVariants> & {
+		asChild?: boolean;
+		/** Purposeful glow for hero CTAs. Never default. */
+		glow?: boolean;
+		glowVariant?: GlowVariant;
+	};
+
+function Button({
+	className,
+	variant = 'default',
+	size = 'default',
+	shape = 'default',
+	asChild = false,
+	glow = false,
+	glowVariant = 'light',
+	...props
+}: ButtonProps) {
+	const Comp = asChild ? Slot.Root : 'button';
+	return (
+		<Comp
+			data-slot="button"
+			data-variant={variant}
+			data-size={size}
+			className={cn(
+				buttonVariants({ variant, size, shape }),
+				glow && glowStyles[glowVariant],
+				className
+			)}
+			{...props}
+		/>
+	);
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-	(
-		{ className, variant, size, asChild = false, glow = false, glowVariant = 'light', ...props },
-		ref
-	) => {
-		const Comp = asChild ? Slot : 'button';
-		return (
-			<Comp
-				className={cn(buttonVariants({ variant, size }), glow && glowStyles[glowVariant], className)}
-				ref={ref}
-				{...props}
-			/>
-		);
-	}
-);
-Button.displayName = 'Button';
-
-// GlowingButton kept as thin alias for backward compatibility.
-// Prefer <Button glow> going forward.
-const GlowingButton = React.forwardRef<
-	HTMLButtonElement,
-	Omit<ButtonProps, 'glow'> & { glowVariant?: GlowVariant; iconOnly?: boolean }
->(({ glowVariant = 'light', iconOnly = false, className, size, ...props }, ref) => (
-	<Button
-		ref={ref}
-		glow
-		glowVariant={glowVariant}
-		size={iconOnly ? 'icon' : size}
-		className={cn('rounded-full', className)}
-		{...props}
-	/>
-));
-GlowingButton.displayName = 'GlowingButton';
-
-export { Button, buttonVariants, GlowingButton };
+export { Button, buttonVariants, type ButtonProps };

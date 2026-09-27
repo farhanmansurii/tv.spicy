@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react';
 import { tmdbImage } from '@/lib/tmdb-image';
+import { cn } from '@/lib/utils';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -17,6 +18,39 @@ interface CastMember {
 
 interface CastCrewSectionProps {
 	credits: { cast?: CastMember[] };
+}
+
+function CastPortrait({ actor }: { actor: CastMember }) {
+	const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+	const initials = actor.name
+		.split(/\s+/)
+		.map((word) => word[0])
+		.filter(Boolean)
+		.slice(0, 2)
+		.join('');
+
+	return (
+		<div className="relative aspect-2/3 overflow-hidden rounded-2xl bg-white/5 mb-2.5 md:mb-3 will-change-transform transition-transform duration-(--duration-ui) ease-spring group-can-hover:scale-105">
+			<div className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+				<span className="font-display text-xl uppercase text-white/25">
+					{initials || 'No image'}
+				</span>
+			</div>
+			{actor.profile_path && status !== 'error' && (
+				<img
+					src={tmdbImage(actor.profile_path, 'w185')}
+					alt={actor.name}
+					loading="lazy"
+					onLoad={() => setStatus('loaded')}
+					onError={() => setStatus('error')}
+					className={cn(
+						'absolute inset-0 h-full w-full object-cover transition-opacity duration-(--duration-ui)',
+						status === 'loaded' ? 'opacity-100' : 'opacity-0'
+					)}
+				/>
+			)}
+		</div>
+	);
 }
 
 function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
@@ -118,7 +152,7 @@ function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
 
 	return (
 		<section ref={sectionRef} className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
+			<div className="w-full px-gutter">
 				{/* Header */}
 				<div ref={headerRef} className="flex items-center justify-between mb-5 md:mb-6">
 					<div className="flex items-baseline gap-3">
@@ -132,7 +166,7 @@ function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
 					<button
 						onClick={() => setIsExpanded((p) => !p)}
 						aria-expanded={isExpanded}
-						className="inline-flex items-center gap-1 text-xs md:text-sm font-medium text-white/50 hover:text-white/80 transition-colors duration-200"
+						className="inline-flex items-center gap-1 text-xs md:text-sm font-medium text-white/50 can-hover:text-white/80 transition-colors duration-200"
 					>
 						{isExpanded ? (
 							<>
@@ -150,24 +184,11 @@ function CastCrewSectionComponent({ credits }: CastCrewSectionProps) {
 				<ul ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-3 gap-y-6 md:gap-x-4 md:gap-y-8">
 					{displayedCast.map((actor) => (
 						<li key={actor.id} data-cast-card className="group">
-							<div className="relative aspect-[2/3] overflow-hidden rounded-2xl bg-white/5 mb-2.5 md:mb-3 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]">
-								{actor.profile_path ? (
-									<img
-										src={tmdbImage(actor.profile_path, 'w185')}
-										alt={actor.name}
-										loading="lazy"
-										className="h-full w-full object-cover transition-opacity duration-300"
-									/>
-								) : (
-									<div className="absolute inset-0 flex items-center justify-center text-white/20 text-xs font-medium">
-										No image
-									</div>
-								)}
-							</div>
+							<CastPortrait actor={actor} />
 							<h3 className="text-xs md:text-sm font-semibold text-white truncate tracking-tight">
 								{actor.name}
 							</h3>
-							<p className="text-[11px] md:text-xs text-white/40 truncate mt-0.5">
+							<p className="text-xs text-white/40 truncate mt-0.5">
 								{actor.character}
 							</p>
 						</li>

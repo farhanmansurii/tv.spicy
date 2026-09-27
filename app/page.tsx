@@ -1,9 +1,8 @@
 import { fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
 import Container from '@/components/shared/containers/container';
 import { Show } from '@/lib/types';
-import HeroCarousel, {
-	type HeroCarouselProps,
-} from '@/components/features/media/carousel/hero-carousel';
+import type { HeroCarouselProps } from '@/components/features/media/carousel/hero-carousel';
+import { EditorialHero } from '@/components/features/home/editorial-hero';
 import DataRow from '@/components/features/media/row/data-row';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
@@ -54,22 +53,15 @@ function HomePageContent({
 	return (
 		<div className="min-h-screen bg-background text-foreground pb-20">
 			<div className="-mt-16 lg:mt-0">
-				<HeroCarousel
-					shows={heroShows as unknown as HeroCarouselProps['shows']}
-					type="tv"
-				/>
+				<EditorialHero shows={heroShows as unknown as HeroCarouselProps['shows']} />
 			</div>
 
-			{/* Apple TV-style content rows with negative margin overlap for cinematic feel */}
-			<div className="relative z-10 -mt-12 md:-mt-20">
-				<div className="bg-gradient-to-t from-background via-background to-transparent h-16 md:h-24" />
-			</div>
-
-			<Container className="w-full relative z-10">
-				<div className="flex flex-col space-y-4 md:space-y-8">
+			<Container className="relative z-10 w-full pt-7 md:pt-12">
+				<div className="flex flex-col">
 					<HomePersonalizedRows section="continue-watching" />
 
 					<DataRow
+						rowNumber={1}
 						endpoint="tv/popular"
 						text={BROWSE_CATEGORIES['popular-tonight'].title}
 						type="tv"
@@ -77,10 +69,11 @@ function HomePageContent({
 						initialData={tvPopular as unknown as Show[]}
 					/>
 
-					<HomePersonalizedRows section="saved" />
+					<HomePersonalizedRows section="saved" sentinelClassName="-mt-1" />
 
 					{/* Pre-fetched rows */}
 					<DataRow
+						rowNumber={2}
 						endpoint="trending/tv/week"
 						text={BROWSE_CATEGORIES['binge-worthy-series'].title}
 						type="tv"
@@ -88,8 +81,9 @@ function HomePageContent({
 						initialData={trendingTV as unknown as Show[]}
 					/>
 
-					<Suspense fallback={<MediaLoader withHeader />}>
+					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
 						<DataRow
+							rowNumber={3}
 							endpoint="tv/on_the_air"
 							text={BROWSE_CATEGORIES['airing-this-week'].title}
 							type="tv"
@@ -97,8 +91,9 @@ function HomePageContent({
 						/>
 					</Suspense>
 
-					<Suspense fallback={<MediaLoader withHeader />}>
+					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
 						<DataRow
+							rowNumber={4}
 							endpoint="tv/top_rated"
 							text={BROWSE_CATEGORIES['critically-acclaimed-tv'].title}
 							type="tv"
@@ -107,6 +102,7 @@ function HomePageContent({
 					</Suspense>
 
 					<DataRow
+						rowNumber={5}
 						endpoint="trending/movie/week"
 						text={BROWSE_CATEGORIES['blockbuster-hits'].title}
 						type="movie"
@@ -115,8 +111,9 @@ function HomePageContent({
 						initialData={trendingMovies as unknown as Show[]}
 					/>
 
-					<Suspense fallback={<MediaLoader withHeader />}>
+					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
 						<DataRow
+							rowNumber={6}
 							endpoint="movie/now_playing"
 							text={BROWSE_CATEGORIES['fresh-in-theaters'].title}
 							type="movie"
@@ -124,8 +121,9 @@ function HomePageContent({
 						/>
 					</Suspense>
 
-					<Suspense fallback={<MediaLoader withHeader />}>
+					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
 						<DataRow
+							rowNumber={7}
 							endpoint="movie/popular"
 							text={BROWSE_CATEGORIES['cult-classics-fan-favorites'].title}
 							type="movie"
@@ -133,8 +131,9 @@ function HomePageContent({
 						/>
 					</Suspense>
 
-					<Suspense fallback={<MediaLoader withHeader />}>
+					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
 						<DataRow
+							rowNumber={8}
 							endpoint="movie/top_rated"
 							text={BROWSE_CATEGORIES['cinema-hall-of-fame'].title}
 							type="movie"

@@ -15,19 +15,28 @@ export default function GlobalError({
 	}, [error]);
 
 	return (
-		<html>
-			<body>
-				<div className="min-h-screen flex items-center justify-center p-6">
-					<div className="w-full max-w-md text-center space-y-4">
-						<h2 className="text-2xl font-bold">Unexpected error</h2>
-						<p className="text-muted-foreground">
-							We hit an unexpected issue. Please try again.
+		<html lang="en">
+			<body className="bg-background text-foreground antialiased">
+				<main className="flex min-h-svh flex-col justify-center px-gutter py-16">
+					<div className="max-w-prose">
+						<p className="font-mono text-caption uppercase tracking-label text-destructive">
+							Error
 						</p>
-						<div className="flex items-center justify-center gap-3">
+
+						<h1 className="mt-4 font-display text-display-2 uppercase text-text text-balance">
+							The projector jammed.
+						</h1>
+
+						<p className="mt-4 text-lede text-soft max-w-prose">
+							The reel stopped mid-frame and we could not find your place in it. Try
+							again, and if it keeps jamming the shelf is worth a look.
+						</p>
+
+						<div className="mt-8">
 							<Button onClick={() => reset()}>Try again</Button>
 						</div>
 					</div>
-				</div>
+				</main>
 			</body>
 		</html>
 	);

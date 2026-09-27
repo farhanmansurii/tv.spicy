@@ -86,6 +86,19 @@ test('basic detail failures throw instead of resolving to null', async () => {
 	await assert.rejects(() => fetchBasicDetailsTMDB('603', 'movie'), /TMDB API Error \(502\)/);
 });
 
+test('basic details only request credits when cast is asked for', async () => {
+	let requested = '';
+	globalThis.fetch = async (input) => {
+		requested = String(input);
+		return jsonResponse({ id: 603, title: 'The Matrix' });
+	};
+
+	const { fetchBasicDetailsTMDB } = await import('./tmdb-client');
+	const details = await fetchBasicDetailsTMDB('603', 'movie');
+	assert.equal(details?.title, 'The Matrix');
+	assert.doesNotMatch(requested, /append_to_response/);
+});
+
 test('429 responses are retried after honouring Retry-After', async () => {
 	let attempts = 0;
 	const startedAt = Date.now();

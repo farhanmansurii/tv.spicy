@@ -148,7 +148,7 @@ function StorylineSectionComponent({ data, type, credits }: StorylineSectionProp
 
 	return (
 		<section ref={sectionRef} className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
+			<div className="w-full px-gutter">
 				{/* Header */}
 				<div ref={headerRef} className="flex items-center justify-between mb-5 md:mb-6">
 					<h2 className="text-lg md:text-xl font-semibold text-white tracking-tight">
@@ -156,7 +156,7 @@ function StorylineSectionComponent({ data, type, credits }: StorylineSectionProp
 					</h2>
 					<button
 						onClick={handleShare}
-						className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 text-white/70 hover:text-white px-4 py-2 text-xs font-medium backdrop-blur-md transition-all duration-300 ease-cinematic active:scale-95"
+						className="inline-flex items-center gap-2 rounded-full bg-white/10 can-hover:bg-white/15 text-white/70 can-hover:text-white px-4 py-2 text-xs font-medium backdrop-blur-md transition-[color,background-color,border-color,transform,opacity] duration-(--duration-ui) ease-cinematic active:scale-95"
 						aria-label="Share"
 					>
 						<ShareNetworkIcon size={14} />
@@ -167,7 +167,7 @@ function StorylineSectionComponent({ data, type, credits }: StorylineSectionProp
 				{/* Synopsis */}
 				<p
 					ref={synopsisRef}
-					className={`text-sm md:text-base text-white/60 leading-relaxed max-w-3xl transition-all duration-500 ease-cinematic ${
+					className={`text-sm md:text-base text-white/60 leading-relaxed max-w-3xl transition-[color,background-color,border-color,transform,opacity] duration-(--duration-ui) ease-cinematic ${
 						isExpanded ? '' : 'line-clamp-3'
 					}`}
 				>
@@ -178,7 +178,7 @@ function StorylineSectionComponent({ data, type, credits }: StorylineSectionProp
 				{synopsis.length > 180 && (
 					<button
 						onClick={() => setIsExpanded((p) => !p)}
-						className="inline-flex items-center gap-1 mt-3 text-xs md:text-sm font-medium text-[#0A84FF] hover:text-[#0A84FF]/80 transition-colors duration-200"
+						className="inline-flex items-center gap-1 mt-3 text-xs md:text-sm font-medium text-ring can-hover:text-ring/80 transition-colors duration-200"
 					>
 						{isExpanded ? (
 							<>

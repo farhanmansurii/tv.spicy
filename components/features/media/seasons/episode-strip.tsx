@@ -1,14 +1,15 @@
 'use client';
 
-import { memo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { EpisodeCard } from './episode-card';
+import React, { memo, useRef, useState, useEffect } from 'react';
+import { useGSAP } from '@gsap/react';
+import { cardCascade, isReducedMotion, skeletonResolve } from '@/lib/motion';
 import { EpisodeListRow } from './episode-list-row';
+import { cn } from '@/lib/utils';
 import type { Episode } from '@/lib/types';
 
 export type EpisodeViewMode = 'grid' | 'list';
 
-interface EpisodeStripProps {
+export interface EpisodeStripProps {
 	episodes: Episode[];
 	activeEpisodeId?: number | string | null;
 	onEpisodeClick: (episode: Episode, event?: React.MouseEvent) => void;
@@ -16,222 +17,134 @@ interface EpisodeStripProps {
 	viewMode?: EpisodeViewMode;
 	progressEpisodeId?: number | null;
 	progressPercent?: number | null;
+	className?: string;
 }
 
-/* ── Skeletons ─────────────────────────────────────────────────────────────── */
-
-function GridSkeleton() {
+function EpisodeStripSkeleton() {
 	return (
-		<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+		<ul className="flex flex-col m-0 p-0 list-none w-full">
 			{Array.from({ length: 6 }).map((_, i) => (
-				<motion.div
+				<li
 					key={i}
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ delay: i * 0.05 }}
-					className="rounded-2xl overflow-hidden"
-					style={{
-						background: 'rgba(255,255,255,0.04)',
-						border: '1px solid rgba(255,255,255,0.05)',
-					}}
+					className="flex w-full items-start md:items-center gap-3 md:gap-8 py-5 border-b border-line"
 				>
-					<div className="aspect-video relative overflow-hidden">
-						<motion.div
-							className="absolute inset-0"
-							style={{
-								background:
-									'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)',
-							}}
-							animate={{ x: ['-100%', '100%'] }}
-							transition={{
-								duration: 1.5,
-								ease: 'easeInOut',
-								repeat: Infinity,
-								delay: i * 0.12,
-							}}
-						/>
+					<div className="w-8 md:w-16 h-8 bg-surface rounded animate-pulse shrink-0" />
+					<div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-3 md:gap-6 lg:gap-8">
+						<div className="aspect-video w-full md:w-52 lg:w-60 rounded-sm bg-surface animate-pulse shrink-0" />
+						<div className="flex-1 min-w-0 flex flex-col gap-2">
+							<div className="h-4 w-1/3 bg-surface rounded animate-pulse" />
+							<div className="h-3 w-1/4 bg-surface rounded animate-pulse" />
+							<div className="h-3 w-2/3 bg-surface rounded animate-pulse" />
+						</div>
+						<div className="h-9 w-28 rounded-full bg-surface animate-pulse shrink-0" />
 					</div>
-					<div className="px-3 pt-2.5 pb-3 space-y-1.5">
-						<div
-							className="h-2 w-12 rounded"
-							style={{ background: 'rgba(255,255,255,0.05)' }}
-						/>
-						<div
-							className="h-3.5 w-3/4 rounded"
-							style={{ background: 'rgba(255,255,255,0.07)' }}
-						/>
-						<div
-							className="h-2.5 w-full rounded"
-							style={{ background: 'rgba(255,255,255,0.04)' }}
-						/>
-					</div>
-				</motion.div>
+				</li>
 			))}
-		</div>
+		</ul>
 	);
 }
-
-function ListSkeleton() {
-	return (
-		<div className="flex flex-col gap-0.5">
-			{Array.from({ length: 6 }).map((_, i) => (
-				<motion.div
-					key={i}
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ delay: i * 0.04 }}
-					className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-					style={{ background: 'rgba(255,255,255,0.02)' }}
-				>
-					<div
-						className="flex-shrink-0 w-7 h-4 rounded"
-						style={{ background: 'rgba(255,255,255,0.04)' }}
-					/>
-					<div
-						className="flex-shrink-0 w-28 aspect-video rounded-xl relative overflow-hidden"
-						style={{ background: 'rgba(255,255,255,0.04)' }}
-					>
-						<motion.div
-							className="absolute inset-0"
-							style={{
-								background:
-									'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)',
-							}}
-							animate={{ x: ['-100%', '100%'] }}
-							transition={{
-								duration: 1.5,
-								ease: 'easeInOut',
-								repeat: Infinity,
-								delay: i * 0.1,
-							}}
-						/>
-					</div>
-					<div className="flex-1 space-y-1.5">
-						<div
-							className="h-2.5 w-1/2 rounded"
-							style={{ background: 'rgba(255,255,255,0.06)' }}
-						/>
-						<div
-							className="h-2 w-4/5 rounded"
-							style={{ background: 'rgba(255,255,255,0.04)' }}
-						/>
-					</div>
-				</motion.div>
-			))}
-		</div>
-	);
-}
-
-/* ── Empty State ───────────────────────────────────────────────────────────── */
 
 function EmptyEpisodes() {
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: 8 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ type: 'spring', stiffness: 200, damping: 24 }}
-			className="flex flex-col items-center justify-center py-16 gap-3"
-		>
-			<div
-				className="w-12 h-12 rounded-2xl flex items-center justify-center"
-				style={{
-					background: 'rgba(255,255,255,0.04)',
-					border: '1px solid rgba(255,255,255,0.06)',
-				}}
-			>
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					strokeWidth="1.5"
-					className="text-white/50"
-				>
-					<path d="M7 4v16M17 4v16M3 8h4M3 16h4M17 8h4M17 16h4" strokeLinecap="round" />
-				</svg>
-			</div>
-			<p className="text-sm font-medium text-white/70">No episodes available</p>
-			<p className="text-xs text-white/55">Try selecting a different season</p>
-		</motion.div>
+		<div className="flex flex-col items-center justify-center gap-2 border-y border-line bg-band px-5 py-16 text-center">
+			<p className="font-display text-4xl uppercase leading-none text-foreground m-0">
+				No episodes on the reel.
+			</p>
+			<p className="font-mono text-caption uppercase tracking-label text-dim m-0">
+				Try selecting another season above.
+			</p>
+		</div>
 	);
 }
-
-/* ── Main ──────────────────────────────────────────────────────────────────── */
 
 function EpisodeStripComponent({
 	episodes,
 	activeEpisodeId,
 	onEpisodeClick,
-	isLoading,
-	viewMode = 'grid',
+	isLoading = false,
 	progressEpisodeId,
 	progressPercent,
+	className,
 }: EpisodeStripProps) {
-	if (isLoading) {
-		return (
-			<div className="w-full">
-				{viewMode === 'grid' && <GridSkeleton />}
-				{viewMode === 'list' && <ListSkeleton />}
-			</div>
-		);
-	}
+	const [showAll, setShowAll] = useState(false);
+	const listRef = useRef<HTMLUListElement | null>(null);
+	const listKey = `${episodes[0]?.id ?? 'empty'}-${episodes.length}`;
 
-	if (!episodes.length) {
-		return <EmptyEpisodes />;
-	}
+	const visibleEpisodes = showAll ? episodes : episodes.slice(0, 12);
+	const hasMore = episodes.length > 12 && !showAll;
+
+	// Reset showAll when episodes change (e.g. season switched)
+	useEffect(() => {
+		setShowAll(false);
+	}, [episodes]);
+
+	useGSAP(
+		() => {
+			skeletonResolve(listRef.current);
+		},
+		{ scope: listRef, dependencies: [listKey] }
+	);
+
+	const handleShowAll = () => {
+		setShowAll(true);
+		if (isReducedMotion()) return;
+		requestAnimationFrame(() => {
+			cardCascade(listRef.current?.querySelectorAll('li:nth-child(n+13)') ?? []);
+		});
+	};
+
+	if (isLoading) return <EpisodeStripSkeleton />;
+	if (!episodes.length) return <EmptyEpisodes />;
 
 	return (
-		<div className="w-full">
-			<AnimatePresence mode="wait">
-				{viewMode === 'grid' && (
-					<motion.div
-						key="grid"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						transition={{ duration: 0.2 }}
-						className="grid grid-cols-2 gap-3 sm:gap-5 md:gap-6 lg:grid-cols-3 xl:grid-cols-4"
-					>
-						{episodes.map((ep, i) => (
-							<EpisodeCard
-								key={ep.id}
-								episode={ep}
-								active={activeEpisodeId === ep.id}
-								onClick={onEpisodeClick}
-								index={i}
-							/>
-						))}
-					</motion.div>
-				)}
+		<div className={cn('w-full flex flex-col', className)}>
+			<ul
+				key={listKey}
+				ref={listRef}
+				className="flex flex-col m-0 p-0 list-none w-full"
+			>
+				{visibleEpisodes.map((episode, index) => {
+					const isActive =
+						activeEpisodeId !== undefined &&
+						activeEpisodeId !== null &&
+						String(episode.id) === String(activeEpisodeId);
 
-				{viewMode === 'list' && (
-					<motion.div
-						key="list"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						transition={{ duration: 0.2 }}
-						className="flex flex-col gap-2 md:gap-0"
+					const isProgressItem =
+						progressEpisodeId !== undefined &&
+						progressEpisodeId !== null &&
+						episode.id === progressEpisodeId;
+
+					return (
+						<EpisodeListRow
+							key={episode.id || `ep-${episode.season_number}-${episode.episode_number}`}
+							episode={episode}
+							index={index}
+							active={isActive}
+							progressPercent={isProgressItem ? progressPercent : undefined}
+							onClick={onEpisodeClick}
+						/>
+					);
+				})}
+			</ul>
+
+			{hasMore && (
+				<div className="pt-4 flex justify-start">
+					<button
+						type="button"
+						onClick={handleShowAll}
+						className={cn(
+							'pressable rounded-full border border-line-strong bg-band px-5 py-3',
+							'text-ui font-semibold text-text can-hover:hover:border-brand can-hover:hover:text-brand',
+							'transition-[border-color,color] duration-150',
+							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+						)}
 					>
-						{episodes.map((ep, i) => (
-							<EpisodeListRow
-								key={ep.id}
-								episode={ep}
-								active={activeEpisodeId === ep.id}
-								onClick={onEpisodeClick}
-								index={i}
-								progressPercent={
-									progressEpisodeId === ep.id ? progressPercent : null
-								}
-							/>
-						))}
-					</motion.div>
-				)}
-			</AnimatePresence>
+						Show all {episodes.length} episodes
+					</button>
+				</div>
+			)}
 		</div>
 	);
 }
 
 export const EpisodeStrip = memo(EpisodeStripComponent);
-EpisodeStripComponent.displayName = 'EpisodeStrip';

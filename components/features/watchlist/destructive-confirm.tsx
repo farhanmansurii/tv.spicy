@@ -2,7 +2,11 @@
 
 import React, { useCallback, useEffect, useId, useRef, useState, memo } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { CURVES, exit, isReducedMotion, registerGSAP } from '@/lib/motion';
+
+/** MOTION.md "Everything else": dialogs scale from .95 and fade over 200ms. */
+const DIALOG = { enter: 0.2, backdrop: 0.16, scaleFrom: 0.95, rise: 8 } as const;
+const REDUCED = 0.18;
 
 interface DestructiveConfirmProps {
 	/** Whether the centered confirm modal is visible. */
@@ -17,20 +21,19 @@ interface DestructiveConfirmProps {
 	onCancel: () => void;
 }
 
-/** Focus ring token from DESIGN.md — keep in sync with the design system. */
 const FOCUS_RING =
-	'focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none';
+	'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none';
 
 /** Scale-only press feedback: transform transition, never `transition: all`. */
 const PRESSABLE =
-	'transition-transform duration-[160ms] ease-out active:scale-[0.97] motion-reduce:active:scale-100';
+	'transition-transform duration-(--duration-press) ease-out active:scale-97 motion-reduce:active:scale-100';
 
 /**
  * Centered confirmation modal for destructive actions.
  *
- * Motion contract: enters over 240ms ease-out, exits faster at 160ms ease-out
- * (never ease-in), all motion under 300ms. Under prefers-reduced-motion the
- * modal fades with opacity only — no scale or translation.
+ * Motion: the dialog enters on the shared `enter` recipe and leaves on the
+ * shared `exit` recipe, so the exit is always faster than the enter and travels
+ * less. Under prefers-reduced-motion both are opacity-only.
  */
 function DestructiveConfirmComponent({
 	open,
@@ -42,12 +45,13 @@ function DestructiveConfirmComponent({
 	onCancel,
 }: DestructiveConfirmProps) {
 	const dialogRef = useRef<HTMLDivElement>(null);
+	const backdropRef = useRef<HTMLButtonElement>(null);
 	const cancelRef = useRef<HTMLButtonElement>(null);
 	const previouslyFocused = useRef<HTMLElement | null>(null);
 	// Keyboard-activated confirm/cancel skips the exit animation entirely.
-	// State (not a ref) so it can be read during render when building `exit`.
 	const [keyboardInitiated, setKeyboardInitiated] = useState(false);
-	const reduceMotion = useReducedMotion();
+	// `open` drives the request; `mounted` keeps the node alive through the exit.
+	const [mounted, setMounted] = useState(open);
 	const titleId = useId();
 	const descriptionId = useId();
 
@@ -57,6 +61,14 @@ function DestructiveConfirmComponent({
 			action();
 		},
 		[]
+	);
+
+	const close = useCallback(
+		(event?: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent) => {
+			if (event && 'detail' in event && event.detail === 0) setKeyboardInitiated(true);
+			onCancel();
+		},
+		[onCancel]
 	);
 
 	// Safe default: focus Cancel while the modal is open, restore focus after.
@@ -74,8 +86,7 @@ function DestructiveConfirmComponent({
 		(event: React.KeyboardEvent) => {
 			if (event.key === 'Escape') {
 				event.stopPropagation();
-				setKeyboardInitiated(true);
-				onCancel();
+				close(event);
 				return;
 			}
 			if (event.key !== 'Tab') return;
@@ -95,106 +106,132 @@ function DestructiveConfirmComponent({
 				first.focus();
 			}
 		},
-		[onCancel]
+		[close]
 	);
 
-	if (typeof document === 'undefined') return null;
+	// Hold the node mounted until the exit finishes, so the dialog never pops.
+	useEffect(() => {
+		if (open) {
+			setMounted(true);
+			return;
+		}
+		if (!mounted) return;
+		// Keyboard actions swap the dialog instantly: no exit to wait for.
+		if (keyboardInitiated) {
+			setMounted(false);
+			return;
+		}
+
+		const gsap = registerGSAP();
+		if (!gsap) {
+			setMounted(false);
+			return;
+		}
+
+		const reduced = isReducedMotion();
+		const timeline = gsap.timeline({ onComplete: () => setMounted(false) });
+		timeline.to([backdropRef.current, dialogRef.current].filter(Boolean), {
+			...exit({ reduced, distance: 4 }),
+			scale: reduced ? 1 : 0.98,
+			clearProps: 'transform,opacity',
+		});
+		return () => {
+			timeline.kill();
+		};
+	}, [open, mounted, keyboardInitiated]);
+
+	// Enter runs on the node that just mounted, once per open.
+	const enterOnMount = useRef(false);
+	useEffect(() => {
+		if (!mounted) {
+			enterOnMount.current = false;
+			return;
+		}
+		if (!open || enterOnMount.current) return;
+
+		const gsap = registerGSAP();
+		if (!gsap) return;
+		enterOnMount.current = true;
+
+		const reduced = isReducedMotion();
+		const timeline = gsap.timeline();
+		timeline.fromTo(
+			backdropRef.current,
+			{ opacity: 0 },
+			{ opacity: 1, duration: reduced ? REDUCED : DIALOG.backdrop, ease: CURVES.touch }
+		);
+		timeline.fromTo(
+			dialogRef.current,
+			reduced ? { opacity: 0 } : { opacity: 0, scale: DIALOG.scaleFrom, y: DIALOG.rise },
+			{
+				opacity: 1,
+				scale: 1,
+				y: 0,
+				duration: reduced ? REDUCED : DIALOG.enter,
+				ease: CURVES.enter,
+				clearProps: 'transform,opacity',
+			},
+			0
+		);
+		return () => {
+			timeline.kill();
+		};
+	}, [mounted, open]);
+
+	if (typeof document === 'undefined' || !mounted) return null;
 
 	return createPortal(
-		<AnimatePresence>
-			{open && (
-				<motion.div
-					className="fixed inset-0 z-[90] flex items-center justify-center p-4"
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					transition={{
-						duration: reduceMotion ? 0 : 0.2,
-						ease: [0, 0, 0.2, 1], // ease-out, never ease-in
-					}}
-					onKeyDown={handleKeyDown}
-				>
-					{/* Backdrop */}
-					<motion.button
+		<div
+			className="fixed inset-0 z-90 flex items-center justify-center p-4"
+			onKeyDown={handleKeyDown}
+		>
+			{/* Backdrop */}
+			<button
+				ref={backdropRef}
+				type="button"
+				aria-label={cancelLabel}
+				tabIndex={-1}
+				onClick={() => close()}
+				className="absolute inset-0 cursor-default bg-black/65 backdrop-blur-xs motion-reduce:backdrop-blur-none"
+			/>
+
+			{/* Dialog */}
+			<div
+				ref={dialogRef}
+				role="alertdialog"
+				aria-modal="true"
+				aria-labelledby={titleId}
+				aria-describedby={description ? descriptionId : undefined}
+				className="relative w-full max-w-dialog rounded-sm border border-line bg-surface p-5 shadow-overlay"
+			>
+				<h2 id={titleId} className="text-title text-foreground">
+					{title}
+				</h2>
+				{description && (
+					<p id={descriptionId} className="mt-2 text-small text-dim">
+						{description}
+					</p>
+				)}
+
+				<div className="mt-5 flex items-center justify-end gap-2.5">
+					<button
+						ref={cancelRef}
 						type="button"
-						aria-label={cancelLabel}
-						tabIndex={-1}
-						onClick={onCancel}
-						className="absolute inset-0 cursor-default bg-black/65 backdrop-blur-[2px] motion-reduce:backdrop-blur-none"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						transition={{
-							duration: reduceMotion ? 0 : 0.16,
-							ease: [0, 0, 0.2, 1],
-						}}
-					/>
-
-					{/* Dialog */}
-					<motion.div
-						ref={dialogRef}
-						role="alertdialog"
-						aria-modal="true"
-						aria-labelledby={titleId}
-						aria-describedby={description ? descriptionId : undefined}
-						className="relative w-full max-w-[min(92vw,26rem)] rounded-2xl border border-white/10 bg-[#1C1C1E] p-5 shadow-[0_24px_64px_rgba(0,0,0,0.6)]"
-						initial={
-							reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 8 }
-						}
-						animate={{ opacity: 1, scale: 1, y: 0 }}
-						exit={
-							reduceMotion
-								? { opacity: 0, transition: { duration: 0, ease: [0, 0, 0.2, 1] } }
-								: {
-										opacity: 0,
-										scale: 0.98,
-										y: 4,
-										// Exit is faster than enter (160ms < 240ms) and is
-										// skipped entirely for keyboard-initiated actions.
-										transition: {
-											duration: keyboardInitiated ? 0 : 0.16,
-											ease: [0, 0, 0.2, 1],
-										},
-									}
-						}
-						transition={{
-							duration: reduceMotion ? 0 : 0.24,
-							ease: [0, 0, 0.2, 1], // enter: ease-out, 240ms
-						}}
+						onClick={(event) => handleButtonActivate(event, onCancel)}
+						className={`rounded-full border border-border-strong bg-card px-4 py-2 text-ui font-semibold text-foreground can-hover:bg-raised ${PRESSABLE} ${FOCUS_RING}`}
 					>
-						<h2 id={titleId} className="text-base font-semibold text-white">
-							{title}
-						</h2>
-						{description && (
-							<p
-								id={descriptionId}
-								className="mt-2 text-sm leading-relaxed text-white/60"
-							>
-								{description}
-							</p>
-						)}
-
-						<div className="mt-5 flex items-center justify-end gap-2.5">
-							<button
-								ref={cancelRef}
-								type="button"
-								onClick={(event) => handleButtonActivate(event, onCancel)}
-								className={`rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white hover:bg-white/[0.1] ${PRESSABLE} ${FOCUS_RING}`}
-							>
-								{cancelLabel}
-							</button>
-							<button
-								type="button"
-								onClick={(event) => handleButtonActivate(event, onConfirm)}
-								className={`rounded-full bg-[#FF453A] px-4 py-2 text-sm font-semibold text-black hover:bg-[#ff5c52] ${PRESSABLE} ${FOCUS_RING}`}
-							>
-								{confirmLabel}
-							</button>
-						</div>
-					</motion.div>
-				</motion.div>
-			)}
-		</AnimatePresence>,
+						{cancelLabel}
+					</button>
+					<button
+						type="button"
+						onClick={(event) => handleButtonActivate(event, onConfirm)}
+						className={`rounded-full bg-destructive px-4 py-2 text-ui font-semibold text-foreground can-hover:bg-destructive/90 ${PRESSABLE} ${FOCUS_RING}`}
+					>
+						{confirmLabel}
+					</button>
+				</div>
+			</div>
+		</div>,
 		document.body
 	);
 }

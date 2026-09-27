@@ -197,7 +197,7 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 
 	return (
 		<section ref={sectionRef} className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
+			<div className="w-full px-gutter">
 				{/* Header */}
 				<div ref={headerRef} className="flex items-center justify-between mb-5 md:mb-6">
 					<div className="flex items-baseline gap-3">
@@ -211,7 +211,7 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 					{allItems.length > 5 && (
 						<button
 							onClick={() => setIsExpanded((p) => !p)}
-							className="inline-flex items-center gap-1 text-xs md:text-sm font-medium text-white/50 hover:text-white/80 transition-colors duration-200"
+							className="inline-flex items-center gap-1 text-xs md:text-sm font-medium text-white/50 can-hover:text-white/80 transition-colors duration-200"
 						>
 							{isExpanded ? (
 								<>
@@ -233,7 +233,7 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 							{item.type === 'video' ? (
 								<button
 									onClick={() => setActiveVideo(item.key!)}
-									className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]"
+									className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-(--duration-ui) ease-spring group-can-hover:scale-105"
 								>
 									<img
 										src={item.poster}
@@ -242,14 +242,14 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 										className="h-full w-full object-cover"
 									/>
 									{/* Play overlay */}
-									<div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/35 transition-colors duration-300">
-										<div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-md group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300 ease-spring">
+									<div className="absolute inset-0 flex items-center justify-center bg-black/20 group-can-hover:bg-black/35 transition-colors duration-(--duration-ui)">
+										<div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-md group-can-hover:bg-white/30 group-can-hover:scale-110 transition-[color,background-color,border-color,transform,opacity] duration-(--duration-ui) ease-spring">
 											<PlayIcon size={20} weight="fill" className="text-white ml-0.5" />
 										</div>
 									</div>
 								</button>
 							) : (
-								<div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-500 ease-spring group-hover:scale-[1.04]">
+								<div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white/5 will-change-transform transition-transform duration-(--duration-ui) ease-spring group-can-hover:scale-105">
 									<img
 										src={item.poster}
 										alt=""
@@ -280,7 +280,7 @@ function VideoSectionComponent({ videos, images }: VideoSectionProps) {
 					>
 						<button
 							onClick={closeModal}
-							className="absolute -top-12 right-0 inline-flex items-center gap-1.5 text-white/60 hover:text-white text-sm font-medium transition-colors duration-200"
+							className="absolute -top-12 right-0 inline-flex items-center gap-1.5 text-white/60 can-hover:text-white text-sm font-medium transition-colors duration-200"
 						>
 							<XIcon size={16} />
 							Close

@@ -11,7 +11,7 @@ interface HeaderNavigationProps {
 
 export function HeaderNavigation({ items, isActive }: HeaderNavigationProps) {
 	return (
-		<ul className="relative flex items-center gap-7">
+		<ul className="relative flex items-center gap-0.5 sm:gap-1">
 			{items.map((item) => {
 				const active = isActive(item.href);
 
@@ -22,22 +22,16 @@ export function HeaderNavigation({ items, isActive }: HeaderNavigationProps) {
 							prefetch={false}
 							aria-current={active ? 'page' : undefined}
 							className={cn(
-								'relative flex h-11 items-center rounded-md px-0.5',
-								'text-[13px] font-medium tracking-[-0.01em]',
-								'transition-colors duration-200 ease-out',
-								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+								'relative flex h-9 items-center rounded-full px-2.5 sm:px-3.5',
+								'text-small sm:text-base font-medium tracking-normal',
+								'transition-colors duration-200 ease-out active:scale-97 motion-reduce:active:scale-100',
 								'select-none',
-								active ? 'text-white' : 'text-white/55 hover:text-white/90'
+								active
+									? 'text-foreground bg-foreground/10'
+									: 'text-muted-foreground can-hover:text-foreground can-hover:bg-foreground/10'
 							)}
 						>
 							{item.label}
-							<span
-								aria-hidden="true"
-								className={cn(
-									'absolute inset-x-0 bottom-1.5 mx-auto h-[2px] w-4 rounded-full bg-white transition-opacity duration-200',
-									active ? 'opacity-100' : 'opacity-0'
-								)}
-							/>
 						</Link>
 					</li>
 				);

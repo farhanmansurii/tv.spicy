@@ -1,10 +1,8 @@
 import Container from '@/components/shared/containers/container';
 import LoadMore from '@/components/features/media/load-more';
+import { TitleDisplay } from '@/components/ui/title-display';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import React from 'react';
-import CommonTitle from '@/components/shared/animated/common-title';
-import SectionWrapper from '@/components/shared/animated/section-layout';
 
 interface MetadataProps {
 	params: Promise<{ slug: string }>;
@@ -18,7 +16,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 	const type = searchParams?.type?.toLowerCase() === 'movie' ? 'Movies' : 'TV Shows';
 
 	return {
-		title: `${title} ${type} | SpicyTV`,
+		title: `${title} ${type} | Spicy TV`,
 		description: `Explore our curated collection of ${title} ${type.toLowerCase()}.`,
 	};
 }
@@ -34,7 +32,8 @@ export default async function Page(props: PageProps) {
 	const genreId = slug;
 	const title = searchParams?.title;
 	const type = searchParams?.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
-	const typeLabel = searchParams?.type?.toLowerCase() === 'movie' ? 'Movie' : 'TV Series';
+	const typeLabel = searchParams?.type?.toLowerCase() === 'movie' ? 'Movies' : 'TV Series';
+	const typePlural = type === 'movie' ? 'movies' : 'TV series';
 
 	// Validate required parameters
 	if (!title || !searchParams?.type || !genreId) {
@@ -53,25 +52,34 @@ export default async function Page(props: PageProps) {
 	};
 
 	return (
-		<div className="min-h-screen mt-20">
+		<main className="min-h-screen bg-background pb-24 pt-safe-header text-foreground md:pb-28 md:pt-28">
 			<Container>
-				<SectionWrapper spacing="large" className="pb-4">
-					<div className="max-w-4xl space-y-6">
-						<div className="space-y-2">
-							<CommonTitle text={typeLabel} variant="section" spacing="none" />
-							<CommonTitle text={title} variant="large" as="h1" className="text-white" />
-						</div>
-						<p className="text-lg md:text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl">
-							A curated selection of the most immersive {title.toLowerCase()}{' '}
-							{typeLabel.toLowerCase()} available.
+				<header className="max-w-4xl border-l-2 border-brand pl-5 md:pl-7">
+					{/* Same recipe as a media row: accent index, then the label, then
+					    the Anton title and the count below. */}
+					<div className="flex items-baseline gap-3">
+						<span
+							aria-hidden="true"
+							className="font-mono text-caption leading-none tracking-label text-brand tabular-nums"
+						>
+							01
+						</span>
+						<p className="font-mono text-caption uppercase tracking-label text-muted-foreground">
+							{typeLabel} / Genre
 						</p>
 					</div>
-				</SectionWrapper>
-
-				<SectionWrapper spacing="medium">
-					<LoadMore params={loadMoreParams} />
-				</SectionWrapper>
+					<TitleDisplay title={title} className="mt-3" />
+					<p className="mt-4 max-w-prose-secondary text-body leading-relaxed text-muted-foreground">
+						A curated selection of {title.toLowerCase()} {typePlural}.
+					</p>
+				</header>
 			</Container>
-		</div>
+
+			{/* LoadMore's grid carries its own gutter, so it stays out of the Container
+			    to keep one gutter instead of two. */}
+			<section className="border-t border-border section-spacing" aria-label={`${title} ${typeLabel}`}>
+				<LoadMore params={loadMoreParams} />
+			</section>
+		</main>
 	);
 }

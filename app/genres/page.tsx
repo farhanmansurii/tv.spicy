@@ -1,133 +1,180 @@
 import { fetchGenres } from '@/lib/api';
 import Container from '@/components/shared/containers/container';
-import SectionWrapper from '@/components/shared/animated/section-layout';
-import CommonTitle from '@/components/shared/animated/common-title';
 import {
-    Swords, Globe, Palette, Smile, BadgeAlert, Search,
-    Clapperboard, Home, Zap, History, Ghost, Music,
-    Heart, Rocket, Tv, Skull, Mountain
-} from 'lucide-react';
+	Atom,
+	Baby,
+	Binoculars,
+	Broadcast,
+	CastleTurret,
+	ChatsCircle,
+	CirclesThree,
+	Compass,
+	CowboyHat,
+	Crosshair,
+	Detective,
+	FilmSlate,
+	FilmStrip,
+	FlagBanner,
+	Ghost,
+	Heart,
+	House,
+	MagnifyingGlass,
+	MicrophoneStage,
+	MusicNote,
+	Newspaper,
+	PaintBrush,
+	Rocket,
+	ShieldChevron,
+	Smiley,
+	Sparkle,
+	Sword,
+	Television,
+} from '@phosphor-icons/react/ssr';
+// Type-only, so the CSR barrel is never evaluated at runtime.
+import type { Icon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export const revalidate = 604800;
 
 interface Genre {
-    id: number;
-    name: string;
+	id: number;
+	name: string;
 }
 
-const getGenreIcon = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes('action')) return <Swords className="w-full h-full" />;
-    if (n.includes('adventure')) return <Globe className="w-full h-full" />;
-    if (n.includes('animation')) return <Palette className="w-full h-full" />;
-    if (n.includes('comedy')) return <Smile className="w-full h-full" />;
-    if (n.includes('crime')) return <BadgeAlert className="w-full h-full" />;
-    if (n.includes('documentary')) return <Search className="w-full h-full" />;
-    if (n.includes('drama')) return <Clapperboard className="w-full h-full" />;
-    if (n.includes('family')) return <Home className="w-full h-full" />;
-    if (n.includes('fantasy')) return <Zap className="w-full h-full" />;
-    if (n.includes('history')) return <History className="w-full h-full" />;
-    if (n.includes('horror')) return <Ghost className="w-full h-full" />;
-    if (n.includes('music')) return <Music className="w-full h-full" />;
-    if (n.includes('mystery')) return <Search className="w-full h-full" />;
-    if (n.includes('romance')) return <Heart className="w-full h-full" />;
-    if (n.includes('science fiction') || n.includes('sci-fi')) return <Rocket className="w-full h-full" />;
-    if (n.includes('tv movie')) return <Tv className="w-full h-full" />;
-    if (n.includes('thriller')) return <Skull className="w-full h-full" />;
-    if (n.includes('war')) return <Swords className="w-full h-full" />;
-    if (n.includes('western')) return <Mountain className="w-full h-full" />;
-    return <Clapperboard className="w-full h-full" />;
+// One icon per TMDB genre id, so no two tiles in a section share a glyph and a
+// new genre falls back to the film-strip mark instead of repeating one above it.
+const GENRE_ICONS: Record<number, Icon> = {
+	28: Sword,
+	12: Compass,
+	16: PaintBrush,
+	35: Smiley,
+	80: Detective,
+	99: FilmSlate,
+	18: MicrophoneStage,
+	10751: House,
+	14: Sparkle,
+	36: CastleTurret,
+	27: Ghost,
+	10402: MusicNote,
+	9648: MagnifyingGlass,
+	10749: Heart,
+	878: Atom,
+	10770: Television,
+	53: Crosshair,
+	10752: ShieldChevron,
+	37: CowboyHat,
+	10759: Binoculars,
+	10762: Baby,
+	10763: Newspaper,
+	10764: Broadcast,
+	10765: Rocket,
+	10766: CirclesThree,
+	10767: ChatsCircle,
+	10768: FlagBanner,
 };
 
-const GenreCard = ({ genre, type }: { genre: Genre; type: 'movie' | 'tv' }) => {
-    const Icon = getGenreIcon(genre.name);
+const GenreCard = ({ genre, type, index }: { genre: Genre; type: 'movie' | 'tv'; index: number }) => {
+	const Glyph = GENRE_ICONS[genre.id] ?? FilmStrip;
 
-    return (
-        <Link
-            href={`/discover/${genre.id}?type=${type}&title=${genre.name}`}
-            prefetch={false}
-            className={cn(
-                'group relative aspect-[16/10] w-full overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-900/20 transition-all duration-700',
-                'hover:scale-[1.03] hover:bg-zinc-900/60 hover:border-primary/30 shadow-2xl backdrop-blur-3xl'
-            )}
-        >
-            {/* Hover Glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-
-            {/* Watermark Icon */}
-            <div className="absolute -right-6 -bottom-6 h-36 w-36 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-1000 rotate-12 transform text-white scale-110 group-hover:scale-125">
-                {Icon}
-            </div>
-
-            <div className="absolute inset-0 p-6 flex flex-col justify-between z-10">
-                <div className="flex items-center justify-between">
-                    <div className="h-11 w-11 p-2.5 rounded-2xl bg-white/[0.03] border border-white/10 text-zinc-500 group-hover:text-primary group-hover:border-primary/20 transition-all duration-500">
-                        {Icon}
-                    </div>
-                    <div className="h-1.5 w-1.5 rounded-full bg-zinc-800 group-hover:bg-primary transition-all duration-500 shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
-                </div>
-
-                <div className="space-y-2 text-left">
-                    <h3 className="text-sm md:text-base font-black uppercase tracking-[0.2em] text-zinc-400 group-hover:text-white transition-colors duration-500">
-                        {genre.name}
-                    </h3>
-                    <div className="h-0.5 w-0 group-hover:w-16 bg-primary transition-all duration-700 rounded-full" />
-                </div>
-            </div>
-        </Link>
-    );
+	return (
+		<Link
+			href={`/discover/${genre.id}?type=${type}&title=${encodeURIComponent(genre.name)}`}
+			prefetch={false}
+			className={cn(
+				'group relative flex min-w-0 min-h-40 flex-col justify-between overflow-hidden rounded-sm border border-border bg-card p-4 transition-[background-color,border-color,transform] duration-(--duration-ui) ease-out md:min-h-48 md:p-6',
+				'can-hover:border-border-strong can-hover:bg-secondary active:scale-97 motion-reduce:active:scale-100',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+			)}
+		>
+			<div className="flex items-center justify-between">
+				<span className="font-mono text-caption uppercase tracking-label text-brand tabular-nums">
+					{String(index + 1).padStart(2, '0')}
+				</span>
+				<span
+					className="text-muted-foreground transition-colors duration-(--duration-ui) group-can-hover:text-foreground"
+					aria-hidden="true"
+				>
+					<Glyph size={20} weight="regular" />
+				</span>
+			</div>
+			<div className="flex min-w-0 flex-col items-start gap-2">
+				<h3 className="min-w-0 max-w-full break-words font-display text-2xl uppercase leading-none text-foreground md:text-3xl">
+					{genre.name}
+				</h3>
+				<span className="font-mono text-micro uppercase tracking-meta-wide text-muted-foreground">
+					Explore
+				</span>
+			</div>
+		</Link>
+	);
 };
+
+function GenreSection({
+	title,
+	caption,
+	genres,
+	type,
+}: {
+	title: string;
+	caption: string;
+	genres: Genre[] | undefined;
+	type: 'movie' | 'tv';
+}) {
+	return (
+		<section className="border-t border-border section-spacing" aria-label={title}>
+			<div className="mb-5 flex flex-wrap items-end justify-between gap-3 md:mb-6">
+				<div className="flex items-end gap-3">
+					<span
+						aria-hidden="true"
+						className="pb-1.25 font-mono text-caption uppercase leading-none tracking-label text-brand tabular-nums"
+					>
+						{caption}
+					</span>
+					<h2 className="font-display text-display-row uppercase leading-none text-foreground">
+						{title}
+					</h2>
+				</div>
+				<span className="font-mono text-caption uppercase tracking-meta-wide text-dim tabular-nums">
+					{genres?.length ?? 0} genres
+				</span>
+			</div>
+			{genres?.length ? (
+				<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 md:gap-4">
+					{genres.map((genre, index) => (
+						<GenreCard key={genre.id} genre={genre} type={type} index={index} />
+					))}
+				</div>
+			) : (
+				<p className="border-y border-border bg-secondary/40 px-5 py-10 text-center font-mono text-caption uppercase tracking-label text-muted-foreground">
+					Nothing in the archive for this shelf yet.
+				</p>
+			)}
+		</section>
+	);
+}
 
 export default async function GenresPage() {
-    const [movieGenres, tvGenres] = await Promise.all([
-        fetchGenres('movie'),
-        fetchGenres('tv')
-    ]);
+	const [movieGenres, tvGenres] = await Promise.all([fetchGenres('movie'), fetchGenres('tv')]);
 
-    return (
-        <div className="min-h-screen mt-20">
-            <Container>
-                <SectionWrapper spacing="large" className="pb-4">
-                    <div className="max-w-4xl space-y-6">
-                        <div className="space-y-2">
-                            <CommonTitle text="Curated Library" variant="section" spacing="none" />
-                            <CommonTitle text="Explore Categories" variant="large" as="h1" className="text-white" />
-                        </div>
-                        <p className="text-lg md:text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl">
-                            Dive into our extensive library organized by mood, style, and cinematic era.
-                            Find your next obsession through professional curation.
-                        </p>
-                    </div>
-                </SectionWrapper>
+	return (
+		<div className="min-h-screen mt-20 bg-background text-foreground">
+			<Container>
+				<section className="section-spacing">
+					<p className="font-mono text-caption uppercase tracking-label text-muted-foreground">
+						Browse the archive
+					</p>
+					<h1 className="mt-3 max-w-4xl font-display text-display-1 uppercase leading-none text-foreground text-balance">
+						Explore Categories
+					</h1>
+					<p className="mt-4 max-w-prose-secondary text-body leading-relaxed text-muted-foreground">
+						Find your next film or series by mood, style, and cinematic era.
+					</p>
+				</section>
 
-                {/* 3. Movie Grid Section */}
-                <SectionWrapper
-                    title="Movie Collections"
-                    description="Archive"
-                    spacing="medium"
-                >
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
-                        {movieGenres?.map((genre: Genre) => (
-                            <GenreCard key={genre.id} genre={genre} type="movie" />
-                        ))}
-                    </div>
-                </SectionWrapper>
-
-                {/* 4. TV Grid Section */}
-                <SectionWrapper
-                    title="Series Collections"
-                    description="Television"
-                    spacing="medium"
-                >
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
-                        {tvGenres?.map((genre: Genre) => (
-                            <GenreCard key={genre.id} genre={genre} type="tv" />
-                        ))}
-                    </div>
-                </SectionWrapper>
-            </Container>
-        </div>
-    );
+				<GenreSection title="Movie Collections" caption="01" genres={movieGenres} type="movie" />
+				<GenreSection title="Series Collections" caption="02" genres={tvGenres} type="tv" />
+			</Container>
+		</div>
+	);
 }

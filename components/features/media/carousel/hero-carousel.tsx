@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/carousel';
 import { Show } from '@/lib/types';
 import { HeroBanner } from '@/components/features/media/hero-banner';
+import { HERO_HEIGHT_CLASS } from '@/components/features/media/hero-height';
 import { cn } from '@/lib/utils';
 import type { TMDBImagesResponse, TMDBMovie, TMDBTVShow } from '@/lib/types/tmdb';
 
@@ -24,21 +25,11 @@ export interface HeroCarouselProps {
 export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 	const [api, setApi] = React.useState<import('@/components/ui/carousel').CarouselApi>();
 	const [activeIndex, setActiveIndex] = React.useState(0);
-	const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
 	const validShows = React.useMemo(
 		() => shows?.filter((show) => show.backdrop_path || show.poster_path).slice(0, 5) || [],
 		[shows]
 	);
-
-	React.useEffect(() => {
-		if (typeof window === 'undefined') return;
-		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-		const updatePreference = () => setPrefersReducedMotion(mediaQuery.matches);
-		updatePreference();
-		mediaQuery.addEventListener('change', updatePreference);
-		return () => mediaQuery.removeEventListener('change', updatePreference);
-	}, []);
 
 	React.useEffect(() => {
 		if (!api) return;
@@ -86,7 +77,7 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 								{isNearActive ? (
 									<div
 										className={cn(
-											'motion-reduce:transition-none transition-opacity duration-500 ease-out',
+											'motion-reduce:transition-none transition-opacity duration-(--duration-reveal) ease-out',
 											isActive ? 'opacity-100' : 'opacity-0'
 										)}
 									>
@@ -97,11 +88,10 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 											loading={isActive ? 'eager' : 'lazy'}
 											priority={isActive}
 											isActive={isActive}
-											prefersReducedMotion={prefersReducedMotion}
 										/>
 									</div>
 								) : (
-									<div className="h-[62dvh] min-h-[430px] md:h-[72dvh] md:min-h-[540px] w-full bg-background" />
+									<div className={cn(HERO_HEIGHT_CLASS, 'w-full bg-background')} />
 								)}
 							</CarouselItem>
 						);
@@ -112,11 +102,11 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 					<div className="absolute right-4 bottom-5 z-20 hidden gap-2 md:flex lg:right-8">
 						<CarouselPrevious
 							variant="ghost"
-							className="static h-10 w-10 translate-y-0 rounded-full border-white/10 bg-background/55 text-white backdrop-blur-md hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+							className="static h-10 w-10 translate-y-0"
 						/>
 						<CarouselNext
 							variant="ghost"
-							className="static h-10 w-10 translate-y-0 rounded-full border-white/10 bg-background/55 text-white backdrop-blur-md hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+							className="static h-10 w-10 translate-y-0"
 						/>
 					</div>
 				)}
@@ -133,11 +123,11 @@ export default function HeroCarousel({ shows, type }: HeroCarouselProps) {
 								type="button"
 								onClick={() => scrollTo(index)}
 								className={cn(
-									'h-1.5 rounded-full transition-[width,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black md:h-2',
-									'relative after:absolute after:left-1/2 after:top-[-26px] after:bottom-[-12px] after:w-6 after:-translate-x-1/2 after:content-[""]',
+									'h-1.5 w-5 rounded-full transition-opacity duration-(--duration-ui) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background md:h-2 md:w-6',
+									'relative carousel-dot-hit',
 									isActive
-										? 'w-5 bg-white md:w-6'
-										: 'w-1.5 bg-white/40 hover:bg-white/70 md:w-2'
+										? 'bg-white opacity-100'
+										: 'bg-white opacity-40 can-hover:opacity-70'
 								)}
 								aria-label={`Show featured title ${title}`}
 								aria-current={isActive ? 'true' : undefined}

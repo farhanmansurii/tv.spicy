@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { fetchGenreByIdFromApi } from '@/lib/api/tmdb-row-client';
 import { Show } from '@/lib/types';
 import MediaRow from './row/media-row';
+import { Button } from '@/components/ui/button';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
+import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
 
 function LoadMore(props: { params: any }) {
 	const { params } = props;
@@ -20,6 +22,7 @@ function LoadMore(props: { params: any }) {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasInitialLoad, setHasInitialLoad] = useState(false);
 	const [hasMore, setHasMore] = useState(true);
+	const [hasFailed, setHasFailed] = useState(false);
 
 	// Handle async params
 	useEffect(() => {
@@ -49,6 +52,8 @@ function LoadMore(props: { params: any }) {
 					setData((res as Show[]) || []);
 				} catch (error) {
 					console.error('Error loading genre data:', error);
+					setHasFailed(true);
+					setHasMore(false);
 				} finally {
 					setIsLoading(false);
 				}
@@ -74,6 +79,8 @@ function LoadMore(props: { params: any }) {
 			setCurrentPage(nextPage);
 		} catch (error) {
 			console.error('Error loading more:', error);
+			setHasFailed(true);
+			setHasMore(false);
 		} finally {
 			setIsLoadingMore(false);
 		}
@@ -86,39 +93,54 @@ function LoadMore(props: { params: any }) {
 		setHasInitialLoad(false);
 		setIsLoadingMore(false);
 		setHasMore(true);
+		setHasFailed(false);
 	}, [searchParams?.id, searchParams?.type]);
 
-	if (!searchParams?.type || !searchParams?.id) {
-		return <MediaLoader layout="grid" isVertical />;
-	}
-
-	if (isLoading) {
-		return <MediaLoader layout="grid" isVertical />;
+	if (!searchParams?.type || !searchParams?.id || isLoading) {
+		return <MediaLoader layout="grid" isVertical itemCount={12} />;
 	}
 
 	// Normalize type for MediaRow
 	const normalizedType = searchParams.type?.toLowerCase() === 'movie' ? 'movie' : 'tv';
 
 	return (
-		<div className="space-y-10">
-			<MediaRow
-				isVertical={true}
-				text=""
-				shows={data}
-				gridLayout={true}
-				type={normalizedType}
-			/>
-			{hasMore && (
-				<div className="flex justify-center py-4">
-					<button
-						type="button"
-						onClick={loadNextPage}
-						disabled={isLoadingMore}
-						className="rounded-full border border-white/10 bg-white/[0.06] px-6 py-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/[0.1] disabled:cursor-wait disabled:opacity-50"
-					>
-						{isLoadingMore ? 'Loading…' : 'Load more'}
-					</button>
-				</div>
+		<div>
+			{hasFailed && data.length === 0 ? (
+				<PageFetchError
+					title="The projector jammed."
+					description="We couldn’t load this collection from the shelf. Try again in a moment."
+					className="px-0"
+				/>
+			) : (
+				<>
+					{/* The page header above already names this collection, so the grid
+					    carries no second heading. */}
+					<MediaRow
+						isVertical={true}
+						shows={data}
+						gridLayout={true}
+						hideHeader
+						type={normalizedType}
+					/>
+					{hasMore && data.length > 0 && (
+						<div className="mt-10 flex justify-center">
+							<Button
+								type="button"
+								variant="ghost"
+								onClick={loadNextPage}
+								disabled={isLoadingMore}
+								aria-busy={isLoadingMore}
+							>
+								{isLoadingMore ? 'Loading…' : 'Load more'}
+								{!isLoadingMore && (
+									<span className="font-mono text-xs tracking-meta text-dim tabular-nums">
+										{data.length} shown
+									</span>
+								)}
+							</Button>
+						</div>
+					)}
+				</>
 			)}
 		</div>
 	);

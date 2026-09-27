@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import useTVShowStore from '@/store/recentsStore';
 import useWatchListStore from '@/store/watchlistStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
@@ -19,12 +19,14 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useHaptics } from '@/hooks/use-haptics';
+import { flourishMyList } from '@/lib/motion';
 
 interface ContinueWatchingButtonProps {
 	id: string | number;
 	show: any;
 	type: 'movie' | 'tv';
 	isDetailsPage?: boolean;
+	tone?: 'default' | 'brand';
 }
 
 export default function ContinueWatchingButton({
@@ -32,6 +34,7 @@ export default function ContinueWatchingButton({
 	show,
 	type,
 	isDetailsPage = false,
+	tone = 'default',
 }: ContinueWatchingButtonProps) {
 	const router = useRouter();
 	const recentlyWatched = useTVShowStore((s) => s.recentlyWatched);
@@ -48,7 +51,21 @@ export default function ContinueWatchingButton({
 	const removeFavorite = useFavoritesStore((s) => s.removeFavorite);
 
 	const [isLoading, setIsLoading] = useState(false);
+	const [animateWatchlistToggle, setAnimateWatchlistToggle] = useState(false);
+	const [showWatchlistPulse, setShowWatchlistPulse] = useState(false);
+	const toggleFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const pulseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const watchlistActionId = useRef(0);
+	const watchlistButtonRef = useRef<HTMLButtonElement | null>(null);
 	const haptic = useHaptics();
+
+	useEffect(
+		() => () => {
+			if (toggleFeedbackTimer.current) clearTimeout(toggleFeedbackTimer.current);
+			if (pulseTimer.current) clearTimeout(pulseTimer.current);
+		},
+		[]
+	);
 
 	const isCurrentlyPlaying = useMemo(() => {
 		if (!isDetailsPage || type !== 'tv' || !activeEP || !isPlaying) return false;
@@ -83,22 +100,33 @@ export default function ContinueWatchingButton({
 	}, [recentlyWatched, id]);
 
 	const handleAddOrRemove = useCallback(
-		async (e: React.MouseEvent) => {
+		async (e: React.MouseEvent<HTMLButtonElement>) => {
 			e.preventDefault();
 			e.stopPropagation();
+			const actionId = ++watchlistActionId.current;
+			const isPointerAction = e.detail > 0;
+			setAnimateWatchlistToggle(isPointerAction);
+			if (toggleFeedbackTimer.current) clearTimeout(toggleFeedbackTimer.current);
+			toggleFeedbackTimer.current = setTimeout(() => setAnimateWatchlistToggle(false), 220);
+			setShowWatchlistPulse(false);
+			if (pulseTimer.current) clearTimeout(pulseTimer.current);
 
 			const label = show?.name || show?.title || 'Item';
 			if (isAdded) {
-				haptic('soft');
 				const ok =
 					type === 'movie'
 						? await removeFromWatchList(Number(id))
 						: await removeFromTvWatchList(Number(id));
 				if (ok) {
-					toast.info('Removed from watchlist', {
-						description: `${label} has been removed from your watchlist.`,
-					});
+					if (actionId === watchlistActionId.current) {
+						haptic('medium');
+						toast.info('Removed from watchlist', {
+							id: `watchlist:${type}:${id}`,
+							description: `${label} has been removed from your watchlist.`,
+						});
+					}
 				} else {
+					if (actionId === watchlistActionId.current) haptic('error');
 					toast.error('Could not update watchlist', {
 						description: 'The change is saved on this device and will sync on retry.',
 						action: {
@@ -110,16 +138,31 @@ export default function ContinueWatchingButton({
 					});
 				}
 			} else {
-				haptic('success');
 				const ok =
 					type === 'movie'
 						? await addToWatchlist(show)
 						: await addToTvWatchlist(show);
 				if (ok) {
-					toast.success('Added to watchlist', {
-						description: `${label} has been added to your watchlist.`,
-					});
+					if (actionId === watchlistActionId.current) {
+						haptic('success');
+						if (
+							watchlistButtonRef.current &&
+							typeof window !== 'undefined' &&
+							window.matchMedia('(hover: hover) and (pointer: fine)').matches
+						) {
+							flourishMyList(watchlistButtonRef.current);
+						}
+						if (isPointerAction) {
+							setShowWatchlistPulse(true);
+							pulseTimer.current = setTimeout(() => setShowWatchlistPulse(false), 280);
+						}
+						toast.success('Added to watchlist', {
+							id: `watchlist:${type}:${id}`,
+							description: `${label} has been added to your watchlist.`,
+						});
+					}
 				} else {
+					if (actionId === watchlistActionId.current) haptic('error');
 					toast.error('Could not update watchlist', {
 						description: 'The change is saved on this device and will sync on retry.',
 						action: {
@@ -141,11 +184,12 @@ export default function ContinueWatchingButton({
 			e.stopPropagation();
 
 			if (isLiked) {
-				haptic('soft');
 				const ok = await removeFavorite(Number(id), type);
 				if (ok) {
+					haptic('medium');
 					toast.info('Removed from favorites');
 				} else {
+					haptic('error');
 					toast.error('Could not update favorites', {
 						description: 'The change is saved on this device and will sync on retry.',
 						action: {
@@ -157,11 +201,12 @@ export default function ContinueWatchingButton({
 					});
 				}
 			} else {
-				haptic('success');
 				const ok = await addFavorite(show, type);
 				if (ok) {
+					haptic('success');
 					toast.success('Added to favorites');
 				} else {
+					haptic('error');
 					toast.error('Could not update favorites', {
 						description: 'The change is saved on this device and will sync on retry.',
 						action: {
@@ -185,7 +230,7 @@ export default function ContinueWatchingButton({
 	}, []);
 
 	const handlePlay = useCallback(async () => {
-		haptic('medium');
+		haptic('light');
 		if (isCurrentlyPlaying) {
 			scrollToPlayer();
 			return;
@@ -219,7 +264,7 @@ export default function ContinueWatchingButton({
 		} finally {
 			setIsLoading(false);
 		}
-	}, [router, type, id, currentActiveEpisode, recentFromHistory, isCurrentlyPlaying, haptic, scrollToPlayer]);
+	}, [router, type, id, currentActiveEpisode, recentFromHistory, isCurrentlyPlaying, scrollToPlayer, haptic]);
 
 	const handleInfo = useCallback(() => {
 		if (!isDetailsPage) {
@@ -262,23 +307,15 @@ export default function ContinueWatchingButton({
 		return { buttonText: 'Start Watching', buttonLabel: 'Start from Episode 1', ButtonIcon: PlayIcon };
 	}, [type, isCurrentlyPlaying, displayEpisode, displaySeasonNumber, displayEpisodeNumber]);
 
-	// Secondary icon button: subtle surface on dark
-	const secondaryBase = cn(
-		'rounded-full h-11 w-11 md:h-12 md:w-12',
-		'bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.14]',
-		'text-white/70 hover:text-white',
-		'border border-white/[0.08] hover:border-white/[0.14]'
-	);
-
 	return (
 		<div className="flex items-center gap-3 md:gap-3.5">
 			{/* Primary CTA */}
 			<Button
 				onClick={handlePlay}
 				disabled={isLoading}
-				variant="default"
-				size="lg"
-				className="rounded-full h-12 md:h-[52px] px-7 md:px-8 text-sm md:text-[15px]"
+				variant={tone === 'brand' ? 'brand' : 'default'}
+				size="xl"
+				shape="pill"
 				aria-label={buttonLabel}
 				aria-busy={isLoading}
 			>
@@ -293,32 +330,64 @@ export default function ContinueWatchingButton({
 			</Button>
 
 			{/* Watchlist */}
-			<Button
-				variant="ghost"
-				size="icon"
-				onClick={handleAddOrRemove}
-				glow={isAdded}
-				glowVariant="light"
-				className={cn(secondaryBase, isAdded && 'bg-white/[0.12] text-white border-white/15')}
-				aria-label={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
-				title={isAdded ? 'In Watchlist' : 'Add to Watchlist'}
-			>
-				{isAdded ? <CheckIcon size={18} weight="bold" /> : <PlusIcon size={18} weight="bold" />}
-			</Button>
+			<span className="relative inline-flex">
+				<Button
+					ref={watchlistButtonRef}
+					variant={isAdded ? 'ghost' : 'glass'}
+					size="icon-lg"
+					onClick={handleAddOrRemove}
+					glow={isAdded}
+					glowVariant="light"
+					aria-label={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
+					aria-pressed={isAdded}
+					title={isAdded ? 'In Watchlist' : 'Add to Watchlist'}
+				>
+					<span className="relative inline-flex size-4.5 items-center justify-center" aria-hidden="true">
+						<PlusIcon
+							size={18}
+							weight="bold"
+							className={cn(
+								'absolute motion-reduce:rotate-0 motion-reduce:scale-100 motion-reduce:blur-none motion-reduce:transition-opacity',
+								animateWatchlistToggle
+									? 'transition-[opacity,filter,transform] duration-(--duration-ui) ease-out'
+									: 'transition-none',
+								isAdded
+									? 'rotate-90 scale-95 opacity-0 blur-sm'
+									: 'rotate-0 scale-100 opacity-100 blur-none motion-reduce:blur-none'
+							)}
+						/>
+						<CheckIcon
+							size={18}
+							weight="bold"
+							className={cn(
+								'absolute motion-reduce:rotate-0 motion-reduce:scale-100 motion-reduce:blur-none motion-reduce:transition-opacity',
+								animateWatchlistToggle
+									? 'transition-[opacity,filter,transform] duration-(--duration-ui) ease-out'
+									: 'transition-none',
+								isAdded
+									? 'rotate-0 scale-100 opacity-100 blur-none motion-reduce:blur-none'
+									: '-rotate-90 scale-95 opacity-0 blur-sm'
+							)}
+						/>
+					</span>
+				</Button>
+				<span
+					aria-hidden="true"
+					className={cn(
+						'pointer-events-none absolute inset-0 rounded-full ring-2 ring-brand transition-opacity duration-(--duration-fade) motion-reduce:transition-opacity',
+						showWatchlistPulse ? 'opacity-100' : 'opacity-0'
+					)}
+				/>
+			</span>
 
 			{/* Favorite */}
 			{isDetailsPage && (
 				<Button
-					variant="ghost"
-					size="icon"
+					variant={isLiked ? 'secondary' : 'glass'}
+					size="icon-lg"
 					onClick={handleLike}
 					glow={isLiked}
 					glowVariant="accent"
-					className={cn(
-						secondaryBase,
-						isLiked &&
-							'bg-[#ff453a]/10 text-[#ff453a] border-[#ff453a]/20 hover:bg-[#ff453a]/15 hover:border-[#ff453a]/30'
-					)}
 					aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
 					title={isLiked ? 'Favorited' : 'Add to Favorites'}
 				>
@@ -329,10 +398,9 @@ export default function ContinueWatchingButton({
 			{/* Info */}
 			{!isDetailsPage && (
 				<Button
-					variant="ghost"
-					size="icon"
+					variant="glass"
+					size="icon-lg"
 					onClick={handleInfo}
-					className={secondaryBase}
 					aria-label="View details"
 					title="More Info"
 				>

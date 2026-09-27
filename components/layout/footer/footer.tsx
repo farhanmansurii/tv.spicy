@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Wordmark } from '@/components/ui/wordmark';
 
 const GitHubIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => (
 	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" {...props}>
@@ -34,41 +35,30 @@ const NAV_LINKS = [
 
 export default function Footer() {
 	return (
-		<footer className="w-full mt-20 pb-8">
-			{/* Shared max-w-7xl container — identical to header and all page containers */}
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
-
-				{/* Full-width rule */}
-				<div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.09] to-transparent" />
+		<footer className="w-full mt-section pb-8 border-t border-border font-sans">
+			{/* Gutter container — matches the header gutter on every viewport */}
+			<div className="w-full px-gutter">
 
 				{/* Main footer body */}
-				<div className="pt-10 pb-6 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-start">
+				<div className="pt-10 pb-6 flex flex-col gap-10 md:flex-row md:items-start md:justify-between md:gap-16">
 
 					{/* Left — brand block */}
 					<div className="flex flex-col gap-4 max-w-sm">
 						<Link
 							href="/"
 							prefetch={false}
-							className="flex items-center gap-2 w-fit group"
+							className="flex items-center gap-1.5 w-fit group"
 							aria-label="Spicy TV home"
 						>
-							<div className="relative h-7 w-7 flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
-								<img src="/logo.webp" alt="" className="h-full w-full object-contain" />
-							</div>
-							<span
-								className="text-[15px] font-semibold tracking-tight text-white/80 group-hover:text-white transition-colors duration-200"
-								style={{ fontFamily: 'var(--font-geist-sans), sans-serif' }}
-							>
-							Spicy TV
-						</span>
-					</Link>
+							<Wordmark size="sm" />
+						</Link>
 
-						<p className="text-[12px] leading-relaxed text-zinc-500 max-w-xs">
+						<p className="text-small leading-relaxed text-muted-foreground max-w-xs">
 							This site does not store any files on its server. All contents are provided
 							by non-affiliated third parties.
 						</p>
 
-						<p className="text-[11px] text-zinc-600 italic">
+						<p className="text-small text-soft">
 							Don&apos;t forget to clear your browser history before you die.
 						</p>
 					</div>
@@ -83,7 +73,7 @@ export default function Footer() {
 										<Link
 											href={link.href}
 											prefetch={false}
-											className="text-[13px] font-medium text-zinc-500 hover:text-white transition-colors duration-150"
+											className="text-small font-medium text-muted-foreground can-hover:text-foreground transition-colors duration-150"
 										>
 											{link.label}
 										</Link>
@@ -99,7 +89,7 @@ export default function Footer() {
 								target="_blank"
 								rel="noreferrer"
 								aria-label="GitHub"
-								className="flex items-center justify-center w-8 h-8 rounded-full text-zinc-500 hover:text-white transition-all duration-150 hover:bg-white/[0.06]"
+								className="hit-target-lg flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground can-hover:text-foreground transition-[color,background-color] duration-(--duration-press) can-hover:bg-foreground/[0.06]"
 							>
 								<GitHubIcon className="w-4 h-4" />
 							</a>
@@ -108,7 +98,7 @@ export default function Footer() {
 								target="_blank"
 								rel="noreferrer"
 								aria-label="X (Twitter)"
-								className="flex items-center justify-center w-8 h-8 rounded-full text-zinc-500 hover:text-white transition-all duration-150 hover:bg-white/[0.06]"
+								className="hit-target-lg flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground can-hover:text-foreground transition-[color,background-color] duration-(--duration-press) can-hover:bg-foreground/[0.06]"
 							>
 								<XIcon className="w-4 h-4" />
 							</a>
@@ -118,10 +108,9 @@ export default function Footer() {
 
 				{/* Bottom bar */}
 				<div
-					className="flex flex-col sm:flex-row justify-between items-center gap-2 pt-5"
-					style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+					className="flex flex-col sm:flex-row justify-between items-center gap-2 pt-5 border-t border-border"
 				>
-					<p className="text-[11px] text-zinc-600 tabular-nums">
+					<p className="text-small text-muted-foreground">
 						© {new Date().getFullYear()} Spicy TV
 					</p>
 
@@ -130,7 +119,7 @@ export default function Footer() {
 							<li key={link.label}>
 								<a
 									href={link.href}
-									className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors duration-150"
+									className="text-small text-muted-foreground can-hover:text-foreground transition-colors duration-150"
 								>
 									{link.label}
 								</a>

@@ -37,7 +37,7 @@ function SearchInput({ className, showGoButton, desktop }: SearchInputProps) {
 
 	const submit = () => {
 		if (value.trim()) {
-			router.push(`/search?q=${encodeURIComponent(value.trim())}`);
+			router.push(`/search?query=${encodeURIComponent(value.trim())}`);
 			setValue('');
 			if (showGoButton) setOpenMobile(false);
 		}
@@ -50,50 +50,43 @@ function SearchInput({ className, showGoButton, desktop }: SearchInputProps) {
 	return (
 		<div
 			className={cn(
-				'relative flex w-full items-center h-11',
-				desktop ? 'rounded-xl px-3.5 gap-3' : 'rounded-xl px-3 gap-2',
-				'bg-white/[0.04] hover:bg-white/[0.06] focus-within:bg-white/[0.08]',
-				'border border-white/[0.08] hover:border-white/[0.12] focus-within:border-white/[0.16]',
-				'transition-all duration-200 ease-out',
+				'relative flex h-11 w-full items-center rounded-sm border border-border-strong bg-card',
+				desktop ? 'gap-3 px-3.5' : 'gap-2 px-3',
+				'transition-[background-color,border-color] duration-(--duration-ui) motion-reduce:transition-none',
+				'focus-within:border-brand',
 				className
 			)}
 		>
-			<MagnifyingGlassIcon className="h-[18px] w-[18px] text-white/30 flex-shrink-0" />
+			<MagnifyingGlassIcon className="size-4.5 shrink-0 text-muted-foreground" />
 			<input
 				type="text"
+				autoComplete="off"
+				spellCheck={false}
 				value={value}
 				onChange={(e) => setValue(e.target.value)}
 				onKeyDown={handleKeyDown}
 				placeholder="Search movies, shows..."
-				className="flex-1 min-w-0 bg-transparent text-sm text-white/80 placeholder:text-white/30 outline-none"
+				className="min-w-0 flex-1 bg-transparent text-body text-foreground outline-none placeholder:text-muted-foreground"
 			/>
-			{showGoButton && value.trim() && (
+			{showGoButton && (
 				<button
+					type="button"
 					onClick={submit}
+					disabled={!value.trim()}
+					aria-label="Search"
 					className={cn(
-						'flex-shrink-0 flex items-center justify-center',
-						'h-7 px-2.5 rounded-full',
-						'bg-white/[0.10] text-white/70',
-						'hover:bg-white/[0.16] hover:text-white',
-						'transition-all duration-200',
-						'text-[11px] font-semibold'
+						'flex h-7 shrink-0 items-center justify-center rounded-full px-2.5',
+						'text-xs font-semibold transition-[color,background-color,border-color] duration-(--duration-ui) motion-reduce:transition-none',
+						'border border-border-strong bg-card text-foreground',
+						'can-hover:border-foreground/25 can-hover:bg-muted',
+						'disabled:pointer-events-none disabled:border-transparent disabled:bg-transparent disabled:text-muted-foreground/40'
 					)}
 				>
-					Go
-				</button>
-			)}
-			{showGoButton && !value.trim() && (
-				<button
-					onClick={submit}
-					disabled
-					className={cn(
-						'flex-shrink-0 flex items-center justify-center',
-						'h-7 w-7 rounded-full',
-						'text-white/20',
-						'cursor-default'
+					{value.trim() ? (
+						'Go'
+					) : (
+						<ArrowRightIcon size={14} aria-hidden="true" />
 					)}
-				>
-					<ArrowRightIcon size={14} />
 				</button>
 			)}
 		</div>
@@ -114,11 +107,10 @@ export function SearchTrigger({ variant = 'default', className }: SearchTriggerP
 				href="/search"
 				prefetch={false}
 				className={cn(
-					'flex items-center justify-center',
-					'w-11 h-11',
-					'text-white/60 hover:text-white/90',
-					'transition-colors duration-200',
-					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+					'flex size-11 items-center justify-center',
+					'text-muted-foreground can-hover:text-foreground',
+					'transition-colors duration-(--duration-ui) motion-reduce:transition-none',
+					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 					'touch-manipulation select-none',
 					className
 				)}
@@ -137,10 +129,8 @@ export function SearchTrigger({ variant = 'default', className }: SearchTriggerP
 	return (
 		<SearchInput
 			className={cn(
-				/* Mobile: full width pill */
-				'flex-1 h-10 rounded-full px-3.5',
-				/* Desktop: fixed width input */
-				'lg:flex-none lg:w-80 lg:rounded-xl lg:px-4',
+				'flex-1 h-10 px-3.5',
+				'lg:w-80 lg:flex-none lg:px-4',
 				className
 			)}
 			desktop

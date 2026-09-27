@@ -16,7 +16,7 @@ export default function SidebarProvider({ children }: { children: React.ReactNod
 		<UISidebarProvider defaultOpen={false}>
 			<a
 				href="#main-content"
-				className="fixed left-[-9999px] top-4 z-[100] rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black focus:left-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+				className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 			>
 				Skip to main content
 			</a>
