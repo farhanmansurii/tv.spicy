@@ -5,6 +5,7 @@ import { SidebarProvider as UISidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/sidebar/app-sidebar';
 import { Header } from '@/components/layout/header/header';
 import { cn } from '@/lib/utils';
+import { RouteTransition } from '@/components/layout/route-transition';
 
 import Footer from '@/components/layout/footer/footer';
 
@@ -20,6 +21,7 @@ export default function SidebarProvider({ children }: { children: React.ReactNod
 			>
 				Skip to main content
 			</a>
+			<RouteTransition />
 			<AppSidebar />
 			<div className="flex flex-col min-h-screen w-full">
 				<Header />

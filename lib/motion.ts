@@ -291,6 +291,33 @@ function unsplitTitle(target: HTMLElement | null) {
 }
 
 /** Detail page opening like a feature spread (MOTION.md A). */
+const ROUTE_LEAVE = { duration: 0.15, restoreAfterMs: 1500 } as const;
+const ROUTE_ENTER = { duration: 0.25 } as const;
+let routeRestoreTimer: ReturnType<typeof setTimeout> | undefined;
+let isLeavingRoute = false;
+
+/** Fades the page out while the next route's first response is on its way. */
+export function leaveRoute(main: HTMLElement): void {
+	const g = registerGSAP();
+	if (!g || isReducedMotion()) return;
+	isLeavingRoute = true;
+	g.killTweensOf(main);
+	g.to(main, { opacity: 0, duration: ROUTE_LEAVE.duration, ease: 'power2.out' });
+	clearTimeout(routeRestoreTimer);
+	// A click that never navigates (cancelled, same URL, failed) must not leave the page hidden.
+	routeRestoreTimer = setTimeout(() => enterRoute(main), ROUTE_LEAVE.restoreAfterMs);
+}
+
+/** Brings the page back once the new route has committed; a no-op unless a leave ran. */
+export function enterRoute(main: HTMLElement): void {
+	const g = registerGSAP();
+	clearTimeout(routeRestoreTimer);
+	if (!g || !isLeavingRoute) return;
+	isLeavingRoute = false;
+	g.killTweensOf(main);
+	g.to(main, { opacity: 1, duration: ROUTE_ENTER.duration, ease: 'power2.out', clearProps: 'opacity' });
+}
+
 let hasLeftLandingPage = false;
 
 /**
