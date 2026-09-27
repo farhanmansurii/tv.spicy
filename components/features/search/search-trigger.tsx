@@ -79,7 +79,7 @@ function SearchInput({ className, showGoButton, desktop }: SearchInputProps) {
 						'text-xs font-semibold transition-[color,background-color,border-color] duration-(--duration-ui) motion-reduce:transition-none',
 						'border border-border-strong bg-card text-foreground',
 						'can-hover:border-foreground/25 can-hover:bg-muted',
-						'disabled:pointer-events-none disabled:border-transparent disabled:bg-transparent disabled:text-muted-foreground/40'
+						'disabled:pointer-events-none disabled:border-transparent disabled:bg-transparent disabled:text-dim'
 					)}
 				>
 					{value.trim() ? (

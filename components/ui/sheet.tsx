@@ -31,7 +31,7 @@ function SheetOverlay({
 		<SheetPrimitive.Overlay
 			data-slot="sheet-overlay"
 			className={cn(
-				'fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:duration-160 data-[state=closed]:duration-120 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+				'fixed inset-0 z-50 bg-black/60 data-[state=open]:duration-160 data-[state=closed]:duration-120 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
 				className
 			)}
 			{...props}
@@ -68,10 +68,10 @@ function SheetContent({
 			<SheetOverlay />
 			<SheetPrimitive.Content
 				data-slot="sheet-content"
-				className={cn(sheetVariants({ side }), appearance === 'sidebar' && 'border-l border-border/30 bg-background/95 p-0 text-sidebar-foreground backdrop-blur-2xl saturate-glass', className)}
+				className={cn(sheetVariants({ side }), appearance === 'sidebar' && 'border-l border-border/30 bg-background p-0 text-sidebar-foreground', className)}
 				{...props}
 			>
-				<SheetPrimitive.Close className="hit-target absolute top-4 right-4 z-10 flex size-10 items-center justify-center rounded-full bg-foreground/[0.05] text-foreground/60 transition-colors duration-200 can-hover:bg-foreground/[0.1] can-hover:text-foreground disabled:pointer-events-none">
+				<SheetPrimitive.Close className="hit-target absolute top-4 right-4 z-10 flex size-10 items-center justify-center rounded-full bg-foreground/[0.05] text-dim transition-colors duration-200 can-hover:bg-foreground/[0.1] can-hover:text-foreground disabled:pointer-events-none">
 					<X className="size-4" strokeWidth={2} />
 					<span className="sr-only">Close</span>
 				</SheetPrimitive.Close>
@@ -105,7 +105,7 @@ function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPr
 	return (
 		<SheetPrimitive.Title
 			data-slot="sheet-title"
-			className={cn('text-lg font-semibold text-foreground', className)}
+			className={cn('text-title font-semibold text-foreground', className)}
 			{...props}
 		/>
 	);
@@ -118,7 +118,7 @@ function SheetDescription({
 	return (
 		<SheetPrimitive.Description
 			data-slot="sheet-description"
-			className={cn('text-sm text-muted-foreground', className)}
+			className={cn('text-small text-muted-foreground', className)}
 			{...props}
 		/>
 	);

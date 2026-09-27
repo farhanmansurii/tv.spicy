@@ -64,7 +64,7 @@ export function AppSidebar() {
 						className={cn(
 							'flex h-9 w-9 items-center justify-center rounded-full',
 							'bg-foreground/[0.05] can-hover:bg-foreground/[0.08] active:bg-foreground/[0.1]',
-							'text-foreground/60 can-hover:text-foreground',
+							'text-dim can-hover:text-foreground',
 							'transition-[color,background-color,border-color,transform] duration-(--duration-ui)',
 							'touch-manipulation'
 						)}
@@ -98,14 +98,14 @@ export function AppSidebar() {
 									'touch-manipulation',
 									itemIsActive
 										? 'bg-foreground/[0.06] text-foreground'
-										: 'text-foreground/80 can-hover:bg-foreground/[0.03] can-hover:text-foreground'
+										: 'text-soft can-hover:bg-foreground/[0.03] can-hover:text-foreground'
 								)}
 							>
 								<span>{item.label}</span>
 								{itemIsActive && (
 									<span
 										aria-hidden="true"
-										className="ml-auto h-1.5 w-1.5 rounded-full bg-foreground/60"
+										className="ml-auto h-1.5 w-1.5 rounded-full bg-dim"
 									/>
 								)}
 							</Link>

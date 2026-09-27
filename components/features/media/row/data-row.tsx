@@ -73,7 +73,7 @@ function RowStatePanel({
 							? 'We couldn’t reach the catalog. Check your connection and try again.'
 							: 'The catalog has no titles in this row right now. Check back later.'}
 					</p>
-					<Button type="button" variant="ghost" size="sm" onClick={onRetry} className="mt-1">
+					<Button type="button" variant="ghost" onClick={onRetry} className="mt-1">
 						{isError ? 'Try again' : 'Refresh'}
 					</Button>
 				</div>

@@ -288,7 +288,7 @@ function EditorialState({
 					type="button"
 					onClick={action.onClick}
 					className={cn(
-						'pressable mt-8 inline-flex min-h-11 items-center justify-center rounded-full border border-border-strong bg-card px-5 text-ui font-semibold text-foreground can-hover:border-foreground/25 can-hover:bg-muted',
+						'pressable mt-8 inline-flex h-12 items-center justify-center rounded-full border border-border-strong bg-card px-5 text-body font-semibold text-foreground can-hover:border-foreground/25 can-hover:bg-muted',
 						focusRing
 					)}
 				>
@@ -470,7 +470,7 @@ export default function SearchPage() {
 					'sticky z-40 transition-[background-color,border-color] duration-(--duration-ui) motion-reduce:transition-none',
 					'top-0 mt-16 lg:top-16',
 					'bg-background lg:bg-transparent',
-					scrolled && 'lg:border-b lg:border-border lg:bg-background/85 lg:backdrop-blur-xl'
+					scrolled && 'lg:border-b lg:border-border lg:bg-background'
 				)}
 			>
 				<Container className="pt-2 pb-0">

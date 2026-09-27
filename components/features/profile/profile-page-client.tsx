@@ -164,11 +164,6 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 		<div className="mt-20 min-h-screen bg-background">
 			<div className="px-gutter pt-8 pb-6 md:pt-12 md:pb-8">
 				<Card className="relative overflow-hidden p-4 md:p-6 lg:p-10">
-					<div
-						aria-hidden="true"
-						className="pointer-events-none absolute inset-0 bg-(image:--gradient-band) opacity-30"
-					/>
-
 					<div className="relative z-10 flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-6 lg:gap-8">
 						<Avatar className="size-20 md:size-28 lg:size-32">
 							<AvatarImage

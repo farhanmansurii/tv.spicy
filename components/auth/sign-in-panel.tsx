@@ -93,7 +93,7 @@ export default function SignInPanel({ backdropPath, callbackUrl, errorParam }: S
 						Spicy TV
 					</p>
 					<h1 className="mt-3 font-display text-display-2 text-balance uppercase leading-none text-foreground">
-						Welcome to Spicy TV
+						Take your seat.
 					</h1>
 					<p className="mt-3 font-mono text-caption uppercase tracking-label text-dim">
 						Sync your list · Resume anywhere

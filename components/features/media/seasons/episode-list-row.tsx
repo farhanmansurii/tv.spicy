@@ -168,8 +168,8 @@ function EpisodeListRowComponent({
 						handleClick(e);
 					}}
 					className={cn(
-						'dv-episode-play pressable shrink-0 self-start md:self-center inline-flex items-center gap-2 rounded-full border border-line-strong px-4 py-2',
-						'text-ui font-semibold text-text can-hover:hover:border-brand can-hover:hover:text-brand',
+						'dv-episode-play pressable shrink-0 self-start md:self-center inline-flex h-12 items-center gap-2 rounded-full border border-line-strong px-5',
+						'text-body font-semibold text-text can-hover:hover:border-brand can-hover:hover:text-brand',
 						'transition-[border-color,color,opacity] duration-150',
 						'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
 					)}

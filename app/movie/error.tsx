@@ -15,13 +15,18 @@ export default function Error({
 	}, [error]);
 
 	return (
-		<div className="flex min-h-96 items-center justify-center p-6">
-			<div className="flex w-full max-w-md flex-col text-center gap-4">
-				<h2 className="text-2xl font-bold">Couldn’t load movies</h2>
-				<p className="text-muted-foreground">
-					We hit an issue loading this section. Please try again.
+		<div className="flex min-h-96 items-center px-gutter py-16">
+			<div className="w-full max-w-prose">
+				<p className="font-mono text-caption uppercase tracking-label text-destructive">
+					Error
 				</p>
-				<div className="flex items-center justify-center gap-3">
+				<h2 className="mt-4 font-display text-display-3 uppercase text-text text-balance">
+					Couldn’t load movies
+				</h2>
+				<p className="mt-3 text-lede text-soft max-w-prose-secondary">
+					We hit an issue loading this section. Try again in a moment.
+				</p>
+				<div className="mt-6 flex flex-wrap items-center gap-3">
 					<Button onClick={() => reset()}>Try again</Button>
 				</div>
 			</div>

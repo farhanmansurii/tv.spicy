@@ -192,7 +192,7 @@ function DestructiveConfirmComponent({
 				aria-label={cancelLabel}
 				tabIndex={-1}
 				onClick={() => close()}
-				className="absolute inset-0 cursor-default bg-black/65 backdrop-blur-xs motion-reduce:backdrop-blur-none"
+				className="absolute inset-0 cursor-default bg-black/65"
 			/>
 
 			{/* Dialog */}
@@ -218,14 +218,14 @@ function DestructiveConfirmComponent({
 						ref={cancelRef}
 						type="button"
 						onClick={(event) => handleButtonActivate(event, onCancel)}
-						className={`rounded-full border border-border-strong bg-card px-4 py-2 text-ui font-semibold text-foreground can-hover:bg-raised ${PRESSABLE} ${FOCUS_RING}`}
+						className={`rounded-full border border-border-strong bg-card h-12 px-5 text-body font-semibold text-foreground can-hover:bg-raised ${PRESSABLE} ${FOCUS_RING}`}
 					>
 						{cancelLabel}
 					</button>
 					<button
 						type="button"
 						onClick={(event) => handleButtonActivate(event, onConfirm)}
-						className={`rounded-full bg-destructive px-4 py-2 text-ui font-semibold text-foreground can-hover:bg-destructive/90 ${PRESSABLE} ${FOCUS_RING}`}
+						className={`rounded-full bg-destructive h-12 px-5 text-body font-semibold text-foreground can-hover:bg-destructive/90 ${PRESSABLE} ${FOCUS_RING}`}
 					>
 						{confirmLabel}
 					</button>
