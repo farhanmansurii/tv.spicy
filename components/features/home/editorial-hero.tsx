@@ -45,6 +45,8 @@ function toSlide(show: HeroShow, fallbackType?: 'movie' | 'tv') {
 		year: releaseDate ? releaseDate.slice(0, 4) : null,
 		score: show.vote_average ?? 0,
 		backdrop,
+		// Textless only: a poster with its title printed on it would repeat the headline.
+		phonePoster: show.images?.posters?.find((image) => image.iso_639_1 === null)?.file_path ?? null,
 		poster: show.poster_path || null,
 	};
 }
@@ -205,28 +207,33 @@ export function EditorialHero({
 			>
 				{slides.map((item, index) =>
 					item.backdrop && backdropWindow.has(index) ? (
-						<img
-							key={item.id}
-							data-reel-backdrop={index}
-							ref={(node) => {
-								if (node?.complete && node.naturalWidth > 0) markLoaded(index);
-							}}
-							src={tmdbImage(item.backdrop, 'w1280')}
-							srcSet={`${tmdbImage(item.backdrop, 'w780')} 780w, ${tmdbImage(item.backdrop, 'w1280')} 1280w`}
-							sizes="(min-width: 1024px) 76vw, 100vw"
-							alt=""
-							decoding="async"
-							fetchPriority={index === 0 ? 'high' : 'low'}
-							onLoad={() => markLoaded(index)}
-							onError={() => markLoaded(index)}
-							className={cn(
-								'absolute inset-0 size-full object-cover hero-backdrop-img opacity-0 lg:hero-backdrop-img-lg',
-								'transition-opacity duration-(--duration-reveal) ease-entrance motion-reduce:transition-none',
-								index === previous && 'z-1 opacity-100',
-								index === current && loaded.has(index) && 'z-2 opacity-100',
-								index === requested?.index && 'transition-none'
+						<picture key={item.id}>
+							{item.phonePoster && (
+								<source media="(max-width: 767px)" srcSet={tmdbImage(item.phonePoster, 'w780')} />
 							)}
-						/>
+							<img
+								data-reel-backdrop={index}
+								ref={(node) => {
+									if (node?.complete && node.naturalWidth > 0) markLoaded(index);
+								}}
+								src={tmdbImage(item.backdrop, 'w1280')}
+								srcSet={`${tmdbImage(item.backdrop, 'w780')} 780w, ${tmdbImage(item.backdrop, 'w1280')} 1280w`}
+								sizes="(min-width: 1024px) 76vw, 100vw"
+								alt=""
+								decoding="async"
+								fetchPriority={index === 0 ? 'high' : 'low'}
+								onLoad={() => markLoaded(index)}
+								onError={() => markLoaded(index)}
+								className={cn(
+									'absolute inset-0 size-full object-cover hero-backdrop-img opacity-0 lg:hero-backdrop-img-lg',
+									'transition-opacity duration-(--duration-reveal) ease-entrance motion-reduce:transition-none',
+									index === previous && 'z-1 opacity-100',
+									index === current && loaded.has(index) && 'z-2 opacity-100',
+									index === requested?.index && 'transition-none',
+									item.phonePoster && 'max-md:object-top'
+								)}
+							/>
+						</picture>
 					) : null
 				)}
 			</div>
