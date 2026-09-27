@@ -42,7 +42,7 @@ function DropdownMenuContent({
 				className={cn(
 					'z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-32 overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
 					menuContentMotion,
-					surface === 'glass' && 'rounded-sm border-line bg-popover/80 p-2 backdrop-blur-2xl saturate-glass shadow-account-menu',
+					surface === 'glass' && 'rounded-sm border-line bg-popover p-2 shadow-account-menu',
 					className
 				)}
 				{...props}
@@ -71,7 +71,7 @@ function DropdownMenuItem({
 			className={cn(
 				menuItemBase,
 				'gap-2 px-2 py-1.5 data-[inset]:pl-8 [&>svg]:size-4 [&>svg]:shrink-0',
-				surface === 'glass' && 'rounded-xl text-foreground/80 transition-colors can-hover:bg-foreground/[0.05] can-hover:text-foreground',
+				surface === 'glass' && 'rounded-sm text-soft transition-colors can-hover:bg-foreground/[0.05] can-hover:text-foreground',
 				className
 			)}
 			{...props}

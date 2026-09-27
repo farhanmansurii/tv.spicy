@@ -3,8 +3,6 @@ import { Slot } from 'radix-ui';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-export type GlowVariant = 'light' | 'primary' | 'accent';
-
 const buttonVariants = cva(
 	[
 		'inline-flex items-center justify-center gap-2 whitespace-nowrap',
@@ -29,7 +27,7 @@ const buttonVariants = cva(
 				ghost:
 					'bg-foreground/[0.08] border border-border-strong text-foreground backdrop-blur-md can-hover:bg-foreground/[0.14] can-hover:border-foreground/40 active:bg-foreground/[0.10]',
 				link: 'text-primary underline-offset-4 can-hover:underline',
-				glass: 'rounded-full border border-border bg-foreground/[0.06] text-foreground/70 can-hover:bg-foreground/[0.10] can-hover:text-foreground can-hover:border-border-strong active:bg-foreground/[0.14]',
+				glass: 'rounded-full border border-border bg-foreground/[0.06] text-soft can-hover:bg-foreground/[0.10] can-hover:text-foreground can-hover:border-border-strong active:bg-foreground/[0.14]',
 			},
 			shape: { default: '', pill: 'rounded-full' },
 			size: {
@@ -63,18 +61,9 @@ const buttonVariants = cva(
 	}
 );
 
-const glowStyles: Record<GlowVariant, string> = {
-	light: 'shadow-glow-light can-hover:shadow-glow-light-hover can-hover:-translate-y-px active:translate-y-0',
-	primary: 'shadow-glow-primary can-hover:shadow-glow-primary-hover can-hover:-translate-y-px active:translate-y-0',
-	accent: 'shadow-glow-accent can-hover:shadow-glow-accent-hover can-hover:-translate-y-px active:translate-y-0',
-};
-
 type ButtonProps = React.ComponentProps<'button'> &
 	VariantProps<typeof buttonVariants> & {
 		asChild?: boolean;
-		/** Purposeful glow for hero CTAs. Never default. */
-		glow?: boolean;
-		glowVariant?: GlowVariant;
 	};
 
 function Button({
@@ -83,8 +72,6 @@ function Button({
 	size = 'default',
 	shape = 'default',
 	asChild = false,
-	glow = false,
-	glowVariant = 'light',
 	...props
 }: ButtonProps) {
 	const Comp = asChild ? Slot.Root : 'button';
@@ -93,11 +80,7 @@ function Button({
 			data-slot="button"
 			data-variant={variant}
 			data-size={size}
-			className={cn(
-				buttonVariants({ variant, size, shape }),
-				glow && glowStyles[glowVariant],
-				className
-			)}
+			className={cn(buttonVariants({ variant, size, shape }), className)}
 			{...props}
 		/>
 	);

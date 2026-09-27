@@ -23,12 +23,12 @@ export function HeaderNavigation({ items, isActive }: HeaderNavigationProps) {
 							aria-current={active ? 'page' : undefined}
 							className={cn(
 								'relative flex h-9 items-center rounded-full px-2.5 sm:px-3.5',
-								'text-small sm:text-base font-medium tracking-normal',
+								'text-ui font-medium tracking-normal',
 								'transition-colors duration-200 ease-out active:scale-97 motion-reduce:active:scale-100',
 								'select-none',
 								active
-									? 'text-foreground bg-foreground/10'
-									: 'text-muted-foreground can-hover:text-foreground can-hover:bg-foreground/10'
+									? 'text-foreground'
+									: 'text-dim can-hover:text-foreground'
 							)}
 						>
 							{item.label}

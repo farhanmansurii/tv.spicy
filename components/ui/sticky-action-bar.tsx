@@ -59,7 +59,7 @@ export function StickyActionBar({
 			aria-hidden={!isVisible}
 			className={cn(
 				'fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-2 px-gutter py-3 pb-safe md:hidden',
-				'border-t border-line-strong bg-canvas/95 backdrop-blur-md',
+				'border-t border-line-strong bg-canvas',
 				'transition-[transform,opacity,visibility]',
 				isVisible
 					? 'translate-y-0 opacity-100 pointer-events-auto duration-(--duration-fade) ease-entrance'
