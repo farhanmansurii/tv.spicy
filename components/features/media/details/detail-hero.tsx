@@ -1,9 +1,7 @@
 'use client';
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import {
-	CaretLeftIcon,
 	CheckIcon,
 	PlayIcon,
 	PlusIcon,
@@ -65,7 +63,6 @@ interface DetailHeroProps {
 function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	const sectionRef = useRef<HTMLElement>(null);
 	const artRef = useRef<HTMLDivElement>(null);
-	const shadeRef = useRef<HTMLDivElement>(null);
 	const overlineRef = useRef<HTMLParagraphElement>(null);
 	const quoteRef = useRef<HTMLQuoteElement>(null);
 	const ratingRef = useRef<HTMLParagraphElement>(null);
@@ -255,11 +252,6 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	// timeline and leaving the inline opacity it applied behind.
 	useGSAP(
 		() => {
-			if (shadeRef.current) {
-				shadeRef.current.style.background =
-					'linear-gradient(to bottom, color-mix(in srgb, var(--canvas) 68%, transparent), transparent 30%), linear-gradient(to right, color-mix(in srgb, var(--canvas) 96%, transparent), color-mix(in srgb, var(--canvas) 88%, transparent) 30%, color-mix(in srgb, var(--canvas) 44%, transparent) 66%, color-mix(in srgb, var(--canvas) 14%, transparent)), linear-gradient(to top, var(--canvas), transparent 78%)';
-			}
-
 			if (!sectionRef.current) return;
 
 			// Attach DOM query classes needed by the arrival recipe
@@ -310,19 +302,10 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 
 				{/* Shade overlay */}
 				<div
-					ref={shadeRef}
-					className="pointer-events-none absolute inset-0 -z-5"
+					className="pointer-events-none absolute inset-0 -z-5 bg-detail-shade"
 					aria-hidden="true"
 				/>
 
-				{/* Back link */}
-				<Link
-					href="/"
-					className="absolute top-24 left-(--gutter) z-10 hidden items-center gap-1.5 lg:flex font-sans font-semibold text-ui text-text transition-colors can-hover:text-white"
-				>
-					<CaretLeftIcon size={16} weight="bold" aria-hidden="true" />
-					<span>Back to browse</span>
-				</Link>
 
 				{/* Content column */}
 				<div className="relative z-10 w-full max-w-3xl">
@@ -339,7 +322,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						{releaseYear && <span>{releaseYear}</span>}
 						{type === 'tv' && seasonsCount ? (
 							<span>
-								<span className="text-brand font-mono tabular-nums">
+								<span className="font-mono tabular-nums">
 									{seasonsCount}
 								</span>{' '}
 								{seasonsCount === 1 ? 'Season' : 'Seasons'}
@@ -348,18 +331,18 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							<span>
 								{runtime >= 60 ? (
 									<>
-										<span className="text-brand font-mono tabular-nums">
+										<span className="font-mono tabular-nums">
 											{Math.floor(runtime / 60)}
 										</span>
 										h{' '}
-										<span className="text-brand font-mono tabular-nums">
+										<span className="font-mono tabular-nums">
 											{runtime % 60}
 										</span>
 										m
 									</>
 								) : (
 									<>
-										<span className="text-brand font-mono tabular-nums">
+										<span className="font-mono tabular-nums">
 											{runtime}
 										</span>
 										m
@@ -440,18 +423,21 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							>
 								{show.overview}
 							</p>
-							{canExpandOverview && (
-								<button
-									type="button"
-									id="dv-more"
-									aria-expanded={isOverviewExpanded}
-									aria-controls="dv-synopsis"
-									onClick={toggleOverview}
-									className="mt-2 inline-block font-sans font-semibold text-ui text-text underline underline-offset-4 cursor-pointer can-hover:text-white"
-								>
-									{isOverviewExpanded ? 'Less' : 'More'}
-								</button>
-							)}
+							{/* The slot is always reserved: whether the synopsis overflows is only known after layout. */}
+							<div className="mt-2 h-6">
+								{canExpandOverview && (
+									<button
+										type="button"
+										id="dv-more"
+										aria-expanded={isOverviewExpanded}
+										aria-controls="dv-synopsis"
+										onClick={toggleOverview}
+										className="inline-block font-sans font-semibold text-ui text-text underline underline-offset-4 cursor-pointer can-hover:text-soft"
+									>
+										{isOverviewExpanded ? 'Less' : 'More'}
+									</button>
+								)}
+							</div>
 						</div>
 					)}
 
@@ -513,10 +499,10 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							type="button"
 							onClick={handleShare}
 							aria-label="Share"
-							className="flex size-12 shrink-0 items-center justify-center gap-2 rounded-full border border-line-strong can-hover:border-line bg-canvas/50 text-text font-sans font-semibold text-ui sm:w-auto sm:px-5 transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
+							title="Share"
+							className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong can-hover:border-line bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
 						>
 							<ShareNetworkIcon size={18} aria-hidden="true" />
-							<span className="hidden sm:inline">Share</span>
 						</button>
 					</div>
 				</div>

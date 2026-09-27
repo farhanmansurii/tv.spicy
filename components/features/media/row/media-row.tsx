@@ -3,8 +3,7 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { cardCascade, isReducedMotion, registerGSAP, reveal } from '@/lib/motion';
+import { revealOnScroll } from '@/lib/motion';
 import { useHaptics } from '@/hooks/use-haptics';
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
@@ -97,30 +96,12 @@ function MediaRowComponent({
 
 	useEffect(() => {
 		const section = sectionRef.current;
-		const gsap = registerGSAP();
-		if (!section || !gsap) return;
-
-		const header = section.querySelectorAll<HTMLElement>('[data-row-reveal-header]');
-		const cards = section.querySelectorAll<HTMLElement>('[data-row-reveal-card]');
-		const timelines: gsap.core.Timeline[] = [];
-
-		const trigger = ScrollTrigger.create({
-			trigger: section,
-			start: 'top 88%',
-			once: true,
-			onEnter: () => {
-				// MOTION.md B: the heading arrives as one line, then the cards cascade.
-				const heading = reveal(header, { distance: 8, step: 0 });
-				const cascade = cardCascade(cards, { delay: isReducedMotion() ? 0 : 0.05 });
-				[heading, cascade].forEach((timeline) => timeline && timelines.push(timeline));
-			},
-		});
-
-		return () => {
-			trigger.kill();
-			timelines.forEach((timeline) => timeline.progress(1).kill());
-			gsap.set([...header, ...cards], { clearProps: 'transform,opacity' });
-		};
+		if (!section) return;
+		return revealOnScroll(
+			section,
+			section.querySelectorAll<HTMLElement>('[data-row-reveal-header]'),
+			section.querySelectorAll<HTMLElement>('[data-row-reveal-card]')
+		);
 	}, []);
 
 	const validShows = useMemo(() => {

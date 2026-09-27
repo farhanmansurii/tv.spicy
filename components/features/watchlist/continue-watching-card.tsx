@@ -66,7 +66,7 @@ function ContinueWatchingCardComponent({ item, index }: ContinueWatchingCardProp
 				aria-label={episodeCode ? `Continue ${title}, ${episodeCode}` : `Continue ${title}`}
 				className="block rounded-sm outline-none transition-transform duration-(--duration-press) ease-out active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100"
 			>
-				<span className="relative block aspect-video w-full overflow-hidden rounded-sm bg-gradient-card-placeholder">
+				<span className="relative isolate block aspect-video w-full overflow-hidden rounded-sm bg-gradient-card-placeholder">
 					{hasImage && (
 						<img
 							src={tmdbImage(imagePath!, 'w780')}
@@ -76,7 +76,7 @@ function ContinueWatchingCardComponent({ item, index }: ContinueWatchingCardProp
 							loading={index < 4 ? 'eager' : 'lazy'}
 							decoding="async"
 							className={cn(
-								'absolute inset-0 size-full object-cover transform-gpu transition-[transform,opacity] duration-(--duration-image) ease-entrance motion-safe:group-can-hover/card:scale-104 motion-reduce:transition-none',
+								'absolute inset-0 size-full object-cover transform-gpu transition-[transform,scale,opacity] duration-(--duration-image) ease-entrance motion-safe:group-can-hover/card:scale-104 motion-reduce:transition-none',
 								imageLoaded ? 'opacity-100' : 'opacity-0'
 							)}
 						/>

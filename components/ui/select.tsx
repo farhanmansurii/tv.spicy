@@ -34,7 +34,7 @@ function SelectTrigger({
 				surface === 'glass' &&
 					'rounded-full border-0 bg-foreground/[0.06] text-foreground/80 shadow-glass backdrop-blur-2xl',
 				surface === 'field' &&
-					'h-11 w-auto gap-3 rounded-full border-line-strong bg-foreground/8 pr-3 pl-4 text-ui text-foreground shadow-none transition-[background-color,border-color,transform] duration-(--duration-ui) active:scale-97 can-hover:border-foreground/40 can-hover:bg-foreground/14 data-[state=open]:border-foreground/40 motion-reduce:active:scale-100',
+					'h-11 w-auto gap-3 rounded-full border-line-strong bg-foreground/8 pr-3 pl-4 text-ui text-foreground shadow-none transition-[background-color,border-color,transform,scale] duration-(--duration-ui) active:scale-97 can-hover:border-foreground/40 can-hover:bg-foreground/14 data-[state=open]:border-foreground/40 motion-reduce:active:scale-100',
 				className
 			)}
 			{...props}

@@ -125,7 +125,7 @@ export function EditorialHero({
 				},
 			});
 		},
-		{ scope: heroRef }
+		[]
 	);
 
 	useGSAP(
@@ -136,7 +136,7 @@ export function EditorialHero({
 				immediate: requested.instant,
 			});
 		},
-		{ scope: heroRef, dependencies: [requested] }
+		{ dependencies: [requested] }
 	);
 
 	useGSAP(
@@ -146,7 +146,7 @@ export function EditorialHero({
 			reelRef.current?.enter();
 			setRequested(null);
 		},
-		{ scope: heroRef, dependencies: [current] }
+		{ dependencies: [current] }
 	);
 
 	useEffect(() => {

@@ -1,9 +1,8 @@
 'use client';
 
-import { memo, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { StarIcon } from '@phosphor-icons/react';
-import { useRouter } from 'next/navigation';
 import type { Show } from '@/lib/types';
 import { tmdbImage, tmdbImageSrcSet } from '@/lib/tmdb-image';
 import { cn } from '@/lib/utils';
@@ -27,9 +26,14 @@ function MediaCardComponent({
 	onClick,
 	rank,
 }: MediaCardProps) {
-	const router = useRouter();
 	const [imageError, setImageError] = useState(false);
 	const imgRef = useRef<HTMLImageElement>(null);
+	const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+	useEffect(() => {
+		const img = imgRef.current;
+		if (img?.complete && img.naturalWidth > 0) setIsImageLoaded(true);
+	}, []);
 
 	const mediaType = show.media_type || type;
 	const ranked = typeof rank === 'number';
@@ -51,28 +55,6 @@ function MediaCardComponent({
 
 	if (!mediaType) return null;
 
-	const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, targetImg?: HTMLElement | null) => {
-		onClick?.(show);
-		if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-		if (e.detail === 0) return;
-		const href = `/${mediaType}/${show.id}`;
-		const reduced =
-			typeof window !== 'undefined' &&
-			window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		const hasViewTransition =
-			typeof document !== 'undefined' && 'startViewTransition' in document;
-
-		if (hasViewTransition && !reduced && targetImg) {
-			e.preventDefault();
-			targetImg.style.setProperty('view-transition-name', 'detail-cover');
-			const transition = (document as unknown as { startViewTransition: (cb: () => void) => { finished: Promise<void> } }).startViewTransition(() => {
-				router.push(href);
-			});
-			transition.finished.finally(() => {
-				targetImg.style.removeProperty('view-transition-name');
-			});
-		}
-	};
 
 	const meta = (
 		<span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-micro uppercase leading-tight tracking-meta text-muted-foreground">
@@ -91,7 +73,7 @@ function MediaCardComponent({
 		<Link
 			href={`/${mediaType}/${show.id}`}
 			prefetch={false}
-			onClick={(e) => handleNavigate(e, imgRef.current)}
+			onClick={() => onClick?.(show)}
 			aria-label={ranked ? `Rank ${rank}: ${title}` : title}
 			className="group block w-full select-none rounded-sm outline-none transition-transform duration-(--duration-press) ease-out active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100"
 		>
@@ -102,7 +84,7 @@ function MediaCardComponent({
 				)}
 			>
 				{imageUrl && !imageError ? (
-					<img
+										<img
 						ref={imgRef}
 						src={imageUrl}
 						srcSet={imageSrcSet}
@@ -110,8 +92,12 @@ function MediaCardComponent({
 						alt=""
 						loading="lazy"
 						decoding="async"
+						onLoad={() => setIsImageLoaded(true)}
 						onError={() => setImageError(true)}
-						className="absolute inset-0 size-full object-cover transform-gpu duration-(--duration-image) ease-entrance motion-safe:group-focus-visible:scale-104 motion-safe:group-can-hover:scale-104 motion-reduce:transform-none motion-reduce:transition-none"
+						className={cn(
+							'absolute inset-0 size-full object-cover transform-gpu transition-[transform,scale,opacity] duration-(--duration-image) ease-entrance motion-safe:group-focus-visible:scale-104 motion-safe:group-can-hover:scale-104 motion-reduce:transform-none motion-reduce:transition-none',
+							isImageLoaded ? 'opacity-100' : 'opacity-0'
+						)}
 					/>
 				) : null}
 

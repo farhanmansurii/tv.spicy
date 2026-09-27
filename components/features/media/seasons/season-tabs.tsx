@@ -76,6 +76,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		data: seasonData,
 		isFetching,
 		isError,
+		isPlaceholderData,
 		refetch,
 	} = useQuery<TMDBSeasonDetails>({
 		queryKey: ['episodes', showId, activeSeason],
@@ -164,36 +165,18 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		[activeSeason, haptic, pathname, searchParams]
 	);
 
-	// Entrance cascade on episodes after season change
+	// The switch fades out, then back in only once the new season's episodes are in, never the old ones.
 	useEffect(() => {
 		const container = episodeContainerRef.current;
-		if (!container) return;
-
-		const reduced = isReducedMotion();
-		if (reduced) {
-			gsap.fromTo(container, { opacity: 0 }, { opacity: 1, duration: 0.18, ease: 'linear' });
-			return;
-		}
-
+		if (!container || isPlaceholderData) return;
 		gsap.killTweensOf(container);
-		gsap.to(container, { opacity: 1, duration: 0.28, ease: 'power4.out' });
-
-		const rows = Array.from(container.querySelectorAll<HTMLElement>('li')).slice(0, 8);
-		if (rows.length > 0) {
-			gsap.fromTo(
-				rows,
-				{ y: 16, opacity: 0 },
-				{
-					y: 0,
-					opacity: 1,
-					duration: 0.28,
-					stagger: 0.045,
-					ease: 'power4.out',
-					clearProps: 'transform',
-				}
-			);
-		}
-	}, [activeSeason, seasonData]);
+		gsap.to(container, {
+			opacity: 1,
+			duration: isReducedMotion() ? 0.18 : 0.28,
+			ease: 'power2.out',
+			clearProps: 'opacity',
+		});
+	}, [activeSeason, seasonData, isPlaceholderData]);
 
 	const onEpisodeClick = useCallback(
 		(episode: EpisodeType, _event?: React.MouseEvent) => {
@@ -261,18 +244,21 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 
 	if (isError) {
 		return (
-			<div className="flex flex-col items-center gap-4 border-y border-line bg-band px-5 py-16 text-center">
-				<WarningCircleIcon size={28} weight="fill" className="text-destructive" aria-hidden="true" />
-				<h2 className="font-display text-4xl uppercase leading-none text-foreground m-0">
+			<div className="flex flex-col items-start gap-4 border-y border-line py-12">
+				<p className="m-0 flex items-center gap-2 font-mono text-caption uppercase tracking-label text-destructive">
+					<WarningCircleIcon size={14} weight="fill" aria-hidden="true" />
+					Error
+				</p>
+				<h2 className="m-0 font-display text-display-3 uppercase leading-none text-foreground">
 					The reel jammed.
 				</h2>
-				<p className="font-mono text-caption text-dim m-0">Episodes could not load. Try again.</p>
+				<p className="m-0 text-body text-soft">Episodes could not load. Try again.</p>
 				<button
 					type="button"
 					onClick={() => refetch()}
-					className="pressable min-h-11 rounded-full bg-brand px-5 text-ui font-semibold text-brand-foreground transition-colors duration-(--duration-ui) can-hover:hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+					className="pressable h-12 rounded-full bg-brand px-5 text-body font-semibold text-brand-foreground transition-[background-color,scale] duration-(--duration-ui) can-hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 				>
-					Try Again
+					Try again
 				</button>
 			</div>
 		);

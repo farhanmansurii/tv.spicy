@@ -51,7 +51,7 @@ export function EditorialHeroRail({
 								aria-label={`Feature ${index + 1} of ${items.length}: ${item.title}`}
 								className={cn(
 									'relative flex min-h-11 w-full items-center gap-3 rounded-sm py-1.5 text-left text-white/60',
-									'transition-[color,transform] duration-(--duration-ui) ease-out active:scale-97 active:duration-(--duration-press)',
+									'transition-[color,transform,scale] duration-(--duration-ui) ease-out active:scale-97 active:duration-(--duration-press)',
 									'can-hover:text-foreground motion-reduce:active:scale-100',
 									'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none',
 									isCurrent && 'text-foreground'
@@ -123,7 +123,7 @@ export function EditorialHeroRail({
 				aria-label={isPaused ? 'Resume featured rotation' : 'Pause featured rotation'}
 				className={cn(
 					'hit-target grid size-10 flex-none place-items-center rounded-full border border-line-strong bg-background/40 text-foreground motion-reduce:hidden',
-					'transition-[background-color,border-color,transform] duration-(--duration-ui) ease-out active:scale-97 active:duration-(--duration-press)',
+					'transition-[background-color,border-color,transform,scale] duration-(--duration-ui) ease-out active:scale-97 active:duration-(--duration-press)',
 					'can-hover:border-foreground/50 can-hover:bg-foreground/[0.14]',
 					'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none'
 				)}

@@ -179,6 +179,59 @@ export function cardCascade(
 	});
 }
 
+const ROW_REVEAL = { start: 'top 92%', rise: 12, duration: 0.6, ease: 'power3.out' } as const;
+
+/**
+ * A section whose heading and cards arrive once as it scrolls in. Sections already on screen at
+ * mount are left alone, and off-screen ones are hidden before they can be seen, so painted content
+ * never snaps to hidden and back. Returns a cleanup that always leaves everything visible.
+ */
+export function revealOnScroll(
+	section: HTMLElement,
+	heading: ArrayLike<HTMLElement>,
+	cards: ArrayLike<HTMLElement>
+): () => void {
+	const g = registerGSAP();
+	const headingEls = Array.from(heading);
+	const cardEls = Array.from(cards);
+	const all = [...headingEls, ...cardEls];
+	const isOnScreen = section.getBoundingClientRect().top < window.innerHeight;
+	if (!g || all.length === 0 || isOnScreen || isReducedMotion()) return () => {};
+
+	g.set(all, { opacity: 0, y: ROW_REVEAL.rise });
+	const timeline = g.timeline({ paused: true });
+	if (headingEls.length > 0) {
+		timeline.to(headingEls, { opacity: 1, y: 0, duration: ROW_REVEAL.duration, ease: ROW_REVEAL.ease }, 0);
+	}
+	if (cardEls.length > 0) {
+		timeline.to(
+			cardEls,
+			{
+				opacity: 1,
+				y: 0,
+				duration: ROW_REVEAL.duration,
+				ease: ROW_REVEAL.ease,
+				stagger: (index: number) => staggerAt(index, STAGGER.card),
+			},
+			0.06
+		);
+	}
+	timeline.eventCallback('onComplete', () => g.set(all, { clearProps: 'opacity,transform' }));
+
+	const trigger = ScrollTrigger.create({
+		trigger: section,
+		start: ROW_REVEAL.start,
+		once: true,
+		onEnter: () => timeline.play(),
+	});
+
+	return () => {
+		trigger.kill();
+		timeline.kill();
+		g.set(all, { clearProps: 'opacity,transform' });
+	};
+}
+
 /** Skeleton to content, one commit: a 2px blur and a fade over 280ms. */
 export function skeletonResolve(
 	target: gsap.TweenTarget,
@@ -238,12 +291,29 @@ function unsplitTitle(target: HTMLElement | null) {
 }
 
 /** Detail page opening like a feature spread (MOTION.md A). */
+let hasLeftLandingPage = false;
+
+/**
+ * True while still on the URL this document was loaded with: the server HTML is already on
+ * screen there, so hiding it to replay an entrance would read as a blink.
+ */
+function isLandingPaint(): boolean {
+	const landing = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+	const isLandingUrl = !!landing && new URL(landing.name).pathname === window.location.pathname;
+	if (!isLandingUrl) hasLeftLandingPage = true;
+	return isLandingUrl && !hasLeftLandingPage;
+}
+
 export function arrival(
 	root: HTMLElement,
 	options: ArrivalOptions = {}
 ): gsap.core.Timeline | null {
 	if (typeof window === 'undefined') return null;
 	registerGSAP();
+	if (isLandingPaint()) {
+		options.onComplete?.();
+		return null;
+	}
 
 	const reduced = isReducedMotion();
 	if (reduced) {
@@ -388,44 +458,20 @@ export function sectionReveal(
 	targets: string | HTMLElement[] | NodeListOf<HTMLElement>
 ): (() => void) | undefined {
 	if (typeof window === 'undefined') return undefined;
-	registerGSAP();
-
-	const reduced = isReducedMotion();
 	const sections: HTMLElement[] =
 		typeof targets === 'string'
 			? Array.from(document.querySelectorAll<HTMLElement>(targets))
 			: Array.from(targets);
-
 	if (sections.length === 0) return undefined;
 
-	const run = (batch: HTMLElement[]) => {
-		batch.forEach((section) => {
-			if (reduced) {
-				gsap.from(section, {
-					opacity: 0,
-					duration: REDUCED_DURATION,
-					clearProps: 'opacity',
-				});
-				return;
-			}
-			const head = section.querySelector<HTMLElement>('.dv-head');
-			if (head) gsap.from(head, enter({ distance: DISTANCE.rise }));
-			cardCascade(
-				section.querySelectorAll<HTMLElement>('.dv-episode, .dv-panel, .row-track > li'),
-				{
-					delay: STAGGER.card,
-				}
-			);
-		});
-	};
-
-	const batches = ScrollTrigger.batch(sections, {
-		start: 'top 85%',
-		once: true,
-		onEnter: (batch) => run(batch as HTMLElement[]),
-	});
-
-	return () => batches.forEach((b) => b.kill());
+	const cleanups = sections.map((section) =>
+		revealOnScroll(
+			section,
+			section.querySelectorAll<HTMLElement>('.dv-head'),
+			section.querySelectorAll<HTMLElement>('.dv-episode, .dv-panel, .row-track > li')
+		)
+	);
+	return () => cleanups.forEach((cleanup) => cleanup());
 }
 
 export const setupSectionReveals = sectionReveal;
@@ -479,7 +525,7 @@ export function flourishMyList(button: HTMLElement): void {
 	ring.style.position = 'absolute';
 	ring.style.inset = '-3px';
 	ring.style.borderRadius = '999px';
-	ring.style.border = '2px solid var(--color-brand, #ff4d2e)';
+	ring.style.border = '2px solid var(--color-brand)';
 	ring.style.pointerEvents = 'none';
 	button.appendChild(ring);
 
@@ -769,7 +815,7 @@ export function openingTitleCard(root: HTMLElement): { interrupt: () => void } {
 	} catch {
 		return { interrupt: () => undefined };
 	}
-	if (played || isReducedMotion()) return { interrupt: () => undefined };
+	if (played || isReducedMotion() || isLandingPaint()) return { interrupt: () => undefined };
 
 	const copy = root.querySelector<HTMLElement>(REEL_COPY);
 	const rail = root.querySelector<HTMLElement>('[data-reel-rail]');

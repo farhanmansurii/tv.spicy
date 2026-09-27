@@ -69,10 +69,17 @@ export function Header({ className }: HeaderProps) {
 			aria-label="Main navigation"
 		>
 			<div
+				aria-hidden="true"
+				className={cn(
+					'pointer-events-none absolute inset-x-0 top-0 h-32 bg-linear-to-b from-background/85 via-background/40 to-transparent transition-opacity duration-(--duration-ui) ease-out',
+					scrolled ? 'opacity-0' : 'opacity-100'
+				)}
+			/>
+			<div
 				className={cn(
 					'absolute inset-0 transition-opacity duration-250 ease-out',
 					scrolled
-						? 'border-b border-border bg-background/84 backdrop-blur-md backdrop-saturate-140 opacity-100'
+						? 'border-b border-border bg-background opacity-100'
 						: 'border-b border-transparent bg-transparent opacity-0 pointer-events-none'
 				)}
 			/>

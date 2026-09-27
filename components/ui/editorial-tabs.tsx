@@ -295,7 +295,7 @@ export function EditorialTabTrigger({
 			disabled={disabled}
 			onClick={() => setActiveTab(value, true)}
 			className={cn(
-				'pressable relative shrink-0 border-0 bg-transparent py-2.5 pb-3.5 text-caption font-medium tracking-label uppercase tabular-nums cursor-pointer transition-[color,transform] duration-150',
+				'pressable relative shrink-0 border-0 bg-transparent py-2.5 pb-3.5 text-caption font-medium tracking-label uppercase tabular-nums cursor-pointer transition-[color,transform,scale] duration-150',
 				isSelected ? 'text-text' : 'text-dim can-hover:hover:text-text',
 				disabled && 'opacity-40 cursor-not-allowed',
 				className

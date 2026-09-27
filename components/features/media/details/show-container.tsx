@@ -1,12 +1,8 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import dynamic from 'next/dynamic';
 import { Show } from '@/lib/types';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface TMDBSeason {
 	air_date: string;
@@ -30,7 +26,7 @@ const Episode = dynamic(() => import('@/components/features/media/episode/episod
 	ssr: false,
 	loading: () => (
 		<div className="w-full py-8 md:py-12">
-			<div className="aspect-video w-full rounded-2xl bg-white/[0.04] animate-pulse" />
+			<div className="aspect-video w-full rounded-sm bg-card" />
 		</div>
 	),
 });
@@ -39,14 +35,14 @@ const SeasonTabs = dynamic(() => import('@/components/features/media/seasons/sea
 	ssr: false,
 	loading: () => (
 		<div className="w-full py-8 md:py-12">
-			<div className="h-10 w-48 rounded-full bg-white/[0.04] animate-pulse mb-6" />
+			<div className="mb-6 h-10 w-48 rounded-full bg-card" />
 			<div className="flex flex-col gap-3">
 				{Array.from({ length: 4 }).map((_, i) => (
 					<div key={i} className="flex gap-3">
-						<div className="aspect-video w-36 md:w-44 rounded-xl bg-white/[0.04] animate-pulse flex-shrink-0" />
+						<div className="aspect-video w-36 shrink-0 rounded-sm bg-card md:w-44" />
 						<div className="flex-1 flex flex-col gap-2 py-2">
-							<div className="h-4 w-3/4 rounded-md bg-white/[0.04] animate-pulse" />
-							<div className="h-3 w-1/2 rounded-md bg-white/[0.03] animate-pulse" />
+							<div className="h-4 w-3/4 rounded-sm bg-card" />
+							<div className="h-3 w-1/2 rounded-sm bg-band" />
 						</div>
 					</div>
 				))}
@@ -62,51 +58,12 @@ export default function ShowContainer({
 	showData,
 	children,
 }: ShowContainerProps) {
-	const contentRef = useRef<HTMLDivElement>(null);
-	const [isVisible, setIsVisible] = React.useState(false);
 	const mediaTitle = showData.title || showData.name || 'Untitled';
-
-	useEffect(() => {
-		if (!contentRef.current) return;
-		if (
-			window.matchMedia('(max-width: 767px)').matches ||
-			window.matchMedia('(prefers-reduced-motion: reduce)').matches
-		) {
-			setIsVisible(true);
-			return;
-		}
-
-		const ctx = gsap.context(() => {
-			gsap.fromTo(
-				contentRef.current,
-				{ y: 24, opacity: 0 },
-				{
-					y: 0,
-					opacity: 1,
-					duration: 0.7,
-					ease: 'power3.out',
-					scrollTrigger: {
-						trigger: contentRef.current,
-						start: 'top 85%',
-						toggleActions: 'play none none none',
-					},
-				}
-			);
-		});
-
-		// Fallback: ensure content is visible even if GSAP/ScrollTrigger fails
-		const timer = setTimeout(() => setIsVisible(true), 100);
-
-		return () => {
-			clearTimeout(timer);
-			ctx.revert();
-		};
-	}, []);
 
 	return (
 		<section className="section-spacing">
 			<div className="w-full px-gutter">
-				<div ref={contentRef} className={isVisible ? 'opacity-100' : undefined}>
+				<div>
 					{type === 'tv' ? (
 						<SeasonTabs
 							seasons={seasons || []}

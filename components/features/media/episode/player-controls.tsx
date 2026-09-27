@@ -22,7 +22,7 @@ import type { ProviderSummary } from './providers';
 const glassOrb = 'rounded-full border border-border-strong bg-card shadow-glass';
 
 const orbPress =
-	'transition-[background-color,color,transform] duration-(--duration-ui) motion-reduce:transition-none can-hover:bg-muted active:scale-97 motion-reduce:active:scale-100';
+	'transition-[background-color,color,transform,scale] duration-(--duration-ui) motion-reduce:transition-none can-hover:bg-muted active:scale-97 motion-reduce:active:scale-100';
 
 /** Format raw seconds into H:MM:SS or M:SS */
 function formatTimestamp(seconds: number): string {

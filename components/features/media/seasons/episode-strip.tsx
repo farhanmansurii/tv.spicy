@@ -78,11 +78,15 @@ function EpisodeStripComponent({
 		setShowAll(false);
 	}, [episodes]);
 
+	const hasResolvedRef = useRef(false);
+
 	useGSAP(
 		() => {
+			if (hasResolvedRef.current || !listRef.current) return;
+			hasResolvedRef.current = true;
 			skeletonResolve(listRef.current);
 		},
-		{ scope: listRef, dependencies: [listKey] }
+		{ dependencies: [listKey] }
 	);
 
 	const handleShowAll = () => {
@@ -133,9 +137,9 @@ function EpisodeStripComponent({
 						type="button"
 						onClick={handleShowAll}
 						className={cn(
-							'pressable rounded-full border border-line-strong bg-band px-5 py-3',
-							'text-ui font-semibold text-text can-hover:hover:border-brand can-hover:hover:text-brand',
-							'transition-[border-color,color] duration-150',
+							'pressable h-12 rounded-full border border-line-strong bg-band px-5',
+							'text-body font-semibold text-text can-hover:border-brand can-hover:text-brand',
+							'transition-[border-color,color,scale] duration-(--duration-ui)',
 							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
 						)}
 					>
