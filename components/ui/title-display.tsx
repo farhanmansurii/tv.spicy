@@ -84,7 +84,7 @@ export function TitleDisplay({
 		>
 			<span className="dv-title-main inline">{renderMainContent()}</span>
 			{subtitle ? (
-				<span className="dv-title-subtitle block mt-3 font-display uppercase text-display-3 tracking-normal text-text">
+				<span className="dv-title-subtitle block mt-2 font-display uppercase text-display-sub tracking-normal text-text">
 					{subtitle}
 				</span>
 			) : null}

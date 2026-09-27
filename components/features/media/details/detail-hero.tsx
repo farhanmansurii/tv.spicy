@@ -412,7 +412,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 
 					{/* Clamped Overview */}
 					{show.overview && (
-						<div className="mt-4 max-w-2xl">
+						<div className="mt-4 max-w-xl">
 							<p
 								id="dv-synopsis"
 								ref={synopsisRef}
