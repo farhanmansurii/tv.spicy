@@ -376,7 +376,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						show.tagline.length <= 120 && (
 							<blockquote
 								ref={quoteRef}
-								className="my-5 max-w-xl font-sans text-lede leading-relaxed text-soft line-clamp-2"
+								className="my-5 max-w-xl font-sans text-body leading-normal text-soft line-clamp-2 md:text-lede md:leading-relaxed"
 							>
 								“{show.tagline.trim()}”
 							</blockquote>
@@ -388,11 +388,11 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							ref={ratingRef}
 							className="mt-5 mb-4 flex flex-wrap items-baseline gap-2.5 tabular-nums"
 						>
-							<strong className="font-display text-display-3 text-text">
+							<strong className="font-display text-display-4 text-text md:text-display-3">
 								{voteAvg.toFixed(1)}
 							</strong>
 							<span
-								className="text-brand text-display-4 select-none"
+								className="text-brand text-body select-none md:text-display-4"
 								aria-hidden="true"
 							>
 								★
@@ -417,7 +417,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 								id="dv-synopsis"
 								ref={synopsisRef}
 								className={cn(
-									'font-sans text-lede leading-relaxed text-soft text-pretty',
+									'font-sans text-body leading-normal text-soft text-pretty md:text-lede md:leading-relaxed',
 									!isOverviewExpanded && 'line-clamp-3'
 								)}
 							>
