@@ -336,8 +336,6 @@ export default function ContinueWatchingButton({
 					variant={isAdded ? 'ghost' : 'glass'}
 					size="icon-lg"
 					onClick={handleAddOrRemove}
-					glow={isAdded}
-					glowVariant="light"
 					aria-label={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
 					aria-pressed={isAdded}
 					title={isAdded ? 'In Watchlist' : 'Add to Watchlist'}
@@ -386,8 +384,6 @@ export default function ContinueWatchingButton({
 					variant={isLiked ? 'secondary' : 'glass'}
 					size="icon-lg"
 					onClick={handleLike}
-					glow={isLiked}
-					glowVariant="accent"
 					aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
 					title={isLiked ? 'Favorited' : 'Add to Favorites'}
 				>
