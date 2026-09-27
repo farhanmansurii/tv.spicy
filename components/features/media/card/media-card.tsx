@@ -1,11 +1,27 @@
 'use client';
 
 import { memo, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link, { useLinkStatus } from 'next/link';
 import { StarIcon } from '@phosphor-icons/react';
 import type { Show } from '@/lib/types';
 import { tmdbImage, tmdbImageSrcSet } from '@/lib/tmdb-image';
 import { cn } from '@/lib/utils';
+
+/** Shows the tap was heard during the one round trip before the route's loading skeleton streams in. */
+function NavigationPendingBar() {
+	const { pending } = useLinkStatus();
+	return (
+		<span
+			aria-hidden="true"
+			className={cn(
+				'absolute inset-x-0 bottom-0 z-40 h-0.5 overflow-hidden transition-opacity duration-(--duration-ui)',
+				pending ? 'opacity-100' : 'opacity-0'
+			)}
+		>
+			<span className="block h-full w-full bg-brand animate-shimmer motion-reduce:animate-none" />
+		</span>
+	);
+}
 
 interface MediaCardProps {
 	/** Row position. Kept for callers; the numbered badge comes from `rank`. */
@@ -69,9 +85,11 @@ function MediaCardComponent({
 		</span>
 	);
 
+	const href = `/${mediaType}/${show.id}`;
+
 	return (
 		<Link
-			href={`/${mediaType}/${show.id}`}
+			href={href}
 			prefetch={false}
 			onClick={() => onClick?.(show)}
 			aria-label={ranked ? `Rank ${rank}: ${title}` : title}
@@ -131,6 +149,7 @@ function MediaCardComponent({
 				)}
 
 				<span aria-hidden="true" className="pointer-events-none absolute inset-0 z-30 rounded-sm shadow-inset-line" />
+				<NavigationPendingBar />
 				<span
 					aria-hidden="true"
 					className="absolute inset-0 z-30 rounded-sm border-2 border-brand opacity-0 transition-opacity duration-(--duration-ui) ease-out group-focus-visible:opacity-100 group-can-hover:opacity-100"
