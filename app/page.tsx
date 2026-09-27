@@ -1,59 +1,69 @@
-import { fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
 import Container from '@/components/shared/containers/container';
-import { Show } from '@/lib/types';
 import type { HeroCarouselProps } from '@/components/features/media/carousel/hero-carousel';
 import { EditorialHero } from '@/components/features/home/editorial-hero';
 import DataRow from '@/components/features/media/row/data-row';
-import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
-import { unstable_noStore } from 'next/cache';
-import { Suspense } from 'react';
+import { connection } from 'next/server';
 import { HomePersonalizedRows } from '@/components/features/home/home-personalized-rows';
 import { BROWSE_CATEGORIES } from '@/lib/browse-categories';
+import { getCachedRow, getCachedHeroItems } from '@/lib/api/catalog-cache';
+import type { TMDBBaseMedia } from '@/lib/types/tmdb';
 
-// Public catalog content can be reused safely; avoid re-rendering the full
-// homepage and its hero/detail requests for every visitor.
-export const revalidate = 3600;
+const ROW_ENDPOINTS = [
+	'tv/popular',
+	'trending/tv/week',
+	'tv/on_the_air',
+	'tv/top_rated',
+	'trending/movie/week',
+	'movie/now_playing',
+	'movie/popular',
+	'movie/top_rated',
+] as const;
 
-async function fetchHomePageData() {
-	const [trendingTV, trendingMovies, tvPopular] = await Promise.all([
-		fetchRowData('trending/tv/week'),
-		fetchRowData('trending/movie/week'),
-		fetchRowData('tv/popular'),
-	]);
+// Every row is fetched on the server inside 'use cache'. A fulfilled row rides
+// along as initialData so the client makes no /api/tmdb/row call; a rejected
+// row renders at request time without initialData, keeping the client fetch
+// path with its error panel and retry. A genuinely empty catalog resolves to
+// [] and renders the row's designed empty state with no extra round trip.
+export default async function HomePage() {
+	const settled = await Promise.allSettled(ROW_ENDPOINTS.map((e) => getCachedRow(e)));
+	const initial = new Map<string, TMDBBaseMedia[]>();
+	let sawFailure = false;
+	settled.forEach((result, index) => {
+		if (result.status === 'fulfilled') initial.set(ROW_ENDPOINTS[index], result.value);
+		else sawFailure = true;
+	});
 
-	const allTrending = [...(trendingTV || []), ...(trendingMovies || [])].filter(Boolean);
-	const basicHeroShows = allTrending
-		.filter((show) => show?.backdrop_path || show?.poster_path)
-		.slice(0, 5);
+	let heroShows: TMDBBaseMedia[] | null = null;
+	try {
+		const basicHeroShows = [
+			...(initial.get('trending/tv/week') ?? []),
+			...(initial.get('trending/movie/week') ?? []),
+		]
+			.filter((show) => show?.backdrop_path || show?.poster_path)
+			.slice(0, 5);
+		if (basicHeroShows.length > 0) {
+			heroShows = await getCachedHeroItems(basicHeroShows, 'tv', 5);
+		} else {
+			sawFailure = true;
+		}
+	} catch {
+		sawFailure = true;
+	}
 
-	const heroShows = (await fetchHeroItemsWithDetails(basicHeroShows, 'tv', 5)) as Array<
-		Show & { media_type?: 'movie' | 'tv' }
-	>;
+	if (sawFailure) await connection();
 
-	return {
-		heroShows,
-		trendingTV: trendingTV as Array<Show | { id: number }>,
-		trendingMovies: trendingMovies as Array<Show | { id: number }>,
-		tvPopular: tvPopular as Array<Show | { id: number }>,
-	};
-}
-
-function HomePageContent({
-	heroShows,
-	trendingTV,
-	trendingMovies,
-	tvPopular,
-}: {
-	heroShows: Array<Show & { media_type?: 'movie' | 'tv' }>;
-	trendingTV: Array<Show | { id: number }>;
-	trendingMovies: Array<Show | { id: number }>;
-	tvPopular: Array<Show | { id: number }>;
-}) {
 	return (
 		<div className="min-h-screen bg-background text-foreground pb-20">
 			<div className="-mt-16 lg:mt-0">
-				<EditorialHero shows={heroShows as unknown as HeroCarouselProps['shows']} />
+				{heroShows ? (
+					<EditorialHero shows={heroShows as unknown as HeroCarouselProps['shows']} />
+				) : (
+					<PageFetchError
+						title="Couldn’t load the homepage"
+						description="We couldn’t reach the catalog. Try again in a moment."
+					/>
+				)}
 			</div>
 
 			<Container className="relative z-10 w-full pt-7 md:pt-12">
@@ -66,40 +76,37 @@ function HomePageContent({
 						text={BROWSE_CATEGORIES['popular-tonight'].title}
 						type="tv"
 						viewAllLink="/browse/popular-tonight"
-						initialData={tvPopular as unknown as Show[]}
+						initialData={initial.get('tv/popular')}
 					/>
 
 					<HomePersonalizedRows section="saved" sentinelClassName="-mt-1" />
 
-					{/* Pre-fetched rows */}
 					<DataRow
 						rowNumber={2}
 						endpoint="trending/tv/week"
 						text={BROWSE_CATEGORIES['binge-worthy-series'].title}
 						type="tv"
 						viewAllLink="/browse/binge-worthy-series"
-						initialData={trendingTV as unknown as Show[]}
+						initialData={initial.get('trending/tv/week')}
 					/>
 
-					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
-						<DataRow
-							rowNumber={3}
-							endpoint="tv/on_the_air"
-							text={BROWSE_CATEGORIES['airing-this-week'].title}
-							type="tv"
-							viewAllLink="/browse/airing-this-week"
-						/>
-					</Suspense>
+					<DataRow
+						rowNumber={3}
+						endpoint="tv/on_the_air"
+						text={BROWSE_CATEGORIES['airing-this-week'].title}
+						type="tv"
+						viewAllLink="/browse/airing-this-week"
+						initialData={initial.get('tv/on_the_air')}
+					/>
 
-					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
-						<DataRow
-							rowNumber={4}
-							endpoint="tv/top_rated"
-							text={BROWSE_CATEGORIES['critically-acclaimed-tv'].title}
-							type="tv"
-							viewAllLink="/browse/critically-acclaimed-tv"
-						/>
-					</Suspense>
+					<DataRow
+						rowNumber={4}
+						endpoint="tv/top_rated"
+						text={BROWSE_CATEGORIES['critically-acclaimed-tv'].title}
+						type="tv"
+						viewAllLink="/browse/critically-acclaimed-tv"
+						initialData={initial.get('tv/top_rated')}
+					/>
 
 					<DataRow
 						rowNumber={5}
@@ -108,72 +115,37 @@ function HomePageContent({
 						type="movie"
 						showRank
 						viewAllLink="/browse/blockbuster-hits"
-						initialData={trendingMovies as unknown as Show[]}
+						initialData={initial.get('trending/movie/week')}
 					/>
 
-					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
-						<DataRow
-							rowNumber={6}
-							endpoint="movie/now_playing"
-							text={BROWSE_CATEGORIES['fresh-in-theaters'].title}
-							type="movie"
-							viewAllLink="/browse/fresh-in-theaters"
-						/>
-					</Suspense>
+					<DataRow
+						rowNumber={6}
+						endpoint="movie/now_playing"
+						text={BROWSE_CATEGORIES['fresh-in-theaters'].title}
+						type="movie"
+						viewAllLink="/browse/fresh-in-theaters"
+						initialData={initial.get('movie/now_playing')}
+					/>
 
-					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
-						<DataRow
-							rowNumber={7}
-							endpoint="movie/popular"
-							text={BROWSE_CATEGORIES['cult-classics-fan-favorites'].title}
-							type="movie"
-							viewAllLink="/browse/cult-classics-fan-favorites"
-						/>
-					</Suspense>
+					<DataRow
+						rowNumber={7}
+						endpoint="movie/popular"
+						text={BROWSE_CATEGORIES['cult-classics-fan-favorites'].title}
+						type="movie"
+						viewAllLink="/browse/cult-classics-fan-favorites"
+						initialData={initial.get('movie/popular')}
+					/>
 
-					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
-						<DataRow
-							rowNumber={8}
-							endpoint="movie/top_rated"
-							text={BROWSE_CATEGORIES['cinema-hall-of-fame'].title}
-							type="movie"
-							viewAllLink="/browse/cinema-hall-of-fame"
-						/>
-					</Suspense>
+					<DataRow
+						rowNumber={8}
+						endpoint="movie/top_rated"
+						text={BROWSE_CATEGORIES['cinema-hall-of-fame'].title}
+						type="movie"
+						viewAllLink="/browse/cinema-hall-of-fame"
+						initialData={initial.get('movie/top_rated')}
+					/>
 				</div>
 			</Container>
 		</div>
 	);
-}
-
-function HomePageError() {
-	return (
-		<PageFetchError
-			title="Couldn’t load the homepage"
-			description="We couldn’t reach the catalog. Try again in a moment."
-		/>
-	);
-}
-
-export default async function HomePage() {
-	const dataResult = await fetchHomePageData().catch((error) => {
-		console.error('Error loading homepage:', error);
-		return null;
-	});
-
-	// fetchRowData swallows upstream failures into [], so an empty payload here
-	// means the load failed rather than an empty catalog. Opt out of ISR so the
-	// error render is not cached.
-	const loadFailed =
-		!dataResult ||
-		dataResult.trendingTV.length === 0 ||
-		dataResult.trendingMovies.length === 0 ||
-		dataResult.tvPopular.length === 0;
-
-	if (loadFailed) {
-		unstable_noStore();
-		return <HomePageError />;
-	}
-
-	return <HomePageContent {...dataResult} />;
 }

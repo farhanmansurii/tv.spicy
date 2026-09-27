@@ -4,8 +4,6 @@ import { tmdbDetailsQuerySchema } from '@/lib/validation/api-schemas';
 import { badRequest, upstreamErrorResponse } from '@/lib/api/route-responses';
 import { cachedResponseHeaders } from '../cache';
 
-export const revalidate = 86400;
-
 export async function GET(request: NextRequest) {
 	const parsed = tmdbDetailsQuerySchema.safeParse(
 		Object.fromEntries(request.nextUrl.searchParams)

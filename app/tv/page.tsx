@@ -2,18 +2,22 @@ import dynamic from 'next/dynamic';
 import Container from '@/components/shared/containers/container';
 import DataRow from '@/components/features/media/row/data-row';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
-import { fetchGenres, fetchRowData, fetchHeroItemsWithDetails } from '@/lib/api';
 import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
-import { unstable_noStore } from 'next/cache';
+import { connection } from 'next/server';
 import { Metadata } from 'next';
 import React, { Suspense } from 'react';
 import { EditorialHero } from '@/components/features/home/editorial-hero';
 import type { HeroCarouselProps } from '@/components/features/media/carousel/hero-carousel';
 import type { Genre } from '@/lib/types/tmdb';
 import type { Show } from '@/lib/types';
+import type { TMDBBaseMedia } from '@/lib/types/tmdb';
 import ProgressiveGenreRows from '@/components/features/media/genre/progressive-genre-rows';
-
-export const revalidate = 86400;
+import {
+	getCachedRow,
+	getCachedGenres,
+	getCachedGenreRow,
+	getCachedHeroItems,
+} from '@/lib/api/catalog-cache';
 
 export const metadata: Metadata = {
 	title: 'Spicy TV',
@@ -36,24 +40,34 @@ const WatchList = dynamic(() => import('@/components/features/watchlist/watch-li
 
 export default async function Page() {
 	let genres: Genre[] = [];
-	let topRatedTV = [];
+	let topRatedTV: TMDBBaseMedia[] = [];
+	let trendingTV: TMDBBaseMedia[] = [];
 	let heroShows: Array<Show & { media_type?: 'movie' | 'tv' }> = [];
+	let initialDataByGenre: Record<number, unknown[]> = {};
 
 	try {
-		[genres, topRatedTV] = await Promise.all([fetchGenres('tv'), fetchRowData('tv/top_rated')]);
-		// Fetch full details (with logos) for hero items
-		heroShows = (await fetchHeroItemsWithDetails(topRatedTV, 'tv', 5)) as Array<
+		[genres, topRatedTV, trendingTV] = (await Promise.all([
+			getCachedGenres('tv'),
+			getCachedRow('tv/top_rated'),
+			getCachedRow('trending/tv/week'),
+		])) as [Genre[], TMDBBaseMedia[], TMDBBaseMedia[]];
+
+		if (genres.length === 0 || topRatedTV.length === 0) throw new Error('Empty catalog');
+
+		heroShows = (await getCachedHeroItems(topRatedTV, 'tv', 5)) as Array<
 			Show & { media_type?: 'movie' | 'tv' }
 		>;
+
+		const settled = await Promise.allSettled(
+			genres.map((genre) => getCachedGenreRow('tv', String(genre.id)))
+		);
+		settled.forEach((result, index) => {
+			if (result.status === 'fulfilled') initialDataByGenre[genres[index].id] = result.value;
+		});
 	} catch (error) {
 		console.error('Failed to load TV page data:', error);
-	}
-
-	// The fetch helpers swallow upstream failures into empty arrays, so an empty
-	// critical payload means the load failed. Opt out of ISR: a degraded or error
-	// render must never be cached for 24h.
-	if (topRatedTV.length === 0 || genres.length === 0) {
-		unstable_noStore();
+		// A degraded or error render must never be cached.
+		await connection();
 		return (
 			<PageFetchError
 				title="Couldn’t load TV shows"
@@ -88,6 +102,7 @@ export default async function Page() {
 						text="Top TV Shows"
 						showRank={false}
 						type="tv"
+						initialData={trendingTV}
 					/>
 
 					<DataRow
@@ -96,9 +111,15 @@ export default async function Page() {
 						text="Top Rated TV Shows"
 						showRank={true}
 						type="tv"
+						initialData={topRatedTV}
 					/>
 
-					<ProgressiveGenreRows genres={genres} type="tv" startRowNumber={3} />
+					<ProgressiveGenreRows
+						genres={genres}
+						type="tv"
+						startRowNumber={3}
+						initialDataByGenre={initialDataByGenre}
+					/>
 				</div>
 			</Container>
 		</div>

@@ -4,6 +4,9 @@ import { TitleDisplay } from '@/components/ui/title-display';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+// TODO: Cache Components adoption. Interactive paginated route (searchParams); stays dynamic.
+export const instant = false;
+
 interface MetadataProps {
 	params: Promise<{ slug: string }>;
 	searchParams: Promise<{ type?: string; title?: string }>;

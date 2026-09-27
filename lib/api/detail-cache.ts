@@ -1,15 +1,14 @@
 /**
- * Next.js 16 optimized detail page data fetching.
- * Uses React cache() for request deduping and unstable_cache for cross-request caching.
- * fetch() is uncached by default in Next.js 16 — we are explicit about what gets cached.
+ * Detail page data for Cache Components.
+ * Public TMDB catalog data is cached with 'use cache' + cacheLife + cacheTag;
+ * React cache() only dedupes within a single request. The durable fetch-data
+ * cache inside tmdb-client.ts is intentionally kept as a second layer.
  */
 
-import { cache } from 'react';
-import { unstable_cache } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import {
 	fetchDetailsTMDB,
 	fetchCredits,
-	fetchVideos,
 	fetchRowData,
 } from './tmdb-client';
 import type { MediaType } from './tmdb-client';
@@ -18,64 +17,32 @@ import type { MediaType } from './tmdb-client';
 export type { MediaType };
 
 /* ────────────────────────────────────────────────────────────
-   Per-request deduping (React cache)
-   Same function call within one render is deduped automatically.
-   ──────────────────────────────────────────────────────────── */
-
-export const getShow = cache(fetchDetailsTMDB);
-export const getCredits = cache(fetchCredits);
-export const getVideos = cache(fetchVideos);
-export const getRowData = cache(fetchRowData);
-
-/* ────────────────────────────────────────────────────────────
-   Cross-request caching (unstable_cache)
-   Survives between requests. Use for data that changes infrequently.
-   ──────────────────────────────────────────────────────────── */
-
-export const getShowCached = (id: string, type: MediaType) =>
-	unstable_cache(
-		() => fetchDetailsTMDB(id, type),
-		[`tmdb-show-${type}-${id}`],
-		{ revalidate: 3600, tags: [`show-${type}-${id}`] }
-	)();
-
-export const getCreditsCached = (id: string, type: MediaType) =>
-	unstable_cache(
-		() => fetchCredits(id, type),
-		[`tmdb-credits-${type}-${id}`],
-		{ revalidate: 86400, tags: [`credits-${type}-${id}`] }
-	)();
-
-export const getSimilarCached = (id: string, type: MediaType) =>
-	unstable_cache(
-		() => fetchRowData(`${type}/${id}/similar`),
-		[`tmdb-similar-${type}-${id}`],
-		{ revalidate: 3600, tags: [`similar-${type}-${id}`] }
-	)();
-
-export const getRecommendationsCached = (id: string, type: MediaType) =>
-	unstable_cache(
-		() => fetchRowData(`${type}/${id}/recommendations`),
-		[`tmdb-recommendations-${type}-${id}`],
-		{ revalidate: 3600, tags: [`recommendations-${type}-${id}`] }
-	)();
-
-/* ────────────────────────────────────────────────────────────
-   Parallel detail fetchers — return plain objects for easy use
+   Cached TMDB reads — one entry per id, shared across requests
+   A missing record resolves to null (a stable, cacheable not-found);
+   any operational failure throws, so an outage is never cached.
    ──────────────────────────────────────────────────────────── */
 
 export async function getDetailShow(id: string, type: MediaType) {
-	return getShowCached(id, type);
+	'use cache';
+	cacheLife('days');
+	cacheTag(`show-${type}-${id}`);
+	return fetchDetailsTMDB(id, type);
 }
 
 export async function getDetailCredits(id: string, type: MediaType) {
-	return getCreditsCached(id, type);
+	'use cache';
+	cacheLife('days');
+	cacheTag(`credits-${type}-${id}`);
+	return fetchCredits(id, type);
 }
 
 export async function getDetailRelated(id: string, type: MediaType) {
+	'use cache';
+	cacheLife('days');
+	cacheTag(`similar-${type}-${id}`, `recommendations-${type}-${id}`);
 	const [similar, recommendations] = await Promise.all([
-		getSimilarCached(id, type).catch(() => [] as Awaited<ReturnType<typeof fetchRowData>>),
-		getRecommendationsCached(id, type).catch(() => [] as Awaited<ReturnType<typeof fetchRowData>>),
+		fetchRowData(`${type}/${id}/similar`),
+		fetchRowData(`${type}/${id}/recommendations`),
 	]);
 	return { similar, recommendations };
 }

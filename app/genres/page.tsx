@@ -1,4 +1,6 @@
 import { fetchGenres } from '@/lib/api';
+import { getCachedGenres } from '@/lib/api/catalog-cache';
+import { connection } from 'next/server';
 import Container from '@/components/shared/containers/container';
 import {
 	Atom,
@@ -34,8 +36,6 @@ import {
 import type { Icon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-
-export const revalidate = 604800;
 
 interface Genre {
 	id: number;
@@ -155,7 +155,19 @@ function GenreSection({
 }
 
 export default async function GenresPage() {
-	const [movieGenres, tvGenres] = await Promise.all([fetchGenres('movie'), fetchGenres('tv')]);
+	// Cached genre lists; a TMDB outage renders at request time from the
+	// lenient fetchers below instead of failing the prerender or caching emptiness.
+	let movieGenres: Genre[] = [];
+	let tvGenres: Genre[] = [];
+	try {
+		[movieGenres, tvGenres] = (await Promise.all([
+			getCachedGenres('movie'),
+			getCachedGenres('tv'),
+		])) as [Genre[], Genre[]];
+	} catch {
+		await connection();
+		[movieGenres, tvGenres] = await Promise.all([fetchGenres('movie'), fetchGenres('tv')]);
+	}
 
 	return (
 		<div className="min-h-screen mt-20 bg-background text-foreground">

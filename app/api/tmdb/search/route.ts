@@ -3,8 +3,6 @@ import { searchTMDBStrict } from '@/lib/api/tmdb-client';
 import { tmdbSearchQuerySchema } from '@/lib/validation/api-schemas';
 import { badRequest, upstreamErrorResponse } from '@/lib/api/route-responses';
 
-export const revalidate = 3600;
-
 export async function GET(request: NextRequest) {
 	const parsed = tmdbSearchQuerySchema.safeParse(
 		Object.fromEntries(request.nextUrl.searchParams)
