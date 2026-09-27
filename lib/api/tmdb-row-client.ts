@@ -1,6 +1,7 @@
 import type {
 	Genre,
 	TMDBBaseMedia,
+	TMDBCastMember,
 	TMDBListResponse,
 	TMDBMediaType,
 	TMDBMovie,
@@ -45,5 +46,7 @@ export function searchTMDBFromApi(query: string, page = 1) {
 
 export function fetchBasicDetailsFromApi(id: string, type: TMDBMediaType) {
 	const params = new URLSearchParams({ id, type });
-	return fetchTMDBRoute<TMDBMovie & TMDBTVShow>(`/api/tmdb/details?${params.toString()}`);
+	return fetchTMDBRoute<TMDBMovie & TMDBTVShow & { cast: TMDBCastMember[] }>(
+		`/api/tmdb/details?${params.toString()}`
+	);
 }
