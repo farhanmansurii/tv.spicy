@@ -1,16 +1,43 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
 import { useQuery } from '@tanstack/react-query';
 import * as Icons from 'lucide-react';
 import { fetchRowData } from './api';
 
-/**
- * Utility Functions
- * For UI helpers, formatting, and client-side utilities
- */
+const customTwMerge = extendTailwindMerge({
+	extend: {
+		classGroups: {
+			'font-size': [
+				'text-display-1',
+				'text-display-1-long',
+				'text-display-1-extended',
+				'text-display-1-maximum',
+				'text-display-2',
+				'text-display-3',
+				'text-display-4',
+				'text-lede',
+				'text-body',
+				'text-title',
+				'text-ui',
+				'text-small',
+				'text-caption',
+				'text-micro',
+			],
+			'text-color': [
+				'text-text',
+				'text-soft',
+				'text-dim',
+				'text-faint',
+				'text-brand',
+				'text-brand-hover',
+				'text-brand-foreground',
+			],
+		},
+	},
+});
 
 export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
+	return customTwMerge(clsx(inputs));
 }
 
 /**

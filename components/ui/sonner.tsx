@@ -1,31 +1,41 @@
-"use client"
+'use client';
 
-import { useTheme } from "next-themes"
-import { Toaster as Sonner } from "sonner"
+import * as React from 'react';
+import { useTheme } from 'next-themes';
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
-type ToasterProps = React.ComponentProps<typeof Sonner>
+function Toaster({ className, toastOptions, style, ...props }: ToasterProps) {
+	const { theme = 'system' } = useTheme();
 
-const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
-
-  return (
-    <Sonner
-      theme={theme as ToasterProps["theme"]}
-      className="toaster group"
-      toastOptions={{
-        classNames: {
-          toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-muted-foreground",
-          actionButton:
-            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
-          cancelButton:
-            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
-        },
-      }}
-      {...props}
-    />
-  )
+	return (
+		<Sonner
+			theme={theme as ToasterProps['theme']}
+			position="bottom-center"
+			offset={64}
+			toastOptions={{
+				...toastOptions,
+				classNames: {
+					toast: '!rounded-full !bg-foreground !text-background !font-sans !font-semibold !px-5 !py-3 !shadow-lg border-0',
+					error: '!bg-destructive !text-destructive-foreground',
+					...toastOptions?.classNames,
+				},
+			}}
+			className={className ?? 'group'}
+			style={
+				{
+					'--normal-bg': 'var(--foreground)',
+					'--normal-text': 'var(--background)',
+					'--normal-border': 'transparent',
+					'--error-bg': 'var(--destructive)',
+					'--error-text': 'var(--destructive-foreground)',
+					'--error-border': 'transparent',
+					'--border-radius': '9999px',
+					...style,
+				} as React.CSSProperties
+			}
+			{...props}
+		/>
+	);
 }
 
-export { Toaster }
+export { Toaster };
