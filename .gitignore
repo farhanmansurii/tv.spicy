@@ -36,3 +36,15 @@ next-env.d.ts
 
 /lib/generated/prisma
 .impeccable/
+
+# AI agent working files
+.claude/
+.agents/
+.cursor/
+.opencode/
+opencode.json
+AGENTS.md
+CLAUDE.md
+DESIGN.md
+PRODUCT.md
+docs/

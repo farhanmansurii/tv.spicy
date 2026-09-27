@@ -6,9 +6,9 @@ const classRule = (pattern, message) => [
   { selector: `TemplateElement[value.raw=${pattern}]`, message },
 ]
 
-// Design-system guardrails from DESIGN.md "Motion"; warn until each surface is migrated, then raise to error.
+// Design-system guardrails; warn until each surface is migrated, then raise to error.
 const designSystemRules = [
-  ...classRule('/(^|\\s)transition-all(\\s|$)/', 'Name the transitioned properties (DESIGN.md Motion): transition-[color,background-color,transform], transition-opacity, ...'),
+  ...classRule('/(^|\\s)transition-all(\\s|$)/', 'Name the transitioned properties: transition-[color,background-color,transform], transition-opacity, ...'),
   ...classRule('/transition-\\[[^\\]]*(width|height|padding|margin|top|left)/', 'Do not animate layout properties; animate transform or opacity.'),
   ...classRule('/(^|\\s)(group-)?hover:/', 'Gate hover with can-hover: / group-can-hover: ((hover: hover) and (pointer: fine)).'),
   ...classRule('/-\\[#[0-9a-fA-F]{3,8}\\]/', 'Use a design token (ring-ring, bg-brand, bg-card, ...) instead of a raw hex colour.'),
