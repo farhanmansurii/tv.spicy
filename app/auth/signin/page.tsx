@@ -1,6 +1,9 @@
 import { fetchRowData, fetchTMDBImages, type MediaType } from '@/lib/api/tmdb-client';
 import SignInPanel from '@/components/auth/sign-in-panel';
 
+// TODO: Cache Components adoption. Per-visit route (searchParams + public art); stays dynamic.
+export const instant = false;
+
 /**
  * Only same-origin relative paths may be used as a post-sign-in redirect.
  * Protocol-relative URLs (`//evil.com`), backslash tricks (`/\evil.com`) and

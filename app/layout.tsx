@@ -1,6 +1,5 @@
 import './globals.css';
 import { Inter_Tight, JetBrains_Mono, Anton } from 'next/font/google';
-import { ThemeProvider } from '@/components/layout/providers/theme-provider';
 import TanstackQueryProvider from '@/components/providers/tanstack-query-provider';
 import SidebarProvider from '@/components/providers/sidebar-provider';
 import { AuthProvider } from '@/components/auth/auth-provider';
@@ -9,6 +8,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { AccessibilityProvider } from '@/components/providers/accessibility-provider';
 import type { Metadata, Viewport } from 'next';
 import { DetailScrollRestoration } from '@/components/providers/detail-scroll-restoration';
+import { Suspense } from 'react';
 
 const interTight = Inter_Tight({
 	subsets: ['latin'],
@@ -88,31 +88,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html
 			lang="en"
-			suppressHydrationWarning
-			className={`${interTight.variable} ${jetbrainsMono.variable} ${anton.variable} antialiased`}
+			className={`dark ${interTight.variable} ${jetbrainsMono.variable} ${anton.variable} antialiased`}
 		>
 			<head>
 				<link rel="dns-prefetch" href="https://image.tmdb.org" />
 				<link rel="preconnect" href="https://image.tmdb.org" crossOrigin="anonymous" />
 			</head>
 			<body className="antialiased font-sans">
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="dark"
-					enableSystem
-					disableTransitionOnChange
-				>
-					<AuthProvider>
-						<TanstackQueryProvider>
-							<AuthSync />
+				<AuthProvider>
+					<TanstackQueryProvider>
+						<AuthSync />
+						{/* Sidebar chrome reads the route (usePathname) for active states;
+						    so it suspends for dynamic params instead of blocking the shell. */}
+						<Suspense fallback={null}>
 							<SidebarProvider>
 								<DetailScrollRestoration />
 								<AccessibilityProvider>{children}</AccessibilityProvider>
 							</SidebarProvider>
-						</TanstackQueryProvider>
-						<Toaster />
-					</AuthProvider>
-				</ThemeProvider>
+						</Suspense>
+					</TanstackQueryProvider>
+					<Toaster />
+				</AuthProvider>
 			</body>
 		</html>
 	);

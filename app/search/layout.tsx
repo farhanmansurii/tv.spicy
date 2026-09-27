@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 
+// TODO: Cache Components adoption. Per-user interactive route; stays dynamic.
+export const instant = false;
+
 export const metadata: Metadata = {
 	title: 'Search | Spicy TV',
 	description: 'Search across movies and TV shows on Spicy TV.',
@@ -15,6 +18,8 @@ export const metadata: Metadata = {
 		images: ['/icon-512x512.png'],
 	},
 };
+
+import type { ReactNode } from 'react';
 
 export default function SearchLayout({ children }: { children: React.ReactNode }) {
 	return children;

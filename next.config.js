@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactStrictMode: true,
+	cacheComponents: true,
+	partialPrefetching: true,
 	experimental: {
 		turbopackFileSystemCacheForDev: true,
 		scrollRestoration: true,

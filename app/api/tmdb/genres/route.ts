@@ -4,8 +4,6 @@ import { tmdbGenresQuerySchema } from '@/lib/validation/api-schemas';
 import { badRequest, upstreamErrorResponse } from '@/lib/api/route-responses';
 import { cachedResponseHeaders, TMDB_CACHE_SECONDS } from '../cache';
 
-export const revalidate = 604800;
-
 export async function GET(request: NextRequest) {
 	const parsed = tmdbGenresQuerySchema.safeParse(
 		Object.fromEntries(request.nextUrl.searchParams)

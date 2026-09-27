@@ -7,6 +7,9 @@ export const metadata = {
 	description: 'Signing in did not go through. Try again.',
 };
 
+// TODO: Cache Components adoption. Per-visit route (searchParams); stays dynamic.
+export const instant = false;
+
 const ERROR_COPY: Record<string, string> = {
 	Configuration: 'Our sign-in service is not wired up right. Try again in a moment.',
 	AccessDenied: 'That account is not allowed to sign in here.',

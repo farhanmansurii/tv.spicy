@@ -8,6 +8,9 @@ export const metadata: Metadata = {
 	description: 'Manage your Spicy TV profile, watchlist, and preferences.',
 };
 
+// TODO: Cache Components adoption. Per-user route (session); stays dynamic.
+export const instant = false;
+
 export default async function ProfilePage() {
 	const session = await getServerSession();
 

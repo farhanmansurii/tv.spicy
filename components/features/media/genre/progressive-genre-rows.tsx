@@ -13,12 +13,15 @@ interface ProgressiveGenreRowsProps {
 	type: 'movie' | 'tv';
 	/** Continues the page's row numbering after its own editorial rows. */
 	startRowNumber?: number;
+	/** Server-fetched first pages by genre id; a missing id keeps the client fetch path. */
+	initialDataByGenre?: Record<number, unknown[]>;
 }
 
 export default function ProgressiveGenreRows({
 	genres,
 	type,
 	startRowNumber = 1,
+	initialDataByGenre,
 }: ProgressiveGenreRowsProps) {
 	const [visibleGenreCount, setVisibleGenreCount] = useState(
 		Math.min(GENRES_PER_BATCH, genres.length)
@@ -48,6 +51,7 @@ export default function ProgressiveGenreRows({
 					text={genre.name}
 					isGenre
 					rowNumber={startRowNumber + index}
+					initialData={initialDataByGenre?.[genre.id]}
 				/>
 			))}
 

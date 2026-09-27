@@ -1,12 +1,15 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { connection } from 'next/server';
 import {
 	getDetailShow,
 	getDetailCredits,
 	getDetailRelated,
 } from '@/lib/api/detail-cache';
+import { fetchRowData } from '@/lib/api';
 import { tmdbImage } from '@/lib/tmdb-image';
+import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
 import {
 	MediaDetailsShell,
 	DetailHero,
@@ -15,15 +18,23 @@ import {
 	MoreDetailsContainer,
 } from '@/components/features/media/details';
 import {
+	HeroSkeleton,
 	ShowContainerSkeleton,
 	RelatedSkeleton,
 	StorylineSkeleton,
 } from '@/components/features/media/details/detail-skeletons';
 
-// Detail pages only contain public TMDB catalog data. Force the route shell
-// into ISR so repeated bot and user visits are served from Vercel's CDN.
-export const dynamic = 'force-static';
-export const revalidate = 604800;
+// Prerender a few real paths so the route has a static shell to validate; all
+// other ids serve the shell first and upgrade after their first visit. A TMDB
+// outage at build time falls back to a known id instead of breaking the build.
+export async function generateStaticParams() {
+	const trending = await fetchRowData('trending/movie/week');
+	const ids = trending
+		.filter((show) => typeof show?.id === 'number')
+		.slice(0, 5)
+		.map((show) => ({ movie: String(show.id) }));
+	return ids.length > 0 ? ids : [{ movie: '550' }];
+}
 
 /* ────────────────────────────────────────────────────────────
    Metadata
@@ -63,10 +74,41 @@ export async function generateMetadata(props: any): Promise<Metadata> {
 }
 
 /* ────────────────────────────────────────────────────────────
-   Async section wrappers — each streams independently
+   Async section wrappers — params stay inside the Suspense
+   boundary so unknown ids still prerender a static shell.
    ──────────────────────────────────────────────────────────── */
-async function InfoPanelSection({ id, show }: { id: string; show: any }) {
-	const credits = await getDetailCredits(id, 'movie');
+async function DetailMain({ params }: { params: Promise<{ movie: string }> }) {
+	const { movie } = await params;
+
+	let show;
+	try {
+		show = await getDetailShow(movie, 'movie');
+	} catch {
+		// An outage renders at request time and is never cached; a missing
+		// record below resolves to a stable cached 404 via notFound().
+		await connection();
+		return (
+			<PageFetchError
+				title="Couldn’t load this title"
+				description="We couldn’t reach the catalog. Try again in a moment."
+			/>
+		);
+	}
+	if (!show) return notFound();
+
+	return (
+		<>
+			<DetailHero show={show} type="movie" />
+			<ShowContainer showData={show as any} id={String(show.id)} type="movie" />
+		</>
+	);
+}
+
+async function InfoPanelSection({ params }: { params: Promise<{ movie: string }> }) {
+	const { movie } = await params;
+	const show = await getDetailShow(movie, 'movie').catch(() => null);
+	if (!show) return null;
+	const credits = await getDetailCredits(movie, 'movie');
 	return (
 		<MediaInfoPanel
 			data={show}
@@ -77,8 +119,11 @@ async function InfoPanelSection({ id, show }: { id: string; show: any }) {
 	);
 }
 
-async function RelatedSection({ id }: { id: string }) {
-	const { similar, recommendations } = await getDetailRelated(id, 'movie');
+async function RelatedSection({ params }: { params: Promise<{ movie: string }> }) {
+	const { movie } = await params;
+	const show = await getDetailShow(movie, 'movie').catch(() => null);
+	if (!show) return null;
+	const { similar, recommendations } = await getDetailRelated(movie, 'movie');
 	if (!similar.length && !recommendations.length) return null;
 	return <MoreDetailsContainer type="movie" similar={similar} recommendations={recommendations} />;
 }
@@ -86,32 +131,30 @@ async function RelatedSection({ id }: { id: string }) {
 /* ────────────────────────────────────────────────────────────
    Page
    ──────────────────────────────────────────────────────────── */
-export default async function MovieDetailsPage(props: {
+export default function MovieDetailsPage({
+	params,
+}: {
 	params: Promise<{ movie: string }>;
 }) {
-	const params = await props.params;
-	const { movie } = params;
-
-	// Only block on the show itself — everything else streams
-	const show = await getDetailShow(movie, 'movie');
-	if (!show) return notFound();
-
-	const showId = String(show.id);
-
 	return (
 		<MediaDetailsShell>
-			<DetailHero show={show} type="movie" />
-
-			<Suspense fallback={<ShowContainerSkeleton type="movie" />}>
-				<ShowContainer showData={show as any} id={showId} type="movie" />
+			<Suspense
+				fallback={
+					<>
+						<HeroSkeleton />
+						<ShowContainerSkeleton type="movie" />
+					</>
+				}
+			>
+				<DetailMain params={params} />
 			</Suspense>
 
 			<Suspense fallback={<StorylineSkeleton />}>
-				<InfoPanelSection id={movie} show={show} />
+				<InfoPanelSection params={params} />
 			</Suspense>
 
 			<Suspense fallback={<RelatedSkeleton />}>
-				<RelatedSection id={movie} />
+				<RelatedSection params={params} />
 			</Suspense>
 		</MediaDetailsShell>
 	);
