@@ -1,33 +1,30 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
-import { createPortal } from 'react-dom';
-import { tmdbImage } from '@/lib/tmdb-image';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
-	FilmSlateIcon,
-	InfoIcon,
+	CaretLeftIcon,
+	CheckIcon,
 	PlayIcon,
 	PlusIcon,
 	ShareNetworkIcon,
-	StarIcon,
-	TelevisionIcon,
 } from '@phosphor-icons/react';
-import gsap from 'gsap';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useMediaInfoPanelStore } from '@/store/mediaInfoPanelStore';
-import { useEpisodeStore } from '@/store/episodeStore';
-import useWatchListStore from '@/store/watchlistStore';
+import { useGSAP } from '@gsap/react';
+import { TitleDisplay } from '@/components/ui/title-display';
+import { MediaFallback } from '@/components/ui/media-fallback';
+import { StickyActionBar } from '@/components/ui/sticky-action-bar';
+import { arrival, flourishMyList, isReducedMotion } from '@/lib/motion';
 import { useHaptics } from '@/hooks/use-haptics';
+import useWatchListStore from '@/store/watchlistStore';
+import { useEpisodeStore } from '@/store/episodeStore';
+import { tmdbImage } from '@/lib/tmdb-image';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import gsap from 'gsap';
 
 interface Genre {
 	id: number;
 	name: string;
-}
-
-interface Logo {
-	iso_639_1: string | null;
-	file_path: string;
 }
 
 interface HeroImage {
@@ -35,24 +32,12 @@ interface HeroImage {
 	file_path: string;
 }
 
-interface ContentRating {
-	iso_3166_1: string;
-	rating: string;
-}
-
-interface ReleaseDate {
-	certification: string;
-}
-
-interface ReleaseDateResult {
-	iso_3166_1: string;
-	release_dates: ReleaseDate[];
-}
-
 interface ShowData {
 	id?: number;
 	title?: string | null;
 	name?: string | null;
+	original_title?: string | null;
+	original_name?: string | null;
 	tagline?: string | null;
 	overview?: string | null;
 	backdrop_path?: string | null;
@@ -61,11 +46,15 @@ interface ShowData {
 	release_date?: string | null;
 	runtime?: number | null;
 	episode_run_time?: number[] | null;
+	number_of_seasons?: number | null;
+	seasons?: Array<{ season_number: number; episode_count?: number }> | null;
 	vote_average?: number | null;
+	vote_count?: number | null;
 	genres?: Genre[];
-	images?: { logos?: Logo[]; posters?: HeroImage[]; backdrops?: HeroImage[] };
-	content_ratings?: { results?: ContentRating[] };
-	release_dates?: { results?: ReleaseDateResult[] };
+	images?: {
+		posters?: HeroImage[];
+		backdrops?: HeroImage[];
+	};
 }
 
 interface DetailHeroProps {
@@ -73,21 +62,21 @@ interface DetailHeroProps {
 	type: 'movie' | 'tv';
 }
 
-function formatRuntime(minutes: number | null) {
-	if (minutes == null || minutes <= 0) return null;
-	return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
-}
-
 function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	const sectionRef = useRef<HTMLElement>(null);
-	const imageWrapRef = useRef<HTMLDivElement>(null);
-	const contentRef = useRef<HTMLDivElement>(null);
-	const btnRowRef = useRef<HTMLDivElement>(null);
-	const openInfoTab = useMediaInfoPanelStore((s) => s.openTab);
+	const artRef = useRef<HTMLDivElement>(null);
+	const shadeRef = useRef<HTMLDivElement>(null);
+	const overlineRef = useRef<HTMLParagraphElement>(null);
+	const quoteRef = useRef<HTMLQuoteElement>(null);
+	const ratingRef = useRef<HTMLParagraphElement>(null);
+	const synopsisRef = useRef<HTMLParagraphElement>(null);
+	const actionsRef = useRef<HTMLDivElement>(null);
+	const listBtnRef = useRef<HTMLButtonElement>(null);
+	const stickyListBtnRef = useRef<HTMLButtonElement>(null);
+
 	const activeEP = useEpisodeStore((s) => s.activeEP);
-	const isPlayerSticky = useEpisodeStore((s) => s.isPlayerSticky);
-	const prefersReducedMotion = useReducedMotion();
 	const haptic = useHaptics();
+
 	const watchlist = useWatchListStore((s) => s.watchlist);
 	const tvwatchlist = useWatchListStore((s) => s.tvwatchlist);
 	const addToWatchlist = useWatchListStore((s) => s.addToWatchlist);
@@ -95,67 +84,73 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	const addToTvWatchlist = useWatchListStore((s) => s.addToTvWatchlist);
 	const removeFromTvWatchList = useWatchListStore((s) => s.removeFromTvWatchList);
 	const retryFailedSync = useWatchListStore((s) => s.retryFailedSync);
-	const [isHeroVisible, setIsHeroVisible] = useState(true);
-	const [logoFailed, setLogoFailed] = useState(false);
+
+	const [backdropError, setBackdropError] = useState(false);
+	const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
+	const [canExpandOverview, setCanExpandOverview] = useState(false);
 
 	const title = show.title || show.name || 'Untitled';
+	const originalTitle = show.original_title || show.original_name || undefined;
 	const releaseDate = show.first_air_date || show.release_date || null;
-	const releaseYear = releaseDate?.split('-')[0] ?? null;
+	const releaseYear = releaseDate ? releaseDate.split('-')[0] : null;
+
 	const runtime = show.episode_run_time?.[0] ?? show.runtime ?? null;
-	const runtimeLabel = formatRuntime(runtime);
+	const seasonsCount =
+		show.number_of_seasons ??
+		(show.seasons ? show.seasons.filter((s) => s.season_number > 0).length : null);
+
 	const voteAvg =
 		typeof show.vote_average === 'number' && show.vote_average > 0 ? show.vote_average : null;
-	const rating =
-		type === 'tv'
-			? show.content_ratings?.results?.find((r) => r.iso_3166_1 === 'US')?.rating
-			: show.release_dates?.results?.find((r) => r.iso_3166_1 === 'US')?.release_dates?.[0]
-					?.certification;
+	const voteCount = typeof show.vote_count === 'number' ? show.vote_count : null;
+	const hasRating = voteAvg !== null && (voteCount === null || voteCount >= 10);
+	const voteCountText =
+		voteCount !== null && voteCount >= 10
+			? `${new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(voteCount)} ratings`
+			: '';
+
 	const genreNames = show.genres?.map((g) => g.name).filter(Boolean) ?? [];
 	const genres = genreNames.slice(0, 2);
-	const cleanPoster =
-		show.images?.posters?.find((img) => img.iso_639_1 === null)?.file_path || show.poster_path;
+
 	const cleanBackdrop =
 		show.images?.backdrops?.find((img) => img.iso_639_1 === null)?.file_path ||
-		show.backdrop_path;
-	const mobileHeroImage = cleanPoster || cleanBackdrop || '';
-	const desktopHeroImage = cleanBackdrop || cleanPoster || '';
-	const logo =
-		show.images?.logos?.find((img) => img.iso_639_1 === 'en')?.file_path ||
-		show.images?.logos?.[0]?.file_path;
+		show.backdrop_path ||
+		show.poster_path;
+	// A textless poster frames a portrait phone screen better than a centre-cropped backdrop.
+	const phonePoster = show.images?.posters?.find((img) => img.iso_639_1 === null)?.file_path;
+
 	const activeEpisodeForShow =
 		type === 'tv' && activeEP && String(activeEP.tv_id) === String(show.id) ? activeEP : null;
+
 	const isInWatchlist = useMemo(() => {
 		if (!show.id) return false;
 		const items = type === 'movie' ? watchlist : tvwatchlist;
 		return items.some((item) => item.id === show.id);
 	}, [show.id, type, watchlist, tvwatchlist]);
+
 	const primaryLabel =
 		type === 'movie'
 			? 'Play'
 			: activeEpisodeForShow
-				? `Continue S${activeEpisodeForShow.season_number} E${activeEpisodeForShow.episode_number}`
-				: 'Choose Episode';
+				? `Resume S${activeEpisodeForShow.season_number} E${activeEpisodeForShow.episode_number}`
+				: 'Play';
 
-	const scrollToSection = useCallback(
-		(id: string) => {
-			document.getElementById(id)?.scrollIntoView({
-				behavior: prefersReducedMotion ? 'auto' : 'smooth',
-				block: 'start',
-			});
-		},
-		[prefersReducedMotion]
-	);
-
-	// A new show gets a fresh logo attempt after a previous one failed.
-	useEffect(() => {
-		setLogoFailed(false);
-	}, [logo]);
+	const scrollToSection = useCallback((id: string) => {
+		const target = document.getElementById(id);
+		if (!target) return;
+		target.scrollIntoView({
+			behavior: isReducedMotion() ? 'auto' : 'smooth',
+			block: 'start',
+		});
+	}, []);
 
 	const handlePrimaryAction = useCallback(() => {
 		haptic('medium');
 		if (type === 'tv' && !activeEpisodeForShow) {
-			scrollToSection('episodes-section');
-			return;
+			const epSection = document.getElementById('episodes-section');
+			if (epSection) {
+				scrollToSection('episodes-section');
+				return;
+			}
 		}
 		scrollToSection('media-player');
 	}, [activeEpisodeForShow, haptic, scrollToSection, type]);
@@ -172,7 +167,13 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 			media_type: type,
 		};
 		const removing = isInWatchlist;
-		haptic(removing ? 'soft' : 'success');
+		haptic(removing ? 'medium' : 'success');
+
+		if (!removing) {
+			if (listBtnRef.current) flourishMyList(listBtnRef.current);
+			if (stickyListBtnRef.current) flourishMyList(stickyListBtnRef.current);
+		}
+
 		const ok =
 			type === 'movie'
 				? removing
@@ -181,10 +182,11 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 				: removing
 					? await removeFromTvWatchList(show.id)
 					: await addToTvWatchlist(watchlistItem);
+
 		if (ok) {
-			toast(removing ? 'Removed from Watchlist' : 'Added to Watchlist');
+			toast(removing ? 'Removed from My List' : 'Added to My List');
 		} else {
-			toast.error('Could not update Watchlist', {
+			toast.error('Could not update My List', {
 				description: 'Your change is saved on this device and will sync on retry.',
 				action: {
 					label: 'Retry',
@@ -209,453 +211,361 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 	const handleShare = useCallback(async () => {
 		const shareData = { title, url: window.location.href };
 		try {
-			if (navigator.share) await navigator.share(shareData);
-			else {
+			if (navigator.share) {
+				await navigator.share(shareData);
+			} else {
 				await navigator.clipboard.writeText(window.location.href);
-				toast.success('Link copied');
+				toast.success('Link copied to clipboard');
 			}
 		} catch (error) {
-			if ((error as Error).name !== 'AbortError') toast.error('Unable to share');
+			if ((error as Error).name !== 'AbortError') {
+				toast.error('Unable to share');
+			}
 		}
 	}, [title]);
 
-	useEffect(() => {
-		const section = sectionRef.current;
-		if (!section) return;
-		const observer = new IntersectionObserver(
-			([entry]) => setIsHeroVisible(entry.isIntersecting),
-			{ threshold: 0.12 }
-		);
-		observer.observe(section);
-		return () => observer.disconnect();
-	}, []);
-
-	/* ── Desktop artwork + entrance ── */
-	useEffect(() => {
-		if (!sectionRef.current) return;
-		if (prefersReducedMotion || window.matchMedia('(max-width: 767px)').matches) return;
-
-		const ctx = gsap.context(() => {
-			if (imageWrapRef.current) {
-				gsap.fromTo(
-					imageWrapRef.current,
-					{ scale: 1.06 },
-					{ scale: 1, duration: 16, ease: 'none' }
-				);
-			}
-
-			if (!contentRef.current) return;
-
-			const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-
-			const metaItems = contentRef.current.querySelectorAll('[data-meta]');
-			tl.fromTo(
-				metaItems,
-				{ y: 10, opacity: 0 },
-				{ y: 0, opacity: 1, duration: 0.5, stagger: 0.035 },
-				0.1
+	const toggleOverview = useCallback(() => {
+		const next = !isOverviewExpanded;
+		setIsOverviewExpanded(next);
+		if (next && synopsisRef.current && !isReducedMotion()) {
+			gsap.fromTo(
+				synopsisRef.current,
+				{ opacity: 0.6 },
+				{ opacity: 1, duration: 0.18, ease: 'power2.out' }
 			);
+		}
+	}, [isOverviewExpanded]);
 
-			const titleEl = contentRef.current.querySelector('[data-hero-title]');
-			if (titleEl) {
-				tl.fromTo(
-					titleEl,
-					{ y: 32, opacity: 0, scale: 0.975 },
-					{ y: 0, opacity: 1, scale: 1, duration: 0.9, ease: 'power4.out' },
-					0.22
+	useEffect(() => {
+		const checkOverview = () => {
+			if (synopsisRef.current) {
+				setCanExpandOverview(
+					synopsisRef.current.scrollHeight > synopsisRef.current.clientHeight + 2 ||
+						isOverviewExpanded
 				);
 			}
+		};
+		checkOverview();
+		window.addEventListener('resize', checkOverview);
+		return () => window.removeEventListener('resize', checkOverview);
+	}, [show.overview, isOverviewExpanded]);
 
-			const taglineEl = contentRef.current.querySelector('[data-hero-tagline]');
-			if (taglineEl) {
-				tl.fromTo(
-					taglineEl,
-					{ y: 14, opacity: 0 },
-					{ y: 0, opacity: 1, duration: 0.6 },
-					0.42
-				);
+	// The arrival runs inside a GSAP context, so an unmount (or the StrictMode
+	// remount in dev) reverts it to the natural state instead of killing a from()
+	// timeline and leaving the inline opacity it applied behind.
+	useGSAP(
+		() => {
+			if (shadeRef.current) {
+				shadeRef.current.style.background =
+					'linear-gradient(to bottom, color-mix(in srgb, var(--canvas) 68%, transparent), transparent 30%), linear-gradient(to right, color-mix(in srgb, var(--canvas) 96%, transparent), color-mix(in srgb, var(--canvas) 88%, transparent) 30%, color-mix(in srgb, var(--canvas) 44%, transparent) 66%, color-mix(in srgb, var(--canvas) 14%, transparent)), linear-gradient(to top, var(--canvas), transparent 78%)';
 			}
 
-			const overviewEl = contentRef.current.querySelector('[data-hero-overview]');
-			if (overviewEl) {
-				tl.fromTo(
-					overviewEl,
-					{ y: 10, opacity: 0 },
-					{ y: 0, opacity: 1, duration: 0.6 },
-					0.5
-				);
-			}
+			if (!sectionRef.current) return;
 
-			const actions = contentRef.current.querySelectorAll('[data-hero-action]');
-			tl.fromTo(
-				actions,
-				{ y: 20, opacity: 0 },
-				{ y: 0, opacity: 1, duration: 0.6, stagger: 0.065, ease: 'back.out(1.3)' },
-				0.62
-			);
-		}, sectionRef);
+			// Attach DOM query classes needed by the arrival recipe
+			artRef.current?.classList.add('dv-art');
+			overlineRef.current?.classList.add('dv-overline');
+			quoteRef.current?.classList.add('dv-quote');
+			ratingRef.current?.classList.add('dv-rating');
+			synopsisRef.current?.classList.add('dv-synopsis');
+			actionsRef.current?.classList.add('dv-actions');
 
-		return () => ctx.revert();
-	}, [prefersReducedMotion]);
+			arrival(sectionRef.current);
+		},
+		{ scope: sectionRef }
+	);
 
 	return (
-		<section
-			ref={sectionRef}
-			className="relative w-full h-[60dvh] min-h-[480px] max-h-[620px] overflow-hidden bg-background md:h-[78dvh] md:min-h-[620px] md:max-h-[780px] lg:h-[82dvh]"
-		>
-			{/* Hero image: poster on phones, cinematic backdrop on wider screens. */}
-			<div className="absolute inset-0 z-0 overflow-hidden">
-				{/* Fallback dark surface — visible when images are missing or fail */}
-				<div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black" />
-
-				<div ref={imageWrapRef} className="absolute inset-0 will-change-transform">
-					{mobileHeroImage && (
-						<img
-							src={tmdbImage(mobileHeroImage, 'w780')}
-							alt={title}
+		<>
+			<section
+				ref={sectionRef}
+				aria-labelledby="dv-title"
+				className="relative isolate flex hero-detail-height items-end overflow-hidden px-gutter pt-28 pb-10 md:min-h-screen md:pt-32 md:pb-20"
+			>
+				{/* Backdrop art */}
+				<div
+					ref={artRef}
+					className="absolute inset-0 -z-10 overflow-hidden bg-surface shadow-inset-line"
+					aria-hidden="true"
+				>
+					{cleanBackdrop && !backdropError ? (
+						<picture>
+							{phonePoster && (
+								<source media="(max-width: 767px)" srcSet={tmdbImage(phonePoster, 'w780')} />
+							)}
+							<img
+							src={tmdbImage(cleanBackdrop, 'w1280')}
+							alt=""
 							loading="eager"
 							fetchPriority="high"
-							className="absolute inset-0 h-full w-full object-cover object-top md:hidden"
-							onError={(e) => {
-								(e.currentTarget as HTMLImageElement).style.display = 'none';
-							}}
+							decoding="async"
+							onError={() => setBackdropError(true)}
+							className="size-full object-cover object-top md:object-center"
 						/>
-					)}
-					{desktopHeroImage && (
-						<img
-							src={tmdbImage(desktopHeroImage, 'w1280')}
-							alt={title}
-							loading="eager"
-							fetchPriority="high"
-							className="absolute inset-0 hidden h-full w-full object-cover object-center md:block"
-							onError={(e) => {
-								(e.currentTarget as HTMLImageElement).style.display = 'none';
-							}}
-						/>
+						</picture>
+					) : (
+						<MediaFallback variant="backdrop" />
 					)}
 				</div>
-			</div>
 
-			{/* One stable legibility field on mobile; richer directional light on desktop. */}
-			<div className="absolute inset-0 z-[1] pointer-events-none">
-				<div className="absolute inset-0 bg-gradient-to-t from-background from-[5%] via-background/65 via-[42%] to-black/5" />
-				{/* Left side for text legibility */}
-				<div className="absolute inset-0 hidden bg-gradient-to-r from-background/90 via-background/35 to-transparent md:block" />
-				{/* Radial punch behind content area */}
+				{/* Shade overlay */}
 				<div
-					className="absolute bottom-0 left-0 w-[60vw] h-[70%] pointer-events-none"
-					style={{
-						background:
-							'radial-gradient(ellipse 80% 70% at 20% 100%, color-mix(in oklab, var(--background) 72%, transparent) 0%, transparent 70%)',
-					}}
+					ref={shadeRef}
+					className="pointer-events-none absolute inset-0 -z-5"
+					aria-hidden="true"
 				/>
-				{/* Top edge */}
-				<div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent md:from-background/50" />
-			</div>
 
-			{/* Grain */}
-			<div className="absolute inset-0 z-[2] pointer-events-none opacity-[0.03] grain-overlay" />
+				{/* Back link */}
+				<Link
+					href="/"
+					className="absolute top-24 left-(--gutter) z-10 hidden items-center gap-1.5 lg:flex font-sans font-semibold text-ui text-text transition-colors can-hover:text-white"
+				>
+					<CaretLeftIcon size={16} weight="bold" aria-hidden="true" />
+					<span>Back to browse</span>
+				</Link>
 
-			{/* Content */}
-			<div className="absolute inset-0 z-10 flex flex-col justify-end">
-				<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-6 md:pb-12 lg:pb-14">
-					<div
-						ref={contentRef}
-						className="max-w-xl md:max-w-2xl flex flex-col items-start text-left"
+				{/* Content column */}
+				<div className="relative z-10 w-full max-w-3xl">
+					{/* Overline / Caption */}
+					<p
+						ref={overlineRef}
+						className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 font-mono text-caption uppercase text-text tracking-label tabular-nums"
 					>
-						{/* Metadata row */}
-						<div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mb-4 md:mb-5">
-							{/* Type badge */}
-							<span
-								data-meta
-								className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/60"
-							>
-								{type === 'tv' ? (
-									<TelevisionIcon weight="fill" size={10} />
-								) : (
-									<FilmSlateIcon weight="fill" size={10} />
-								)}
-								{type === 'tv' ? 'Series' : 'Film'}
+						<span
+							className="inline-block w-7 h-0.5 mr-1 bg-brand shrink-0"
+							aria-hidden="true"
+						/>
+						<span>{type === 'tv' ? 'Series' : 'Movie'}</span>
+						{releaseYear && <span>{releaseYear}</span>}
+						{type === 'tv' && seasonsCount ? (
+							<span>
+								<span className="text-brand font-mono tabular-nums">
+									{seasonsCount}
+								</span>{' '}
+								{seasonsCount === 1 ? 'Season' : 'Seasons'}
 							</span>
-
-							{genres.length > 0 && (
-								<>
-									<span data-meta className="text-white/18 select-none">
-										·
-									</span>
-									<span
-										data-meta
-										className="text-[11px] font-medium text-white/45 tracking-wide"
-									>
-										{genres.join(' / ')}
-									</span>
-								</>
-							)}
-
-							{releaseYear && (
-								<>
-									<span data-meta className="text-white/18 select-none">
-										·
-									</span>
-									<span
-										data-meta
-										className="text-[11px] font-medium text-white/45 tabular-nums"
-									>
-										{releaseYear}
-									</span>
-								</>
-							)}
-
-							{runtime != null && runtime > 0 && (
-								<>
-									<span data-meta className="text-white/18 select-none">
-										·
-									</span>
-									<span
-										data-meta
-										className="text-[11px] font-medium text-white/45 tabular-nums"
-									>
-										{runtimeLabel}
-									</span>
-								</>
-							)}
-
-							{voteAvg && (
-								<>
-									<span data-meta className="text-white/18 select-none">
-										·
-									</span>
-									<span
-										data-meta
-										className="inline-flex items-center gap-1 px-1.5 py-[3px] rounded-md"
-										style={{
-											background: 'rgba(255,214,10,0.12)',
-											border: '1px solid rgba(255,214,10,0.2)',
-										}}
-									>
-										<StarIcon
-											weight="fill"
-											size={10}
-											color="#FFD60A"
-											aria-hidden="true"
-										/>
-										<span
-											className="text-[10px] font-bold tabular-nums"
-											style={{ color: '#FFD60A' }}
-										>
-											{voteAvg.toFixed(1)}
+						) : runtime && runtime > 0 ? (
+							<span>
+								{runtime >= 60 ? (
+									<>
+										<span className="text-brand font-mono tabular-nums">
+											{Math.floor(runtime / 60)}
 										</span>
-									</span>
-								</>
-							)}
-
-							{rating && (
-								<>
-									<span data-meta className="text-white/18 select-none">
-										·
-									</span>
-									<span
-										data-meta
-										className="text-[10px] font-bold text-white/50 border border-white/18 rounded-[4px] px-[5px] py-[2px] leading-none tracking-widest uppercase"
-									>
-										{rating}
-									</span>
-								</>
-							)}
-						</div>
-
-						{/* Logo or title */}
-						<div
-							data-hero-title
-							className="flex flex-col items-start gap-2.5 md:gap-3 w-full"
-						>
-							{logo && !logoFailed ? (
-								<>
-									{/* Decorative logo: keep the page h1 in the accessibility tree. */}
-									<h1 className="sr-only">{title}</h1>
-									<img
-										src={tmdbImage(logo, 'w500')}
-										alt=""
-										width={720}
-										height={360}
-										loading="eager"
-										fetchPriority="high"
-										className="h-auto w-[min(72vw,330px)] max-h-[120px] sm:w-[min(68vw,390px)] md:w-auto md:max-w-xl md:max-h-[160px] lg:max-h-[200px] object-contain object-left drop-shadow-[0_16px_48px_rgba(0,0,0,0.9)]"
-										onError={() => setLogoFailed(true)}
-									/>
-								</>
-							) : (
-								<h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-bold text-white leading-[0.9] tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
-									{title}
-								</h1>
-							)}
-						</div>
-
-						{/* Tagline */}
-						{show.tagline && (
-							<p
-								data-hero-tagline
-								className="mt-2.5 line-clamp-1 text-[12px] font-medium italic leading-snug tracking-wide text-white/55 md:text-sm"
+										h{' '}
+										<span className="text-brand font-mono tabular-nums">
+											{runtime % 60}
+										</span>
+										m
+									</>
+								) : (
+									<>
+										<span className="text-brand font-mono tabular-nums">
+											{runtime}
+										</span>
+										m
+									</>
+								)}
+							</span>
+						) : null}
+						{genres.map((genre, index) => (
+							<span
+								key={genre}
+								className={index > 0 ? 'hidden sm:inline' : undefined}
 							>
-								&ldquo;{show.tagline}&rdquo;
-							</p>
+								{genre}
+							</span>
+						))}
+					</p>
+
+					{/* Anton Display Title */}
+					<TitleDisplay
+						title={title}
+						originalTitle={originalTitle}
+						as="h1"
+						id="dv-title"
+						splitWords={true}
+						className="mb-0"
+					/>
+
+					{/* Tagline */}
+					{show.tagline &&
+						show.tagline.trim().length > 0 &&
+						show.tagline.length <= 120 && (
+							<blockquote
+								ref={quoteRef}
+								className="my-5 max-w-xl font-sans text-lede leading-relaxed text-soft line-clamp-2"
+							>
+								“{show.tagline.trim()}”
+							</blockquote>
 						)}
 
-						{/* Overview */}
-						{show.overview && (
+					{/* Score / Rating */}
+					{hasRating ? (
+						<p
+							ref={ratingRef}
+							className="mt-5 mb-4 flex flex-wrap items-baseline gap-2.5 tabular-nums"
+						>
+							<strong className="font-display text-display-3 text-text">
+								{voteAvg.toFixed(1)}
+							</strong>
+							<span
+								className="text-brand text-display-4 select-none"
+								aria-hidden="true"
+							>
+								★
+							</span>
+							<span className="font-mono text-caption uppercase text-dim tracking-label">
+								/ 10{voteCountText ? ` · ${voteCountText}` : ''}
+							</span>
+						</p>
+					) : (
+						<p
+							ref={ratingRef}
+							className="mt-5 mb-4 flex flex-wrap items-baseline gap-2.5 font-mono text-caption uppercase text-dim tracking-label"
+						>
+							NOT YET RATED
+						</p>
+					)}
+
+					{/* Clamped Overview */}
+					{show.overview && (
+						<div className="mt-4 max-w-2xl">
 							<p
-								data-hero-overview
-								className="mt-3 hidden max-w-lg text-sm leading-relaxed text-white/52 md:mt-3.5 md:block md:line-clamp-4"
-								style={{
-									fontFamily:
-										'-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif',
-								}}
+								id="dv-synopsis"
+								ref={synopsisRef}
+								className={cn(
+									'font-sans text-lede leading-relaxed text-soft text-pretty',
+									!isOverviewExpanded && 'line-clamp-3'
+								)}
 							>
 								{show.overview}
 							</p>
-						)}
+							{canExpandOverview && (
+								<button
+									type="button"
+									id="dv-more"
+									aria-expanded={isOverviewExpanded}
+									aria-controls="dv-synopsis"
+									onClick={toggleOverview}
+									className="mt-2 inline-block font-sans font-semibold text-ui text-text underline underline-offset-4 cursor-pointer can-hover:text-white"
+								>
+									{isOverviewExpanded ? 'Less' : 'More'}
+								</button>
+							)}
+						</div>
+					)}
 
-						{/* Actions */}
-						<div
-							ref={btnRowRef}
-							className="mt-5 flex w-full items-center gap-2.5 md:mt-8 md:w-auto md:gap-3"
+					{/* Action buttons */}
+					<div
+						id="dv-actions"
+						ref={actionsRef}
+						className="mt-6 flex items-center gap-2.5"
+					>
+						<button
+							type="button"
+							onClick={handlePrimaryAction}
+							className="flex items-center justify-center gap-2 rounded-full bg-brand can-hover:bg-brand-hover text-brand-foreground font-sans font-semibold text-body h-12 px-5 min-w-36 flex-1 sm:flex-none sm:px-6 sm:text-ui transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
 						>
-							{/* Primary play */}
-							<button
-								data-hero-action
-								onClick={handlePrimaryAction}
-								className="inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 text-[13px] font-bold text-zinc-950 shadow-[0_6px_28px_rgba(255,255,255,0.18)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none md:h-auto md:flex-none md:px-8 md:py-3 md:text-sm"
-							>
-								<PlayIcon weight="fill" size={16} />
-								<span className="truncate">{primaryLabel}</span>
-							</button>
+							<PlayIcon size={18} weight="fill" aria-hidden="true" />
+							<span>{primaryLabel}</span>
+						</button>
 
-							{/* Watchlist frosted */}
-							<button
-								data-hero-action
-								onClick={handleWatchlist}
-								aria-label={
-									isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'
-								}
-								className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-semibold text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none md:w-auto md:gap-2 md:px-6 md:text-sm"
-								style={{
-									background: 'rgba(255,255,255,0.1)',
-									backdropFilter: 'blur(24px) saturate(180%)',
-									border: '1px solid rgba(255,255,255,0.14)',
-									boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
-								}}
+						<button
+							type="button"
+							ref={listBtnRef}
+							onClick={handleWatchlist}
+							aria-pressed={isInWatchlist}
+							aria-label="My List"
+							className={cn(
+								'flex items-center gap-2 rounded-full border bg-canvas/50 font-sans font-semibold text-body h-12 shrink-0 px-4 sm:px-5 sm:text-ui transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer',
+								isInWatchlist
+									? 'border-brand text-brand'
+									: 'border-line-strong can-hover:border-line text-text'
+							)}
+						>
+							<span
+								className="relative flex items-center justify-center size-4"
+								aria-hidden="true"
 							>
 								<PlusIcon
+									size={16}
 									weight="bold"
-									size={17}
-									className={isInWatchlist ? 'rotate-45' : ''}
+									className={cn(
+										'absolute transition-opacity duration-200',
+										isInWatchlist ? 'opacity-0' : 'opacity-100'
+									)}
+									data-icon="plus"
 								/>
-								<span className="hidden md:inline">
-									{isInWatchlist ? 'Remove' : 'Watchlist'}
-								</span>
-							</button>
+								<CheckIcon
+									size={16}
+									weight="bold"
+									className={cn(
+										'absolute text-brand transition-opacity duration-200',
+										isInWatchlist ? 'opacity-100' : 'opacity-0'
+									)}
+									data-icon="check"
+								/>
+							</span>
+							<span>My List</span>
+						</button>
 
-							{/* More info — opens details panel directly */}
-							<button
-								data-hero-action
-								aria-label="More info"
-								onClick={() => {
-									openInfoTab('details');
-									if (typeof window !== 'undefined') {
-										requestAnimationFrame(() => {
-											document
-												.getElementById('media-info-body')
-												?.scrollIntoView({
-													behavior: 'smooth',
-													block: 'start',
-												});
-										});
-									}
-								}}
-								className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
-								style={{
-									background: 'rgba(255,255,255,0.08)',
-									backdropFilter: 'blur(24px) saturate(180%)',
-									border: '1px solid rgba(255,255,255,0.11)',
-									boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)',
-								}}
-							>
-								<InfoIcon weight="bold" size={16} />
-							</button>
-
-							{/* Share icon only */}
-							<button
-								data-hero-action
-								aria-label="Share"
-								onClick={handleShare}
-								className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none min-[375px]:inline-flex"
-								style={{
-									background: 'rgba(255,255,255,0.08)',
-									backdropFilter: 'blur(24px) saturate(180%)',
-									border: '1px solid rgba(255,255,255,0.11)',
-									boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)',
-								}}
-							>
-								<ShareNetworkIcon weight="bold" size={16} />
-							</button>
-						</div>
+						<button
+							type="button"
+							onClick={handleShare}
+							aria-label="Share"
+							className="flex size-12 shrink-0 items-center justify-center gap-2 rounded-full border border-line-strong can-hover:border-line bg-canvas/50 text-text font-sans font-semibold text-ui sm:w-auto sm:px-5 transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
+						>
+							<ShareNetworkIcon size={18} aria-hidden="true" />
+							<span className="hidden sm:inline">Share</span>
+						</button>
 					</div>
 				</div>
-			</div>
+			</section>
 
-			{typeof document !== 'undefined'
-				? createPortal(
-						<AnimatePresence>
-							{!isHeroVisible && !isPlayerSticky && (
-								<motion.div
-									data-mobile-detail-dock
-									initial={
-										prefersReducedMotion
-											? { opacity: 0 }
-											: { opacity: 0, y: 24 }
-									}
-									animate={{ opacity: 1, y: 0 }}
-									exit={
-										prefersReducedMotion
-											? { opacity: 0 }
-											: { opacity: 0, y: 24 }
-									}
-									transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
-									className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 md:hidden"
-								>
-									<div className="flex items-center gap-2 rounded-[22px] border border-white/10 bg-black/78 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl supports-[backdrop-filter]:bg-black/62 motion-reduce:backdrop-blur-none">
-										<button
-											type="button"
-											onClick={handlePrimaryAction}
-											className="flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-[16px] bg-white px-4 text-sm font-semibold text-black transition-transform duration-100 active:scale-[0.97]"
-										>
-											<PlayIcon size={16} weight="fill" />
-											<span className="truncate">{primaryLabel}</span>
-										</button>
-										<button
-											type="button"
-											onClick={handleWatchlist}
-											aria-label={
-												isInWatchlist
-													? 'Remove from Watchlist'
-													: 'Add to Watchlist'
-											}
-											className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-white/10 text-white transition-transform duration-100 active:scale-[0.94]"
-										>
-											<PlusIcon
-												size={18}
-												weight="bold"
-												className={isInWatchlist ? 'rotate-45' : ''}
-											/>
-										</button>
-									</div>
-								</motion.div>
-							)}
-						</AnimatePresence>,
-						document.body
-					)
-				: null}
-		</section>
+			{/* Sticky action bar on mobile */}
+			<StickyActionBar targetId="dv-actions" className="translate-y-0">
+				<div className="flex w-full items-center justify-between gap-2.5">
+					<button
+						type="button"
+						onClick={handlePrimaryAction}
+						className="flex flex-1 h-12 items-center justify-center gap-2 rounded-full bg-brand can-hover:bg-brand-hover px-4 font-sans font-semibold text-body text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 cursor-pointer"
+					>
+						<PlayIcon size={16} weight="fill" aria-hidden="true" />
+						<span className="truncate">{primaryLabel}</span>
+					</button>
+					<button
+						type="button"
+						ref={stickyListBtnRef}
+						onClick={handleWatchlist}
+						aria-pressed={isInWatchlist}
+						aria-label="My List"
+						className={cn(
+							'flex size-12 shrink-0 items-center justify-center rounded-full border bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 cursor-pointer',
+							isInWatchlist ? 'border-brand text-brand' : 'border-line-strong'
+						)}
+					>
+						{isInWatchlist ? (
+							<CheckIcon
+								size={18}
+								weight="bold"
+								className="text-brand"
+								data-icon="check"
+							/>
+						) : (
+							<PlusIcon size={18} weight="bold" data-icon="plus" />
+						)}
+					</button>
+					<button
+						type="button"
+						onClick={handleShare}
+						aria-label="Share"
+						className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 cursor-pointer"
+					>
+						<ShareNetworkIcon size={18} />
+					</button>
+				</div>
+			</StickyActionBar>
+		</>
 	);
 }
 

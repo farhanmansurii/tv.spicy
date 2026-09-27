@@ -1,46 +1,34 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import Container from '@/components/shared/containers/container';
 
+const tileGrid = 'grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 md:gap-4';
+
 export default function GenresLoading() {
 	return (
 		<div className="min-h-screen mt-20 bg-background">
 			<Container>
-				{/* Header skeleton */}
-				<div className="py-8 md:py-12 pb-4">
-					<div className="max-w-4xl space-y-6">
-						<div className="space-y-2">
-							<Skeleton className="h-4 w-32 rounded-md" />
-							<Skeleton className="h-10 md:h-14 w-56 md:w-80 rounded-lg" />
+				<section className="section-spacing">
+					<Skeleton className="h-3 w-40 rounded-sm" />
+					<Skeleton className="mt-3 h-16 w-96 max-w-full rounded-sm md:h-24" />
+					<Skeleton className="mt-4 h-5 w-full max-w-xl rounded-sm" />
+				</section>
+
+				{[0, 1].map((section) => (
+					<section key={section} className="border-t border-border section-spacing">
+						<div className="mb-5 flex items-end justify-between gap-3 md:mb-6">
+							<div className="flex items-end gap-3">
+								<Skeleton className="h-3 w-6 rounded-sm" />
+								<Skeleton className="h-8 w-56 rounded-sm md:h-11" />
+							</div>
+							<Skeleton className="h-3 w-20 rounded-sm" />
 						</div>
-						<Skeleton className="h-5 md:h-6 w-full max-w-xl rounded-md" />
-					</div>
-				</div>
-
-				{/* Movie Collections skeleton */}
-				<div className="py-6 md:py-8">
-					<div className="flex items-center gap-3 mb-4 md:mb-6">
-						<Skeleton className="h-8 w-8 rounded-lg" />
-						<Skeleton className="h-6 md:h-7 w-40 rounded-md" />
-					</div>
-					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
-						{Array.from({ length: 10 }).map((_, i) => (
-							<Skeleton key={i} className="aspect-[16/10] rounded-[1.5rem]" />
-						))}
-					</div>
-				</div>
-
-				{/* Series Collections skeleton */}
-				<div className="py-6 md:py-8">
-					<div className="flex items-center gap-3 mb-4 md:mb-6">
-						<Skeleton className="h-8 w-8 rounded-lg" />
-						<Skeleton className="h-6 md:h-7 w-44 rounded-md" />
-					</div>
-					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
-						{Array.from({ length: 10 }).map((_, i) => (
-							<Skeleton key={i} className="aspect-[16/10] rounded-[1.5rem]" />
-						))}
-					</div>
-				</div>
+						<div className={tileGrid}>
+							{Array.from({ length: 10 }).map((_, i) => (
+								<Skeleton key={i} className="min-h-40 rounded-sm md:min-h-48" />
+							))}
+						</div>
+					</section>
+				))}
 			</Container>
 		</div>
 	);

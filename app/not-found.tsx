@@ -1,46 +1,45 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Film, Home, Search } from 'lucide-react';
+import { Home, Search } from 'lucide-react';
 
 export const metadata = {
-	title: 'Not Found | Spicy TV',
-	description: 'The page you are looking for does not exist.',
+	title: 'End of Reel | Spicy TV',
+	description: 'Nothing is threaded at this address.',
 };
 
 export default function NotFound() {
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-background px-4">
-			<div className="max-w-md w-full text-center space-y-6">
-				<div className="flex justify-center">
-					<div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-						<Film className="h-8 w-8 text-primary" />
-					</div>
-				</div>
+		<main className="flex min-h-error flex-col justify-center px-gutter pt-safe-header pb-16">
+			<div className="max-w-prose">
+				<p className="font-mono text-caption uppercase tracking-label text-dim">
+					<span className="text-brand">404</span>
+					<span aria-hidden="true"> / </span>End of reel
+				</p>
 
-				<div className="space-y-2">
-					<h1 className="text-2xl font-semibold tracking-tight text-foreground">
-						Page not found
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						We couldn&apos;t find the page you were looking for. It might have been moved or deleted.
-					</p>
-				</div>
+				<h1 className="mt-4 font-display text-display-2 uppercase text-text text-balance">
+					Nothing here but dust.
+				</h1>
 
-				<div className="flex items-center justify-center gap-3">
-					<Button asChild variant="default" className="gap-2">
+				<p className="mt-4 text-lede text-soft max-w-prose">
+					There is no title at this address. It may have left the schedule, or the link
+					came apart somewhere in the edit.
+				</p>
+
+				<div className="mt-8 flex flex-wrap items-center gap-3">
+					<Button asChild variant="default">
 						<Link href="/" prefetch={false}>
 							<Home className="h-4 w-4" />
-							Home
+							Back to browse
 						</Link>
 					</Button>
-					<Button asChild variant="outline" className="gap-2">
+					<Button asChild variant="outline">
 						<Link href="/search" prefetch={false}>
 							<Search className="h-4 w-4" />
-							Search
+							Search the archive
 						</Link>
 					</Button>
 				</div>
 			</div>
-		</div>
+		</main>
 	);
 }

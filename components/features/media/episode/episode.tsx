@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CircleNotchIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { tmdbImage } from '@/lib/tmdb-image';
 import useProviderStore from '@/store/providerStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import useTVShowStore from '@/store/recentsStore';
+import { useHaptics } from '@/hooks/use-haptics';
 import { cn } from '@/lib/utils';
 
 import { listEnabledProviders, resolveProvider } from './providers';
@@ -13,6 +16,9 @@ import { PlayerControls } from './player-controls';
 
 // A dead provider must surface as a failure instead of a black rectangle.
 const PLAYER_LOAD_TIMEOUT_MS = 15_000;
+// After this long without a load, offer an inline escape to another server
+// while the current one keeps trying.
+const SERVER_OFFER_TIMEOUT_MS = 8_000;
 
 type PlayerStatus = 'loading' | 'ready' | 'failed';
 
@@ -23,6 +29,8 @@ interface EpisodeProps {
 	type: string;
 	episodeNumber?: number | string;
 	seasonNumber?: number | string;
+	/** Media title for the NOW PLAYING caption. Falls back to the watch history. */
+	title?: string;
 	getNextEp?: () => void;
 	isSticky?: boolean;
 	onCloseSticky?: () => void;
@@ -33,11 +41,15 @@ export default function Episode({
 	type,
 	seasonNumber,
 	episodeNumber,
+	title,
 	getNextEp,
 	isSticky,
 	onCloseSticky,
 }: EpisodeProps) {
 	const iframeRef = useRef<HTMLIFrameElement>(null);
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+	const haptic = useHaptics();
 	const { selectedProvider, setProvider } = useProviderStore();
 	const { setIsPlaying } = useEpisodeStore();
 	const { recentlyWatched, updatePlaybackProgress, flushPlaybackProgress } =
@@ -56,7 +68,9 @@ export default function Episode({
 	const [iframeKey, setIframeKey] = useState(0);
 	const [activeResumeSeconds, setActiveResumeSeconds] = useState(0);
 	const [hasResumed, setHasResumed] = useState(false);
-	const currentProvider = resolveProvider(selectedProvider);
+	// Memoised so the provider object is stable while the selection is: the URL
+	// memo and the progress hook both key off it.
+	const currentProvider = useMemo(() => resolveProvider(selectedProvider), [selectedProvider]);
 
 	// Migrate persisted selections when a provider is unknown, candidate, or
 	// disabled — resolveProvider already fell back to the default.
@@ -106,58 +120,130 @@ export default function Episode({
 	}, [savedPositionSeconds]);
 
 	// ── Build the current provider URL ───────────────────────────────────────
-	// Only the selected provider's URL is built. `activeResumeSeconds` and
-	// `iframeKey` are intentionally in deps here so the URL only rebuilds (and
-	// the iframe only remounts) on an explicit user action.
-	const currentUrl = useMemo(
-		() =>
-			currentProvider.buildUrl({
-				type: type as 'movie' | 'tv',
-				id,
-				seasonNumber: numericSeasonNumber,
-				episodeNumber: numericEpisodeNumber,
-				resumeSeconds: activeResumeSeconds,
-			}),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[
-			currentProvider.id,
-			type,
-			id,
-			numericSeasonNumber,
-			numericEpisodeNumber,
-			activeResumeSeconds,
-			iframeKey,
-		]
-	);
+	// Pure string work, and the iframe remount is driven by `iframeKey` on the
+	// element, so no memo is needed to keep the embed stable between renders.
+	const currentUrl = currentProvider.buildUrl({
+		type: type as 'movie' | 'tv',
+		id,
+		seasonNumber: numericSeasonNumber,
+		episodeNumber: numericEpisodeNumber,
+		resumeSeconds: activeResumeSeconds,
+	});
 
 	// ── Player status ─────────────────────────────────────────────────────────
-	// Every URL change (provider switch, retry, resume) remounts the iframe, so
-	// the load cycle starts over.
-	const [status, setStatus] = useState<PlayerStatus>('loading');
+	// A cross-origin embed fires `load` for its error pages too, so an embed
+	// that reports playback through its progress adapter is only "ready" once
+	// that first message lands. Without an adapter the load event is all there is.
+	const [loadState, setLoadState] = useState<'pending' | 'loaded' | 'failed'>('pending');
+	const [playbackSeen, setPlaybackSeen] = useState(false);
+	const [showServerOffer, setShowServerOffer] = useState(false);
+	const needsPlaybackSignal = Boolean(currentProvider.progress?.origin);
+
+	const status: PlayerStatus =
+		loadState === 'failed'
+			? 'failed'
+			: needsPlaybackSignal
+				? playbackSeen
+					? 'ready'
+					: 'loading'
+				: loadState === 'loaded'
+					? 'ready'
+					: 'loading';
+
+	const handlePlaybackSignal = useCallback(() => setPlaybackSeen(true), []);
 
 	useEffect(() => {
-		setStatus('loading');
+		setLoadState('pending');
+		setPlaybackSeen(false);
+		setShowServerOffer(false);
 	}, [currentUrl]);
 
 	useEffect(() => {
 		if (status !== 'loading') return;
-		const timer = setTimeout(() => setStatus('failed'), PLAYER_LOAD_TIMEOUT_MS);
-		return () => clearTimeout(timer);
+		const offerTimer = setTimeout(() => setShowServerOffer(true), SERVER_OFFER_TIMEOUT_MS);
+		const failTimer = setTimeout(() => setLoadState('failed'), PLAYER_LOAD_TIMEOUT_MS);
+		return () => {
+			clearTimeout(offerTimer);
+			clearTimeout(failTimer);
+		};
 	}, [status, currentUrl]);
 
-	const handleIframeLoad = useCallback(() => setStatus('ready'), []);
+	const handleIframeLoad = useCallback(() => setLoadState('loaded'), []);
 
 	const handleRetry = useCallback(() => {
-		setStatus('loading');
+		setLoadState('pending');
+		setPlaybackSeen(false);
+		setShowServerOffer(false);
 		setIframeKey((k) => k + 1);
 	}, []);
+
+	const handleTryAnotherServer = useCallback(() => {
+		const list = listEnabledProviders();
+		const index = list.findIndex((p) => p.id === currentProvider.id);
+		const next = list[(index + 1) % list.length];
+		if (next && next.id !== currentProvider.id) {
+			setProvider(next.id);
+		} else {
+			handleRetry();
+		}
+	}, [currentProvider.id, setProvider, handleRetry]);
+
+	// ── Episode navigation ───────────────────────────────────────────────────
+	// The episode strip owns the list, so stepping back only rewrites the URL;
+	// the strip re-reads it and moves the highlight and the store with it.
+	const canGoPrevious = type === 'tv' && numericEpisodeNumber > 1;
+
+	const goPreviousEpisode = useCallback(() => {
+		if (!canGoPrevious) return;
+		haptic('selection');
+		const params = new URLSearchParams(searchParams.toString());
+		params.set('season', String(numericSeasonNumber));
+		params.set('episode', String(numericEpisodeNumber - 1));
+		window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+	}, [
+		canGoPrevious,
+		haptic,
+		numericEpisodeNumber,
+		numericSeasonNumber,
+		pathname,
+		searchParams,
+	]);
+
+	const goNextEpisode = useCallback(() => {
+		if (!getNextEp) return;
+		haptic('selection');
+		getNextEp();
+	}, [getNextEp, haptic]);
+
+	// ── Captions and poster ───────────────────────────────────────────────────
+	const seasonEpisodeLabel =
+		type === 'tv' && numericSeasonNumber > 0 && numericEpisodeNumber > 0
+			? `S${numericSeasonNumber} E${numericEpisodeNumber}`
+			: null;
+	const titleLabel = title?.trim();
+	// An unplayed film has no watch-history entry, so the prop leads and the
+	// store covers every caller that does not pass one.
+	const nowPlayingSubject =
+		type === 'movie'
+			? titleLabel || currentWatchItem?.title?.trim() || currentWatchItem?.showName?.trim() || 'Movie'
+			: (currentWatchItem?.episodeName?.trim() ?? null);
+	const nowPlayingCaption = seasonEpisodeLabel
+		? `Now playing · ${seasonEpisodeLabel}${nowPlayingSubject ? ` · ${nowPlayingSubject}` : ''}`
+		: `Now playing · ${type === 'movie' ? nowPlayingSubject : 'Episode'}`;
+	const loadingCaption = seasonEpisodeLabel
+		? `Loading ${seasonEpisodeLabel}`
+		: `Loading ${type === 'movie' ? nowPlayingSubject : 'episode'}`;
+	const posterUrl = currentWatchItem?.stillPath
+		? tmdbImage(currentWatchItem.stillPath, 'w780')
+		: null;
+	const [posterError, setPosterError] = useState(false);
 
 	// ── Document title ────────────────────────────────────────────────────────
 	useEffect(() => {
 		const previousTitle = document.title;
 		const showLabel = currentWatchItem?.showName?.trim();
 		const episodeNameLabel = currentWatchItem?.episodeName?.trim();
-		const itemTitle = currentWatchItem?.title?.trim();
+		const itemTitle = titleLabel || currentWatchItem?.title?.trim();
 		const episodeLabel =
 			type === 'tv' && numericSeasonNumber > 0 && numericEpisodeNumber > 0
 				? `S${numericSeasonNumber} E${numericEpisodeNumber}`
@@ -171,7 +257,7 @@ export default function Episode({
 		return () => {
 			document.title = previousTitle;
 		};
-	}, [currentWatchItem, type, numericSeasonNumber, numericEpisodeNumber]);
+	}, [currentWatchItem, titleLabel, type, numericSeasonNumber, numericEpisodeNumber]);
 
 	// ── Progress tracking ────────────────────────────────────────────────────
 	usePlaybackProgress({
@@ -184,59 +270,82 @@ export default function Episode({
 		currentWatchItem,
 		updatePlaybackProgress,
 		flushPlaybackProgress,
+		onPlaybackSignal: handlePlaybackSignal,
 	});
 
-	return (
-		<>
-			<PlayerControls
-				providers={listEnabledProviders()}
-				selectedProvider={currentProvider.id}
-				onProviderChange={setProvider}
-				savedPositionSeconds={savedPositionSeconds}
-				onResume={handleResume}
-				hasResumed={hasResumed}
-				onNextEpisode={getNextEp}
-				mediaType={type}
-				isSticky={isSticky}
-				onCloseSticky={onCloseSticky}
-			/>
+	const isReady = status === 'ready';
 
-			<div className="relative mt-1 w-full rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_4px_20px_rgba(0,0,0,0.35)]">
-				<div className="relative w-full h-[50vh] min-h-[280px] max-h-[560px] overflow-hidden rounded-xl bg-black sm:aspect-video sm:h-auto sm:min-h-0">
+	return (
+		<div className="flex flex-col">
+			<p className="mb-2 font-mono text-caption uppercase tracking-label text-dim">
+				{nowPlayingCaption}
+			</p>
+
+			<div className="relative w-full overflow-hidden rounded-sm border border-border bg-background">
+				<div className="relative aspect-video max-h-140 min-h-70 w-full">
 					<iframe
 						key={iframeKey}
 						ref={iframeRef}
 						allowFullScreen
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-						className="block h-full w-full bg-transparent"
+						className="absolute inset-0 block size-full bg-transparent"
 						src={currentUrl}
 						title={`${currentProvider.label} player`}
 						loading="eager"
 						onLoad={handleIframeLoad}
 					/>
 
+					{/* The still sits over the embed, not under it: a provider error
+					    page would otherwise show as a white box. */}
+					{posterUrl && !posterError && (
+						<img
+							src={posterUrl}
+							alt=""
+							aria-hidden="true"
+							loading="eager"
+							decoding="async"
+							onError={() => setPosterError(true)}
+							className={cn(
+								'pointer-events-none absolute inset-0 size-full object-cover transition-opacity duration-(--duration-fade) motion-reduce:transition-none',
+								isReady ? 'opacity-0' : 'opacity-100'
+							)}
+						/>
+					)}
+
 					{/* State overlay — occupies the player box so loading, failure and
-					    playback reserve identical height. */}
+					    playback reserve identical height. Never blocks the embed, so
+					    the viewer can always press play. */}
 					<div
 						className={cn(
-							'absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black px-6 text-center transition-opacity motion-reduce:transition-none',
-							status === 'ready'
-								? 'pointer-events-none opacity-0 duration-[120ms]'
-								: 'opacity-100 duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)]'
+							'pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-background/75 px-6 text-center transition-opacity duration-(--duration-fade) motion-reduce:transition-none',
+							isReady ? 'opacity-0' : 'opacity-100'
 						)}
-						aria-hidden={status === 'ready' ? true : undefined}
+						aria-hidden={isReady ? true : undefined}
 					>
 						{status === 'loading' && (
-							<div className="flex flex-col items-center gap-3">
-								<CircleNotchIcon
-									size={32}
-									weight="bold"
+							<div className="flex flex-col items-center gap-4">
+								<p
 									aria-hidden="true"
-									className="animate-spin text-white/70 motion-reduce:animate-none"
-								/>
-								<p aria-hidden="true" className="text-sm font-medium text-white/70">
-									Loading player…
+									className="font-mono text-caption uppercase tracking-label text-muted-foreground"
+								>
+									{loadingCaption}
 								</p>
+								<div
+									aria-hidden="true"
+									className="h-0.5 w-40 overflow-hidden rounded-full bg-foreground/10"
+								>
+									<div className="h-full w-1/2 animate-shimmer bg-brand motion-reduce:animate-none" />
+								</div>
+								{showServerOffer && (
+									<Button
+										type="button"
+										variant="ghost"
+										onClick={handleTryAnotherServer}
+										className="pointer-events-auto"
+									>
+										Try another server
+									</Button>
+								)}
 							</div>
 						)}
 
@@ -244,32 +353,26 @@ export default function Episode({
 							<div
 								role="alert"
 								aria-live="assertive"
-								className="flex max-w-sm flex-col items-center gap-3"
+								className="pointer-events-auto flex max-w-sm flex-col items-center gap-3"
 							>
-								<WarningCircleIcon
-									size={32}
-									weight="fill"
-									aria-hidden="true"
-									className="text-[#FF453A]"
-								/>
-								<h3 className="text-base font-semibold text-white md:text-lg">
-									Playback failed
-								</h3>
-								<p className="text-sm leading-relaxed text-white/70">
-									This source didn’t respond in time. Retry it, or pick another
-									source above.
+								<p className="font-mono text-caption uppercase tracking-label text-dim">
+									Source · {currentProvider.label}
 								</p>
-								<button
-									type="button"
-									onClick={handleRetry}
-									className={cn(
-										'min-h-11 rounded-full bg-white px-5 text-sm font-semibold text-black',
-										'transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:active:scale-100',
-										'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black'
-									)}
-								>
-									Retry
-								</button>
+								<h3 className="font-display text-display-2 uppercase text-foreground">
+									The projector jammed.
+								</h3>
+								<p className="max-w-sm text-small leading-relaxed text-soft">
+									This source did not answer. Try another server, or retry{' '}
+									{currentProvider.label}.
+								</p>
+								<div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+									<Button type="button" onClick={handleTryAnotherServer}>
+										Try another server
+									</Button>
+									<Button type="button" variant="ghost" onClick={handleRetry}>
+										Retry
+									</Button>
+								</div>
 							</div>
 						)}
 					</div>
@@ -283,6 +386,23 @@ export default function Episode({
 					</p>
 				</div>
 			</div>
-		</>
+
+			<div className="mt-3">
+				<PlayerControls
+					providers={listEnabledProviders()}
+					selectedProvider={currentProvider.id}
+					onProviderChange={setProvider}
+					savedPositionSeconds={savedPositionSeconds}
+					onResume={handleResume}
+					hasResumed={hasResumed}
+					onNextEpisode={goNextEpisode}
+					onPreviousEpisode={goPreviousEpisode}
+					canGoPrevious={canGoPrevious}
+					mediaType={type}
+					isSticky={isSticky}
+					onCloseSticky={onCloseSticky}
+				/>
+			</div>
+		</div>
 	);
 }

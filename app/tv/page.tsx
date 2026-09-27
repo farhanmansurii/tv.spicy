@@ -7,9 +7,8 @@ import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
 import { unstable_noStore } from 'next/cache';
 import { Metadata } from 'next';
 import React, { Suspense } from 'react';
-import HeroCarousel, {
-	type HeroCarouselProps,
-} from '@/components/features/media/carousel/hero-carousel';
+import { EditorialHero } from '@/components/features/home/editorial-hero';
+import type { HeroCarouselProps } from '@/components/features/media/carousel/hero-carousel';
 import type { Genre } from '@/lib/types/tmdb';
 import type { Show } from '@/lib/types';
 import ProgressiveGenreRows from '@/components/features/media/genre/progressive-genre-rows';
@@ -34,9 +33,6 @@ export const metadata: Metadata = {
 
 const RecentlyWatched = dynamic(() => import('@/components/features/watchlist/recently-watched'));
 const WatchList = dynamic(() => import('@/components/features/watchlist/watch-list'));
-const GenreGrid = dynamic(() => import('@/components/features/media/genre/genre-grid'), {
-	loading: () => <div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />,
-});
 
 export default async function Page() {
 	let genres: Genre[] = [];
@@ -67,24 +63,27 @@ export default async function Page() {
 	}
 
 	return (
-		<>
-			<HeroCarousel shows={heroShows as unknown as HeroCarouselProps['shows']} type="tv" />
+		<div className="min-h-screen bg-background text-foreground pb-20">
+			<div className="-mt-16 lg:mt-0">
+				<EditorialHero shows={heroShows as unknown as HeroCarouselProps['shows']} type="tv" />
+			</div>
 
-			<Container>
-				<div className="flex flex-col space-y-4 md:space-y-6">
+			<Container className="relative z-10 w-full pt-7 md:pt-12">
+				<div className="flex flex-col">
 					<Suspense
 						fallback={
-							<MediaLoader withHeader withHeaderAction className="min-h-[280px]" />
+							<MediaLoader withHeader withHeaderAction className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />
 						}
 					>
 						<RecentlyWatched />
 					</Suspense>
 
-					<Suspense fallback={<MediaLoader withHeader className="min-h-[280px]" />}>
+					<Suspense fallback={<MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />}>
 						<WatchList type="tv" />
 					</Suspense>
 
 					<DataRow
+						rowNumber={1}
 						endpoint="trending/tv/week"
 						text="Top TV Shows"
 						showRank={false}
@@ -92,23 +91,16 @@ export default async function Page() {
 					/>
 
 					<DataRow
+						rowNumber={2}
 						endpoint="tv/top_rated"
 						text="Top Rated TV Shows"
 						showRank={true}
 						type="tv"
 					/>
 
-					<ProgressiveGenreRows genres={genres} type="tv" />
+					<ProgressiveGenreRows genres={genres} type="tv" startRowNumber={3} />
 				</div>
 			</Container>
-
-			{genres.length > 0 && (
-				<Suspense
-					fallback={<div className="h-96 bg-zinc-800/50 animate-pulse rounded-md" />}
-				>
-					<GenreGrid type="tv" genres={genres} />
-				</Suspense>
-			)}
-		</>
+		</div>
 	);
 }

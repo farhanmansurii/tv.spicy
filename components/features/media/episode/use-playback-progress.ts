@@ -26,6 +26,8 @@ interface UsePlaybackProgressParams {
 		mediaId: string,
 		mediaType?: 'movie' | 'tv'
 	) => Promise<void>;
+	/** Fired on the first message the provider's adapter recognises as playback. */
+	onPlaybackSignal?: () => void;
 }
 
 /**
@@ -50,6 +52,7 @@ export function usePlaybackProgress({
 	currentWatchItem,
 	updatePlaybackProgress,
 	flushPlaybackProgress,
+	onPlaybackSignal,
 }: UsePlaybackProgressParams): void {
 	const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -91,6 +94,8 @@ export function usePlaybackProgress({
 			});
 			if (!parsed) return;
 
+			onPlaybackSignal?.();
+
 			if (debounceRef.current) clearTimeout(debounceRef.current);
 
 			debounceRef.current = setTimeout(
@@ -124,13 +129,14 @@ export function usePlaybackProgress({
 				debounceRef.current = null;
 			}
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		id,
 		numericEpisodeNumber,
 		numericMediaId,
 		numericSeasonNumber,
-		provider.id,
+		onPlaybackSignal,
+		progressOrigin,
+		provider,
 		type,
 		updatePlaybackProgress,
 	]);
@@ -138,41 +144,38 @@ export function usePlaybackProgress({
 	// ── 2. Time-based fallback ────────────────────────────────────────────────
 	// Only fires when the current provider has no postMessage support.
 	// Requires `durationSeconds` in the store — skips silently otherwise.
+	// Keys off stable identifiers, so a progress tick does not resubscribe.
+	const knownDuration = currentWatchItem?.durationSeconds ?? 0;
+	const knownPosition = currentWatchItem?.lastPositionSeconds ?? 0;
+
 	useEffect(() => {
 		if (progressOrigin) return; // handled above
-		if (!currentWatchItem) return;
-
-		const duration = currentWatchItem.durationSeconds;
-		if (!duration || duration <= 0) return;
+		if (!knownDuration || knownDuration <= 0) return;
 
 		const watchStart = Date.now();
-		const startPosition = currentWatchItem.lastPositionSeconds ?? 0;
 
 		const intervalId = setInterval(() => {
 			const elapsed = (Date.now() - watchStart) / 1000;
-			const estimatedPosition = startPosition + elapsed;
+			const estimatedPosition = knownPosition + elapsed;
 
 			void updatePlaybackProgress({
 				mediaId: id,
 				mediaType: type as 'movie' | 'tv',
-				progressPercent: (estimatedPosition / duration) * 100,
+				progressPercent: (estimatedPosition / knownDuration) * 100,
 				lastPositionSeconds: estimatedPosition,
-				durationSeconds: duration,
+				durationSeconds: knownDuration,
 				seasonNumber: numericSeasonNumber || null,
 				episodeNumber: numericEpisodeNumber || null,
 			});
 		}, 15_000);
 
 		return () => clearInterval(intervalId);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
-		provider.id,
-		progressOrigin,
-		// Stable identifiers only — avoids re-subscribing on every progress tick
-		currentWatchItem?.id,
-		currentWatchItem?.durationSeconds,
-		currentWatchItem?.lastPositionSeconds,
 		id,
+		knownDuration,
+		knownPosition,
+		progressOrigin,
+		provider,
 		type,
 		numericSeasonNumber,
 		numericEpisodeNumber,

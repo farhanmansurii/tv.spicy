@@ -4,24 +4,23 @@ import Container from '@/components/shared/containers/container';
 
 export default function BrowseLoading() {
 	return (
-		<div className="min-h-screen bg-background">
-			{/* Editorial header skeleton — matches browse page layout */}
-			<div className="pt-20 md:pt-24 pb-0">
-				<Container>
-					<div className="max-w-4xl space-y-4">
-						<Skeleton className="h-4 w-32 rounded-md" />
-						<Skeleton className="h-10 md:h-14 w-64 md:w-96 rounded-lg" />
-						<Skeleton className="h-5 md:h-6 w-full max-w-md rounded-md" />
-					</div>
-				</Container>
-			</div>
+		<main className="min-h-screen bg-background pb-24 pt-safe-header text-foreground md:pb-28 md:pt-28">
+			<Container>
+				<header className="max-w-4xl border-l-2 border-brand pl-5 md:pl-7">
+					<Skeleton className="h-3 w-40 rounded-sm" />
+					<Skeleton className="mt-3 h-16 w-96 max-w-full rounded-sm md:h-28" />
+					<Skeleton className="mt-4 h-5 w-full max-w-md rounded-sm" />
+				</header>
+			</Container>
 
-			{/* Grid content skeleton */}
-			<div className="py-8 md:py-12">
-				<Container>
-					<MediaLoader layout="grid" isVertical itemCount={12} />
-				</Container>
+			<div className="section-spacing">
+				<MediaLoader
+					layout="grid"
+					isVertical
+					itemCount={12}
+					className="relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing overflow-visible"
+				/>
 			</div>
-		</div>
+		</main>
 	);
 }

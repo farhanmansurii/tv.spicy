@@ -6,8 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import { fetchGenreByIdFromApi, fetchRowDataFromApi } from '@/lib/api/tmdb-row-client';
 import MediaRow from './media-row';
+import { Button } from '@/components/ui/button';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
-import { cn } from '@/lib/utils';
 import type { Show } from '@/lib/types';
 
 export type DataRowEndpoint = string | { id: string | number; type: 'movie' | 'tv' };
@@ -23,61 +23,62 @@ export interface DataRowProps {
 	isGenre?: boolean;
 	hideHeader?: boolean;
 	gridLayout?: boolean;
+	rowNumber?: number;
 }
-
-const stateActionButton = cn(
-	'min-h-11 rounded-full bg-white px-5 text-sm font-semibold text-black',
-	'transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:active:scale-100',
-	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black'
-);
 
 function RowStatePanel({
 	state,
 	text,
 	hideHeader,
+	rowNumber,
 	onRetry,
 }: {
 	state: 'error' | 'empty';
 	text: string;
 	hideHeader: boolean;
+	rowNumber?: number;
 	onRetry: () => void;
 }) {
 	const isError = state === 'error';
 	return (
-		<div className={cn(!hideHeader && 'py-3 md:py-5')}>
-			{!hideHeader && (
-				<div className="mb-3 flex items-center px-1 md:mb-4">
-					<h2 className="text-lg font-bold tracking-[-0.02em] text-white md:text-xl">
-						{text}
-					</h2>
-				</div>
-			)}
-			<div
-				role={isError ? 'alert' : 'status'}
-				aria-live={isError ? 'assertive' : 'polite'}
-				className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-xl bg-white/[0.025] px-6 py-8 text-center ring-1 ring-inset ring-white/[0.06]"
-			>
-				{isError && (
-					<WarningCircleIcon
-						size={28}
-						weight="fill"
-						aria-hidden="true"
-						className="text-[#FF453A]"
-					/>
+		<section className="relative left-1/2 w-screen shrink-0 -translate-x-1/2 section-spacing overflow-visible">
+			<div className="px-gutter">
+				{!hideHeader && text && (
+					<div className="mb-3.5 flex items-end gap-3 md:mb-4">
+						{rowNumber !== undefined && (
+							<span
+								aria-hidden="true"
+								className="pb-1.25 font-mono text-caption leading-none tracking-label text-brand tabular-nums"
+							>
+								{String(rowNumber).padStart(2, '0')}
+							</span>
+						)}
+						<h2 className="font-display text-display-row uppercase">{text}</h2>
+					</div>
 				)}
-				<h3 className="text-base font-semibold text-white md:text-lg">
-					{isError ? 'Couldn’t load this row' : 'Nothing to show here'}
-				</h3>
-				<p className="max-w-sm text-sm leading-relaxed text-white/70">
-					{isError
-						? 'We couldn’t reach the catalog. Check your connection and try again.'
-						: 'This row is empty right now. Check back later.'}
-				</p>
-				<button type="button" onClick={onRetry} className={stateActionButton}>
-					{isError ? 'Retry' : 'Refresh'}
-				</button>
+				<div
+					role={isError ? 'alert' : 'status'}
+					aria-live={isError ? 'assertive' : 'polite'}
+					className="flex min-h-56 flex-col items-start justify-center gap-3 rounded-sm border border-border bg-card/40 px-5 py-8 sm:px-6"
+				>
+					<p className="flex items-center gap-2 font-mono text-caption uppercase tracking-label text-destructive">
+						{isError && <WarningCircleIcon size={16} weight="fill" aria-hidden="true" />}
+						{isError ? 'Signal lost' : 'Nothing scheduled'}
+					</p>
+					<p className="font-display text-display-4 uppercase text-foreground">
+						{isError ? 'The projector jammed.' : 'This reel is empty.'}
+					</p>
+					<p className="max-w-sm text-small leading-relaxed text-muted-foreground">
+						{isError
+							? 'We couldn’t reach the catalog. Check your connection and try again.'
+							: 'The catalog has no titles in this row right now. Check back later.'}
+					</p>
+					<Button type="button" variant="ghost" size="sm" onClick={onRetry} className="mt-1">
+						{isError ? 'Try again' : 'Refresh'}
+					</Button>
+				</div>
 			</div>
-		</div>
+		</section>
 	);
 }
 
@@ -92,6 +93,7 @@ export default function DataRow({
 	isGenre = false,
 	hideHeader = false,
 	gridLayout = false,
+	rowNumber,
 }: DataRowProps) {
 	const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.05 });
 	const [hasMounted, setHasMounted] = useState(false);
@@ -148,6 +150,7 @@ export default function DataRow({
 				layout={gridLayout ? 'grid' : 'carousel'}
 				isVertical={isVertical}
 				ranked={showRank}
+				className="relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing overflow-visible"
 			/>
 		</div>
 	);
@@ -164,6 +167,7 @@ export default function DataRow({
 					state="error"
 					text={text}
 					hideHeader={hideHeader}
+					rowNumber={rowNumber}
 					onRetry={() => refetch()}
 				/>
 			</div>
@@ -182,6 +186,7 @@ export default function DataRow({
 					state="empty"
 					text={text}
 					hideHeader={hideHeader}
+					rowNumber={rowNumber}
 					onRetry={() => refetch()}
 				/>
 			</div>
@@ -199,6 +204,7 @@ export default function DataRow({
 				hideHeader={hideHeader}
 				viewAllLink={viewAllLink}
 				ranked={showRank}
+				rowNumber={rowNumber}
 			/>
 		</div>
 	);

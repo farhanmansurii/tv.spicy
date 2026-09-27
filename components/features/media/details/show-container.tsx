@@ -40,11 +40,11 @@ const SeasonTabs = dynamic(() => import('@/components/features/media/seasons/sea
 	loading: () => (
 		<div className="w-full py-8 md:py-12">
 			<div className="h-10 w-48 rounded-full bg-white/[0.04] animate-pulse mb-6" />
-			<div className="space-y-3">
+			<div className="flex flex-col gap-3">
 				{Array.from({ length: 4 }).map((_, i) => (
 					<div key={i} className="flex gap-3">
 						<div className="aspect-video w-36 md:w-44 rounded-xl bg-white/[0.04] animate-pulse flex-shrink-0" />
-						<div className="flex-1 space-y-2 py-2">
+						<div className="flex-1 flex flex-col gap-2 py-2">
 							<div className="h-4 w-3/4 rounded-md bg-white/[0.04] animate-pulse" />
 							<div className="h-3 w-1/2 rounded-md bg-white/[0.03] animate-pulse" />
 						</div>
@@ -64,6 +64,7 @@ export default function ShowContainer({
 }: ShowContainerProps) {
 	const contentRef = useRef<HTMLDivElement>(null);
 	const [isVisible, setIsVisible] = React.useState(false);
+	const mediaTitle = showData.title || showData.name || 'Untitled';
 
 	useEffect(() => {
 		if (!contentRef.current) return;
@@ -104,8 +105,8 @@ export default function ShowContainer({
 
 	return (
 		<section className="section-spacing">
-			<div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
-				<div ref={contentRef} style={{ opacity: isVisible ? 1 : undefined }}>
+			<div className="w-full px-gutter">
+				<div ref={contentRef} className={isVisible ? 'opacity-100' : undefined}>
 					{type === 'tv' ? (
 						<SeasonTabs
 							seasons={seasons || []}
@@ -117,7 +118,13 @@ export default function ShowContainer({
 						<div className="flex flex-col gap-4 md:gap-6">
 							{children}
 							<div id="media-player" className="scroll-mt-24">
-								<Episode episodeId={''} id={id || ''} movieID={id} type={type} />
+								<Episode
+								episodeId={''}
+								id={id || ''}
+								movieID={id}
+								type={type}
+								title={mediaTitle}
+							/>
 							</div>
 						</div>
 					)}

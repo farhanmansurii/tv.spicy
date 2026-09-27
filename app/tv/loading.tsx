@@ -1,21 +1,20 @@
-import { HeroSkeleton } from '@/components/features/media/details/detail-skeletons';
+import { EditorialHeroSkeleton } from '@/components/features/media/details/detail-skeletons';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import Container from '@/components/shared/containers/container';
+
+const rowSkeleton =
+	'relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing overflow-visible';
 
 export default function TVLoading() {
 	return (
 		<div className="min-h-screen bg-background">
-			<HeroSkeleton />
+			<EditorialHeroSkeleton />
 			<Container>
-				<div className="flex flex-col space-y-4 md:space-y-6">
-					<MediaLoader withHeader withHeaderAction className="min-h-[280px]" />
-					<MediaLoader withHeader className="min-h-[280px]" />
-					<MediaLoader withHeader />
-					<MediaLoader withHeader />
-					{Array.from({ length: 6 }).map((_, i) => (
-						<MediaLoader withHeader key={i} />
-					))}
-				</div>
+				<MediaLoader withHeader withHeaderAction className={`min-h-70 ${rowSkeleton}`} />
+				<MediaLoader withHeader className={`min-h-70 ${rowSkeleton}`} />
+				{Array.from({ length: 6 }).map((_, i) => (
+					<MediaLoader withHeader key={i} className={rowSkeleton} />
+				))}
 			</Container>
 		</div>
 	);

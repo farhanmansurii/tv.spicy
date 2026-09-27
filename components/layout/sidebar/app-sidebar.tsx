@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { Wordmark } from '@/components/ui/wordmark';
 import { usePathname } from 'next/navigation';
 import { XIcon } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
 
 import {
 	Sidebar,
@@ -53,39 +53,19 @@ export function AppSidebar() {
 						href="/"
 						prefetch={false}
 						onClick={handleLinkClick}
-						className={cn(
-							'flex items-center gap-3',
-							'rounded-xl px-2 py-2 -ml-2',
-							'transition-all duration-200',
-							'hover:bg-foreground/[0.03] active:bg-foreground/[0.05]'
-						)}
+						aria-label="Spicy TV home"
+						className="-ml-1 flex h-11 items-center rounded-md px-1 transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100"
 					>
-						<div className="relative h-10 w-10 flex-shrink-0">
-							<img
-								src="/logo.webp"
-								alt="Spicy TV"
-								loading="eager"
-								fetchPriority="high"
-								className="h-full w-full object-contain"
-							/>
-						</div>
-						<div className="flex flex-col gap-0.5">
-							<span className="text-[17px] font-semibold tracking-[-0.41px] leading-tight text-foreground">
-								Spicy TV
-							</span>
-							<span className="text-[12px] text-muted-foreground/70 leading-tight">
-								Streaming Platform
-							</span>
-						</div>
+						<Wordmark />
 					</Link>
 
 					<button
 						onClick={() => setOpenMobile(false)}
 						className={cn(
 							'flex h-9 w-9 items-center justify-center rounded-full',
-							'bg-foreground/[0.05] hover:bg-foreground/[0.08] active:bg-foreground/[0.1]',
-							'text-foreground/60 hover:text-foreground',
-							'transition-all duration-200',
+							'bg-foreground/[0.05] can-hover:bg-foreground/[0.08] active:bg-foreground/[0.1]',
+							'text-foreground/60 can-hover:text-foreground',
+							'transition-[color,background-color,border-color,transform] duration-(--duration-ui)',
 							'touch-manipulation'
 						)}
 						aria-label="Close menu"
@@ -100,8 +80,8 @@ export function AppSidebar() {
 			</div>
 
 			<div className="mx-4 h-px bg-border/50" />
-			<SidebarContent className="custom-scrollbar px-3 py-4">
-				<nav className="space-y-1">
+			<SidebarContent className="px-3 py-4">
+				<nav className="flex flex-col gap-1">
 					{navigationItems.map((item) => {
 						const itemIsActive = isActive(item.href);
 
@@ -112,23 +92,20 @@ export function AppSidebar() {
 								prefetch={false}
 								onClick={handleLinkClick}
 								className={cn(
-									'group flex items-center gap-3 px-3 py-3 rounded-xl',
-									'text-[15px] font-medium',
-									'transition-all duration-200 ease-out',
+									'group flex items-center gap-3 px-3 py-3 rounded-sm',
+									'text-title font-medium',
+									'transition-[color,background-color,border-color,transform] duration-(--duration-ui) ease-out',
 									'touch-manipulation',
 									itemIsActive
 										? 'bg-foreground/[0.06] text-foreground'
-										: 'text-foreground/80 hover:bg-foreground/[0.03] hover:text-foreground'
+										: 'text-foreground/80 can-hover:bg-foreground/[0.03] can-hover:text-foreground'
 								)}
 							>
 								<span>{item.label}</span>
 								{itemIsActive && (
-									<motion.div
-										layoutId="activeSidebarIndicator"
+									<span
+										aria-hidden="true"
 										className="ml-auto h-1.5 w-1.5 rounded-full bg-foreground/60"
-										initial={{ scale: 0 }}
-										animate={{ scale: 1 }}
-										transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 									/>
 								)}
 							</Link>
@@ -137,14 +114,16 @@ export function AppSidebar() {
 				</nav>
 			</SidebarContent>
 
-			<SidebarFooter className="px-4 py-4 border-t border-border/30">
-				<div className="flex items-center justify-between">
-					<span className="text-[12px] text-muted-foreground/50 font-medium uppercase tracking-wider">
-						Account
-					</span>
-					<AuthButton />
-				</div>
-			</SidebarFooter>
+			<div className="border-t border-border/30">
+				<SidebarFooter className="px-4 py-4">
+					<div className="flex items-center justify-between">
+						<span className="font-mono text-caption uppercase tracking-label text-dim">
+							Account
+						</span>
+						<AuthButton />
+					</div>
+				</SidebarFooter>
+			</div>
 		</Sidebar>
 	);
 }

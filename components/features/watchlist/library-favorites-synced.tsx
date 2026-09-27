@@ -6,6 +6,7 @@ import { HeartIcon } from '@phosphor-icons/react'
 import type { Show } from '@/lib/types'
 import { useFavoritesStore } from '@/store/favoritesStore'
 import MediaCard from '@/components/features/media/card/media-card'
+import { ReelEmptyState } from './reel-empty-state'
 import { useHasMounted } from '@/hooks/use-has-mounted'
 import { cn } from '@/lib/utils'
 
@@ -47,27 +48,24 @@ export function LibraryFavoritesSynced() {
 
 	if (totalCount === 0) {
 		return (
-			<div className="flex flex-col items-center justify-center py-20 space-y-4">
-				<div className="w-16 h-16 rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.06] flex items-center justify-center">
-					<HeartIcon size={28} className="text-muted-foreground/50" />
-				</div>
-				<h3 className="text-lg font-semibold text-foreground">No favorites yet</h3>
-				<p className="text-sm text-muted-foreground text-center max-w-md leading-relaxed">
-					Start adding shows and movies to your favorites by clicking the heart icon on any details page.
-				</p>
-			</div>
+			<ReelEmptyState
+				icon={<HeartIcon size={24} />}
+				title="No favorites on the reel."
+				caption="Mark a film or series as a favorite to keep it close."
+				actionLabel="Find a favorite"
+			/>
 		)
 	}
 
 	return (
-		<div className="flex flex-col space-y-8 md:space-y-10">
+		<div className="flex flex-col gap-8 md:gap-10">
 			{movieFavorites.length > 0 && (
-				<div className="space-y-4 md:space-y-5">
+				<div className="flex flex-col gap-4 md:gap-5">
 					<div>
-						<p className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-[0.2em]">
+						<p className="font-mono text-micro font-medium uppercase tracking-meta-wide text-muted-foreground">
 							Movies
 						</p>
-						<p className="text-sm text-muted-foreground mt-1">
+						<p className="mt-1 font-mono text-micro uppercase tracking-meta text-muted-foreground">
 							{movieFavorites.length} {movieFavorites.length === 1 ? 'movie' : 'movies'}
 						</p>
 					</div>
@@ -85,12 +83,12 @@ export function LibraryFavoritesSynced() {
 			)}
 
 			{tvFavorites.length > 0 && (
-				<div className="space-y-4 md:space-y-5">
+				<div className="flex flex-col gap-4 md:gap-5">
 					<div>
-						<p className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-[0.2em]">
+						<p className="font-mono text-micro font-medium uppercase tracking-meta-wide text-muted-foreground">
 							TV Shows
 						</p>
-						<p className="text-sm text-muted-foreground mt-1">
+						<p className="mt-1 font-mono text-micro uppercase tracking-meta text-muted-foreground">
 							{tvFavorites.length} {tvFavorites.length === 1 ? 'show' : 'shows'}
 						</p>
 					</div>

@@ -5,3 +5,6 @@
  */
 export const HERO_HEIGHT_CLASS =
 	'h-[62dvh] min-h-[430px] max-h-[620px] md:h-[72dvh] md:min-h-[540px] lg:max-h-[760px]';
+
+/** Home editorial hero; shared with the root skeleton for the same reason. */
+export const EDITORIAL_HERO_HEIGHT_CLASS = 'min-h-[max(600px,94svh)] lg:min-h-[max(680px,96svh)]';

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import useTVShowStore from '@/store/recentsStore';
 import {
 	TrashIcon,
@@ -11,6 +12,7 @@ import {
 import { toast } from 'sonner';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { ContinueWatchingCard } from './continue-watching-card';
+import { ReelEmptyState } from './reel-empty-state';
 import { DestructiveConfirm } from './destructive-confirm';
 import type { ContinueWatchingItem } from '@/lib/continue-watching';
 import {
@@ -57,26 +59,21 @@ export function LibraryContinueWatching() {
 
 	if (episodes.length === 0) {
 		return (
-			<div className="flex flex-col items-center justify-center py-20 space-y-4">
-				<div className="w-16 h-16 rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.06] flex items-center justify-center">
-					<ClockCounterClockwiseIcon size={28} className="text-muted-foreground/50" />
-				</div>
-				<h3 className="text-lg font-semibold text-foreground">No recent activity</h3>
-				<p className="text-sm text-muted-foreground text-center max-w-md leading-relaxed">
-					Start watching shows and movies to see them here. Your progress will be saved
-					automatically.
-				</p>
-			</div>
+			<ReelEmptyState
+				icon={<ClockCounterClockwiseIcon size={24} />}
+				title="The reel starts here."
+				caption="Start a film or series, and your progress will be waiting here."
+			/>
 		);
 	}
 
 	return (
-		<div className="space-y-4">
+		<div className="flex flex-col gap-4">
 			{/* Subtle clear action */}
 			<div className="flex items-center justify-end">
 				<button
 					onClick={() => setConfirmOpen(true)}
-					className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground/60 hover:text-red-400 transition-colors duration-200"
+					className="inline-flex min-h-11 items-center gap-2 rounded-full px-3 font-mono text-micro font-medium uppercase tracking-meta text-muted-foreground transition-colors duration-(--duration-ui) can-hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 				>
 					<TrashIcon size={13} />
 					<span className="hidden sm:inline">Clear History</span>
@@ -105,7 +102,7 @@ export function LibraryContinueWatching() {
 					{episodes.map((item, index: number) => (
 						<CarouselItem
 							key={item.id}
-							className="pl-4 md:pl-6 basis-[90%] sm:basis-[58%] lg:basis-[42%] xl:basis-[34%]"
+							className="pl-4 md:pl-6 basis-9/10 sm:basis-7/12 lg:basis-5/12 xl:basis-1/3"
 						>
 							<ContinueWatchingCard item={item} index={index} />
 						</CarouselItem>
@@ -113,13 +110,17 @@ export function LibraryContinueWatching() {
 				</CarouselContent>
 
 				<div className="flex items-center justify-between mt-4 md:mt-6 px-1">
-					<div className="flex items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity duration-500">
+					<div className="flex items-center gap-1 opacity-100 group-can-hover/row:opacity-100 transition-opacity duration-(--duration-ui)">
 						<CarouselPrevious
-							className="static translate-y-0 h-8 w-8 bg-zinc-900 border-white/5 text-zinc-500 hover:bg-white hover:text-black transition-all"
+							variant="glass"
+							size="icon-lg"
+							className="static translate-y-0 min-h-11 min-w-11"
 							icon={<CaretLeftIcon size={16} />}
 						/>
 						<CarouselNext
-							className="static translate-y-0 h-8 w-8 bg-zinc-900 border-white/5 text-zinc-500 hover:bg-white hover:text-black transition-all"
+							variant="glass"
+							size="icon-lg"
+							className="static translate-y-0 min-h-11 min-w-11"
 							icon={<CaretRightIcon size={16} />}
 						/>
 					</div>

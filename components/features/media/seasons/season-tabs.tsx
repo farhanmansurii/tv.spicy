@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useHaptics } from '@/hooks/use-haptics';
-import { motion } from 'framer-motion';
-import { SquaresFourIcon, ListBulletsIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useSearchParams, usePathname } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { gsap } from 'gsap';
 import { fetchSeasonEpisodesFromApi } from '@/lib/api/tmdb-row-client';
 import { useEpisodeStore } from '@/store/episodeStore';
 import useTVShowStore from '@/store/recentsStore';
@@ -14,11 +14,12 @@ import {
 	parseEpisodeParam,
 	parseSeasonParam,
 } from '@/components/features/media/player/deep-link-params';
+import { isReducedMotion } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type { Episode as EpisodeType, SeasonTabsProps } from '@/lib/types';
 import type { TMDBEpisode, TMDBSeasonDetails } from '@/lib/types/tmdb';
 import { SeasonSelector } from './season-selector';
-import { EpisodeStrip, type EpisodeViewMode } from './episode-strip';
+import { EpisodeStrip } from './episode-strip';
 
 const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps) => {
 	const haptic = useHaptics();
@@ -48,35 +49,29 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 	const hasActiveEpisode = !!activeEpisodeForShow;
 	const { addRecentlyWatched, recentlyWatched } = useTVShowStore();
 
-	const [isMobile, setIsMobile] = useState(false);
-
-	// Detect mobile for the default episode layout. The player remains in-flow on phones.
-	useEffect(() => {
-		const check = () => setIsMobile(window.innerWidth < 768);
-
-		check();
-		window.addEventListener('resize', check, { passive: true });
-		return () => window.removeEventListener('resize', check);
-	}, []);
+	const episodeContainerRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
 		setIsPlayerSticky(false);
 		return () => setIsPlayerSticky(false);
 	}, [setIsPlayerSticky]);
 
-	// State
-	const validSeasons = useMemo(
-		() => seasons?.filter((s) => s.season_number > 0) || seasons || [],
-		[seasons]
-	);
+	// Order seasons: regular seasons ascending, specials (season 0) last
+	const validSeasons = useMemo(() => {
+		if (!seasons?.length) return [];
+		const regular = seasons.filter((s) => s.season_number > 0).sort((a, b) => a.season_number - b.season_number);
+		const specials = seasons.filter((s) => s.season_number === 0);
+		return [...regular, ...specials];
+	}, [seasons]);
+
 	const validSeasonNumbers = useMemo(
 		() => validSeasons.map((s) => s.season_number),
 		[validSeasons]
 	);
-	const [activeSeason, setActiveSeason] = useState<number | null>(null);
-	const [viewMode, setViewMode] = useState<EpisodeViewMode>(isMobile ? 'list' : 'grid');
 
-	// Data
+	const [activeSeason, setActiveSeason] = useState<number | null>(null);
+
+	// Data fetching for the active season
 	const {
 		data: seasonData,
 		isFetching,
@@ -94,6 +89,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		() => seasonData?.episodes?.map(hydrateEpisode) || [],
 		[seasonData, hydrateEpisode]
 	);
+
 	const savedProgress = recentlyWatched.find(
 		(item) =>
 			item.mediaType === 'tv' &&
@@ -101,7 +97,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			item.seasonNumber === activeSeason
 	);
 
-	// Init from URL — invalid or out-of-range values fall back to the first season
+	// Init from URL — invalid or out-of-range values fall back to the first valid season
 	useEffect(() => {
 		const sParam = parseSeasonParam(searchParams.get('season'), validSeasonNumbers);
 		if (sParam !== null) {
@@ -111,13 +107,13 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		}
 	}, [validSeasons, validSeasonNumbers, searchParams]);
 
-	// Init active episode from URL when episodes loaded
+	// Init active episode from URL when episodes load
 	useEffect(() => {
 		const sParam = parseSeasonParam(searchParams.get('season'), validSeasonNumbers);
 		const eParam = parseEpisodeParam(searchParams.get('episode'), episodes.length);
 		if (episodes.length && eParam !== null && sParam !== null && sParam === activeSeason) {
 			const ep = episodes.find(
-				(ep) => ep.season_number === sParam && ep.episode_number === eParam
+				(e) => e.season_number === sParam && e.episode_number === eParam
 			);
 			if (ep && activeEP?.id !== ep.id) {
 				setActiveEP(ep);
@@ -134,17 +130,70 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		addRecentlyWatched,
 	]);
 
+	// Cross-fade animation on season switch
 	const handleSeasonChange = useCallback(
 		(sNum: number) => {
+			if (sNum === activeSeason) return;
 			haptic('selection');
-			setActiveSeason(sNum);
-			const params = new URLSearchParams(searchParams.toString());
-			params.set('season', String(sNum));
-			params.delete('episode');
-			window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+
+			const container = episodeContainerRef.current;
+			const reduced = isReducedMotion();
+
+			const swapSeason = () => {
+				setActiveSeason(sNum);
+				const params = new URLSearchParams(searchParams.toString());
+				params.set('season', String(sNum));
+				params.delete('episode');
+				window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+			};
+
+			if (!reduced && container) {
+				gsap.killTweensOf(container);
+				gsap.to(container, {
+					opacity: 0,
+					duration: 0.16,
+					ease: 'power2.in',
+					onComplete: () => {
+						swapSeason();
+					},
+				});
+			} else {
+				swapSeason();
+			}
 		},
-		[haptic, pathname, searchParams]
+		[activeSeason, haptic, pathname, searchParams]
 	);
+
+	// Entrance cascade on episodes after season change
+	useEffect(() => {
+		const container = episodeContainerRef.current;
+		if (!container) return;
+
+		const reduced = isReducedMotion();
+		if (reduced) {
+			gsap.fromTo(container, { opacity: 0 }, { opacity: 1, duration: 0.18, ease: 'linear' });
+			return;
+		}
+
+		gsap.killTweensOf(container);
+		gsap.to(container, { opacity: 1, duration: 0.28, ease: 'power4.out' });
+
+		const rows = Array.from(container.querySelectorAll<HTMLElement>('li')).slice(0, 8);
+		if (rows.length > 0) {
+			gsap.fromTo(
+				rows,
+				{ y: 16, opacity: 0 },
+				{
+					y: 0,
+					opacity: 1,
+					duration: 0.28,
+					stagger: 0.045,
+					ease: 'power4.out',
+					clearProps: 'transform',
+				}
+			);
+		}
+	}, [activeSeason, seasonData]);
 
 	const onEpisodeClick = useCallback(
 		(episode: EpisodeType, _event?: React.MouseEvent) => {
@@ -156,9 +205,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
 			requestAnimationFrame(() => {
 				document.getElementById('media-player')?.scrollIntoView({
-					behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-						? 'auto'
-						: 'smooth',
+					behavior: isReducedMotion() ? 'auto' : 'smooth',
 					block: 'start',
 				});
 			});
@@ -166,7 +213,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 		[pathname, searchParams, setActiveEP, addRecentlyWatched]
 	);
 
-	// Next episode
+	// Next episode handler
 	const handleNextEpisode = useCallback(() => {
 		let current = activeEP;
 		if (!current && episodes.length > 0) {
@@ -199,30 +246,55 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			params.set('episode', '1');
 			window.history.pushState(null, '', `${pathname}?${params.toString()}`);
 		}
-	}, [activeEP, episodes, activeSeason, validSeasons, validSeasonNumbers, pathname, searchParams, onEpisodeClick]);
+	}, [
+		activeEP,
+		episodes,
+		activeSeason,
+		validSeasons,
+		validSeasonNumbers,
+		pathname,
+		searchParams,
+		onEpisodeClick,
+	]);
 
 	const urlSeason = parseSeasonParam(searchParams.get('season'), validSeasonNumbers);
 
-	if (isError)
+	if (isError) {
 		return (
-			<div className="flex flex-col items-center py-20 gap-4 text-destructive">
-				<WarningCircleIcon size={32} weight="fill" />
-				<p className="font-bold">Failed to load episodes. Please try again.</p>
+			<div className="flex flex-col items-center gap-4 border-y border-line bg-band px-5 py-16 text-center">
+				<WarningCircleIcon size={28} weight="fill" className="text-destructive" aria-hidden="true" />
+				<h2 className="font-display text-4xl uppercase leading-none text-foreground m-0">
+					The reel jammed.
+				</h2>
+				<p className="font-mono text-caption text-dim m-0">Episodes could not load. Try again.</p>
 				<button
 					type="button"
 					onClick={() => refetch()}
-					className="min-h-11 rounded-full bg-white px-5 text-sm font-semibold text-black active:scale-[0.97]"
+					className="pressable min-h-11 rounded-full bg-brand px-5 text-ui font-semibold text-brand-foreground transition-colors duration-(--duration-ui) can-hover:hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 				>
 					Try Again
 				</button>
 			</div>
 		);
+	}
+
+	const seasonsCount = validSeasons.length;
+	const countText =
+		episodes.length > 0
+			? `${episodes.length} ${episodes.length === 1 ? 'episode' : 'episodes'}`
+			: seasonsCount > 0
+				? `${seasonsCount} ${seasonsCount === 1 ? 'season' : 'seasons'}`
+				: '';
 
 	return (
-		<div className="flex w-full flex-col gap-4 md:gap-6">
+		<div className="flex w-full flex-col gap-6">
 			{/* PLAYER */}
 			{hasActiveEpisode && (
-				<div id="media-player" data-player-container className="relative z-10 w-full">
+				<div
+					id="media-player"
+					data-player-container
+					className="relative z-10 w-full border-b border-line pb-6"
+				>
 					<TVContainer
 						showId={showId}
 						getNextEp={handleNextEpisode}
@@ -239,93 +311,51 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 			{detailsPanel}
 
 			{/* SEASON SELECTOR + EPISODES */}
-			<div id="episodes-section" className="scroll-mt-24 space-y-3 md:space-y-4">
-				{/* Header row */}
-				<div className="flex items-center justify-between gap-3">
-					{/* Left: title + season info */}
-					<div className="flex items-baseline gap-3 min-w-0">
-						<h2 className="text-base md:text-lg font-bold text-white tracking-tight flex-shrink-0 font-sans">
+			<section
+				id="episodes"
+				aria-labelledby="episodes-title"
+				className={cn('scroll-mt-24 flex flex-col', hasActiveEpisode && 'mt-section')}
+			>
+				{/* Section heading matching prototype */}
+				<div className="flex items-end justify-between border-b border-line-strong pb-4 mb-6">
+					<div className="flex items-baseline gap-3">
+						<span className="font-mono text-caption text-brand tracking-label tabular-nums" aria-hidden="true">
+							01
+						</span>
+						<h2 id="episodes-title" className="font-display text-display-2 uppercase leading-none text-foreground m-0">
 							Episodes
 						</h2>
-						{seasonData?.episodes && (
-							<span className="text-[12px] text-white/28 tabular-nums font-medium truncate">
-								{seasonData.episodes.length} ep
-								{seasonData.episodes.length !== 1 ? 's' : ''}
-								{seasonData.name &&
-									seasonData.name !== `Season ${activeSeason}` && (
-										<span className="hidden sm:inline ml-1.5 text-white/20">
-											· {seasonData.name}
-										</span>
-									)}
-							</span>
-						)}
 					</div>
-
-					{/* Right: view mode toggle */}
-					<div
-						className="flex flex-shrink-0 items-center gap-0.5 rounded-[10px] p-[3px]"
-						style={{
-							background: 'rgba(255,255,255,0.055)',
-							border: '1px solid rgba(255,255,255,0.07)',
-						}}
-					>
-						{(
-							[
-								{
-									mode: 'grid',
-									icon: <SquaresFourIcon size={15} weight="bold" />,
-									label: 'Grid',
-								},
-								{
-									mode: 'list',
-									icon: <ListBulletsIcon size={15} weight="bold" />,
-									label: 'List',
-								},
-							] as { mode: EpisodeViewMode; icon: React.ReactNode; label: string }[]
-						).map(({ mode, icon, label }) => (
-							<motion.button
-								key={mode}
-								onClick={() => setViewMode(mode)}
-								aria-label={label}
-								whileTap={{ scale: 0.92 }}
-								className={cn(
-									'flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A84FF]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
-									viewMode === mode
-										? 'bg-white text-zinc-900 shadow-[0_1px_4px_rgba(0,0,0,0.35)]'
-										: 'text-white/35 hover:text-white/65'
-								)}
-							>
-								{icon}
-							</motion.button>
-						))}
-					</div>
+					{countText && (
+						<span className="font-mono text-caption text-dim tracking-label uppercase tabular-nums">
+							{countText}
+						</span>
+					)}
 				</div>
 
-				{/* Season pills */}
+				{/* Season tabs */}
 				{validSeasons.length > 1 && (
-					<SeasonSelector
-						seasons={validSeasons}
-						activeSeason={activeSeason ?? validSeasons[0]?.season_number ?? 1}
-						onSeasonChange={handleSeasonChange}
-					/>
+					<div className="mb-6">
+						<SeasonSelector
+							seasons={validSeasons}
+							activeSeason={activeSeason ?? validSeasons[0]?.season_number ?? 1}
+							onSeasonChange={handleSeasonChange}
+						/>
+					</div>
 				)}
 
-				{/* Episode strip — fades during season transition */}
-				<div
-					className="transition-opacity duration-200 motion-reduce:transition-none"
-					style={{ opacity: isFetching && episodes.length ? 0.72 : 1 }}
-				>
+				{/* Episode list with season cross-fade */}
+				<div ref={episodeContainerRef} className="w-full">
 					<EpisodeStrip
 						episodes={episodes}
 						activeEpisodeId={activeEpisodeForShow?.id}
 						onEpisodeClick={onEpisodeClick}
-						viewMode={viewMode}
 						isLoading={isFetching && !episodes.length}
 						progressEpisodeId={savedProgress?.episodeId}
 						progressPercent={savedProgress?.progressPercent}
 					/>
 				</div>
-			</div>
+			</section>
 		</div>
 	);
 };

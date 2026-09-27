@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 
 import { MagnifyingGlassIcon, XIcon, ArrowLeftIcon, ArrowRightIcon } from '@phosphor-icons/react';
 
@@ -29,49 +28,122 @@ const FILTERS = [
 
 type FilterType = (typeof FILTERS)[number]['id'];
 
+// The same rhythm the editorial rows use for their poster grids.
+const GRID =
+	'grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5 xl:grid-cols-6';
+
+// House press treatment: 150ms dip, colour on the same clock.
+const pressableControl =
+	'transition-[color,background-color,border-color,transform,scale] duration-(--duration-press) ease-out active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100';
+
+const focusRing =
+	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+
 /* ------------------------------------------------------------------ */
-//  Filter tabs — flat underline style, no icons
+//  Section heading — the page recipe: mono index, Anton title, mono count
 /* ------------------------------------------------------------------ */
 
-function FilterTabs({
-	active,
-	onChange,
+function SectionHeading({
+	index,
+	title,
+	count,
+	action,
 }: {
-	active: FilterType;
-	onChange: (f: FilterType) => void;
+	index: string;
+	title: string;
+	count?: string;
+	action?: React.ReactNode;
 }) {
 	return (
-		<div className="overflow-x-auto scrollbar-none">
-			<div className="flex min-w-max gap-6 border-b border-white/[0.06]">
+		<div className="mb-3.5 flex items-end gap-3">
+			<span
+				aria-hidden="true"
+				className="pb-1.25 font-mono text-caption leading-none tracking-label text-brand tabular-nums"
+			>
+				{index}
+			</span>
+			<h2 className="font-display text-display-row uppercase text-foreground">{title}</h2>
+			{count && (
+				<span className="hidden pb-1.25 font-mono text-caption leading-none tracking-meta-wide text-muted-foreground uppercase tabular-nums sm:block">
+					{count}
+				</span>
+			)}
+			{action && <div className="ml-auto flex shrink-0 items-center gap-3">{action}</div>}
+		</div>
+	);
+}
+
+/* ------------------------------------------------------------------ */
+//  Filter tabs — own row, one marker element moved with transform only
+/* ------------------------------------------------------------------ */
+
+function FilterTabs({ active, onChange }: { active: FilterType; onChange: (f: FilterType) => void }) {
+	const rowRef = useRef<HTMLDivElement>(null);
+	const tabRefs = useRef<Partial<Record<FilterType, HTMLButtonElement | null>>>({});
+	const [marker, setMarker] = useState<{ x: number; scale: number } | null>(null);
+
+	const measure = useCallback(() => {
+		const row = rowRef.current;
+		const tab = tabRefs.current[active];
+		if (!row || !tab) return;
+		const rowBox = row.getBoundingClientRect();
+		const tabBox = tab.getBoundingClientRect();
+		if (!rowBox.width) return;
+		setMarker({ x: tabBox.x - rowBox.x, scale: tabBox.width / rowBox.width });
+	}, [active]);
+
+	useEffect(measure, [measure]);
+
+	useEffect(() => {
+		const row = rowRef.current;
+		if (!row) return;
+		const observer = new ResizeObserver(measure);
+		observer.observe(row);
+		return () => observer.disconnect();
+	}, [measure]);
+
+	return (
+		<div className="overflow-x-auto">
+			<div ref={rowRef} className="relative flex min-w-max gap-6 border-b border-border">
 				{FILTERS.map((f) => {
 					const isActive = active === f.id;
 					return (
 						<button
 							key={f.id}
+							ref={(el) => {
+								tabRefs.current[f.id] = el;
+							}}
+							type="button"
+							aria-pressed={isActive}
 							onClick={() => onChange(f.id)}
 							className={cn(
-								'relative pb-3 text-[13px] font-semibold transition-colors duration-200',
-								isActive ? 'text-white' : 'text-white/70 hover:text-white'
+								'relative min-h-11 px-1 pb-3 font-mono text-caption font-medium uppercase',
+								pressableControl,
+								focusRing,
+								isActive ? 'text-foreground' : 'text-muted-foreground can-hover:text-foreground'
 							)}
 						>
 							{f.label}
-							{isActive && (
-								<motion.div
-									layoutId="searchFilterIndicator"
-									className="absolute bottom-0 left-0 right-0 h-[2px] bg-white"
-									transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-								/>
-							)}
 						</button>
 					);
 				})}
+				<span
+					aria-hidden="true"
+					className="pointer-events-none absolute bottom-0 left-0 h-0.5 w-full origin-left bg-brand translate-x-(--marker-x) scale-x-(--marker-scale) transition-transform duration-(--duration-ui) ease-cinematic will-change-transform motion-reduce:transition-none motion-reduce:will-change-auto"
+					style={
+						{
+							'--marker-x': `${marker?.x ?? 0}px`,
+							'--marker-scale': marker?.scale ?? 0,
+						} as React.CSSProperties
+					}
+				/>
 			</div>
 		</div>
 	);
 }
 
 /* ------------------------------------------------------------------ */
-//  Recent searches — horizontal poster cards
+//  Recent searches — poster cards in the media recipe
 /* ------------------------------------------------------------------ */
 
 function RecentSearches({
@@ -86,74 +158,94 @@ function RecentSearches({
 	onClear: () => void;
 }) {
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h2 className="text-[15px] font-semibold text-white/70 tracking-tight">
-					Recent Searches
-				</h2>
-				<button
-					onClick={onClear}
-					className="text-[11px] font-medium text-white/70 hover:text-white transition-colors"
-				>
-					Clear all
-				</button>
-			</div>
-			<div className="flex gap-3 overflow-x-auto scrollbar-none pb-2 -mx-4 px-4">
-				{items.map((item) => (
-					<div key={item.id} className="relative group shrink-0 w-[100px]">
-						<button onClick={() => onSelect(item)} className="block w-full text-left">
-							<div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-white/[0.04] mb-2">
-								{item.poster_path ? (
-									<img
-										src={tmdbImage(item.poster_path, 'w185')}
-										alt=""
-										className="w-full h-full object-cover"
-										loading="lazy"
-									/>
-								) : (
-									<div className="w-full h-full flex items-center justify-center">
-										<span className="text-[10px] text-white/70">No image</span>
-									</div>
+		<div className="flex flex-col">
+			<SectionHeading
+				index="01"
+				title="Recent Searches"
+				count={`${items.length} ${items.length === 1 ? 'title' : 'titles'}`}
+				action={
+					<button
+						type="button"
+						onClick={onClear}
+						className={cn(
+							'min-h-11 px-1 font-mono text-caption uppercase tracking-label text-muted-foreground can-hover:text-foreground',
+							pressableControl,
+							focusRing
+						)}
+					>
+						Clear all
+					</button>
+				}
+			/>
+			<div className="flex gap-3 overflow-x-auto pb-2">
+				{items.map((item) => {
+					const title = item.title || item.name || 'Untitled';
+					return (
+						<div key={item.id} className="group relative w-25 shrink-0">
+							<button
+								type="button"
+								onClick={() => onSelect(item)}
+								className={cn(
+									'pressable block w-full rounded-sm text-left',
+									focusRing
 								)}
-							</div>
-							<p className="text-[12px] font-medium text-white/70 truncate leading-tight">
-								{item.title || item.name}
-							</p>
-						</button>
-						<button
-							aria-label={`Remove ${item.title || item.name} from recent searches`}
-							onClick={(e) => {
-								e.stopPropagation();
-								onRemove(item.id);
-							}}
-							className={cn(
-								'absolute -top-1.5 -right-1.5',
-								'w-6 h-6 rounded-full',
-								'bg-[#1c1c1e] border border-white/[0.08]',
-								'flex items-center justify-center',
-								'text-white/70 hover:text-white',
-								'opacity-0 group-hover:opacity-100',
-								'transition-all duration-200'
-							)}
-						>
-							<XIcon className="w-3 h-3" weight="bold" />
-						</button>
-					</div>
-				))}
+							>
+								<span
+									aria-hidden="true"
+									className="relative block aspect-2/3 w-full overflow-hidden rounded-sm bg-gradient-card-placeholder shadow-inset-line"
+								>
+									{item.poster_path ? (
+										<img
+											src={tmdbImage(item.poster_path, 'w185')}
+											alt=""
+											loading="lazy"
+											decoding="async"
+											className="size-full object-cover"
+										/>
+									) : (
+										<span className="flex size-full items-center justify-center p-2 text-center font-mono text-micro uppercase leading-tight text-muted-foreground">
+											{title}
+										</span>
+									)}
+								</span>
+								<span className="mt-2 block truncate text-title font-semibold text-foreground">
+									{title}
+								</span>
+							</button>
+							<button
+								aria-label={`Remove ${title} from recent searches`}
+								onClick={(e) => {
+									e.stopPropagation();
+									onRemove(item.id);
+								}}
+								className={cn(
+									'absolute -top-2 -right-2 flex size-8 items-center justify-center rounded-full',
+									'border border-border bg-muted text-muted-foreground',
+									'pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 focus-visible:opacity-100 can-hover:text-foreground can-hover:border-border-strong',
+									pressableControl,
+									focusRing
+								)}
+							>
+								<XIcon className="size-3" weight="bold" />
+							</button>
+						</div>
+					);
+				})}
 			</div>
 		</div>
 	);
 }
 
 /* ------------------------------------------------------------------ */
-//  Trending grid — empty state content
+//  Poster grid — trending, shared by the empty state
 /* ------------------------------------------------------------------ */
 
 function TrendingGrid({ items, onSelect }: { items: Show[]; onSelect: (item: Show) => void }) {
+	if (items.length === 0) return null;
 	return (
-		<div className="space-y-4">
-			<h2 className="text-[15px] font-semibold text-white/70 tracking-tight">Trending Now</h2>
-			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 md:gap-6">
+		<div className="flex flex-col">
+			<SectionHeading index="01" title="Trending Now" count={`${items.length} titles`} />
+			<div className={GRID}>
 				{items.map((show, index) => (
 					<MediaCard
 						key={show.id}
@@ -170,21 +262,39 @@ function TrendingGrid({ items, onSelect }: { items: Show[]; onSelect: (item: Sho
 }
 
 /* ------------------------------------------------------------------ */
-//  Empty results state
+//  Editorial states — the voice of the 404, left aligned, no decoration
 /* ------------------------------------------------------------------ */
 
-function EmptyResults({ query }: { query: string }) {
+function EditorialState({
+	kicker,
+	title,
+	body,
+	action,
+	role,
+}: {
+	kicker: string;
+	title: string;
+	body: string;
+	action: { label: string; onClick: () => void };
+	role?: 'alert';
+}) {
 	return (
-		<div className="flex flex-col items-center justify-center py-24 text-center">
-			<div className="h-14 w-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-5">
-				<MagnifyingGlassIcon className="w-6 h-6 text-white/70" />
+		<div className="border-t border-border pt-10 pb-16" role={role}>
+			<div className="max-w-prose">
+				<p className="font-mono text-caption uppercase tracking-label text-dim">{kicker}</p>
+				<h2 className="mt-4 font-display text-display-2 uppercase text-foreground">{title}</h2>
+				<p className="mt-4 max-w-prose text-lede text-soft">{body}</p>
+				<button
+					type="button"
+					onClick={action.onClick}
+					className={cn(
+						'pressable mt-8 inline-flex min-h-11 items-center justify-center rounded-full border border-border-strong bg-card px-5 text-ui font-semibold text-foreground can-hover:border-foreground/25 can-hover:bg-muted',
+						focusRing
+					)}
+				>
+					{action.label}
+				</button>
 			</div>
-			<p className="text-base font-semibold text-white/80 mb-1">
-				No results for &ldquo;{query}&rdquo;
-			</p>
-			<p className="text-sm text-white/70 max-w-xs leading-relaxed">
-				Try a different search term or check your spelling.
-			</p>
 		</div>
 	);
 }
@@ -204,37 +314,37 @@ function Pagination({
 }) {
 	if (totalPages <= 1) return null;
 	return (
-		<div className="flex justify-center items-center gap-5 pt-10">
+		<div className="flex items-center justify-center gap-5 pt-10">
 			<button
 				aria-label="Previous page"
 				onClick={() => onPageChange(page - 1)}
 				disabled={page === 1}
 				className={cn(
-					'flex items-center justify-center w-10 h-10 rounded-full',
-					'bg-white/[0.04] border border-white/[0.08]',
-					'text-white/70 hover:text-white hover:bg-white/[0.06]',
-					'transition-all duration-200',
-					'disabled:opacity-30 disabled:pointer-events-none'
+					'flex size-11 items-center justify-center rounded-full',
+					'border border-border-strong bg-card text-muted-foreground can-hover:bg-muted can-hover:text-foreground',
+					pressableControl,
+					focusRing,
+					'disabled:pointer-events-none disabled:opacity-30'
 				)}
 			>
-				<ArrowLeftIcon className="w-4 h-4" />
+				<ArrowLeftIcon className="size-4" />
 			</button>
-			<span className="text-xs font-medium text-white/70 tabular-nums">
-				Page {page} of {totalPages}
+			<span className="font-mono text-caption tracking-label text-muted-foreground uppercase tabular-nums">
+				Page <span className="text-foreground">{page}</span> of {totalPages}
 			</span>
 			<button
 				aria-label="Next page"
 				onClick={() => onPageChange(page + 1)}
 				disabled={page === totalPages}
 				className={cn(
-					'flex items-center justify-center w-10 h-10 rounded-full',
-					'bg-white/[0.04] border border-white/[0.08]',
-					'text-white/70 hover:text-white hover:bg-white/[0.06]',
-					'transition-all duration-200',
-					'disabled:opacity-30 disabled:pointer-events-none'
+					'flex size-11 items-center justify-center rounded-full',
+					'border border-border-strong bg-card text-muted-foreground can-hover:bg-muted can-hover:text-foreground',
+					pressableControl,
+					focusRing,
+					'disabled:pointer-events-none disabled:opacity-30'
 				)}
 			>
-				<ArrowRightIcon className="w-4 h-4" />
+				<ArrowRightIcon className="size-4" />
 			</button>
 		</div>
 	);
@@ -247,10 +357,10 @@ function Pagination({
 export default function SearchPage() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const defaultQuery = searchParams.get('q') || '';
+	const urlQuery = searchParams.get('query') || searchParams.get('q') || '';
 
-	const [inputValue, setInputValue] = useState(defaultQuery);
-	const [query, setQuery] = useState(defaultQuery);
+	const [inputValue, setInputValue] = useState(urlQuery);
+	const [query, setQuery] = useState(urlQuery);
 	const [filter, setFilter] = useState<FilterType>('all');
 	const [page, setPage] = useState(1);
 	const [scrolled, setScrolled] = useState(false);
@@ -263,6 +373,14 @@ export default function SearchPage() {
 		removeFromRecentlySearched,
 		clearRecentlySearched,
 	} = useSearchStore();
+
+	// A shared link, the header search or back/forward can change the query
+	// while this page stays mounted, so the field follows the URL.
+	useEffect(() => {
+		setInputValue(urlQuery);
+		setQuery(urlQuery.trim());
+		setPage(1);
+	}, [urlQuery]);
 
 	// Auto-focus on mount
 	useEffect(() => {
@@ -296,7 +414,7 @@ export default function SearchPage() {
 	}, [inputValue]);
 
 	// Search query
-	const { data: searchData, isFetching } = useQuery({
+	const { data: searchData, isFetching, isError, refetch } = useQuery({
 		queryKey: ['search', query, page],
 		queryFn: () => searchTMDBFromApi(query, page),
 		enabled: query.length >= 2,
@@ -304,7 +422,7 @@ export default function SearchPage() {
 	});
 
 	// Trending for empty state
-	const { data: trendingData } = useQuery({
+	const { data: trendingData, isLoading: isTrendingLoading } = useQuery({
 		queryKey: ['trending', 'all', 'week'],
 		queryFn: () => fetchRowDataFromApi('trending/all/week'),
 	});
@@ -327,7 +445,6 @@ export default function SearchPage() {
 	const handleSelectShow = useCallback(
 		(item: Show) => {
 			addToRecentlySearched(item);
-			// Navigation is handled by MediaCard's internal Link
 		},
 		[addToRecentlySearched]
 	);
@@ -336,130 +453,144 @@ export default function SearchPage() {
 	const hasRecents = isMounted && recentlySearched.length > 0;
 	const showRecents = !hasQuery && hasRecents;
 	const showTrending = !hasQuery && !hasRecents;
-	const showResults = hasQuery && results.length > 0;
-	const showEmpty = hasQuery && results.length === 0 && !isFetching;
+	const showEmpty = hasQuery && results.length === 0 && !isFetching && !isError;
 	const showLoader = hasQuery && isFetching && results.length === 0;
+
+	const clearSearch = useCallback(() => {
+		setInputValue('');
+		setQuery('');
+		setPage(1);
+		inputRef.current?.focus();
+	}, []);
 
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<div
 				className={cn(
-					'sticky z-40 transition-all duration-300',
-					'top-0 lg:top-14',
-					'pt-16 lg:pt-0',
+					'sticky z-40 transition-[background-color,border-color] duration-(--duration-ui) motion-reduce:transition-none',
+					'top-0 mt-16 lg:top-16',
 					'bg-background lg:bg-transparent',
-					scrolled &&
-						'lg:bg-black/80 lg:backdrop-blur-xl lg:border-b lg:border-white/[0.06]'
+					scrolled && 'lg:border-b lg:border-border lg:bg-background/85 lg:backdrop-blur-xl'
 				)}
 			>
 				<Container className="pt-2 pb-0">
-					<div className="relative">
-						<div
-							className={cn(
-								'flex items-center h-12 px-4 gap-3 rounded-xl',
-								'bg-white/[0.04] border border-white/[0.08]',
-								'focus-within:border-[#0A84FF]/40 focus-within:ring-1 focus-within:ring-[#0A84FF]/20',
-								'transition-all duration-200'
-							)}
-						>
-							<MagnifyingGlassIcon className="w-5 h-5 text-white/70 shrink-0" />
-							<input
-								ref={inputRef}
-								aria-label="Search movies and TV shows"
-								type="text"
-								placeholder="Search movies, TV shows..."
-								value={inputValue}
-								onChange={(e) => setInputValue(e.target.value)}
-								className="flex-1 min-w-0 bg-transparent text-[15px] text-white/90 placeholder:text-white/70 outline-none h-full"
-							/>
-							{inputValue && (
-								<button
-									aria-label="Clear search"
-									onClick={() => setInputValue('')}
-									className="p-1.5 rounded-full text-white/70 hover:bg-white/[0.08] hover:text-white transition-colors shrink-0"
-								>
-									<XIcon className="w-4 h-4" weight="bold" />
-								</button>
-							)}
-							<kbd className="pointer-events-none hidden lg:flex h-5 items-center gap-0.5 rounded-md bg-white/[0.06] border border-white/[0.08] px-1.5 font-mono text-[10px] font-medium text-white/70">
-								<span className="text-[11px]">⌘</span>K
-							</kbd>
-						</div>
+					<div className="flex h-12 items-center gap-3 rounded-sm border border-border-strong bg-card px-4 transition-[border-color,box-shadow] duration-200 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand focus-within:ring-offset-2 focus-within:ring-offset-background">
+						<MagnifyingGlassIcon className="size-5 shrink-0 text-muted-foreground" />
+						<input
+							ref={inputRef}
+							aria-label="Search movies and TV shows"
+							type="text"
+							autoComplete="off"
+							spellCheck={false}
+							placeholder="Search movies, TV shows..."
+							value={inputValue}
+							onChange={(e) => setInputValue(e.target.value)}
+							className="h-full min-w-0 flex-1 bg-transparent text-body text-foreground outline-none placeholder:text-muted-foreground"
+						/>
+						{inputValue && (
+							<button
+								aria-label="Clear search"
+								onClick={clearSearch}
+								className={cn(
+									'flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground can-hover:bg-foreground/[0.08] can-hover:text-foreground',
+									pressableControl,
+									focusRing
+								)}
+							>
+								<XIcon className="size-4" weight="bold" />
+							</button>
+						)}
+						<kbd className="pointer-events-none hidden h-6 items-center gap-1 rounded-sm border border-border bg-muted px-1.5 font-mono text-micro font-medium tracking-label text-dim lg:flex">
+							<span aria-hidden="true">⌘</span>K
+						</kbd>
 					</div>
 
-					<div className="mt-8">
+					<div className="mt-6">
 						<FilterTabs active={filter} onChange={setFilter} />
 					</div>
 				</Container>
 			</div>
 
-			<Container className="pb-20 pt-10 md:pt-3">
-				{/* Recent searches */}
+			<Container className="section-spacing">
 				{showRecents && (
-					<div className="mb-6">
-						<RecentSearches
-							items={recentlySearched}
-							onSelect={(item) => {
-								const type = item.media_type || 'movie';
-								router.push(`/${type}/${item.id}`);
-								addToRecentlySearched(item);
-							}}
-							onRemove={removeFromRecentlySearched}
-							onClear={clearRecentlySearched}
-						/>
-					</div>
+					<RecentSearches
+						items={recentlySearched}
+						onSelect={(item) => {
+							const type = item.media_type || 'movie';
+							router.push(`/${type}/${item.id}`);
+							addToRecentlySearched(item);
+						}}
+						onRemove={removeFromRecentlySearched}
+						onClear={clearRecentlySearched}
+					/>
 				)}
 
-				{/* Trending — empty state */}
-				{showTrending && (
-					<div className="mb-6">
+				{showTrending &&
+					(trending.length > 0 ? (
 						<TrendingGrid items={trending} onSelect={handleSelectShow} />
-					</div>
-				)}
+					) : isTrendingLoading ? (
+						<div className="flex flex-col">
+							<SectionHeading index="01" title="Trending Now" />
+							<MediaLoader layout="grid" isVertical className="py-0" />
+						</div>
+					) : null)}
 
-				{/* Loader */}
-				{showLoader && (
-					<div className="py-20">
-						<MediaLoader layout="grid" isVertical />
-					</div>
-				)}
-
-				{/* Results */}
-				{showResults && (
-					<div className="space-y-6">
-						{query && (
-							<p className="text-sm text-white/70">
-								{results.length > 0 && (
-									<>
-										<span className="text-white/90 font-semibold">
-											{results.length}
-										</span>{' '}
-										results for{' '}
-										<span className="text-white/90 font-semibold">
-											&ldquo;{query}&rdquo;
-										</span>
-									</>
-								)}
+				{/* The heading stays put while the grid swaps, so nothing jumps */}
+				{hasQuery && !isError && (results.length > 0 || isFetching) && (
+					<div className="flex flex-col">
+						<p className="mb-2 truncate font-mono text-caption uppercase tracking-label text-dim">
+							&ldquo;{query}&rdquo;
+						</p>
+						<SectionHeading
+							index="01"
+							title="Results"
+							count={results.length > 0 ? `${results.length} titles` : undefined}
+						/>
+						{showLoader ? (
+							<MediaLoader layout="grid" isVertical className="py-0" />
+						) : (
+							<>
+								<div className={GRID}>
+									{results.map((show, index) => (
+										<MediaCard
+											key={show.id}
+											show={show}
+											index={index}
+											type={show.media_type === 'movie' ? 'movie' : 'tv'}
+											isVertical={true}
+											onClick={() => handleSelectShow(show)}
+										/>
+									))}
+								</div>
+								<Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+							</>
+						)}
+						{isFetching && results.length > 0 && (
+							<p aria-live="polite" className="sr-only">
+								Loading page {page}
 							</p>
 						)}
-						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 md:gap-6">
-							{results.map((show, index) => (
-								<MediaCard
-									key={show.id}
-									show={show}
-									index={index}
-									type={show.media_type === 'movie' ? 'movie' : 'tv'}
-									isVertical={true}
-									onClick={() => handleSelectShow(show)}
-								/>
-							))}
-						</div>
-						<Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 					</div>
 				)}
 
-				{/* Empty search results */}
-				{showEmpty && <EmptyResults query={query} />}
+				{hasQuery && isError && (
+					<EditorialState
+						role="alert"
+						kicker="Search failed"
+						title="The projector jammed."
+						body="The archive did not answer. Try again, or search a shorter term."
+						action={{ label: 'Try again', onClick: () => void refetch() }}
+					/>
+				)}
+
+				{showEmpty && (
+					<EditorialState
+						kicker={`No results for “${query}”`}
+						title="The reel came up empty."
+						body="Nothing in the archive matches that. Try a shorter term, or check the spelling."
+						action={{ label: 'Clear search', onClick: clearSearch }}
+					/>
+				)}
 			</Container>
 		</div>
 	);

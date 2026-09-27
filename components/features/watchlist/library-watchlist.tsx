@@ -6,6 +6,7 @@ import { BookmarkSimpleIcon } from '@phosphor-icons/react'
 import type { Show as MediaShow } from '@/lib/types'
 import useWatchListStore from '@/store/watchlistStore'
 import MediaCard from '@/components/features/media/card/media-card'
+import { ReelEmptyState } from './reel-empty-state'
 import { useHasMounted } from '@/hooks/use-has-mounted'
 import { cn } from '@/lib/utils'
 
@@ -30,27 +31,23 @@ export function LibraryWatchlist() {
 
 	if (totalCount === 0) {
 		return (
-			<div className="flex flex-col items-center justify-center py-20 space-y-4">
-				<div className="w-16 h-16 rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.06] flex items-center justify-center">
-					<BookmarkSimpleIcon size={28} className="text-muted-foreground/50" />
-				</div>
-				<h3 className="text-lg font-semibold text-foreground">Your watchlist is empty</h3>
-				<p className="text-sm text-muted-foreground text-center max-w-md leading-relaxed">
-					Add shows and movies to your watchlist by clicking the bookmark icon on any details page.
-				</p>
-			</div>
+			<ReelEmptyState
+				icon={<BookmarkSimpleIcon size={24} />}
+				title="Nothing on the reel yet."
+				caption="Save a film or series with its bookmark, and it will appear here."
+			/>
 		)
 	}
 
 	return (
-		<div className="flex flex-col space-y-8 md:space-y-10">
+		<div className="flex flex-col gap-8 md:gap-10">
 			{filteredMovieWatchlist.length > 0 && (
-				<div className="space-y-4 md:space-y-5">
+				<div className="flex flex-col gap-4 md:gap-5">
 					<div>
-						<p className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-[0.2em]">
+						<p className="font-mono text-micro font-medium uppercase tracking-meta-wide text-muted-foreground">
 							Movies
 						</p>
-						<p className="text-sm text-muted-foreground mt-1">
+						<p className="mt-1 font-mono text-micro uppercase tracking-meta text-muted-foreground">
 							{filteredMovieWatchlist.length} {filteredMovieWatchlist.length === 1 ? 'movie' : 'movies'}
 						</p>
 					</div>
@@ -74,12 +71,12 @@ export function LibraryWatchlist() {
 			)}
 
 			{filteredTVWatchlist.length > 0 && (
-				<div className="space-y-4 md:space-y-5">
+				<div className="flex flex-col gap-4 md:gap-5">
 					<div>
-						<p className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-[0.2em]">
+						<p className="font-mono text-micro font-medium uppercase tracking-meta-wide text-muted-foreground">
 							TV Shows
 						</p>
-						<p className="text-sm text-muted-foreground mt-1">
+						<p className="mt-1 font-mono text-micro uppercase tracking-meta text-muted-foreground">
 							{filteredTVWatchlist.length} {filteredTVWatchlist.length === 1 ? 'show' : 'shows'}
 						</p>
 					</div>

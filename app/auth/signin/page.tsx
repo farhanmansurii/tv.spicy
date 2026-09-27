@@ -1,10 +1,5 @@
-'use client';
-
-import { signIn } from '@/lib/auth-client';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { SignInPage } from '@/components/ui/sign-in';
-import { toast } from 'sonner';
+import { fetchRowData, fetchTMDBImages, type MediaType } from '@/lib/api/tmdb-client';
+import SignInPanel from '@/components/auth/sign-in-panel';
 
 /**
  * Only same-origin relative paths may be used as a post-sign-in redirect.
@@ -15,82 +10,39 @@ import { toast } from 'sonner';
  */
 const UNSAFE_CALLBACK = /[\u0000-\u001F\u007F\\]/;
 
-function safeCallbackUrl(value: string | null): string {
-	if (
-		!value ||
-		!value.startsWith('/') ||
-		value.startsWith('//') ||
-		UNSAFE_CALLBACK.test(value)
-	) {
+function safeCallbackUrl(value: string | string[] | undefined): string {
+	const raw = Array.isArray(value) ? value[0] : value;
+	if (!raw || !raw.startsWith('/') || raw.startsWith('//') || UNSAFE_CALLBACK.test(raw)) {
 		return '/';
 	}
-	return value;
+	return raw;
 }
 
-export default function SignInPageWrapper() {
-	const searchParams = useSearchParams();
-	const router = useRouter();
-	const callbackUrl = safeCallbackUrl(searchParams.get('callbackUrl'));
-	const errorParam = searchParams.get('error');
-	const [isLoading, setIsLoading] = useState(false);
-
-	const getErrorMessage = (error: string | null): string | null => {
-		if (!error) return null;
-		const errorMessages: Record<string, string> = {
-			INVALID_CREDENTIALS: 'Invalid email or password.',
-			EMAIL_NOT_VERIFIED: 'Please verify your email address.',
-			ACCOUNT_LOCKED: 'Account is locked. Please contact support.',
-		};
-		return errorMessages[error] || 'An error occurred. Please try again.';
-	};
-
-	const handleEmailSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		setIsLoading(true);
-
-		const formData = new FormData(event.currentTarget);
-		const email = formData.get('email') as string;
-		const password = formData.get('password') as string;
-
-		try {
-			const result = await signIn.email({
-				email,
-				password,
-			});
-
-			if (result.error) {
-				toast.error(result.error.message || 'Invalid email or password');
-			} else {
-				toast.success('Signed in successfully');
-				router.push(callbackUrl);
-				router.refresh();
-			}
-		} catch (error) {
-			toast.error('An error occurred. Please try again.');
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	const handleGoogleSignIn = () => {
-		signIn.social({
-			provider: 'google',
-			callbackURL: callbackUrl,
-		});
-	};
-
-	return (
-		<SignInPage
-			title={
-				<span className="font-light text-foreground tracking-tighter">
-					Welcome to <span className="font-semibold">SpicyTV</span>
-				</span>
-			}
-			description="Sign in to sync your watchlist and continue watching your favorite shows and movies"
-			onSignIn={handleEmailSignIn}
-			onGoogleSignIn={handleGoogleSignIn}
-			isLoading={isLoading}
-			error={getErrorMessage(errorParam)}
-		/>
+/**
+ * A scene still from this week's top title. TMDB ranks key art first, so the
+ * second textless backdrop is usually a frame from the film rather than a poster.
+ */
+async function pickBackdropPath(): Promise<string | null> {
+	const trending = await fetchRowData('trending/all/week');
+	const top = trending.find(
+		(item) => item?.backdrop_path && (item.media_type === 'movie' || item.media_type === 'tv')
 	);
+	if (!top) return null;
+	const images = await fetchTMDBImages(String(top.id), top.media_type as MediaType);
+	const textless = images?.backdrops?.filter((image) => image.iso_639_1 === null) ?? [];
+	return (textless[1] ?? textless[0])?.file_path ?? top.backdrop_path ?? null;
+}
+
+export default async function SignInPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ callbackUrl?: string | string[]; error?: string | string[] }>;
+}) {
+	const params = await searchParams;
+	const callbackUrl = safeCallbackUrl(params.callbackUrl);
+	const rawError = Array.isArray(params.error) ? params.error[0] : params.error;
+	const errorParam = rawError ?? null;
+	const backdropPath = await pickBackdropPath();
+
+	return <SignInPanel backdropPath={backdropPath} callbackUrl={callbackUrl} errorParam={errorParam} />;
 }

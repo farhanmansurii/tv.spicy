@@ -15,8 +15,8 @@ export default function Error({
 	}, [error]);
 
 	return (
-		<div className="min-h-[60vh] flex items-center justify-center p-6">
-			<div className="w-full max-w-md text-center space-y-4">
+		<div className="flex min-h-96 items-center justify-center p-6">
+			<div className="flex w-full max-w-md flex-col text-center gap-4">
 				<h2 className="text-2xl font-bold">Couldn’t load movies</h2>
 				<p className="text-muted-foreground">
 					We hit an issue loading this section. Please try again.

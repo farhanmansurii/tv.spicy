@@ -5,7 +5,7 @@ import Container from '@/components/shared/containers/container';
 import { fetchRowData } from '@/lib/api';
 import { PageFetchError } from '@/components/shared/errors/page-fetch-error';
 import MediaRow from '@/components/features/media/row/media-row';
-import { BrowseCollectionHeader } from '@/components/features/media/row/browse-collection-header';
+import { TitleDisplay } from '@/components/ui/title-display';
 import { getBrowseCategory } from '@/lib/browse-categories';
 import type { Show } from '@/lib/types';
 
@@ -45,32 +45,51 @@ export default async function BrowsePage({ params }: PageProps) {
 	if (loadFailed) unstable_noStore();
 
 	return (
-		<main className="min-h-screen bg-background pb-24 pt-[calc(6rem+env(safe-area-inset-top))] text-foreground md:pb-28 md:pt-28">
+		<main className="min-h-screen bg-background pb-24 pt-safe-header text-foreground md:pb-28 md:pt-28">
 			<Container>
-				<BrowseCollectionHeader
-					title={category.title}
-					description={category.description}
-					count={loadFailed ? undefined : shows.length}
-				/>
+				<header className="max-w-4xl border-l-2 border-brand pl-5 md:pl-7">
+					{/* Same recipe as a media row: accent index, then the label, then
+					    the Anton title and the mono count below. */}
+					<div className="flex items-baseline gap-3">
+						<span
+							aria-hidden="true"
+							className="font-mono text-caption leading-none tracking-label text-brand tabular-nums"
+						>
+							01
+						</span>
+						<p className="font-mono text-caption uppercase tracking-label text-muted-foreground">
+							Curated collection
+						</p>
+					</div>
+					<TitleDisplay title={category.title} className="mt-3" />
+					<div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+						<p className="max-w-prose-secondary text-body leading-relaxed text-muted-foreground">
+							{category.description}
+						</p>
+						{!loadFailed && (
+							<span className="font-mono text-caption uppercase tracking-meta text-dim tabular-nums">
+								{shows.length} {shows.length === 1 ? 'title' : 'titles'}
+							</span>
+						)}
+					</div>
+				</header>
+			</Container>
 
-				<section aria-label={`${category.title} titles`} className="mt-6 md:mt-8">
-					{loadFailed ? (
+			{/* The row grid carries its own gutter, so it stays out of the Container
+			    to keep one gutter instead of two. */}
+			<section aria-label={`${category.title} titles`} className="section-spacing">
+				{loadFailed ? (
+					<Container>
 						<PageFetchError
-							title="Couldn’t load this collection"
-							description="Check your connection and try again."
+							title="The projector jammed."
+							description="We couldn’t load this collection from the shelf. Check your connection and try again."
 							className="min-h-48 px-0 py-0"
 						/>
-					) : (
-						<MediaRow
-							shows={shows}
-							type={category.type}
-							isVertical
-							gridLayout
-							hideHeader
-						/>
-					)}
-				</section>
-			</Container>
+					</Container>
+				) : (
+					<MediaRow shows={shows} type={category.type} isVertical gridLayout hideHeader />
+				)}
+			</section>
 		</main>
 	);
 }

@@ -1,22 +1,30 @@
 'use client';
 
-import DataRow from '@/components/features/media/row/data-row';
-import type { Genre } from '@/lib/types/tmdb';
-import { useInView } from 'react-intersection-observer';
 import { useEffect, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
+import DataRow from '@/components/features/media/row/data-row';
+import { Button } from '@/components/ui/button';
+import type { Genre } from '@/lib/types/tmdb';
 
 const GENRES_PER_BATCH = 3;
 
 interface ProgressiveGenreRowsProps {
 	genres: Genre[];
 	type: 'movie' | 'tv';
+	/** Continues the page's row numbering after its own editorial rows. */
+	startRowNumber?: number;
 }
 
-export default function ProgressiveGenreRows({ genres, type }: ProgressiveGenreRowsProps) {
+export default function ProgressiveGenreRows({
+	genres,
+	type,
+	startRowNumber = 1,
+}: ProgressiveGenreRowsProps) {
 	const [visibleGenreCount, setVisibleGenreCount] = useState(
 		Math.min(GENRES_PER_BATCH, genres.length)
 	);
 	const hasMoreGenres = visibleGenreCount < genres.length;
+	const remainingGenres = genres.length - visibleGenreCount;
 	const { ref: loadMoreRef, inView } = useInView({
 		rootMargin: '600px 0px',
 		threshold: 0,
@@ -31,7 +39,7 @@ export default function ProgressiveGenreRows({ genres, type }: ProgressiveGenreR
 
 	return (
 		<>
-			{genres.slice(0, visibleGenreCount).map((genre) => (
+			{genres.slice(0, visibleGenreCount).map((genre, index) => (
 				<DataRow
 					key={genre.id}
 					showRank={false}
@@ -39,14 +47,15 @@ export default function ProgressiveGenreRows({ genres, type }: ProgressiveGenreR
 					endpoint={{ id: genre.id, type }}
 					text={genre.name}
 					isGenre
+					rowNumber={startRowNumber + index}
 				/>
 			))}
 
 			{hasMoreGenres && (
-				<div ref={loadMoreRef} className="flex justify-center py-2">
-					<button
+				<div ref={loadMoreRef} className="flex justify-center">
+					<Button
 						type="button"
-						className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+						variant="ghost"
 						onClick={() =>
 							setVisibleGenreCount((count) =>
 								Math.min(count + GENRES_PER_BATCH, genres.length)
@@ -54,7 +63,10 @@ export default function ProgressiveGenreRows({ genres, type }: ProgressiveGenreR
 						}
 					>
 						Show more genres
-					</button>
+						<span className="font-mono text-xs tracking-meta text-dim tabular-nums">
+							{remainingGenres} left
+						</span>
+					</Button>
 				</div>
 			)}
 		</>

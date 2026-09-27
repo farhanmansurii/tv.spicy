@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useGSAP } from '@gsap/react';
 import { formatDistanceToNow } from 'date-fns';
 import { tmdbImage, tmdbImageSrcSet } from '@/lib/tmdb-image';
 import { StarIcon } from '@phosphor-icons/react';
@@ -9,6 +10,8 @@ import { useMediaQuery } from '@/store/mediaQueryStore';
 import Container from '@/components/shared/containers/container';
 import ContinueWatchingButton from '@/components/features/watchlist/continue-watching-button';
 import { HERO_HEIGHT_CLASS } from '@/components/features/media/hero-height';
+import { gsap } from 'gsap';
+import { crossfade, reveal, STAGGER } from '@/lib/motion';
 import type { TMDBImagesResponse, TMDBMovie, TMDBTVShow } from '@/lib/types/tmdb';
 
 interface HeroBannerProps {
@@ -27,7 +30,6 @@ interface HeroBannerProps {
 	loading?: 'eager' | 'lazy';
 	priority?: boolean;
 	isActive?: boolean;
-	prefersReducedMotion?: boolean;
 }
 
 export function HeroBanner({
@@ -37,7 +39,6 @@ export function HeroBanner({
 	loading = 'lazy',
 	priority = false,
 	isActive = true,
-	prefersReducedMotion = false,
 }: HeroBannerProps) {
 	const isMobile = useMediaQuery();
 	const [imageLoaded, setImageLoaded] = useState(false);
@@ -98,6 +99,13 @@ export function HeroBanner({
 
 	const handleImageLoad = useCallback(() => {
 		setImageLoaded(true);
+		if (imageContainerRef.current) {
+			gsap.fromTo(
+				imageContainerRef.current,
+				{ opacity: 0 },
+				{ ...crossfade(), clearProps: 'opacity' }
+			);
+		}
 		requestAnimationFrame(() => setShouldAnimate(true));
 	}, []);
 
@@ -112,31 +120,25 @@ export function HeroBanner({
 		}
 	}, [handleImageLoad]);
 
-	// Ken Burns is decorative only and must not run for reduced-motion users.
-	useEffect(() => {
-		if (isDetailsPage || !imageContainerRef.current) return;
-		if (isActive && !prefersReducedMotion) {
-			imageContainerRef.current.style.transform = 'scale(1.08)';
-		} else {
-			imageContainerRef.current.style.transform = 'scale(1)';
-		}
-	}, [isActive, isDetailsPage, prefersReducedMotion]);
+	useGSAP(
+		() => {
+			if (!contentRef.current || !showRevealed) return;
+			reveal(contentRef.current.children, { step: STAGGER.card });
+		},
+		{ scope: contentRef, dependencies: [showRevealed] }
+	);
 
 	return (
 		<section className={cn('relative w-full overflow-hidden bg-background', HERO_HEIGHT_CLASS)}>
 			{/* Background Image with Ken Burns */}
 			<div className="absolute inset-0 z-0">
 				{/* Fallback dark surface — visible when image is missing or fails */}
-				<div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black" />
+				<div className="absolute inset-0 bg-gradient-to-br from-band to-canvas" />
 
 				{currentImage ? (
 					<div
 						ref={imageContainerRef}
-						className={cn(
-							'absolute inset-0 transition-transform duration-[12000ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
-							imageLoaded ? 'opacity-100' : 'opacity-0'
-						)}
-						style={{ willChange: imageLoaded ? 'transform' : 'auto' }}
+						className={cn('absolute inset-0', imageLoaded ? 'opacity-100' : 'opacity-0')}
 					>
 						<img
 							key={currentImage}
@@ -165,49 +167,39 @@ export function HeroBanner({
 
 				{/* Cinematic gradient stack — Apple TV+ style multi-layer scrim */}
 				{/* Bottom-to-top: strongest fade at bottom */}
-				<div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 via-[20%] to-transparent" />
+				<div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 via-20% to-transparent" />
 				{/* Left-to-right: content readability on left */}
 				<div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
 				{/* Top fade for header blend */}
 				<div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-transparent" />
 				{/* Radial vignette for cinematic depth */}
-				<div
-					className="absolute inset-0"
-					style={{
-						background:
-							'radial-gradient(ellipse at 50% 70%, transparent 20%, color-mix(in oklab, var(--background) 62%, transparent) 100%)',
-					}}
-				/>
+				<div className="absolute inset-0 bg-vignette-hero" />
 				{/* Additional bottom scrim for text legibility */}
-				<div className="absolute bottom-0 left-0 right-0 h-[45%] bg-gradient-to-t from-background via-background/60 to-transparent" />
+				<div className="absolute bottom-0 left-0 right-0 h-9/20 bg-gradient-to-t from-background via-background/60 to-transparent" />
 			</div>
 
 			{/* Content */}
 			<div className="absolute inset-0 z-10 flex flex-col justify-end">
 				<Container
-					variant={isDetailsPage ? 'detail' : 'default'}
 					className="pb-8 md:pb-12 lg:pb-16"
 				>
 					<div
 						ref={contentRef}
 						className={cn(
 							'max-w-4xl flex flex-col items-center md:items-start text-center md:text-left',
-							showRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
-							hasImage &&
-								'transition-[opacity,transform] duration-[280ms] ease-[cubic-bezier(0.23,1,0.32,1)]',
-							'motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none'
+							!showRevealed && 'opacity-0'
 						)}
 					>
 						{/* Metadata — clean, minimal, Apple TV style */}
 						<div className="flex flex-wrap items-center justify-center md:justify-start gap-x-2.5 gap-y-1 mb-6 md:mb-8">
-							<span className="text-[11px] md:text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">
+							<span className="text-micro md:text-xs font-semibold text-white/50 uppercase tracking-caps">
 								{type === 'tv' ? 'Series' : 'Movie'}
 							</span>
 
 							{genreList.length > 0 && (
 								<>
 									<span className="text-white/15">·</span>
-									<span className="text-[11px] md:text-xs font-medium text-white/50 tracking-wide">
+									<span className="text-micro md:text-xs font-medium text-white/50 tracking-wide">
 										{genreList.join(', ')}
 									</span>
 								</>
@@ -216,7 +208,7 @@ export function HeroBanner({
 							{releaseYear && (
 								<>
 									<span className="text-white/15">·</span>
-									<span className="text-[11px] md:text-xs font-medium text-white/50 tabular-nums">
+									<span className="text-micro md:text-xs font-medium text-white/50 tabular-nums">
 										{releaseYear}
 									</span>
 								</>
@@ -225,7 +217,7 @@ export function HeroBanner({
 							{runtime != null && runtime > 0 && (
 								<>
 									<span className="text-white/15">·</span>
-									<span className="text-[11px] md:text-xs font-medium text-white/50 tabular-nums">
+									<span className="text-micro md:text-xs font-medium text-white/50 tabular-nums">
 										{runtime}m
 									</span>
 								</>
@@ -234,7 +226,7 @@ export function HeroBanner({
 							{rating && (
 								<>
 									<span className="text-white/15">·</span>
-									<span className="text-[11px] md:text-xs font-semibold text-white/70 tracking-wide">
+									<span className="text-micro md:text-xs font-semibold text-white/70 tracking-wide">
 										{rating}
 									</span>
 								</>
@@ -243,7 +235,7 @@ export function HeroBanner({
 							{(show.vote_average ?? 0) > 0 && (
 								<>
 									<span className="text-white/15">·</span>
-									<span className="flex items-center gap-1 text-[11px] md:text-xs font-medium text-amber-400/90 tabular-nums">
+									<span className="flex items-center gap-1 text-micro md:text-xs font-medium text-brand tabular-nums">
 										<StarIcon
 											weight="fill"
 											size={12}
@@ -266,13 +258,13 @@ export function HeroBanner({
 										height={360}
 										loading={loading}
 										className={cn(
-											'h-auto w-[min(86vw,420px)] sm:w-[min(78vw,520px)] md:w-auto',
+											'h-auto w-hero-logo sm:w-hero-logo-wide md:w-auto',
 											// Much larger logo treatment
-											'max-h-[clamp(120px,34vw,180px)] sm:max-h-[220px] md:max-h-[220px] lg:max-h-[280px]',
+											'max-h-hero-logo sm:max-h-55 md:max-h-55 lg:max-h-70',
 											'md:max-w-xl lg:max-w-2xl xl:max-w-3xl',
 											'object-contain object-center md:object-left',
 											// Deep cinematic shadow
-											'drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]'
+											'drop-shadow-hero'
 										)}
 									/>
 								</div>
@@ -281,8 +273,8 @@ export function HeroBanner({
 									<h1
 										className={cn(
 											// Hero 2-line iron rule: clamp ensures max 2-3 lines
-											'text-[clamp(2.5rem,6vw,5.5rem)]',
-											'font-bold text-white leading-[0.92] tracking-tight',
+											'text-hero-title',
+											'font-bold text-white tracking-tight',
 											'text-center md:text-left',
 											'max-w-5xl'
 										)}
@@ -304,7 +296,7 @@ export function HeroBanner({
 
 							{shouldShowHeroRunStatus && (
 								<div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-md">
-									<span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+									<span className="h-1.5 w-1.5 rounded-full bg-google-green animate-pulse" />
 									<p className="text-xs md:text-sm font-medium text-white/95">
 										{nextEpisodeLabel
 											? `Running · Next episode ${nextEpisodeLabel}`

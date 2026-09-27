@@ -5,6 +5,7 @@ import { usePersonalizedHome } from '@/hooks/use-user-data';
 import MediaRow from '@/components/features/media/row/media-row';
 import { MediaLoader } from '@/components/shared/loaders/media-loader';
 import type { Show } from '@/lib/types';
+import type { PersonalizedHomeData } from '@/lib/types/personalized-home';
 
 export type UserMediaScope = 'movie' | 'tv' | 'all';
 export type UserMediaVariant = 'watchlist' | 'favorites';
@@ -13,6 +14,7 @@ export interface UserMediaRowProps {
 	variant: UserMediaVariant;
 	scope: UserMediaScope;
 	text?: string;
+	rowNumber?: number;
 }
 
 type WatchlistItem = {
@@ -65,7 +67,27 @@ const buildWatchlistShow = (item: WatchlistItem, mediaType: 'movie' | 'tv'): Sho
 	spoken_languages: [],
 });
 
-function UserWatchlistRow({ scope, text }: UserMediaRowProps) {
+export function hasUserMediaItems(
+	variant: UserMediaVariant,
+	scope: UserMediaScope,
+	data: PersonalizedHomeData | undefined
+): boolean {
+	if (!data) return false;
+	if (variant === 'watchlist') {
+		return data.watchlist.some(
+			(item) =>
+				(scope === 'all' || item.mediaType?.toLowerCase() === scope) &&
+				Boolean(item.posterPath || item.backdropPath)
+		);
+	}
+	return data.favorites.some(
+		(item) =>
+			(scope === 'all' || item.media_type?.toLowerCase() === scope) &&
+			Boolean(item.poster_path || item.backdrop_path)
+	);
+}
+
+function UserWatchlistRow({ scope, text, rowNumber }: UserMediaRowProps) {
 	const { data, isLoading } = usePersonalizedHome();
 
 	const watchlist = useMemo(() => {
@@ -82,7 +104,7 @@ function UserWatchlistRow({ scope, text }: UserMediaRowProps) {
 	);
 
 	if (isLoading) {
-		return <MediaLoader withHeader className="min-h-[280px]" />;
+		return <MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />;
 	}
 
 	if (filteredWatchlist.length === 0) {
@@ -94,11 +116,12 @@ function UserWatchlistRow({ scope, text }: UserMediaRowProps) {
 			text={text || defaultTitles.watchlist[scope]}
 			shows={filteredWatchlist}
 			type={scope === 'movie' ? 'movie' : 'tv'}
+			rowNumber={rowNumber}
 		/>
 	);
 }
 
-function UserFavoritesRow({ scope, text }: UserMediaRowProps) {
+function UserFavoritesRow({ scope, text, rowNumber }: UserMediaRowProps) {
 	const { data, isLoading } = usePersonalizedHome();
 
 	const favorites = useMemo(() => {
@@ -114,7 +137,7 @@ function UserFavoritesRow({ scope, text }: UserMediaRowProps) {
 	);
 
 	if (isLoading) {
-		return <MediaLoader withHeader className="min-h-[280px]" />;
+		return <MediaLoader withHeader className="min-h-70 relative left-1/2 w-screen shrink-0 -translate-x-1/2 px-(--gutter) section-spacing" />;
 	}
 
 	if (filteredFavorites.length === 0) {
@@ -126,15 +149,16 @@ function UserFavoritesRow({ scope, text }: UserMediaRowProps) {
 			text={text || defaultTitles.favorites[scope]}
 			shows={filteredFavorites}
 			type={scope === 'movie' ? 'movie' : 'tv'}
+			rowNumber={rowNumber}
 		/>
 	);
 }
 
-function UserMediaRowComponent({ variant, scope, text }: UserMediaRowProps) {
+function UserMediaRowComponent({ variant, scope, text, rowNumber }: UserMediaRowProps) {
 	return variant === 'watchlist' ? (
-		<UserWatchlistRow variant={variant} scope={scope} text={text} />
+		<UserWatchlistRow variant={variant} scope={scope} text={text} rowNumber={rowNumber} />
 	) : (
-		<UserFavoritesRow variant={variant} scope={scope} text={text} />
+		<UserFavoritesRow variant={variant} scope={scope} text={text} rowNumber={rowNumber} />
 	);
 }
 
