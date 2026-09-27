@@ -22,7 +22,7 @@ import {
 	encodeSegment as enc,
 } from './url-builders';
 
-export const DEFAULT_PROVIDER_ID = 'vidfast';
+export const DEFAULT_PROVIDER_ID = 'cinesrc';
 
 const VIDKING_QUERY = {
 	color: 'ef4444',
@@ -75,7 +75,7 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 		id: 'vidfast',
 		label: 'Vidfast',
 		status: 'enabled',
-		rank: 1,
+		rank: 2,
 		// vidfast.net now redirects to vidfast.vc (observed 2026-07-14); embed
 		// the final domain directly so the postMessage origin matches.
 		urls: pathEmbedUrls('https://vidfast.vc'),
@@ -174,7 +174,7 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 		id: 'cinesrc',
 		label: 'CineSrc',
 		status: 'enabled',
-		rank: 2,
+		rank: 1,
 		urls: customEmbedUrls(
 			'https://cinesrc.st',
 			(id) =>
@@ -182,7 +182,7 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 					autoplay: 'true',
 					seek: '10',
 					prioritize: 'true',
-					color: '#ef4444',
+					color: '#f0b429',
 				}),
 			(id, s, e) =>
 				withQuery(`https://cinesrc.st/embed/tv/${enc(id)}`, {
@@ -193,7 +193,7 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
 					autoskip: 'true',
 					seek: '10',
 					prioritize: 'true',
-					color: '#ef4444',
+					color: '#f0b429',
 				})
 		),
 		resume: queryResume('t'),

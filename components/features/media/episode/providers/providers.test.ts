@@ -86,14 +86,14 @@ test('validation rejects enabled providers without verification', () => {
 
 // ── Selector list ────────────────────────────────────────────────────────────
 
-test('enabled providers are rank-sorted with Vidfast first', () => {
+test('enabled providers are rank-sorted with CineSrc first', () => {
 	const list = listEnabledProviders();
-	assert.equal(list[0].id, 'vidfast');
+	assert.equal(list[0].id, 'cinesrc');
 	assert.deepEqual(
 		list.map((p) => p.id),
 		[
-			'vidfast',
 			'cinesrc',
+			'vidfast',
 			'vidlink',
 			'vidapi',
 			'vidzee',
@@ -115,9 +115,9 @@ test('candidate and disabled providers never appear in selector results', () => 
 // ── Resolution ───────────────────────────────────────────────────────────────
 
 test('unknown and disabled ids resolve to the default', () => {
-	assert.equal(DEFAULT_PROVIDER_ID, 'vidfast');
+	assert.equal(DEFAULT_PROVIDER_ID, 'cinesrc');
 	for (const id of ['nope', 'rivestream', 'toustream', '']) {
-		assert.equal(resolveProvider(id).id, 'vidfast');
+		assert.equal(resolveProvider(id).id, 'cinesrc');
 	}
 	assert.equal(resolveProvider('vidking').id, 'vidking');
 });
@@ -146,11 +146,11 @@ test('cinesrc keeps its query-based tv route and resume composes with it', () =>
 	const cinesrc = PROVIDER_DEFINITIONS.find((d) => d.id === 'cinesrc')!;
 	assert.equal(
 		buildUrl(cinesrc.urls, cinesrc.resume, tv),
-		'https://cinesrc.st/embed/tv/1399?s=1&e=1&autoplay=true&autonext=false&autoskip=true&seek=10&prioritize=true&color=%23ef4444'
+		'https://cinesrc.st/embed/tv/1399?s=1&e=1&autoplay=true&autonext=false&autoskip=true&seek=10&prioritize=true&color=%23f0b429'
 	);
 	assert.equal(
 		buildUrl(cinesrc.urls, cinesrc.resume, { ...tv, resumeSeconds: 61 }),
-		'https://cinesrc.st/embed/tv/1399?s=1&e=1&autoplay=true&autonext=false&autoskip=true&seek=10&prioritize=true&color=%23ef4444&t=61'
+		'https://cinesrc.st/embed/tv/1399?s=1&e=1&autoplay=true&autonext=false&autoskip=true&seek=10&prioritize=true&color=%23f0b429&t=61'
 	);
 });
 
