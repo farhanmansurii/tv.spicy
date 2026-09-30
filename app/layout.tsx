@@ -1,5 +1,5 @@
 import './globals.css';
-import { Manrope, Space_Grotesk } from 'next/font/google';
+import { DM_Sans, Instrument_Serif } from 'next/font/google';
 import TanstackQueryProvider from '@/components/providers/tanstack-query-provider';
 import SidebarProvider from '@/components/providers/sidebar-provider';
 import { AuthProvider } from '@/components/auth/auth-provider';
@@ -10,14 +10,15 @@ import type { Metadata, Viewport } from 'next';
 import { DetailScrollRestoration } from '@/components/providers/detail-scroll-restoration';
 import { Suspense } from 'react';
 
-const manrope = Manrope({
+const dmSans = DM_Sans({
 	subsets: ['latin'],
 	variable: '--font-sans',
 	display: 'swap',
 });
-const spaceGrotesk = Space_Grotesk({
+const instrumentSerif = Instrument_Serif({
 	subsets: ['latin'],
 	variable: '--font-display',
+	weight: '400',
 	display: 'swap',
 });
 
@@ -82,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html
 			lang="en"
-			className={`dark ${manrope.variable} ${spaceGrotesk.variable} antialiased`}
+			className={`dark ${dmSans.variable} ${instrumentSerif.variable} antialiased`}
 		>
 			<head>
 				<link rel="dns-prefetch" href="https://image.tmdb.org" />
