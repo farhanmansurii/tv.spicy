@@ -1,5 +1,5 @@
 import './globals.css';
-import { Geist, Geist_Mono, Anton } from 'next/font/google';
+import { Manrope, Space_Grotesk } from 'next/font/google';
 import TanstackQueryProvider from '@/components/providers/tanstack-query-provider';
 import SidebarProvider from '@/components/providers/sidebar-provider';
 import { AuthProvider } from '@/components/auth/auth-provider';
@@ -10,19 +10,15 @@ import type { Metadata, Viewport } from 'next';
 import { DetailScrollRestoration } from '@/components/providers/detail-scroll-restoration';
 import { Suspense } from 'react';
 
-const geist = Geist({
+const manrope = Manrope({
 	subsets: ['latin'],
 	variable: '--font-sans',
-});
-const geistMono = Geist_Mono({
-	subsets: ['latin'],
-	variable: '--font-mono',
-});
-const anton = Anton({
-	weight: '400',
-	subsets: ['latin'],
 	display: 'swap',
+});
+const spaceGrotesk = Space_Grotesk({
+	subsets: ['latin'],
 	variable: '--font-display',
+	display: 'swap',
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://spicy-tv.vercel.app';
@@ -86,7 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html
 			lang="en"
-			className={`dark ${geist.variable} ${geistMono.variable} ${anton.variable} antialiased`}
+			className={`dark ${manrope.variable} ${spaceGrotesk.variable} antialiased`}
 		>
 			<head>
 				<link rel="dns-prefetch" href="https://image.tmdb.org" />
