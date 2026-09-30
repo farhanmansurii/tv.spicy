@@ -1,5 +1,5 @@
 import './globals.css';
-import { Inter_Tight, JetBrains_Mono, Anton } from 'next/font/google';
+import { Geist, Geist_Mono, Anton } from 'next/font/google';
 import TanstackQueryProvider from '@/components/providers/tanstack-query-provider';
 import SidebarProvider from '@/components/providers/sidebar-provider';
 import { AuthProvider } from '@/components/auth/auth-provider';
@@ -10,14 +10,12 @@ import type { Metadata, Viewport } from 'next';
 import { DetailScrollRestoration } from '@/components/providers/detail-scroll-restoration';
 import { Suspense } from 'react';
 
-const interTight = Inter_Tight({
+const geist = Geist({
 	subsets: ['latin'],
-	weight: ['400', '500', '600', '700'],
 	variable: '--font-sans',
 });
-const jetbrainsMono = JetBrains_Mono({
+const geistMono = Geist_Mono({
 	subsets: ['latin'],
-	weight: ['500'],
 	variable: '--font-mono',
 });
 const anton = Anton({
@@ -88,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html
 			lang="en"
-			className={`dark ${interTight.variable} ${jetbrainsMono.variable} ${anton.variable} antialiased`}
+			className={`dark ${geist.variable} ${geistMono.variable} ${anton.variable} antialiased`}
 		>
 			<head>
 				<link rel="dns-prefetch" href="https://image.tmdb.org" />
