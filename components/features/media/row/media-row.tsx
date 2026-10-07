@@ -129,7 +129,7 @@ function MediaRowComponent({
 	const renderGrid = () => (
 		<div
 			className={cn(
-				'grid gap-4 px-gutter md:gap-6',
+				'grid gap-4 px-gutter py-1 md:gap-6',
 				visualIsVertical
 					? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
 					: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
@@ -166,8 +166,11 @@ function MediaRowComponent({
 				)}
 			/>
 
-			<Carousel setApi={setApi} opts={carouselOpts} className="relative w-full">
-				<CarouselContent className="-ml-3 cursor-grab touch-pan-y overflow-visible transform-gpu will-change-transform active:cursor-grabbing px-(--gutter) md:-ml-5">
+			<Carousel setApi={setApi} opts={carouselOpts} className="relative w-full -my-1">
+				<CarouselContent
+					viewportClassName="py-1"
+					className="-ml-3 cursor-grab touch-pan-y overflow-visible transform-gpu will-change-transform active:cursor-grabbing px-(--gutter) md:-ml-5"
+				>
 					{validShows.map((show: Show, index: number) => (
 						<CarouselItem
 							key={show.id}

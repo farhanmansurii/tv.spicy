@@ -139,11 +139,20 @@ function Carousel({
 	);
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
+type CarouselContentProps = React.ComponentProps<'div'> & {
+	/** Applied to the Embla viewport (overflow clip). Use vertical padding so lifted slides keep borders visible. */
+	viewportClassName?: string;
+};
+
+function CarouselContent({ className, viewportClassName, ...props }: CarouselContentProps) {
 	const { carouselRef, orientation } = useCarousel();
 
 	return (
-		<div ref={carouselRef} className="overflow-hidden" data-slot="carousel-content">
+		<div
+			ref={carouselRef}
+			className={cn('overflow-hidden', viewportClassName)}
+			data-slot="carousel-content"
+		>
 			<div
 				className={cn(
 					'flex',

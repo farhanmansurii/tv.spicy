@@ -17,6 +17,7 @@ import useWatchListStore from '@/store/watchlistStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { toast } from 'sonner';
+import { buttonIconLabelClass } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import gsap from 'gsap';
 
@@ -450,9 +451,12 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						<button
 							type="button"
 							onClick={handlePrimaryAction}
-							className="flex h-12 min-w-36 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand px-5 text-ui font-medium text-brand-foreground transition-[background-color,transform] duration-(--duration-press) ease-out can-hover:bg-brand-hover active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 sm:flex-none sm:px-6"
+							className={cn(
+								buttonIconLabelClass,
+								'flex h-12 min-w-36 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand px-5 font-sans text-ui font-medium tracking-normal text-brand-foreground transition-[background-color,transform] duration-(--duration-press) ease-out can-hover:bg-brand-hover active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 sm:flex-none sm:px-6'
+							)}
 						>
-							<PlayIcon size={18} weight="fill" aria-hidden="true" />
+							<PlayIcon weight="fill" aria-hidden="true" />
 							<span>{primaryLabel}</span>
 						</button>
 
@@ -463,6 +467,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							aria-pressed={isInWatchlist}
 							aria-label="My List"
 							className={cn(
+								buttonIconLabelClass,
 								'flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border bg-canvas/50 px-4 font-sans text-ui font-medium tracking-normal transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 sm:px-5',
 								isInWatchlist
 									? 'border-brand text-brand'
@@ -470,11 +475,10 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							)}
 						>
 							<span
-								className="relative flex items-center justify-center size-4"
+								className="relative flex size-[1cap] shrink-0 items-center justify-center"
 								aria-hidden="true"
 							>
 								<PlusIcon
-									size={16}
 									weight="bold"
 									className={cn(
 										'absolute transition-opacity duration-200',
@@ -483,16 +487,15 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 									data-icon="plus"
 								/>
 								<CheckIcon
-									size={16}
 									weight="bold"
 									className={cn(
-										'absolute text-brand transition-opacity duration-200',
+										'absolute size-[1cap] text-brand transition-opacity duration-200',
 										isInWatchlist ? 'opacity-100' : 'opacity-0'
 									)}
 									data-icon="check"
 								/>
 							</span>
-							<span>My List</span>
+							My List
 						</button>
 
 						<button
@@ -514,9 +517,12 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 					<button
 						type="button"
 						onClick={handlePrimaryAction}
-						className="flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand px-4 font-sans text-ui font-medium tracking-normal text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 can-hover:bg-brand-hover"
+						className={cn(
+							buttonIconLabelClass,
+							'flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand px-4 font-sans text-ui font-medium tracking-normal text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 can-hover:bg-brand-hover'
+						)}
 					>
-						<PlayIcon size={16} weight="fill" aria-hidden="true" />
+						<PlayIcon weight="fill" aria-hidden="true" />
 						<span className="truncate">{primaryLabel}</span>
 					</button>
 					<button

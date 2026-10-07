@@ -83,9 +83,12 @@ const RecentlyWatchedComponent = () => {
 
 			<Carousel
 				opts={{ align: 'start', dragFree: true, containScroll: 'trimSnaps' }}
-				className="relative w-full"
+				className="relative w-full -my-1"
 			>
-				<CarouselContent className="-ml-3 cursor-grab touch-pan-y overflow-visible active:cursor-grabbing px-(--gutter) md:-ml-5">
+				<CarouselContent
+					viewportClassName="py-1"
+					className="-ml-3 cursor-grab touch-pan-y overflow-visible active:cursor-grabbing px-(--gutter) md:-ml-5"
+				>
 					{episodes.map((item, index: number) => (
 						<CarouselItem
 							key={item.id}

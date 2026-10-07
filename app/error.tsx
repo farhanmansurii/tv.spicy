@@ -86,20 +86,20 @@ export default function GlobalError({
 
 				<div className="mt-8 flex flex-wrap items-center gap-3">
 					<Button onClick={reset} variant="default">
-						<RefreshCw className="h-4 w-4" />
+						<RefreshCw aria-hidden="true" />
 						Try again
 					</Button>
 					<Button onClick={copyReport} variant="outline">
 						{copyState === 'copied' ? (
-							<Check className="h-4 w-4" />
+							<Check aria-hidden="true" />
 						) : (
-							<Copy className="h-4 w-4" />
+							<Copy aria-hidden="true" />
 						)}
 						{copyState === 'copied' ? 'Copied' : 'Copy error report'}
 					</Button>
 					<Button asChild variant="outline">
 						<Link href="/" prefetch={false}>
-							<Home className="h-4 w-4" />
+							<Home aria-hidden="true" />
 							Home
 						</Link>
 					</Button>

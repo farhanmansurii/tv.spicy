@@ -75,9 +75,12 @@ export function MediaLoader({
 						dragFree: true,
 						containScroll: 'trimSnaps',
 					}}
-					className="w-full relative"
+					className="w-full relative -my-1"
 				>
-					<CarouselContent className="-ml-3 cursor-grab touch-pan-y overflow-visible transform-gpu will-change-transform active:cursor-grabbing md:-ml-5">
+					<CarouselContent
+						viewportClassName="py-1"
+						className="-ml-3 cursor-grab touch-pan-y overflow-visible transform-gpu will-change-transform active:cursor-grabbing md:-ml-5"
+					>
 						{Array.from({ length: resolvedCount }).map((_, index) => (
 							<CarouselItem
 								key={index}

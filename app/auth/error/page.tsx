@@ -48,7 +48,7 @@ export default async function AuthErrorPage({
 					</Button>
 					<Button asChild variant="outline">
 						<Link href="/" prefetch={false}>
-							<Home className="h-4 w-4" />
+							<Home aria-hidden="true" />
 							Home
 						</Link>
 					</Button>

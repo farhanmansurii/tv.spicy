@@ -93,66 +93,68 @@ function MediaCardComponent({
 			prefetch={false}
 			onClick={() => onClick?.(show)}
 			aria-label={ranked ? `Rank ${rank}: ${title}` : title}
-			className="group block w-full select-none rounded-sm outline-none transition-transform duration-(--duration-ui) ease-entrance will-change-transform can-hover:-translate-y-0.5 active:translate-y-0 active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100"
+			className="group block w-full select-none rounded-sm outline-none transition-[transform,box-shadow] duration-(--duration-ui) ease-entrance will-change-transform can-hover:-translate-y-0.5 can-hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.55)] active:translate-y-0 active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:can-hover:shadow-none"
 		>
 			<span
 				className={cn(
-					'relative isolate block w-full overflow-hidden rounded-sm bg-gradient-card-placeholder',
+					'relative isolate block w-full rounded-sm',
 					usesPoster ? 'aspect-2/3' : 'aspect-video'
 				)}
 			>
-				{imageUrl && !imageError ? (
-										<img
-						ref={imgRef}
-						src={imageUrl}
-						srcSet={imageSrcSet}
-						sizes={imageSizes}
-						alt=""
-						loading="lazy"
-						decoding="async"
-						onLoad={() => setIsImageLoaded(true)}
-						onError={() => setImageError(true)}
-						className={cn(
-							'absolute inset-0 size-full object-cover transform-gpu transition-[transform,opacity] duration-(--duration-reveal) ease-entrance motion-safe:group-can-hover:scale-102 motion-reduce:transform-none motion-reduce:transition-none',
-							isImageLoaded ? 'opacity-100' : 'opacity-0'
-						)}
-					/>
-				) : null}
-
-				{!usesPoster && (
-					// A missing image keeps the title in its normal overlay role on the
-					// placeholder gradient, so it is never printed twice.
-					<>
-						<span
-							aria-hidden="true"
-							className="absolute inset-0 z-10 bg-linear-to-t from-background/80 via-background/20 via-55% to-transparent to-75%"
+				<span className="absolute inset-0 overflow-hidden rounded-sm bg-gradient-card-placeholder">
+					{imageUrl && !imageError ? (
+						<img
+							ref={imgRef}
+							src={imageUrl}
+							srcSet={imageSrcSet}
+							sizes={imageSizes}
+							alt=""
+							loading="lazy"
+							decoding="async"
+							onLoad={() => setIsImageLoaded(true)}
+							onError={() => setImageError(true)}
+							className={cn(
+								'absolute inset-0 size-full object-cover transform-gpu transition-[transform,opacity] duration-(--duration-reveal) ease-entrance motion-safe:group-can-hover:scale-102 motion-reduce:transform-none motion-reduce:transition-none',
+								isImageLoaded ? 'opacity-100' : 'opacity-0'
+							)}
 						/>
+					) : null}
+
+					{!usesPoster && (
+						// A missing image keeps the title in its normal overlay role on the
+						// placeholder gradient, so it is never printed twice.
+						<>
+							<span
+								aria-hidden="true"
+								className="absolute inset-0 z-10 bg-linear-to-t from-background/80 via-background/20 via-55% to-transparent to-75%"
+							/>
+							<span
+								aria-hidden="true"
+								className="absolute inset-x-3.5 bottom-3 z-20 grid gap-1"
+							>
+								<span className="line-clamp-2 text-ui font-medium text-text">
+									{title}
+								</span>
+								{meta}
+							</span>
+						</>
+					)}
+
+					{ranked && (
 						<span
 							aria-hidden="true"
-							className="absolute inset-x-3.5 bottom-3 z-20 grid gap-1"
+							className="absolute top-2 left-2 z-20 rounded-full bg-brand px-2 py-1 font-mono text-micro leading-none font-semibold tracking-meta text-brand-foreground tabular-nums"
 						>
-							<span className="line-clamp-2 text-ui font-medium text-text">
-								{title}
-							</span>
-							{meta}
+							{String(rank).padStart(2, '0')}
 						</span>
-					</>
-				)}
-
-				{ranked && (
-					<span
-						aria-hidden="true"
-						className="absolute top-2 left-2 z-20 rounded-full bg-brand px-2 py-1 font-mono text-micro leading-none font-semibold tracking-meta text-brand-foreground tabular-nums"
-					>
-						{String(rank).padStart(2, '0')}
-					</span>
-				)}
+					)}
+				</span>
 
 				<span aria-hidden="true" className="pointer-events-none absolute inset-0 z-30 rounded-sm shadow-inset-line" />
 				<NavigationPendingBar />
 				<span
 					aria-hidden="true"
-					className="absolute inset-0 z-30 rounded-sm border border-line-strong opacity-0 transition-opacity duration-(--duration-ui) ease-out group-can-hover:opacity-100 group-focus-visible:border-brand group-focus-visible:opacity-100"
+					className="pointer-events-none absolute inset-0 z-30 rounded-sm border border-line-strong opacity-0 transition-opacity duration-(--duration-ui) ease-out group-can-hover:opacity-100 group-focus-visible:border-brand group-focus-visible:opacity-100"
 				/>
 			</span>
 

@@ -198,7 +198,7 @@ export default function LibraryPage() {
 						<div className="flex shrink-0 items-center gap-3">
 							<Button asChild size="xl">
 								<Link href="/auth/signin?callbackUrl=/library" prefetch={false}>
-									<LogIn className="h-4 w-4" />
+									<LogIn aria-hidden="true" />
 									Sign in to sync
 								</Link>
 							</Button>

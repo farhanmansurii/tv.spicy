@@ -96,9 +96,12 @@ export function LibraryContinueWatching() {
 					dragFree: true,
 					containScroll: 'trimSnaps',
 				}}
-				className="w-full relative group/row"
+				className="w-full relative group/row -my-1"
 			>
-				<CarouselContent className="-ml-4 md:-ml-6 overflow-visible cursor-grab active:cursor-grabbing">
+				<CarouselContent
+					viewportClassName="py-1"
+					className="-ml-4 md:-ml-6 overflow-visible cursor-grab active:cursor-grabbing"
+				>
 					{episodes.map((item, index: number) => (
 						<CarouselItem
 							key={item.id}

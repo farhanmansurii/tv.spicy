@@ -3,13 +3,17 @@ import { Slot } from 'radix-ui';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
+/** Keeps icon + label on one optical center line (detail hero, etc.). */
+export const buttonIconLabelClass =
+	'leading-none [&_svg]:block [&_svg]:size-[1cap] [&_svg]:shrink-0';
+
 const buttonVariants = cva(
 	[
-		'inline-flex items-center justify-center gap-2 whitespace-nowrap',
+		'inline-flex items-center justify-center gap-2 whitespace-nowrap leading-none',
 		'font-sans rounded-full font-medium tracking-normal',
 		'transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-(--duration-press) ease-out',
 		'disabled:pointer-events-none disabled:opacity-40',
-		'[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+		'[&_svg]:pointer-events-none [&_svg]:block [&_svg]:shrink-0',
 		'active:scale-97 motion-reduce:active:scale-100',
 	],
 	{
@@ -31,15 +35,16 @@ const buttonVariants = cva(
 			},
 			shape: { default: '', pill: 'rounded-full' },
 			size: {
-				default: 'h-12 px-6 text-ui gap-2.5',
+				default: 'h-12 px-6 text-ui',
 				sm: 'h-9 px-4 text-ui',
 				lg: 'h-12 px-8 text-ui',
 				xl: 'h-12 px-5 text-ui md:h-13 md:px-8',
-				icon: 'hit-target h-10 w-10 p-0 rounded-full',
-				'icon-lg': 'hit-target size-12 p-0 rounded-full',
+				icon: 'hit-target h-10 w-10 p-0 rounded-full [&_svg]:size-4',
+				'icon-lg': 'hit-target size-12 p-0 rounded-full [&_svg]:size-[1.125rem]',
 			},
 		},
 		compoundVariants: [
+			{ size: ['default', 'sm', 'lg', 'xl'], className: '[&_svg]:size-[1cap]' },
 			{
 				variant: 'ghost',
 				size: 'icon',
