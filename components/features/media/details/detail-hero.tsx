@@ -360,7 +360,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						))}
 					</p>
 
-					{/* Anton Display Title */}
+					{/* Display title */}
 					<TitleDisplay
 						title={title}
 						originalTitle={originalTitle}
@@ -388,11 +388,11 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							ref={ratingRef}
 							className="mt-5 mb-4 flex flex-wrap items-baseline gap-2.5 tabular-nums"
 						>
-							<strong className="font-display text-display-4 text-text md:text-display-3">
+							<strong className="text-title tabular-nums text-text">
 								{voteAvg.toFixed(1)}
 							</strong>
 							<span
-								className="text-brand text-body select-none md:text-display-4"
+								className="select-none text-lede text-brand"
 								aria-hidden="true"
 							>
 								★
@@ -450,7 +450,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						<button
 							type="button"
 							onClick={handlePrimaryAction}
-							className="flex items-center justify-center gap-2 rounded-full bg-brand can-hover:bg-brand-hover text-brand-foreground font-sans font-semibold text-body h-12 px-5 min-w-36 flex-1 sm:flex-none sm:px-6 sm:text-ui transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
+							className="flex h-12 min-w-36 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand px-5 text-ui font-medium text-brand-foreground transition-[background-color,transform] duration-(--duration-press) ease-out can-hover:bg-brand-hover active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 sm:flex-none sm:px-6"
 						>
 							<PlayIcon size={18} weight="fill" aria-hidden="true" />
 							<span>{primaryLabel}</span>
@@ -463,7 +463,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							aria-pressed={isInWatchlist}
 							aria-label="My List"
 							className={cn(
-								'flex items-center gap-2 rounded-full border bg-canvas/50 font-sans font-semibold text-body h-12 shrink-0 px-4 sm:px-5 sm:text-ui transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer',
+								'flex items-center gap-2 rounded-full border bg-canvas/50 font-sans font-semibold text-body h-12 shrink-0 px-4 sm:px-5 sm:text-ui transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer',
 								isInWatchlist
 									? 'border-brand text-brand'
 									: 'border-line-strong can-hover:border-line text-text'
@@ -500,7 +500,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							onClick={handleShare}
 							aria-label="Share"
 							title="Share"
-							className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong can-hover:border-line bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
+							className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong can-hover:border-line bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
 						>
 							<ShareNetworkIcon size={18} aria-hidden="true" />
 						</button>
@@ -514,7 +514,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 					<button
 						type="button"
 						onClick={handlePrimaryAction}
-						className="flex flex-1 h-12 items-center justify-center gap-2 rounded-full bg-brand can-hover:bg-brand-hover px-4 font-sans font-semibold text-body text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 cursor-pointer"
+						className="flex flex-1 h-12 items-center justify-center gap-2 rounded-full bg-brand can-hover:bg-brand-hover px-4 font-sans font-semibold text-body text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 cursor-pointer"
 					>
 						<PlayIcon size={16} weight="fill" aria-hidden="true" />
 						<span className="truncate">{primaryLabel}</span>
@@ -526,7 +526,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						aria-pressed={isInWatchlist}
 						aria-label="My List"
 						className={cn(
-							'flex size-12 shrink-0 items-center justify-center rounded-full border bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 cursor-pointer',
+							'flex size-12 shrink-0 items-center justify-center rounded-full border bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 cursor-pointer',
 							isInWatchlist ? 'border-brand text-brand' : 'border-line-strong'
 						)}
 					>
@@ -545,7 +545,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						type="button"
 						onClick={handleShare}
 						aria-label="Share"
-						className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 cursor-pointer"
+						className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 cursor-pointer"
 					>
 						<ShareNetworkIcon size={18} />
 					</button>

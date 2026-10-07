@@ -93,7 +93,7 @@ function MediaCardComponent({
 			prefetch={false}
 			onClick={() => onClick?.(show)}
 			aria-label={ranked ? `Rank ${rank}: ${title}` : title}
-			className="group block w-full select-none rounded-sm outline-none transition-transform duration-(--duration-press) ease-out active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100"
+			className="group block w-full select-none rounded-sm outline-none transition-transform duration-(--duration-ui) ease-entrance will-change-transform can-hover:-translate-y-0.5 active:translate-y-0 active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100"
 		>
 			<span
 				className={cn(
@@ -113,7 +113,7 @@ function MediaCardComponent({
 						onLoad={() => setIsImageLoaded(true)}
 						onError={() => setImageError(true)}
 						className={cn(
-							'absolute inset-0 size-full object-cover transform-gpu transition-[transform,scale,opacity] duration-(--duration-image) ease-entrance motion-safe:group-focus-visible:scale-104 motion-safe:group-can-hover:scale-104 motion-reduce:transform-none motion-reduce:transition-none',
+							'absolute inset-0 size-full object-cover transform-gpu transition-[transform,opacity] duration-(--duration-reveal) ease-entrance motion-safe:group-can-hover:scale-102 motion-reduce:transform-none motion-reduce:transition-none',
 							isImageLoaded ? 'opacity-100' : 'opacity-0'
 						)}
 					/>
@@ -131,7 +131,7 @@ function MediaCardComponent({
 							aria-hidden="true"
 							className="absolute inset-x-3.5 bottom-3 z-20 grid gap-1"
 						>
-							<span className="line-clamp-2 font-display text-display-card uppercase">
+							<span className="line-clamp-2 text-ui font-medium text-text">
 								{title}
 							</span>
 							{meta}
@@ -152,13 +152,13 @@ function MediaCardComponent({
 				<NavigationPendingBar />
 				<span
 					aria-hidden="true"
-					className="absolute inset-0 z-30 rounded-sm border-2 border-brand opacity-0 transition-opacity duration-(--duration-ui) ease-out group-focus-visible:opacity-100 group-can-hover:opacity-100"
+					className="absolute inset-0 z-30 rounded-sm border border-line-strong opacity-0 transition-opacity duration-(--duration-ui) ease-out group-can-hover:opacity-100 group-focus-visible:border-brand group-focus-visible:opacity-100"
 				/>
 			</span>
 
 			{usesPoster && (
 				<span className="mt-2.5 block">
-					<span className="block truncate text-title leading-tight font-semibold text-foreground">
+					<span className="block truncate text-ui font-medium leading-tight text-text">
 						{title}
 					</span>
 					<span className="mt-1 block">{meta}</span>

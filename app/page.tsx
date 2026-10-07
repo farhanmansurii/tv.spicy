@@ -66,7 +66,7 @@ export default async function HomePage() {
 				)}
 			</div>
 
-			<Container className="relative z-10 w-full pt-7 md:pt-12">
+			<Container className="relative z-10 w-full">
 				<div className="flex flex-col">
 					<HomePersonalizedRows section="continue-watching" />
 

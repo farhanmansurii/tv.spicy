@@ -250,7 +250,7 @@ export function EditorialHero({
 			<div
 				data-reel-ghost
 				aria-hidden="true"
-				className="pointer-events-none absolute top-18 right-4 -z-10 font-display hero-ghost text-transparent select-none sm:right-6 lg:top-auto lg:right-8 lg:bottom-37.5"
+				className="pointer-events-none absolute top-20 right-6 -z-10 hero-ghost text-transparent select-none lg:top-auto lg:right-10 lg:bottom-40"
 			>
 				<span data-reel-ghost="in" className="block">
 					{padIndex(current + 1)}
@@ -269,7 +269,7 @@ export function EditorialHero({
 				>
 					<p
 						data-reel-slate
-						className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-sm leading-tight tracking-label text-white/60 uppercase"
+						className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-caption leading-tight tracking-label text-dim uppercase"
 					>
 						<span>
 							<span className="text-brand">{padIndex(current + 1)}</span> /{' '}
@@ -282,18 +282,15 @@ export function EditorialHero({
 
 					<h1
 						className={cn(
-							'mt-4 mb-4.5 font-display text-balance uppercase break-anywhere',
-							titleMain.length > LONG_TITLE_CHARS ? 'text-display-long' : 'text-display-hero'
+							'mt-4 mb-5 text-balance break-anywhere text-display text-text',
+							titleMain.length > LONG_TITLE_CHARS && 'is-long'
 						)}
 					>
 						<span data-reel-title className="block">
 							{titleMain}
 						</span>
 						{titleSubtitle && (
-							<span
-								data-reel-sub
-								className="mt-3 block font-display uppercase text-display-3 tracking-normal"
-							>
+							<span data-reel-sub className="mt-3 block text-lede font-normal text-soft">
 								{titleSubtitle}
 							</span>
 						)}
@@ -301,10 +298,10 @@ export function EditorialHero({
 
 					{slide.score > 0 && (
 						<p data-reel-score className="mb-6 flex items-baseline gap-2.5">
-							<span className="font-display text-display-3 leading-none">
+							<span className="text-title tabular-nums leading-none text-text">
 								{slide.score.toFixed(1)}
 							</span>
-							<span className="font-mono text-sm leading-none tracking-label text-white/60 uppercase">
+							<span className="font-mono text-caption leading-none tracking-label text-soft uppercase">
 								/ 10
 							</span>
 						</p>

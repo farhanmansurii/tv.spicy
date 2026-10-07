@@ -70,9 +70,7 @@ async function BrowseContent({ params }: PageProps) {
 	return (
 		<main className="min-h-screen bg-background pb-24 pt-safe-header text-foreground md:pb-28 md:pt-28">
 			<Container>
-				<header className="max-w-4xl border-l-2 border-brand pl-5 md:pl-7">
-					{/* Same recipe as a media row: accent index, then the label, then
-					    the Anton title and the mono count below. */}
+				<header className="max-w-3xl">
 					<div className="flex items-baseline gap-3">
 						<span
 							aria-hidden="true"
@@ -80,15 +78,13 @@ async function BrowseContent({ params }: PageProps) {
 						>
 							01
 						</span>
-						<p className="font-mono text-caption uppercase tracking-label text-muted-foreground">
-							Curated collection
+						<p className="font-mono text-caption uppercase tracking-label text-dim">
+							Collection
 						</p>
 					</div>
-					<TitleDisplay title={category.title} className="mt-3" />
-					<div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-						<p className="max-w-prose-secondary text-body leading-relaxed text-muted-foreground">
-							{category.description}
-						</p>
+					<TitleDisplay title={category.title} className="mt-4" />
+					<div className="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+						<p className="max-w-prose text-lede text-soft">{category.description}</p>
 						<span className="font-mono text-caption uppercase tracking-meta text-dim tabular-nums">
 							{shows.length} {shows.length === 1 ? 'title' : 'titles'}
 						</span>

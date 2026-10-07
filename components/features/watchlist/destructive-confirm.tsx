@@ -204,7 +204,7 @@ function DestructiveConfirmComponent({
 				aria-describedby={description ? descriptionId : undefined}
 				className="relative w-full max-w-dialog rounded-sm border border-line bg-surface p-5 shadow-overlay"
 			>
-				<h2 id={titleId} className="text-title text-foreground">
+				<h2 id={titleId} className="text-lede font-medium text-foreground">
 					{title}
 				</h2>
 				{description && (

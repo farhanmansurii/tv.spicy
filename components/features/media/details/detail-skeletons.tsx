@@ -29,7 +29,7 @@ export function HeroSkeleton() {
 					<div className="h-3.5 w-20 rounded-full bg-surface animate-pulse" />
 				</div>
 
-				{/* Anton title placeholder */}
+				{/* Title placeholder */}
 				<div className="h-16 sm:h-20 md:h-24 w-4/5 rounded-sm bg-surface animate-pulse mb-3" />
 				<div className="h-10 sm:h-12 md:h-14 w-1/2 rounded-sm bg-surface animate-pulse mb-6" />
 
@@ -65,7 +65,7 @@ export function AboutSkeleton({ type = 'tv' }: { type?: 'movie' | 'tv' }) {
 	const sectionIndex = type === 'tv' ? '02' : '01';
 
 	return (
-		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
+		<section className="mb-section scroll-mt-8 px-gutter">
 			{/* Section Heading */}
 			<div className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7">
 				<span
@@ -74,7 +74,7 @@ export function AboutSkeleton({ type = 'tv' }: { type?: 'movie' | 'tv' }) {
 				>
 					{sectionIndex}
 				</span>
-				<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
+				<h2 className="text-title text-text">
 					About
 				</h2>
 				<span className="ml-auto pb-1 text-right font-mono text-caption uppercase text-dim tracking-label tabular-nums">
@@ -119,7 +119,7 @@ export function ShowContainerSkeleton({
 }) {
 	const isTV = type === 'tv';
 	return (
-		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
+		<section className="mb-section scroll-mt-8 px-gutter">
 			{isTV ? (
 				<>
 					{/* Episodes Section Heading */}
@@ -130,7 +130,7 @@ export function ShowContainerSkeleton({
 						>
 							01
 						</span>
-						<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
+						<h2 className="text-title text-text">
 							Episodes
 						</h2>
 					</div>
@@ -169,7 +169,7 @@ export function ShowContainerSkeleton({
 
 export function RelatedSkeleton() {
 	return (
-		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
+		<section className="mb-section scroll-mt-8 px-gutter">
 			{/* Section Heading */}
 			<div className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7">
 				<span
@@ -178,7 +178,7 @@ export function RelatedSkeleton() {
 				>
 					03
 				</span>
-				<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
+				<h2 className="text-title text-text">
 					More like this
 				</h2>
 			</div>
@@ -199,9 +199,9 @@ export function RelatedSkeleton() {
 
 export function VideoSkeleton() {
 	return (
-		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
+		<section className="mb-section scroll-mt-8 px-gutter">
 			<div className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7">
-				<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
+				<h2 className="text-title text-text">
 					Videos
 				</h2>
 			</div>

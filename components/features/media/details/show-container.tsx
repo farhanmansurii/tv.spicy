@@ -74,7 +74,7 @@ export default function ShowContainer({
 					) : (
 						<div className="flex flex-col gap-4 md:gap-6">
 							{children}
-							<div id="media-player" className="scroll-mt-24">
+							<div id="media-player" data-player-container className="scroll-mt-24">
 								<Episode
 								episodeId={''}
 								id={id || ''}

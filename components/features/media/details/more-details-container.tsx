@@ -50,7 +50,7 @@ function MoreDetailsContainerComponent({
 			ref={sectionRef}
 			id="related"
 			aria-labelledby="related-title"
-			className="px-gutter mb-20 md:mb-28 scroll-mt-8"
+			className="mb-section scroll-mt-8 px-gutter"
 		>
 			{/* Section Heading */}
 			<div
@@ -65,7 +65,7 @@ function MoreDetailsContainerComponent({
 				</span>
 				<h2
 					id="related-title"
-					className="font-display text-display-2 uppercase tracking-normal text-text text-balance"
+					className="text-title text-balance text-text"
 				>
 					More like this
 				</h2>

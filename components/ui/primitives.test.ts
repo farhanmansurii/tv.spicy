@@ -6,50 +6,50 @@ import { cn } from '@/lib/utils';
 
 describe('twMerge customization in cn', () => {
 	it('preserves text-display font size alongside text color', () => {
-		const merged = cn('m-0 text-balance break-anywhere tracking-normal', 'text-display-1', 'font-display uppercase text-text');
-		assert.match(merged, /\btext-display-1\b/);
+		const merged = cn('m-0 text-balance break-anywhere', 'text-display', 'text-text');
+		assert.match(merged, /\btext-display\b/);
 		assert.match(merged, /\btext-text\b/);
 	});
 
 	it('preserves all custom font size roles with color tokens', () => {
-		assert.match(cn('text-display-2 text-dim'), /\btext-display-2\b/);
-		assert.match(cn('text-display-2 text-dim'), /\btext-dim\b/);
-		assert.match(cn('text-display-3 text-brand'), /\btext-display-3\b/);
-		assert.match(cn('text-display-3 text-brand'), /\btext-brand\b/);
+		assert.match(cn('text-title text-dim'), /\btext-title\b/);
+		assert.match(cn('text-title text-dim'), /\btext-dim\b/);
+		assert.match(cn('text-lede text-brand'), /\btext-lede\b/);
+		assert.match(cn('text-lede text-brand'), /\btext-brand\b/);
 	});
 });
 
 describe('TitleDisplay parseTitleParts', () => {
-	it('assigns text-display-1 to titles up to 14 characters', () => {
+	it('assigns text-display to titles up to 14 characters', () => {
 		const result = parseTitleParts('Severance');
-		assert.equal(result.tierClass, 'text-display-1');
+		assert.equal(result.tierClass, 'text-display');
 		assert.equal(result.tierModifier, '');
 		assert.equal(result.main, 'Severance');
 		assert.equal(result.subtitle, '');
 		assert.equal(result.isNonLatin, false);
 	});
 
-	it('assigns text-display-1-long to titles from 15 to 28 characters', () => {
+	it('assigns is-long to titles from 15 to 28 characters', () => {
 		const result = parseTitleParts('Better Call Saul');
-		assert.equal(result.tierClass, 'text-display-1-long');
+		assert.equal(result.tierClass, 'text-display');
 		assert.equal(result.tierModifier, 'is-long');
 		assert.equal(result.main, 'Better Call Saul');
 		assert.equal(result.subtitle, '');
 		assert.equal(result.isNonLatin, false);
 	});
 
-	it('assigns text-display-1-extended to titles from 29 to 48 characters', () => {
+	it('assigns is-extended to titles from 29 to 48 characters', () => {
 		const result = parseTitleParts('The Extraordinary Attorney Woo: Subtitle Here');
-		assert.equal(result.tierClass, 'text-display-1-extended');
+		assert.equal(result.tierClass, 'text-display');
 		assert.equal(result.tierModifier, 'is-extended');
 		assert.equal(result.main, 'The Extraordinary Attorney Woo');
 		assert.equal(result.subtitle, 'Subtitle Here');
 	});
 
-	it('assigns text-display-1-maximum to titles over 48 characters', () => {
+	it('assigns is-maximum to titles over 48 characters', () => {
 		const longTitle = 'Supercalifragilisticexpialidocious Ultra Long Title In Existence';
 		const result = parseTitleParts(longTitle);
-		assert.equal(result.tierClass, 'text-display-1-maximum');
+		assert.equal(result.tierClass, 'text-display');
 		assert.equal(result.tierModifier, 'is-maximum');
 	});
 

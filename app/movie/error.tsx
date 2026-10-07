@@ -20,7 +20,7 @@ export default function Error({
 				<p className="font-mono text-caption uppercase tracking-label text-destructive">
 					Error
 				</p>
-				<h2 className="mt-4 font-display text-display-3 uppercase text-text text-balance">
+				<h2 className="mt-4 text-title text-balance text-text">
 					Couldn’t load movies
 				</h2>
 				<p className="mt-3 text-lede text-soft max-w-prose-secondary">

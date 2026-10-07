@@ -7,7 +7,7 @@ const buttonVariants = cva(
 	[
 		'inline-flex items-center justify-center gap-2 whitespace-nowrap',
 		'rounded-full text-sm font-semibold tracking-tight',
-		'transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-150 ease-out',
+		'transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-(--duration-press) ease-out',
 		'disabled:pointer-events-none disabled:opacity-40',
 		'[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
 		'active:scale-97 motion-reduce:active:scale-100',

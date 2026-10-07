@@ -50,7 +50,7 @@ function StatCard({ value, label }: StatCardProps) {
 	return (
 		<Card className="p-4 lg:p-6">
 			<p className="font-mono text-micro uppercase tracking-meta text-dim">{label}</p>
-			<p className="mt-2 font-display text-display-3 tabular-nums text-foreground">{value}</p>
+			<p className="mt-2 text-title tabular-nums text-foreground">{value}</p>
 		</Card>
 	);
 }
@@ -176,7 +176,7 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 						<div className="w-full flex-1 text-center md:text-left">
 							<div className="flex flex-col items-center gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
 								<div className="min-w-0">
-									<h1 className="font-display text-display-2 text-balance uppercase leading-none text-foreground">
+									<h1 className="text-title text-balance text-foreground">
 										{session.user?.name || 'Your account'}
 									</h1>
 									<p className="mt-2 flex items-center justify-center gap-2 font-mono text-micro uppercase tracking-meta text-dim md:justify-start">
@@ -214,7 +214,7 @@ export default function ProfilePageClient({ session }: ProfilePageClientProps) {
 			{isEmpty ? (
 				<div className="flex flex-col items-center gap-4 px-gutter py-16 text-center md:py-24">
 					<BookmarkSimpleIcon size={24} className="text-dim" aria-hidden="true" />
-					<h2 className="font-display text-display-2 text-balance uppercase leading-none text-foreground">
+					<h2 className="text-title text-balance text-foreground">
 						Nothing on the reel yet.
 					</h2>
 					<p className="max-w-md font-mono text-micro uppercase leading-relaxed tracking-meta text-dim">

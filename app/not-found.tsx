@@ -16,7 +16,7 @@ export default function NotFound() {
 					<span aria-hidden="true"> / </span>End of reel
 				</p>
 
-				<h1 className="mt-4 font-display text-display-2 uppercase text-text text-balance">
+				<h1 className="mt-4 text-title text-balance text-text">
 					Nothing here but dust.
 				</h1>
 

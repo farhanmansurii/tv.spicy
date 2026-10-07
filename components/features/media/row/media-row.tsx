@@ -196,7 +196,7 @@ function MediaRowComponent({
 			href={viewAllLink}
 			prefetch={false}
 			aria-label={`See all titles in ${text || 'this collection'}`}
-			className="hit-target -my-2 inline-flex items-center gap-0.5 px-1 py-2 text-small font-semibold text-dim transition-colors can-hover:text-foreground"
+			className="hit-target -my-2 inline-flex items-center gap-1 px-1 py-2 text-ui font-medium text-dim transition-colors duration-(--duration-ui) can-hover:text-text"
 		>
 			See All
 			<CaretRightIcon size={13} weight="bold" aria-hidden="true" />
@@ -253,7 +253,7 @@ function MediaRowComponent({
 				// Baseline alignment, not bottom: a 1-line heading must start at the
 				// same offset from the row above as a 2-line one, or the row rhythm
 				// changes with heading length.
-				<div className="mb-3.5 flex items-baseline gap-3 px-gutter md:mb-4">
+				<div className="mb-5 flex items-baseline gap-3 px-gutter md:mb-6">
 					{rowNumber !== undefined && (
 						<span
 							data-row-reveal-header
@@ -265,7 +265,7 @@ function MediaRowComponent({
 					)}
 					<h2
 						data-row-reveal-header
-						className="font-display text-display-row uppercase text-balance"
+						className="text-title text-balance text-text"
 					>
 						{text || ''}
 					</h2>

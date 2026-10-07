@@ -107,7 +107,7 @@ export function EditorialHeroRail({
 									<span className="font-mono text-caption leading-none">
 										{padIndex(index + 1)}
 									</span>
-									<span className="block truncate text-title font-semibold">
+									<span className="block truncate text-ui font-medium">
 										{item.title}
 									</span>
 								</span>

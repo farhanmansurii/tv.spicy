@@ -51,7 +51,7 @@ export default function GlobalError({
 					Error
 				</p>
 
-				<h1 className="mt-4 font-display text-display-2 uppercase text-text text-balance">
+				<h1 className="mt-4 text-title text-balance text-text">
 					The projector jammed.
 				</h1>
 

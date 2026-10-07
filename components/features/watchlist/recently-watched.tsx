@@ -52,7 +52,7 @@ const RecentlyWatchedComponent = () => {
 			className="relative left-1/2 w-screen shrink-0 -translate-x-1/2 section-spacing overflow-visible"
 		>
 			<div className="mb-3.5 flex items-baseline gap-3 px-gutter md:mb-4">
-				<h2 className="font-display text-display-row text-balance uppercase text-foreground">
+				<h2 className="text-title text-balance text-foreground">
 					Continue Watching
 				</h2>
 				<span

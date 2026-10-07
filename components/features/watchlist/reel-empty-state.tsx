@@ -24,7 +24,7 @@ export function ReelEmptyState({
 			<span className="text-dim" aria-hidden="true">
 				{icon}
 			</span>
-			<h2 className="font-display text-display-2 text-balance uppercase leading-none text-foreground">
+			<h2 className="text-title text-balance text-foreground">
 				{title}
 			</h2>
 			<p className="max-w-md font-mono text-micro uppercase leading-relaxed tracking-meta text-dim">

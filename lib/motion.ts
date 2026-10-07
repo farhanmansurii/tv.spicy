@@ -302,7 +302,7 @@ export function leaveRoute(main: HTMLElement): void {
 	if (!g || isReducedMotion()) return;
 	isLeavingRoute = true;
 	g.killTweensOf(main);
-	g.to(main, { opacity: 0, duration: ROUTE_LEAVE.duration, ease: 'power2.out' });
+	g.to(main, { opacity: 0, y: -6, duration: ROUTE_LEAVE.duration, ease: 'power2.in' });
 	clearTimeout(routeRestoreTimer);
 	// A click that never navigates (cancelled, same URL, failed) must not leave the page hidden.
 	routeRestoreTimer = setTimeout(() => enterRoute(main), ROUTE_LEAVE.restoreAfterMs);
@@ -315,7 +315,60 @@ export function enterRoute(main: HTMLElement): void {
 	if (!g || !isLeavingRoute) return;
 	isLeavingRoute = false;
 	g.killTweensOf(main);
-	g.to(main, { opacity: 1, duration: ROUTE_ENTER.duration, ease: 'power2.out', clearProps: 'opacity' });
+	if (isReducedMotion()) {
+		g.set(main, { clearProps: 'opacity,transform' });
+		return;
+	}
+	g.fromTo(
+		main,
+		{ opacity: 0, y: 10 },
+		{
+			opacity: 1,
+			y: 0,
+			duration: ROUTE_ENTER.duration,
+			ease: 'power3.out',
+			clearProps: 'opacity,transform',
+		}
+	);
+}
+
+/** Player chrome arriving under the frame. Transform and opacity only. */
+export function showPlayerChrome(chrome: HTMLElement): () => void {
+	const g = registerGSAP();
+	if (!g || isReducedMotion()) return () => {};
+	g.killTweensOf(chrome);
+	g.fromTo(
+		chrome,
+		{ opacity: 0, y: 8 },
+		{
+			opacity: 1,
+			y: 0,
+			duration: 0.32,
+			ease: CURVES.enter,
+			clearProps: 'opacity,transform',
+		}
+	);
+	return () => {
+		g.killTweensOf(chrome);
+		g.set(chrome, { clearProps: 'opacity,transform' });
+	};
+}
+
+/** Player chrome leaving before the sticky frame is dismissed. */
+export function hidePlayerChrome(chrome: HTMLElement, onComplete: () => void): void {
+	const g = registerGSAP();
+	if (!g || isReducedMotion()) {
+		onComplete();
+		return;
+	}
+	g.killTweensOf(chrome);
+	g.to(chrome, {
+		opacity: 0,
+		y: 6,
+		duration: TIMINGS.exit,
+		ease: CURVES.exit,
+		onComplete,
+	});
 }
 
 let hasLeftLandingPage = false;

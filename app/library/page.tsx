@@ -179,11 +179,11 @@ export default function LibraryPage() {
 							{isSignedIn ? 'Library · Synced' : 'Library · On this device'}
 						</p>
 						{isMounted && isAuthenticated && greetingMessage ? (
-							<h1 className="mt-3 font-display text-display-2 text-balance uppercase leading-none text-foreground">
+							<h1 className="mt-3 text-title text-balance text-foreground">
 								{greetingMessage}
 							</h1>
 						) : (
-							<h1 className="mt-3 font-display text-display-2 text-balance uppercase leading-none text-foreground">
+							<h1 className="mt-3 text-title text-balance text-foreground">
 								Your Library
 							</h1>
 						)}

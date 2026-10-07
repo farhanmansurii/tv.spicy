@@ -207,7 +207,7 @@ function MediaInfoPanelComponent({ data, type, credits }: MediaInfoPanelProps) {
 			ref={sectionRef}
 			id="about"
 			aria-labelledby="about-title"
-			className="px-gutter mb-20 md:mb-28 scroll-mt-8"
+			className="mb-section scroll-mt-8 px-gutter"
 		>
 			{/* Section Heading */}
 			<div
@@ -222,7 +222,7 @@ function MediaInfoPanelComponent({ data, type, credits }: MediaInfoPanelProps) {
 				</span>
 				<h2
 					id="about-title"
-					className="font-display text-display-2 uppercase tracking-normal text-text text-balance"
+					className="text-title text-balance text-text"
 				>
 					About
 				</h2>
@@ -274,7 +274,7 @@ function MediaInfoPanelComponent({ data, type, credits }: MediaInfoPanelProps) {
 										<span className="block mb-2 font-mono text-caption text-dim uppercase tracking-label truncate">
 											{member.job || 'Crew'}
 										</span>
-										<span className="font-semibold text-title text-text line-clamp-2">
+										<span className="line-clamp-2 text-ui font-medium text-text">
 											{member.name}
 										</span>
 									</div>

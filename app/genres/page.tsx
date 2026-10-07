@@ -99,7 +99,7 @@ const GenreCard = ({ genre, type, index }: { genre: Genre; type: 'movie' | 'tv';
 				</span>
 			</div>
 			<div className="flex min-w-0 flex-col items-start gap-2">
-				<h3 className="min-w-0 max-w-full break-words font-display text-2xl uppercase leading-none text-foreground md:text-3xl">
+				<h3 className="min-w-0 max-w-full break-words text-title text-foreground">
 					{genre.name}
 				</h3>
 				<span className="font-mono text-micro uppercase tracking-meta-wide text-muted-foreground">
@@ -131,7 +131,7 @@ function GenreSection({
 					>
 						{caption}
 					</span>
-					<h2 className="font-display text-display-row uppercase leading-none text-foreground">
+					<h2 className="text-title text-foreground">
 						{title}
 					</h2>
 				</div>
@@ -176,7 +176,7 @@ export default async function GenresPage() {
 					<p className="font-mono text-caption uppercase tracking-label text-muted-foreground">
 						Browse the archive
 					</p>
-					<h1 className="mt-3 max-w-4xl font-display text-display-1 uppercase leading-none text-foreground text-balance">
+					<h1 className="mt-3 max-w-4xl text-display text-balance text-foreground">
 						Explore Categories
 					</h1>
 					<p className="mt-4 max-w-prose-secondary text-body leading-relaxed text-muted-foreground">

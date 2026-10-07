@@ -79,7 +79,7 @@ function EpisodeListRowComponent({
 			)}
 		>
 			{/* Episode number */}
-			<span className="w-8 md:w-16 shrink-0 self-start font-display text-display-3 text-dim tabular-nums select-none">
+			<span className="w-8 md:w-16 shrink-0 self-start text-title tabular-nums text-dim select-none">
 				{epNum}
 			</span>
 
@@ -144,7 +144,7 @@ function EpisodeListRowComponent({
 				{/* Copy block */}
 				<div className="flex-1 min-w-0 flex flex-col gap-1.5">
 					{!isGenericTitle && (
-						<h3 className="line-clamp-2 text-title font-semibold text-text m-0">
+						<h3 className="m-0 line-clamp-2 text-ui font-medium text-text">
 							{episode.name}
 						</h3>
 					)}

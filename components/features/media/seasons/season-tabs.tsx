@@ -249,7 +249,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 					<WarningCircleIcon size={14} weight="fill" aria-hidden="true" />
 					Error
 				</p>
-				<h2 className="m-0 font-display text-display-3 uppercase leading-none text-foreground">
+				<h2 className="m-0 text-title text-foreground">
 					The reel jammed.
 				</h2>
 				<p className="m-0 text-body text-soft">Episodes could not load. Try again.</p>
@@ -308,7 +308,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 						<span className="font-mono text-caption text-brand tracking-label tabular-nums" aria-hidden="true">
 							01
 						</span>
-						<h2 id="episodes-title" className="font-display text-display-2 uppercase leading-none text-foreground m-0">
+						<h2 id="episodes-title" className="text-title text-foreground m-0">
 							Episodes
 						</h2>
 					</div>
