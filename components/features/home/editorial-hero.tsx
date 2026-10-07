@@ -282,7 +282,7 @@ export function EditorialHero({
 
 					<h1
 						className={cn(
-							'mt-4 mb-5 text-balance break-anywhere text-display text-text',
+							'mt-4 mb-5 text-balance break-anywhere font-display text-display text-text',
 							titleMain.length > LONG_TITLE_CHARS && 'is-long'
 						)}
 					>

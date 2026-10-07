@@ -12,7 +12,7 @@ function Toaster({ className, toastOptions, style, ...props }: ToasterProps) {
 			toastOptions={{
 				...toastOptions,
 				classNames: {
-					toast: '!rounded-full !bg-foreground !text-background !font-sans !font-semibold !px-5 !py-3 !shadow-lg border-0',
+					toast: '!rounded-full !bg-foreground !text-background !font-sans !text-ui !font-medium !tracking-normal !px-5 !py-3 !shadow-lg border-0',
 					error: '!bg-destructive !text-destructive-foreground',
 					...toastOptions?.classNames,
 				},

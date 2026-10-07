@@ -288,7 +288,7 @@ function EditorialState({
 					type="button"
 					onClick={action.onClick}
 					className={cn(
-						'pressable mt-8 inline-flex h-12 items-center justify-center rounded-full border border-border-strong bg-card px-5 text-body font-semibold text-foreground can-hover:border-foreground/25 can-hover:bg-muted',
+						'pressable mt-8 inline-flex h-12 items-center justify-center rounded-full border border-border-strong bg-card px-5 font-sans text-ui font-medium tracking-normal text-foreground can-hover:border-foreground/25 can-hover:bg-muted',
 						focusRing
 					)}
 				>

@@ -256,7 +256,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 				<button
 					type="button"
 					onClick={() => refetch()}
-					className="pressable h-12 rounded-full bg-brand px-5 text-body font-semibold text-brand-foreground transition-[background-color,scale] duration-(--duration-ui) can-hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+					className="pressable h-12 rounded-full bg-brand px-5 font-sans text-ui font-medium tracking-normal text-brand-foreground transition-[background-color,scale] duration-(--duration-ui) can-hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 				>
 					Try again
 				</button>

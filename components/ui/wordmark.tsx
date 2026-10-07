@@ -10,7 +10,7 @@ export function Wordmark({ size = 'default', className }: WordmarkProps) {
 		<span className={cn('inline-flex items-center gap-2', className)}>
 			<span
 				className={cn(
-					'font-medium tracking-tight text-text',
+					'font-sans font-medium tracking-normal text-text',
 					size === 'sm' ? 'text-base' : 'text-md'
 				)}
 			>

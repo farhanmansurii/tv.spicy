@@ -432,7 +432,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 										aria-expanded={isOverviewExpanded}
 										aria-controls="dv-synopsis"
 										onClick={toggleOverview}
-										className="inline-block font-sans font-semibold text-ui text-text underline underline-offset-4 cursor-pointer can-hover:text-soft"
+										className="inline-block font-sans font-medium text-ui tracking-normal text-text underline underline-offset-4 cursor-pointer can-hover:text-soft"
 									>
 										{isOverviewExpanded ? 'Less' : 'More'}
 									</button>
@@ -463,7 +463,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							aria-pressed={isInWatchlist}
 							aria-label="My List"
 							className={cn(
-								'flex items-center gap-2 rounded-full border bg-canvas/50 font-sans font-semibold text-body h-12 shrink-0 px-4 sm:px-5 sm:text-ui transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer',
+								'flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border bg-canvas/50 px-4 font-sans text-ui font-medium tracking-normal transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 sm:px-5',
 								isInWatchlist
 									? 'border-brand text-brand'
 									: 'border-line-strong can-hover:border-line text-text'
@@ -514,7 +514,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 					<button
 						type="button"
 						onClick={handlePrimaryAction}
-						className="flex flex-1 h-12 items-center justify-center gap-2 rounded-full bg-brand can-hover:bg-brand-hover px-4 font-sans font-semibold text-body text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 cursor-pointer"
+						className="flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand px-4 font-sans text-ui font-medium tracking-normal text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 can-hover:bg-brand-hover"
 					>
 						<PlayIcon size={16} weight="fill" aria-hidden="true" />
 						<span className="truncate">{primaryLabel}</span>

@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* Neue Montreal is the only UI face. Files already live in public/fonts. */
+/* Neue Montreal: display and titles. Geist Sans (layout): UI, body, buttons. */
 @font-face {
 	font-family: 'Neue Montreal';
 	src: url('/fonts/NeueMontreal-Light.ttf') format('truetype');
@@ -193,7 +193,9 @@
 	--color-sidebar-ring: var(--sidebar-ring);
 
 	--font-sans:
-		'Neue Montreal', ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+		var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+	--font-display:
+		'Neue Montreal', var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 	--font-mono:
 		var(--font-mono), ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
 
@@ -222,13 +224,13 @@
 	--text-title--letter-spacing: -0.024em;
 	--text-lede: 1.0625rem;
 	--text-lede--line-height: 1.55;
-	--text-lede--letter-spacing: -0.011em;
+	--text-lede--letter-spacing: 0;
 	--text-body: 0.9375rem;
 	--text-body--line-height: 1.55;
-	--text-body--letter-spacing: -0.011em;
+	--text-body--letter-spacing: 0;
 	--text-ui: 0.875rem;
 	--text-ui--line-height: 1.35;
-	--text-ui--letter-spacing: -0.006em;
+	--text-ui--letter-spacing: 0;
 	--text-caption: 0.75rem;
 	--text-caption--line-height: 1.35;
 	--text-caption--letter-spacing: 0.08em;
@@ -333,12 +335,14 @@
 }
 
 @utility text-display {
+	font-family: var(--font-display);
 	font-weight: 500;
 	font-size: clamp(2.75rem, 6.2vw, 5.25rem);
 	line-height: 0.98;
 	letter-spacing: -0.034em;
 }
 @utility text-title {
+	font-family: var(--font-display);
 	font-weight: 500;
 	font-size: clamp(1.375rem, 2.1vw, 1.875rem);
 	line-height: 1.15;
@@ -347,23 +351,23 @@
 @utility text-lede {
 	font-size: 1.0625rem;
 	line-height: 1.55;
-	letter-spacing: -0.011em;
+	letter-spacing: 0;
 }
 @utility text-body {
 	font-size: 0.9375rem;
 	line-height: 1.55;
-	letter-spacing: -0.011em;
+	letter-spacing: 0;
 }
 @utility text-ui {
 	font-size: 0.875rem;
 	line-height: 1.35;
-	letter-spacing: -0.006em;
+	letter-spacing: 0;
 }
 /* Secondary copy sits on the ui step with reading leading. */
 @utility text-small {
 	font-size: 0.875rem;
 	line-height: 1.5;
-	letter-spacing: -0.006em;
+	letter-spacing: 0;
 }
 @utility text-caption {
 	font-size: 0.75rem;
@@ -424,6 +428,7 @@
 }
 
 @utility dv-title {
+	font-family: var(--font-display);
 	font-weight: 500;
 	font-size: clamp(2.75rem, 6.2vw, 5.25rem);
 	line-height: 0.98;
@@ -591,7 +596,7 @@
 
 	body {
 		@apply bg-background text-foreground font-sans;
-		letter-spacing: -0.011em;
+		letter-spacing: 0;
 		padding-right: 0px !important;
 		margin-right: 0px !important;
 		width: 100% !important;

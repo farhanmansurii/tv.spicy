@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 const buttonVariants = cva(
 	[
 		'inline-flex items-center justify-center gap-2 whitespace-nowrap',
-		'rounded-full text-sm font-semibold tracking-tight',
+		'font-sans rounded-full font-medium tracking-normal',
 		'transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-(--duration-press) ease-out',
 		'disabled:pointer-events-none disabled:opacity-40',
 		'[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
@@ -31,10 +31,10 @@ const buttonVariants = cva(
 			},
 			shape: { default: '', pill: 'rounded-full' },
 			size: {
-				default: 'h-12 px-6 rounded-full font-semibold text-base gap-2.5',
-				sm: 'h-9 px-4 text-micro rounded-full',
-				lg: 'h-12 px-8 text-base rounded-full',
-				xl: 'h-12 px-5 text-base rounded-full md:h-13 md:px-8',
+				default: 'h-12 px-6 text-ui gap-2.5',
+				sm: 'h-9 px-4 text-ui',
+				lg: 'h-12 px-8 text-ui',
+				xl: 'h-12 px-5 text-ui md:h-13 md:px-8',
 				icon: 'hit-target h-10 w-10 p-0 rounded-full',
 				'icon-lg': 'hit-target size-12 p-0 rounded-full',
 			},

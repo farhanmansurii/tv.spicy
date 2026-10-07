@@ -74,12 +74,13 @@ export function TitleDisplay({
 				tierClass,
 				tierModifier,
 				isNonLatin && 'is-nonlatin font-sans leading-nonlatin',
+				!isNonLatin && 'font-display',
 				className
 			)}
 		>
 			<span className="dv-title-main inline">{renderMainContent()}</span>
 			{subtitle ? (
-				<span className="dv-title-subtitle mt-3 block text-lede font-normal text-soft">
+				<span className="dv-title-subtitle mt-3 block font-sans text-lede font-normal text-soft">
 					{subtitle}
 				</span>
 			) : null}
