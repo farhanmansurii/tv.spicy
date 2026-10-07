@@ -1,77 +1,91 @@
 # Watvh
 
-Watvh is a web application that allows users to explore and watch a vast collection of movies and TV shows. With a user-friendly interface and integration with the TMDb API, Watvh provides a delightful streaming experience. You can also save your favorite content to a watchlist and track previously watched content with time tracking features.
+Next.js streaming app for browsing movies and TV shows via [TMDb](https://www.themoviedb.org/), with watchlist, favorites, and watch-time tracking.
 
-## Screenshot
-![CleanShot 2024-05-19 at 01 59 18@2x](https://github.com/farhanmansurii/tv.spicy/assets/74182335/193045be-dff2-4f24-b24f-27d4d63d21e6)
-![CleanShot 2024-05-19 at 01 59 43@2x](https://github.com/farhanmansurii/tv.spicy/assets/74182335/c4539edb-5348-421e-aa6a-448c2b0e5fe5)
-
-
-## Features
-
-- Browse a vast library of movies and TV shows.
-- Stream movies and TV shows seamlessly.
-- Add content to your watchlist for easy access.
-- Track the time you've spent watching content.
-- Responsive design for a great user experience on any device.
-
-## Technologies Used
-
-- [Next.js](https://nextjs.org/): A React framework for server-rendered applications.
-- [Zustand](https://github.com/pmndrs/zustand): A small, fast, and scalable state management for React.
-- [Tailwind CSS](https://tailwindcss.com/): A utility-first CSS framework for rapid UI development.
-- [TMDb API](https://www.themoviedb.org/documentation/api): The TMDb API provides access to a vast movie and TV show database.
-
-## Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd tv.spicy
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**
-
-   Create a `.env.local` file in the root directory (this file is gitignored and won't be committed):
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Then edit `.env.local` and add your TMDB API credentials:
-   - Get your API key from: https://www.themoviedb.org/settings/api
-   - Get your Bearer Token from: https://www.themoviedb.org/settings/api (recommended)
-
-   Add one of the following to `.env.local`:
-   ```env
-   NEXT_PUBLIC_TMDB_BEARER_TOKEN=your_bearer_token_here
-   ```
-
-   OR
-   ```env
-   NEXT_PUBLIC_TMDB_API_KEY=your_api_key_here
-   ```
-
-   **Note:** You only need ONE of the above. Bearer Token is recommended as it's more secure.
-
-4. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-# Usage
-
-- **Home:** Explore the vast library of movies and TV shows, and select a title to watch.
-- **Watchlist:** Save your favorite content to the watchlist for easy access.
-- **History:** View a list of previously watched content and track your watch time.
-- **Search:** Find specific movies and TV shows using the search feature.
+**Live:** [watvh.vercel.app](https://watvh.vercel.app)
 
 ## Screenshots
 
+![Home](https://github.com/farhanmansurii/tv.spicy/assets/74182335/193045be-dff2-4f24-b24f-27d4d63d21e6)
+![Details](https://github.com/farhanmansurii/tv.spicy/assets/74182335/c4539edb-5348-421e-aa6a-448c2b0e5fe5)
+
+## Features
+
+- Browse movies and TV shows from the TMDb catalog (home, browse, discover, genres)
+- Search titles; signed-in users keep recent search history
+- Watch movies and TV shows in-app
+- Library for signed-in users: watchlist, favorites, continue watching / recently watched with progress
+- Auth via better-auth (Google sign-in and email magic links)
+- Responsive layout for desktop and mobile
+
+## Stack
+
+| Area | Choice |
+| --- | --- |
+| App | Next.js 16, React 19, TypeScript |
+| UI | Tailwind CSS 4 |
+| Data | Prisma, PostgreSQL, TanStack Query |
+| Client state | Zustand |
+| Auth | better-auth |
+| Validation | Zod |
+| CI | GitHub Actions — `tsc --noEmit`, ESLint, `npm test` on Node 24 |
+
+## Setup
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/farhanmansurii/tv.spicy.git
+cd tv.spicy
+npm install
+```
+
+`postinstall` runs `prisma generate`.
+
+### 2. Environment
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local`. Full comments live in [`.env.example`](.env.example). Summary:
+
+| Variable | Notes |
+| --- | --- |
+| `NEXT_PUBLIC_TMDB_BEARER_TOKEN` or `NEXT_PUBLIC_TMDB_API_KEY` | TMDb access (one required in production). Server-only `TMDB_BEARER_TOKEN` / `TMDB_API_KEY` aliases work too. Bearer token preferred. Get credentials at [TMDb API settings](https://www.themoviedb.org/settings/api). |
+| `DATABASE_URL` | Postgres connection string (required in production for auth/library). |
+| `PRISMA_DATABASE_URL` | Optional Prisma Accelerate URL; when set, takes precedence over `DATABASE_URL`. |
+| `BETTER_AUTH_SECRET` or `NEXTAUTH_SECRET` | Session signing (one required in production). |
+| `BETTER_AUTH_URL` / `NEXTAUTH_URL` | Auth base URL; required in production when not on Vercel (`VERCEL_URL` is used there). |
+| `NEXT_PUBLIC_SITE_URL` | Optional canonical origin for metadata/sitemap. |
+| `NEXT_PUBLIC_BETTER_AUTH_URL` | Optional client auth base URL. |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google sign-in. |
+| `RESEND_API_KEY` / `EMAIL_FROM` | Optional magic-link email. Without Resend, links are logged on the server. |
+
+Nothing in `.env.example` is a real credential.
+
+### 3. Database
+
+Point `DATABASE_URL` at Postgres, then apply the schema with your usual Prisma workflow (for example `npx prisma db push` or migrations).
+
+### 4. Run
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Development server (Turbopack) |
+| `npm run build` | Production build |
+| `npm start` | Start the production server |
+| `npm test` | Run `*.test.ts` with `tsx --test` |
+| `npm run lint` | ESLint |
+
 ## License
 
-This project is open-source and available under the MIT License.
+This repository does not currently include a license file.
