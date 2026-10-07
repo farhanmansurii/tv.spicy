@@ -44,7 +44,7 @@ function RowStatePanel({
 		<section className="relative left-1/2 w-screen shrink-0 -translate-x-1/2 section-spacing overflow-visible">
 			<div className="px-gutter">
 				{!hideHeader && text && (
-					<div className="mb-3.5 flex items-end gap-3 md:mb-4">
+					<div className="mb-5 flex items-baseline gap-3 md:mb-6">
 						{rowNumber !== undefined && (
 							<span
 								aria-hidden="true"
@@ -53,7 +53,7 @@ function RowStatePanel({
 								{String(rowNumber).padStart(2, '0')}
 							</span>
 						)}
-						<h2 className="font-display text-display-row uppercase">{text}</h2>
+						<h2 className="text-title text-text">{text}</h2>
 					</div>
 				)}
 				<div
@@ -65,7 +65,7 @@ function RowStatePanel({
 						{isError && <WarningCircleIcon size={16} weight="fill" aria-hidden="true" />}
 						{isError ? 'Signal lost' : 'Nothing scheduled'}
 					</p>
-					<p className="font-display text-display-4 uppercase text-foreground">
+					<p className="text-title text-text">
 						{isError ? 'The projector jammed.' : 'This reel is empty.'}
 					</p>
 					<p className="max-w-sm text-small leading-relaxed text-muted-foreground">

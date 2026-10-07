@@ -52,7 +52,7 @@ const RecentlyWatchedComponent = () => {
 			className="relative left-1/2 w-screen shrink-0 -translate-x-1/2 section-spacing overflow-visible"
 		>
 			<div className="mb-3.5 flex items-baseline gap-3 px-gutter md:mb-4">
-				<h2 className="font-display text-display-row text-balance uppercase text-foreground">
+				<h2 className="text-title text-balance text-foreground">
 					Continue Watching
 				</h2>
 				<span
@@ -83,9 +83,12 @@ const RecentlyWatchedComponent = () => {
 
 			<Carousel
 				opts={{ align: 'start', dragFree: true, containScroll: 'trimSnaps' }}
-				className="relative w-full"
+				className="relative w-full -my-1"
 			>
-				<CarouselContent className="-ml-3 cursor-grab touch-pan-y overflow-visible active:cursor-grabbing px-(--gutter) md:-ml-5">
+				<CarouselContent
+					viewportClassName="py-1"
+					className="-ml-3 cursor-grab touch-pan-y overflow-visible active:cursor-grabbing px-(--gutter) md:-ml-5"
+				>
 					{episodes.map((item, index: number) => (
 						<CarouselItem
 							key={item.id}

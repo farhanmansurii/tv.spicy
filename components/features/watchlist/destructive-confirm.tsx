@@ -204,7 +204,7 @@ function DestructiveConfirmComponent({
 				aria-describedby={description ? descriptionId : undefined}
 				className="relative w-full max-w-dialog rounded-sm border border-line bg-surface p-5 shadow-overlay"
 			>
-				<h2 id={titleId} className="text-title text-foreground">
+				<h2 id={titleId} className="text-lede font-medium text-foreground">
 					{title}
 				</h2>
 				{description && (
@@ -218,14 +218,14 @@ function DestructiveConfirmComponent({
 						ref={cancelRef}
 						type="button"
 						onClick={(event) => handleButtonActivate(event, onCancel)}
-						className={`rounded-full border border-border-strong bg-card h-12 px-5 text-body font-semibold text-foreground can-hover:bg-raised ${PRESSABLE} ${FOCUS_RING}`}
+						className={`h-12 rounded-full border border-border-strong bg-card px-5 font-sans text-ui font-medium tracking-normal text-foreground can-hover:bg-raised ${PRESSABLE} ${FOCUS_RING}`}
 					>
 						{cancelLabel}
 					</button>
 					<button
 						type="button"
 						onClick={(event) => handleButtonActivate(event, onConfirm)}
-						className={`rounded-full bg-destructive h-12 px-5 text-body font-semibold text-foreground can-hover:bg-destructive/90 ${PRESSABLE} ${FOCUS_RING}`}
+						className={`h-12 rounded-full bg-destructive px-5 font-sans text-ui font-medium tracking-normal text-foreground can-hover:bg-destructive/90 ${PRESSABLE} ${FOCUS_RING}`}
 					>
 						{confirmLabel}
 					</button>

@@ -40,7 +40,7 @@ const focusRing =
 	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 /* ------------------------------------------------------------------ */
-//  Section heading — the page recipe: mono index, Anton title, mono count
+//  Section heading — mono index, title, mono count
 /* ------------------------------------------------------------------ */
 
 function SectionHeading({
@@ -62,7 +62,7 @@ function SectionHeading({
 			>
 				{index}
 			</span>
-			<h2 className="font-display text-display-row uppercase text-foreground">{title}</h2>
+			<h2 className="text-title text-foreground">{title}</h2>
 			{count && (
 				<span className="hidden pb-1.25 font-mono text-caption leading-none tracking-meta-wide text-muted-foreground uppercase tabular-nums sm:block">
 					{count}
@@ -208,7 +208,7 @@ function RecentSearches({
 										</span>
 									)}
 								</span>
-								<span className="mt-2 block truncate text-title font-semibold text-foreground">
+								<span className="mt-2 block truncate text-ui font-medium text-foreground">
 									{title}
 								</span>
 							</button>
@@ -282,13 +282,13 @@ function EditorialState({
 		<div className="border-t border-border pt-10 pb-16" role={role}>
 			<div className="max-w-prose">
 				<p className="font-mono text-caption uppercase tracking-label text-dim">{kicker}</p>
-				<h2 className="mt-4 font-display text-display-2 uppercase text-foreground">{title}</h2>
+				<h2 className="mt-4 text-title text-foreground">{title}</h2>
 				<p className="mt-4 max-w-prose text-lede text-soft">{body}</p>
 				<button
 					type="button"
 					onClick={action.onClick}
 					className={cn(
-						'pressable mt-8 inline-flex h-12 items-center justify-center rounded-full border border-border-strong bg-card px-5 text-body font-semibold text-foreground can-hover:border-foreground/25 can-hover:bg-muted',
+						'pressable mt-8 inline-flex h-12 items-center justify-center rounded-full border border-border-strong bg-card px-5 font-sans text-ui font-medium tracking-normal text-foreground can-hover:border-foreground/25 can-hover:bg-muted',
 						focusRing
 					)}
 				>

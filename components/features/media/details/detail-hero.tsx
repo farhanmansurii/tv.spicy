@@ -17,6 +17,7 @@ import useWatchListStore from '@/store/watchlistStore';
 import { useEpisodeStore } from '@/store/episodeStore';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { toast } from 'sonner';
+import { buttonIconLabelClass } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import gsap from 'gsap';
 
@@ -360,7 +361,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						))}
 					</p>
 
-					{/* Anton Display Title */}
+					{/* Display title */}
 					<TitleDisplay
 						title={title}
 						originalTitle={originalTitle}
@@ -388,11 +389,11 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							ref={ratingRef}
 							className="mt-5 mb-4 flex flex-wrap items-baseline gap-2.5 tabular-nums"
 						>
-							<strong className="font-display text-display-4 text-text md:text-display-3">
+							<strong className="text-title tabular-nums text-text">
 								{voteAvg.toFixed(1)}
 							</strong>
 							<span
-								className="text-brand text-body select-none md:text-display-4"
+								className="select-none text-lede text-brand"
 								aria-hidden="true"
 							>
 								★
@@ -432,7 +433,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 										aria-expanded={isOverviewExpanded}
 										aria-controls="dv-synopsis"
 										onClick={toggleOverview}
-										className="inline-block font-sans font-semibold text-ui text-text underline underline-offset-4 cursor-pointer can-hover:text-soft"
+										className="inline-block font-sans font-medium text-ui tracking-normal text-text underline underline-offset-4 cursor-pointer can-hover:text-soft"
 									>
 										{isOverviewExpanded ? 'Less' : 'More'}
 									</button>
@@ -450,9 +451,12 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						<button
 							type="button"
 							onClick={handlePrimaryAction}
-							className="flex items-center justify-center gap-2 rounded-full bg-brand can-hover:bg-brand-hover text-brand-foreground font-sans font-semibold text-body h-12 px-5 min-w-36 flex-1 sm:flex-none sm:px-6 sm:text-ui transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
+							className={cn(
+								buttonIconLabelClass,
+								'flex h-12 min-w-36 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand px-5 font-sans text-ui font-medium tracking-normal text-brand-foreground transition-[background-color,transform] duration-(--duration-press) ease-out can-hover:bg-brand-hover active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 sm:flex-none sm:px-6'
+							)}
 						>
-							<PlayIcon size={18} weight="fill" aria-hidden="true" />
+							<PlayIcon weight="fill" aria-hidden="true" />
 							<span>{primaryLabel}</span>
 						</button>
 
@@ -463,18 +467,18 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							aria-pressed={isInWatchlist}
 							aria-label="My List"
 							className={cn(
-								'flex items-center gap-2 rounded-full border bg-canvas/50 font-sans font-semibold text-body h-12 shrink-0 px-4 sm:px-5 sm:text-ui transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer',
+								buttonIconLabelClass,
+								'flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border bg-canvas/50 px-4 font-sans text-ui font-medium tracking-normal transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 sm:px-5',
 								isInWatchlist
 									? 'border-brand text-brand'
 									: 'border-line-strong can-hover:border-line text-text'
 							)}
 						>
 							<span
-								className="relative flex items-center justify-center size-4"
+								className="relative flex size-[1cap] shrink-0 items-center justify-center"
 								aria-hidden="true"
 							>
 								<PlusIcon
-									size={16}
 									weight="bold"
 									className={cn(
 										'absolute transition-opacity duration-200',
@@ -483,16 +487,15 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 									data-icon="plus"
 								/>
 								<CheckIcon
-									size={16}
 									weight="bold"
 									className={cn(
-										'absolute text-brand transition-opacity duration-200',
+										'absolute size-[1cap] text-brand transition-opacity duration-200',
 										isInWatchlist ? 'opacity-100' : 'opacity-0'
 									)}
 									data-icon="check"
 								/>
 							</span>
-							<span>My List</span>
+							My List
 						</button>
 
 						<button
@@ -500,7 +503,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 							onClick={handleShare}
 							aria-label="Share"
 							title="Share"
-							className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong can-hover:border-line bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
+							className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong can-hover:border-line bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-pointer"
 						>
 							<ShareNetworkIcon size={18} aria-hidden="true" />
 						</button>
@@ -514,9 +517,12 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 					<button
 						type="button"
 						onClick={handlePrimaryAction}
-						className="flex flex-1 h-12 items-center justify-center gap-2 rounded-full bg-brand can-hover:bg-brand-hover px-4 font-sans font-semibold text-body text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 cursor-pointer"
+						className={cn(
+							buttonIconLabelClass,
+							'flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand px-4 font-sans text-ui font-medium tracking-normal text-brand-foreground transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 can-hover:bg-brand-hover'
+						)}
 					>
-						<PlayIcon size={16} weight="fill" aria-hidden="true" />
+						<PlayIcon weight="fill" aria-hidden="true" />
 						<span className="truncate">{primaryLabel}</span>
 					</button>
 					<button
@@ -526,7 +532,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						aria-pressed={isInWatchlist}
 						aria-label="My List"
 						className={cn(
-							'flex size-12 shrink-0 items-center justify-center rounded-full border bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 cursor-pointer',
+							'flex size-12 shrink-0 items-center justify-center rounded-full border bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 cursor-pointer',
 							isInWatchlist ? 'border-brand text-brand' : 'border-line-strong'
 						)}
 					>
@@ -545,7 +551,7 @@ function DetailHeroComponent({ show, type }: DetailHeroProps) {
 						type="button"
 						onClick={handleShare}
 						aria-label="Share"
-						className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 cursor-pointer"
+						className="flex size-12 shrink-0 items-center justify-center rounded-full border border-line-strong bg-canvas/50 text-text transition-transform duration-(--duration-press) active:scale-97 motion-reduce:active:scale-100 cursor-pointer"
 					>
 						<ShareNetworkIcon size={18} />
 					</button>

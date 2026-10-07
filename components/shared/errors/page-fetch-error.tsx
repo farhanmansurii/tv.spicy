@@ -40,7 +40,7 @@ export function PageFetchError({
 					Error
 				</p>
 
-				<h1 className="mt-4 font-display text-display-3 uppercase text-text text-balance">
+				<h1 className="mt-4 text-title text-balance text-text">
 					{title}
 				</h1>
 

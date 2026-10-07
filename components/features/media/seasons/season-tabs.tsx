@@ -249,14 +249,14 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 					<WarningCircleIcon size={14} weight="fill" aria-hidden="true" />
 					Error
 				</p>
-				<h2 className="m-0 font-display text-display-3 uppercase leading-none text-foreground">
+				<h2 className="m-0 text-title text-foreground">
 					The reel jammed.
 				</h2>
 				<p className="m-0 text-body text-soft">Episodes could not load. Try again.</p>
 				<button
 					type="button"
 					onClick={() => refetch()}
-					className="pressable h-12 rounded-full bg-brand px-5 text-body font-semibold text-brand-foreground transition-[background-color,scale] duration-(--duration-ui) can-hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+					className="pressable h-12 rounded-full bg-brand px-5 font-sans text-ui font-medium tracking-normal text-brand-foreground transition-[background-color,scale] duration-(--duration-ui) can-hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 				>
 					Try again
 				</button>
@@ -308,7 +308,7 @@ const SeasonTabs = ({ seasons, showId, showData, detailsPanel }: SeasonTabsProps
 						<span className="font-mono text-caption text-brand tracking-label tabular-nums" aria-hidden="true">
 							01
 						</span>
-						<h2 id="episodes-title" className="font-display text-display-2 uppercase leading-none text-foreground m-0">
+						<h2 id="episodes-title" className="text-title text-foreground m-0">
 							Episodes
 						</h2>
 					</div>

@@ -26,7 +26,7 @@ export function MediaFallback({
 					className
 				)}
 			>
-				<span className="font-display uppercase text-ui text-dim tracking-label">
+				<span className="text-ui font-medium uppercase tracking-label text-dim">
 					{text}
 				</span>
 			</div>
@@ -43,7 +43,7 @@ export function MediaFallback({
 				)}
 			>
 				{label ? (
-					<span className="absolute inset-x-gutter bottom-1/4 font-display uppercase text-display-1 text-dim/20 break-anywhere">
+					<span className="absolute inset-x-gutter bottom-1/4 text-display text-dim/25 break-anywhere">
 						{label}
 					</span>
 				) : null}
@@ -66,7 +66,7 @@ export function MediaFallback({
 				)}
 			>
 				{displayText ? (
-					<span className="font-display uppercase text-display-4 text-text break-anywhere">
+					<span className="text-ui font-medium text-text break-anywhere">
 						{displayText}
 					</span>
 				) : null}
@@ -83,7 +83,7 @@ export function MediaFallback({
 			)}
 		>
 			{label ? (
-				<span className="font-display uppercase text-display-4 text-dim break-anywhere">
+				<span className="text-ui font-medium text-dim break-anywhere">
 					{label}
 				</span>
 			) : null}

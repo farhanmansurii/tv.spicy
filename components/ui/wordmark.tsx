@@ -7,20 +7,20 @@ interface WordmarkProps {
 
 export function Wordmark({ size = 'default', className }: WordmarkProps) {
 	return (
-		<span className={cn('inline-flex items-center gap-1.5', className)}>
+		<span className={cn('inline-flex items-center gap-2', className)}>
 			<span
 				className={cn(
-					'font-display uppercase tracking-normal text-foreground',
-					size === 'sm' ? 'text-xl' : 'text-2xl'
+					'font-sans font-medium tracking-normal text-text',
+					size === 'sm' ? 'text-base' : 'text-md'
 				)}
 			>
-				SPICY
+				Spicy
 			</span>
 			<span
 				aria-hidden="true"
-				className={cn('rounded-full bg-brand', size === 'sm' ? 'size-1.5' : 'size-2')}
+				className={cn('rounded-full bg-brand', size === 'sm' ? 'size-1' : 'size-1.5')}
 			/>
-			<span className="font-mono text-micro uppercase tracking-meta text-muted-foreground">TV</span>
+			<span className="font-mono text-micro uppercase tracking-meta text-dim">TV</span>
 		</span>
 	);
 }

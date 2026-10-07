@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
+import { useGSAP } from '@gsap/react';
 import {
 	CaretLeftIcon,
 	CaretRightIcon,
@@ -15,14 +16,11 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { hidePlayerChrome, showPlayerChrome } from '@/lib/motion';
 import type { ProviderSummary } from './providers';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-const glassOrb = 'rounded-full border border-border-strong bg-card shadow-glass';
-
-const orbPress =
-	'transition-[background-color,color,transform,scale] duration-(--duration-ui) motion-reduce:transition-none can-hover:bg-muted active:scale-97 motion-reduce:active:scale-100';
+const chromeButton =
+	'inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md px-2.5 text-ui font-medium text-soft transition-[color,background-color,transform] duration-(--duration-ui) ease-out can-hover:bg-raised can-hover:text-text active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:pointer-events-none disabled:opacity-40';
 
 /** Format raw seconds into H:MM:SS or M:SS */
 function formatTimestamp(seconds: number): string {
@@ -47,14 +45,7 @@ function ResumeChip({ seconds, onResume }: ResumeChipProps) {
 		<button
 			type="button"
 			onClick={onResume}
-			className={cn(
-				glassOrb,
-				orbPress,
-				'inline-flex min-h-11 items-center gap-1.5 px-3',
-				'font-mono text-caption font-medium tracking-meta text-muted-foreground',
-				'can-hover:text-foreground',
-				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
-			)}
+			className={cn(chromeButton, 'font-mono text-caption tracking-meta')}
 			title={`Resume from ${formatTimestamp(seconds)}`}
 		>
 			<ArrowCounterClockwiseIcon size={13} aria-hidden="true" />
@@ -84,13 +75,7 @@ function EpisodePill({
 			disabled={disabled}
 			aria-label={label}
 			title={label}
-			className={cn(
-				glassOrb,
-				orbPress,
-				'flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-0 text-foreground md:w-auto md:px-4',
-				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-				'disabled:pointer-events-none disabled:opacity-40'
-			)}
+			className={cn(chromeButton, 'min-w-10 px-2.5 text-text md:px-3')}
 		>
 			{children}
 		</button>
@@ -136,9 +121,29 @@ export function PlayerControls({
 	const showResumeChip = !hasResumed && savedPositionSeconds > 30;
 	const isSeries = mediaType === 'tv';
 	const showNavigation = isSeries && (onNextEpisode || onPreviousEpisode);
+	const chromeRef = useRef<HTMLDivElement>(null);
+
+	useGSAP(() => {
+		if (chromeRef.current) showPlayerChrome(chromeRef.current);
+	}, []);
+
+	const requestClose = () => {
+		if (!onCloseSticky) return;
+		const frame = chromeRef.current?.closest('[data-player-container]');
+		const target = frame instanceof HTMLElement ? frame : chromeRef.current;
+		if (!target) {
+			onCloseSticky();
+			return;
+		}
+		hidePlayerChrome(target, onCloseSticky);
+	};
 
 	return (
-		<div className="flex flex-wrap items-center justify-between gap-2">
+		<div
+			ref={chromeRef}
+			data-player-chrome
+			className="flex flex-wrap items-center justify-between gap-1 rounded-md border border-line bg-surface px-1.5 py-1.5"
+		>
 			{/* Left side: resume and episode navigation */}
 			<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
 				{showResumeChip && (
@@ -153,10 +158,10 @@ export function PlayerControls({
 							disabled={!canGoPrevious}
 						>
 							<CaretLeftIcon size={18} aria-hidden="true" />
-							<span className="hidden text-ui font-semibold md:inline">Previous</span>
+							<span className="hidden md:inline">Previous</span>
 						</EpisodePill>
 						<EpisodePill label="Next episode" onClick={onNextEpisode}>
-							<span className="hidden text-ui font-semibold md:inline">Next</span>
+							<span className="hidden md:inline">Next</span>
 							<CaretRightIcon size={18} aria-hidden="true" />
 						</EpisodePill>
 					</>
@@ -187,15 +192,10 @@ export function PlayerControls({
 				{isSticky && onCloseSticky && (
 					<button
 						type="button"
-						onClick={onCloseSticky}
+						onClick={requestClose}
 						aria-label="Hide sticky player"
 						title="Hide sticky player"
-						className={cn(
-							glassOrb,
-							orbPress,
-							'flex size-11 items-center justify-center text-muted-foreground can-hover:text-foreground',
-							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
-						)}
+						className={cn(chromeButton, 'size-10 px-0 text-dim')}
 					>
 						<XIcon size={16} aria-hidden="true" />
 					</button>

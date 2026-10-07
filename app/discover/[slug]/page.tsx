@@ -57,9 +57,7 @@ export default async function Page(props: PageProps) {
 	return (
 		<main className="min-h-screen bg-background pb-24 pt-safe-header text-foreground md:pb-28 md:pt-28">
 			<Container>
-				<header className="max-w-4xl border-l-2 border-brand pl-5 md:pl-7">
-					{/* Same recipe as a media row: accent index, then the label, then
-					    the Anton title and the count below. */}
+				<header className="max-w-3xl">
 					<div className="flex items-baseline gap-3">
 						<span
 							aria-hidden="true"
@@ -67,12 +65,12 @@ export default async function Page(props: PageProps) {
 						>
 							01
 						</span>
-						<p className="font-mono text-caption uppercase tracking-label text-muted-foreground">
+						<p className="font-mono text-caption uppercase tracking-label text-dim">
 							{typeLabel} / Genre
 						</p>
 					</div>
-					<TitleDisplay title={title} className="mt-3" />
-					<p className="mt-4 max-w-prose-secondary text-body leading-relaxed text-muted-foreground">
+					<TitleDisplay title={title} className="mt-4" />
+					<p className="mt-5 max-w-prose text-lede text-soft">
 						A curated selection of {title.toLowerCase()} {typePlural}.
 					</p>
 				</header>
@@ -80,7 +78,7 @@ export default async function Page(props: PageProps) {
 
 			{/* LoadMore's grid carries its own gutter, so it stays out of the Container
 			    to keep one gutter instead of two. */}
-			<section className="border-t border-border section-spacing" aria-label={`${title} ${typeLabel}`}>
+			<section className="section-spacing" aria-label={`${title} ${typeLabel}`}>
 				<LoadMore params={loadMoreParams} />
 			</section>
 		</main>

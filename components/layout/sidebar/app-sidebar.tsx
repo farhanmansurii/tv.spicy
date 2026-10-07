@@ -93,7 +93,7 @@ export function AppSidebar() {
 								onClick={handleLinkClick}
 								className={cn(
 									'group flex items-center gap-3 px-3 py-3 rounded-sm',
-									'text-title font-medium',
+									'text-ui font-medium',
 									'transition-[color,background-color,border-color,transform] duration-(--duration-ui) ease-out',
 									'touch-manipulation',
 									itemIsActive

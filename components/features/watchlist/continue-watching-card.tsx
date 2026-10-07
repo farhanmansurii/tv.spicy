@@ -91,7 +91,7 @@ function ContinueWatchingCardComponent({ item, index }: ContinueWatchingCardProp
 					/>
 
 					<span aria-hidden="true" className="absolute inset-x-3.5 bottom-4 z-20 grid gap-1">
-						<span className="line-clamp-2 font-display text-display-card uppercase">{title}</span>
+						<span className="line-clamp-2 text-ui font-medium">{title}</span>
 						<span className="flex min-w-0 items-center gap-x-2 font-mono text-micro uppercase leading-tight tracking-meta text-muted-foreground">
 							{episodeCode && <span className="shrink-0 tabular-nums text-foreground">{episodeCode}</span>}
 							{item.episodeName && <span className="truncate">{item.episodeName}</span>}

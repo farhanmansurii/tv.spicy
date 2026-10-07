@@ -71,16 +71,16 @@ export function Header({ className }: HeaderProps) {
 			<div
 				aria-hidden="true"
 				className={cn(
-					'pointer-events-none absolute inset-x-0 top-0 h-32 bg-linear-to-b from-background/85 via-background/40 to-transparent transition-opacity duration-(--duration-ui) ease-out',
+					'pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-canvas/80 via-canvas/25 to-transparent transition-opacity duration-(--duration-ui) ease-out',
 					scrolled ? 'opacity-0' : 'opacity-100'
 				)}
 			/>
 			<div
 				className={cn(
-					'absolute inset-0 transition-opacity duration-250 ease-out',
+					'absolute inset-0 border-b transition-[background-color,border-color,opacity] duration-(--duration-ui) ease-out',
 					scrolled
-						? 'border-b border-border bg-background opacity-100'
-						: 'border-b border-transparent bg-transparent opacity-0 pointer-events-none'
+						? 'border-line bg-canvas/80 opacity-100 backdrop-blur-md'
+						: 'pointer-events-none border-transparent bg-transparent opacity-0'
 				)}
 			/>
 			<div className="relative mx-auto flex h-16 w-full items-center justify-between px-gutter">

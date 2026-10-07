@@ -273,7 +273,7 @@ export function HeroBanner({
 									<h1
 										className={cn(
 											// Hero 2-line iron rule: clamp ensures max 2-3 lines
-											'text-hero-title',
+											'text-display font-medium',
 											'font-bold text-white tracking-tight',
 											'text-center md:text-left',
 											'max-w-5xl'

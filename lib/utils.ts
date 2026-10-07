@@ -5,16 +5,10 @@ const customTwMerge = extendTailwindMerge({
 	extend: {
 		classGroups: {
 			'font-size': [
-				'text-display-1',
-				'text-display-1-long',
-				'text-display-1-extended',
-				'text-display-1-maximum',
-				'text-display-2',
-				'text-display-3',
-				'text-display-4',
+				'text-display',
+				'text-title',
 				'text-lede',
 				'text-body',
-				'text-title',
 				'text-ui',
 				'text-small',
 				'text-caption',

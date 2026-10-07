@@ -281,7 +281,7 @@ export default function Episode({
 				{nowPlayingCaption}
 			</p>
 
-			<div className="relative w-full overflow-hidden rounded-sm border border-border bg-background">
+			<div className="relative w-full overflow-hidden rounded-md border border-line bg-canvas">
 				<div className="relative aspect-video max-h-140 min-h-70 w-full">
 					<iframe
 						key={iframeKey}
@@ -358,7 +358,7 @@ export default function Episode({
 								<p className="font-mono text-caption uppercase tracking-label text-dim">
 									Source · {currentProvider.label}
 								</p>
-								<h3 className="font-display text-display-2 uppercase text-foreground">
+								<h3 className="text-lede font-medium text-foreground">
 									The projector jammed.
 								</h3>
 								<p className="max-w-sm text-small leading-relaxed text-soft">

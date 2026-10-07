@@ -47,7 +47,7 @@ function EpisodeStripSkeleton() {
 function EmptyEpisodes() {
 	return (
 		<div className="flex flex-col items-center justify-center gap-2 border-y border-line bg-band px-5 py-16 text-center">
-			<p className="font-display text-4xl uppercase leading-none text-foreground m-0">
+			<p className="text-title text-foreground m-0">
 				No episodes on the reel.
 			</p>
 			<p className="font-mono text-caption uppercase tracking-label text-dim m-0">

@@ -34,7 +34,7 @@ export default async function AuthErrorPage({
 				</div>
 
 				<div className="flex flex-col gap-2">
-					<h1 className="font-display text-display-2 text-balance uppercase text-foreground">
+					<h1 className="text-title text-balance text-foreground">
 						The sign-in jammed.
 					</h1>
 					<p className="text-small text-muted-foreground">{message}</p>
@@ -48,7 +48,7 @@ export default async function AuthErrorPage({
 					</Button>
 					<Button asChild variant="outline">
 						<Link href="/" prefetch={false}>
-							<Home className="h-4 w-4" />
+							<Home aria-hidden="true" />
 							Home
 						</Link>
 					</Button>

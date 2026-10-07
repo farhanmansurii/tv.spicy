@@ -16,7 +16,7 @@ export default function NotFound() {
 					<span aria-hidden="true"> / </span>End of reel
 				</p>
 
-				<h1 className="mt-4 font-display text-display-2 uppercase text-text text-balance">
+				<h1 className="mt-4 text-title text-balance text-text">
 					Nothing here but dust.
 				</h1>
 
@@ -28,13 +28,13 @@ export default function NotFound() {
 				<div className="mt-8 flex flex-wrap items-center gap-3">
 					<Button asChild variant="default">
 						<Link href="/" prefetch={false}>
-							<Home className="h-4 w-4" />
+							<Home aria-hidden="true" />
 							Back to browse
 						</Link>
 					</Button>
 					<Button asChild variant="outline">
 						<Link href="/search" prefetch={false}>
-							<Search className="h-4 w-4" />
+							<Search aria-hidden="true" />
 							Search the archive
 						</Link>
 					</Button>
