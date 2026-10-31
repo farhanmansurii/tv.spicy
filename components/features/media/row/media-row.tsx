@@ -72,7 +72,10 @@ function MediaRowComponent({
 
 		const updateBoundaries = () => {
 			const next = api.canScrollNext();
-			setCanScroll({ prev: api.canScrollPrev(), next });
+			const prev = api.canScrollPrev();
+			setCanScroll((current) =>
+				current.prev === prev && current.next === next ? current : { prev, next }
+			);
 			// Nudge once per arrival at the last card, driven by the settled scroll
 			// position rather than the arrow press. A row that fits entirely never
 			// nudged, because the end is where it started.

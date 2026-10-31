@@ -15,7 +15,7 @@ const buckets = new Map<string, Bucket>();
 const MAX_TRACKED_KEYS = 10_000;
 
 /** Default budget for mutating routes: `limit` requests per `windowMs`, per user. */
-export const MUTATION_RATE_LIMIT = { limit: 60, windowMs: 60_000 } as const;
+const MUTATION_RATE_LIMIT = { limit: 60, windowMs: 60_000 } as const;
 
 function pruneExpired(now: number) {
 	for (const [key, bucket] of buckets) {

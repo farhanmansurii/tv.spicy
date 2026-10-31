@@ -41,19 +41,6 @@ export async function removeFavorite(userId: string, mediaId: number, mediaType:
 	});
 }
 
-export async function isFavorite(userId: string, mediaId: number, mediaType: 'movie' | 'tv') {
-	const item = await prisma.favorite.findUnique({
-		where: {
-			userId_mediaId_mediaType: {
-				userId,
-				mediaId,
-				mediaType: mediaType.toUpperCase() as MediaType,
-			},
-		},
-	});
-	return !!item;
-}
-
 export async function clearFavorites(userId: string, mediaType?: 'movie' | 'tv') {
 	const where: any = { userId };
 	if (mediaType) {

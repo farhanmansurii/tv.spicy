@@ -9,7 +9,7 @@
 
 export type Tombstones = Record<string, number>;
 
-export interface MembershipItem {
+interface MembershipItem {
 	key: string;
 	syncedAt?: string | null;
 }
@@ -33,7 +33,7 @@ export function clearTombstones(tombstones: Tombstones, keys: Iterable<string>):
 	return next;
 }
 
-export function pruneTombstones(tombstones: Tombstones): Tombstones {
+function pruneTombstones(tombstones: Tombstones): Tombstones {
 	const entries = Object.entries(tombstones);
 	if (entries.length <= MAX_TOMBSTONES) {
 		return tombstones;

@@ -22,8 +22,3 @@ export const navigationItems: NavigationItem[] = [
 		href: '/library',
 	},
 ];
-
-export function getNavigationItems(options: { isSignedIn: boolean }) {
-	void options;
-	return navigationItems;
-}

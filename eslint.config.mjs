@@ -39,7 +39,6 @@ const config = [
           contracts: [
             { pattern: '^Skeleton$', allow: ['layout', 'shape', 'spacing'] },
             { pattern: '^Carousel(Content|Item)?$', allow: ['layout', 'spacing'] },
-            { pattern: '^LiquidGlass$', allow: ['layout', 'shape', 'spacing'] },
             { pattern: '^Sidebar(Header|Content|Footer)$', allow: ['layout', 'spacing'] },
             { pattern: '^Card(Header|Content|Footer)?$', allow: ['layout', 'spacing'] },
           ],

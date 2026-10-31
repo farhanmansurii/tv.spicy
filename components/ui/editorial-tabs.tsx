@@ -6,6 +6,7 @@ import React, {
 	useContext,
 	useEffect,
 	useId,
+	useMemo,
 	useRef,
 	useState,
 } from 'react';
@@ -114,15 +115,18 @@ export function EditorialTabs({
 		}
 	}, [activeTab, updateMarker]);
 
-	const contextValue: EditorialTabsContextValue = {
-		activeTab,
-		setActiveTab,
-		baseId,
-		registerTrigger,
-		listRef,
-		markerRef,
-		updateMarker,
-	};
+	const contextValue = useMemo<EditorialTabsContextValue>(
+		() => ({
+			activeTab,
+			setActiveTab,
+			baseId,
+			registerTrigger,
+			listRef,
+			markerRef,
+			updateMarker,
+		}),
+		[activeTab, setActiveTab, baseId, registerTrigger, listRef, markerRef, updateMarker]
+	);
 
 	if (tabs && tabs.length > 0) {
 		return (

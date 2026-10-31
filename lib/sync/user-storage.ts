@@ -10,7 +10,7 @@ const LEGACY_CLAIM_SUFFIX = ':legacy-claimed';
  * using the original (legacy) key, and the first user to sign in on a device
  * claims any pre-existing anonymous data exactly once.
  */
-export function userScopedKey(baseKey: string, userId: string | null): string {
+function userScopedKey(baseKey: string, userId: string | null): string {
 	return userId ? `${baseKey}:user:${userId}` : baseKey;
 }
 

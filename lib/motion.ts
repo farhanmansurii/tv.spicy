@@ -3,8 +3,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 
-export const EASE_ENTRANCE = [0.23, 1, 0.32, 1] as const;
-
 export const CURVES = {
 	enter: 'power4.out',
 	exit: 'power2.in',
@@ -29,7 +27,7 @@ export const STAGGER = {
 	maxStaggeredCards: 8,
 } as const;
 
-export const DISTANCE = {
+const DISTANCE = {
 	rise: 16,
 	lift: 8,
 	mask: 110,
@@ -68,7 +66,7 @@ export function registerGSAP(): typeof gsap | null {
 	return gsap;
 }
 
-export function staggerAt(index: number, step: number, cap = STAGGER.maxStaggeredCards): number {
+function staggerAt(index: number, step: number, cap = STAGGER.maxStaggeredCards): number {
 	return Math.min(index, cap) * step;
 }
 
@@ -76,14 +74,14 @@ export function cardRiseDelay(index: number): number {
 	return 0.18 + staggerAt(index, STAGGER.card);
 }
 
-export interface RecipeOptions {
+interface RecipeOptions {
 	reduced?: boolean;
 	delay?: number;
 	distance?: number;
 }
 
 /** Arriving: opacity plus a short rise, entrance ease, 450ms. */
-export function enter(options: RecipeOptions = {}): gsap.TweenVars {
+function enter(options: RecipeOptions = {}): gsap.TweenVars {
 	if (options.reduced) {
 		return {
 			opacity: 0,
@@ -116,7 +114,7 @@ export function exit(options: RecipeOptions = {}): gsap.TweenVars {
 }
 
 /** Travelling on screen: poster morph, marker glide, row scroll. */
-export function move(options: RecipeOptions = {}): gsap.TweenVars {
+function move(options: RecipeOptions = {}): gsap.TweenVars {
 	if (options.reduced) {
 		return {
 			opacity: 0,
@@ -137,7 +135,7 @@ export function crossfade(options: { duration?: number; blur?: boolean } = {}): 
 	};
 }
 
-export interface RevealOptions {
+interface RevealOptions {
 	reduced?: boolean;
 	delay?: number;
 	distance?: number;
@@ -248,7 +246,7 @@ export function skeletonResolve(
 	});
 }
 
-export interface ArrivalOptions {
+interface ArrivalOptions {
 	afterMorph?: boolean;
 	onComplete?: () => void;
 }
@@ -477,8 +475,6 @@ export function arrival(
 
 	return tl;
 }
-
-export const animateArrival = arrival;
 
 /** Sections on scroll (MOTION.md B): once, no scrub, no pin, no replay. */
 export function sectionReveal(

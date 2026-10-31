@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server';
 import { TMDBRequestError } from '@/lib/api/tmdb-client';
 
 /** Headers that keep both the browser and the Vercel CDN from caching a response. */
-export const NO_STORE_HEADERS = {
+const NO_STORE_HEADERS = {
 	'Cache-Control': 'no-store',
 	'Vercel-CDN-Cache-Control': 'no-store',
 } as const;
