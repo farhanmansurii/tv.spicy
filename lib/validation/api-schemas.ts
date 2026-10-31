@@ -10,8 +10,7 @@
 import { z } from 'zod';
 
 /** Media type accepted by watchlist, favorites and TMDB routes. */
-export const mediaTypeSchema = z.enum(['movie', 'tv']);
-export type MediaTypeValue = z.infer<typeof mediaTypeSchema>;
+const mediaTypeSchema = z.enum(['movie', 'tv']);
 
 /** Positive TMDB id arriving as a JSON number or numeric string. */
 const mediaIdSchema = z.coerce.number().int().positive();
@@ -93,7 +92,7 @@ export const recentSearchAddBodySchema = z.object({
 // ---------------------------------------------------------------------------
 
 /** Per-list cap for POST /api/sync arrays (see REPORT.md). */
-export const SYNC_MAX_ITEMS_PER_LIST = 1000;
+const SYNC_MAX_ITEMS_PER_LIST = 1000;
 /** Whole-body cap for POST /api/sync, enforced with 413. */
 export const SYNC_MAX_BODY_BYTES = 1024 * 1024;
 

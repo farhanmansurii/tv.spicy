@@ -1,8 +1,8 @@
 // Deep-link ?season=&episode= values are raw URL strings; they are parsed and
 // bounded before they reach the player or write to watch history.
 
-export const MAX_SEASON_NUMBER = 500;
-export const MAX_EPISODE_NUMBER = 999;
+const MAX_SEASON_NUMBER = 500;
+const MAX_EPISODE_NUMBER = 999;
 
 function parseBoundedInt(raw: string | null, min: number, max: number): number | null {
 	if (!raw || !/^\d+$/.test(raw)) return null;

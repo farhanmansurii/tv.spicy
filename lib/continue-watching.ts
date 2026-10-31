@@ -55,7 +55,7 @@ export function clampProgress(progress: number | null | undefined): number {
 	return Math.max(0, Math.min(100, Math.round(progress as number)));
 }
 
-export function isContinueWatchingCandidate(progressPercent: number): boolean {
+function isContinueWatchingCandidate(progressPercent: number): boolean {
 	return progressPercent >= 3 && progressPercent < 95;
 }
 

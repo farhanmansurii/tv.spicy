@@ -61,16 +61,3 @@ export async function clearWatchlist(userId: string, mediaType?: 'movie' | 'tv')
 	}
 	return prisma.watchlist.deleteMany({ where });
 }
-
-export async function isInWatchlist(userId: string, mediaId: number, mediaType: 'movie' | 'tv') {
-	const item = await prisma.watchlist.findUnique({
-		where: {
-			userId_mediaId_mediaType: {
-				userId,
-				mediaId,
-				mediaType: mediaType.toUpperCase() as MediaType,
-			},
-		},
-	});
-	return !!item;
-}

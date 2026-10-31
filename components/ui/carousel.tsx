@@ -26,7 +26,20 @@ type CarouselContextProps = {
 	scrollNext: () => void;
 	canScrollPrev: boolean;
 	canScrollNext: boolean;
-} & CarouselProps;
+	orientation: 'horizontal' | 'vertical';
+};
+
+const EMPTY_PLUGINS: NonNullable<CarouselPlugin> = [];
+type EmblaOptions = NonNullable<CarouselOptions>;
+
+function sameOptions(a: EmblaOptions, b: EmblaOptions) {
+	const left = a as Record<string, unknown>;
+	const right = b as Record<string, unknown>;
+	const leftKeys = Object.keys(left);
+	const rightKeys = Object.keys(right);
+	if (leftKeys.length !== rightKeys.length) return false;
+	return leftKeys.every((key) => left[key] === right[key]);
+}
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
 
@@ -49,13 +62,13 @@ function Carousel({
 	children,
 	...props
 }: React.ComponentProps<'div'> & CarouselProps) {
-	const [carouselRef, api] = useEmblaCarousel(
-		{
-			...opts,
-			axis: orientation === 'horizontal' ? 'x' : 'y',
-		},
-		plugins
-	);
+	const axis = orientation === 'horizontal' ? 'x' : 'y';
+	const nextOptions: EmblaOptions = { ...opts, axis };
+	const [emblaOptions, setEmblaOptions] = React.useState(nextOptions);
+	if (!sameOptions(emblaOptions, nextOptions)) {
+		setEmblaOptions(nextOptions);
+	}
+	const [carouselRef, api] = useEmblaCarousel(emblaOptions, plugins ?? EMPTY_PLUGINS);
 	const [canScrollPrev, setCanScrollPrev] = React.useState(false);
 	const [canScrollNext, setCanScrollNext] = React.useState(false);
 
@@ -112,19 +125,30 @@ function Carousel({
 		};
 	}, [api, onSelect]);
 
+	const resolvedOrientation = orientation || (opts?.axis === 'y' ? 'vertical' : 'horizontal');
+	const contextValue = React.useMemo(
+		() => ({
+			carouselRef,
+			api,
+			orientation: resolvedOrientation,
+			scrollPrev,
+			scrollNext,
+			canScrollPrev,
+			canScrollNext,
+		}),
+		[
+			carouselRef,
+			api,
+			resolvedOrientation,
+			scrollPrev,
+			scrollNext,
+			canScrollPrev,
+			canScrollNext,
+		]
+	);
+
 	return (
-		<CarouselContext.Provider
-			value={{
-				carouselRef,
-				api: api,
-				opts,
-				orientation: orientation || (opts?.axis === 'y' ? 'vertical' : 'horizontal'),
-				scrollPrev,
-				scrollNext,
-				canScrollPrev,
-				canScrollNext,
-			}}
-		>
+		<CarouselContext.Provider value={contextValue}>
 			<div
 				onKeyDownCapture={handleKeyDown}
 				className={cn('relative', className)}

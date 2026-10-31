@@ -89,7 +89,11 @@ function FilterTabs({ active, onChange }: { active: FilterType; onChange: (f: Fi
 		const rowBox = row.getBoundingClientRect();
 		const tabBox = tab.getBoundingClientRect();
 		if (!rowBox.width) return;
-		setMarker({ x: tabBox.x - rowBox.x, scale: tabBox.width / rowBox.width });
+		const x = tabBox.x - rowBox.x;
+		const scale = tabBox.width / rowBox.width;
+		setMarker((current) =>
+			current && current.x === x && current.scale === scale ? current : { x, scale }
+		);
 	}, [active]);
 
 	useEffect(measure, [measure]);

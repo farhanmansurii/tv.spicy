@@ -1,6 +1,3 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-
 export function HeroSkeleton() {
 	return (
 		<section className="relative isolate flex min-h-screen items-end overflow-hidden px-gutter pt-28 pb-16 md:pt-32 md:pb-20 bg-background">
@@ -61,7 +58,7 @@ export function EditorialHeroSkeleton() {
 	return <HeroSkeleton />;
 }
 
-export function AboutSkeleton({ type = 'tv' }: { type?: 'movie' | 'tv' }) {
+function AboutSkeleton({ type = 'tv' }: { type?: 'movie' | 'tv' }) {
 	const sectionIndex = type === 'tv' ? '02' : '01';
 
 	return (
@@ -101,10 +98,6 @@ export function AboutSkeleton({ type = 'tv' }: { type?: 'movie' | 'tv' }) {
 			</div>
 		</section>
 	);
-}
-
-export function CastCrewSkeleton() {
-	return <AboutSkeleton />;
 }
 
 export function StorylineSkeleton() {
@@ -191,26 +184,6 @@ export function RelatedSkeleton() {
 						<div className="h-4 w-3/4 rounded bg-surface animate-pulse mb-1.5" />
 						<div className="h-3 w-1/2 rounded bg-surface animate-pulse" />
 					</div>
-				))}
-			</div>
-		</section>
-	);
-}
-
-export function VideoSkeleton() {
-	return (
-		<section className="px-gutter mb-20 md:mb-28 scroll-mt-8">
-			<div className="flex items-end gap-3.5 pb-5 border-b border-line-strong mb-7">
-				<h2 className="font-display text-display-2 uppercase tracking-normal text-text">
-					Videos
-				</h2>
-			</div>
-			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-				{Array.from({ length: 3 }).map((_, i) => (
-					<div
-						key={i}
-						className="aspect-video rounded-sm bg-surface animate-pulse shadow-inset-line"
-					/>
 				))}
 			</div>
 		</section>

@@ -26,9 +26,6 @@
     "paths": {
       "@/*": [
         "./*"
-      ],
-      "@oplayer/plugins": [
-        "types/oplayer-plugins.d.ts"
       ]
     }
   },

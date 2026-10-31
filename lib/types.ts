@@ -40,19 +40,6 @@ export interface Show {
 	spoken_languages: SpokenLanguage[];
 }
 
-export interface Season {
-	season: number;
-	isReleased: boolean;
-	episodes: Episode[];
-}
-
-interface SeasonContentProps {
-	episodes: Episode[];
-	id: string;
-	tv_id: string;
-	view: 'grid' | 'list' | 'carousel';
-}
-
 export interface Episode {
 	show_name: string;
 	img?: string | null;

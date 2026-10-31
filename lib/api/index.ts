@@ -1,32 +1,10 @@
 /**
- * Centralized API exports
- * Import all API functions from here
+ * Shared catalog helpers.
+ * Stream link helpers stay on this barrel.
  */
 
-// TMDB API
-export {
-	fetchRowData,
-	fetchDetailsTMDB,
-	fetchBasicDetailsTMDB,
-	fetchTMDBImages,
-	fetchRecommendations,
-	fetchCredits,
-	fetchVideos,
-	fetchGenres,
-	fetchGenreById,
-	searchTMDB,
-	discoverMedia,
-	fetchSeasonEpisodes,
-	fetchEpisodeDetails,
-	fetchHeroItemsWithDetails,
-	getNewAndPopularShows,
-	type MediaType,
-	type TimeWindow,
-	type DiscoverOptions,
-} from './tmdb-client';
+export { fetchRowData, fetchGenres, type MediaType } from './tmdb-client';
 
-// Consumet API
 export { fetchDetails, fetchMovieLinks } from './consumet-client';
 
-// Streaming APIs
 export { fetchSusflixLinks } from './streaming-client';

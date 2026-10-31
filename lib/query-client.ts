@@ -10,10 +10,6 @@ export function setQueryClient(client: QueryClient | null) {
 	queryClientInstance = client;
 }
 
-export function getQueryClient(): QueryClient | null {
-	return queryClientInstance;
-}
-
 export function updatePersonalizedHomeQuery(
 	userId: string,
 	updater: (data: PersonalizedHomeData) => PersonalizedHomeData

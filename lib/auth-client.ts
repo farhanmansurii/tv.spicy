@@ -19,10 +19,10 @@ function getBaseURL(): string {
 
 const baseURL = getBaseURL();
 
-export const authClient = createAuthClient({
+const authClient = createAuthClient({
 	baseURL,
 	basePath: '/api/auth',
 	sessionOptions: AUTH_CLIENT_SESSION_OPTIONS,
 });
 
-export const { signIn, signOut, signUp, useSession } = authClient;
+export const { signIn, signOut, useSession } = authClient;

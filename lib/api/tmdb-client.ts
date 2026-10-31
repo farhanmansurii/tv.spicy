@@ -6,7 +6,6 @@
 import type {
 	TMDBCastMember,
 	TMDBCreditsResponse,
-	TMDBEpisodeDetails,
 	TMDBImagesResponse,
 	TMDBListResponse,
 	TMDBMovie,
@@ -57,7 +56,6 @@ const BASIC_DETAILS_CAST_LIMIT = 20;
 // ============================================================================
 
 export type MediaType = 'movie' | 'tv';
-export type TimeWindow = 'day' | 'week';
 export type TMDBBasicDetails = TMDBMovie & TMDBTVShow;
 export type TMDBBasicDetailsWithCast = TMDBBasicDetails & { cast: TMDBCastMember[] };
 
@@ -454,26 +452,6 @@ export async function fetchTMDBImages(
 }
 
 /**
- * Fetch recommendations or similar content
- */
-export async function fetchRecommendations(
-	id: string,
-	type: MediaType,
-	recommendationType: 'recommendations' | 'similar' = 'recommendations'
-): Promise<TMDBListResponse<TMDBBaseMedia>> {
-	const endpoint = `/${type}/${id}/${recommendationType}?language=en-US&page=1`;
-
-	try {
-		return await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
-			revalidate: CACHE_DURATIONS.MEDIUM,
-		});
-	} catch (error) {
-		console.error(`Error fetching ${recommendationType} for ${type}/${id}:`, error);
-		return { results: [], page: 1, total_pages: 0, total_results: 0 };
-	}
-}
-
-/**
  * Fetch credits (cast & crew)
  */
 export async function fetchCredits(
@@ -488,22 +466,6 @@ export async function fetchCredits(
 		});
 	} catch (error) {
 		console.error('Error fetching credits:', error);
-		return null;
-	}
-}
-
-/**
- * Fetch videos (trailers, teasers, etc.)
- */
-export async function fetchVideos(id: string, type: MediaType): Promise<TMDBVideosResponse | null> {
-	const endpoint = `/${type}/${id}/videos?language=en-US`;
-
-	try {
-		return await tmdbFetch<TMDBVideosResponse>(endpoint, {
-			revalidate: CACHE_DURATIONS.MEDIUM,
-		});
-	} catch (error) {
-		console.error('Error fetching videos:', error);
 		return null;
 	}
 }
@@ -541,26 +503,9 @@ export async function fetchGenresStrict(type: MediaType): Promise<Genre[]> {
 }
 
 /**
- * Fetch media by genre
- *
- * Lenient variant for pages; API routes should use `fetchGenreByIdStrict`.
- */
-export async function fetchGenreById(
-	type: MediaType,
-	genreId: string,
-	page: number = 1
-): Promise<TMDBBaseMedia[]> {
-	try {
-		return await fetchGenreByIdStrict(type, genreId, page);
-	} catch (error) {
-		console.error(`Error fetching genre ${genreId} for ${type}:`, error);
-		return [];
-	}
-}
-
-/**
- * Strict variant of {@link fetchGenreById}: rejects on upstream failure,
- * resolves to `[]` only when TMDB genuinely returned no results.
+ * Fetch media by genre.
+ * Rejects on upstream failure.
+ * Resolves to `[]` only when TMDB returned no results.
  */
 export async function fetchGenreByIdStrict(
 	type: MediaType,
@@ -590,25 +535,9 @@ export async function fetchGenreByIdStrict(
 }
 
 /**
- * Search media
- *
- * Lenient variant for pages; API routes should use `searchTMDBStrict`.
- */
-export async function searchTMDB(
-	query: string,
-	page: number = 1
-): Promise<TMDBListResponse<TMDBBaseMedia>> {
-	try {
-		return await searchTMDBStrict(query, page);
-	} catch (error) {
-		console.error('Error searching TMDB:', error);
-		return { results: [], page: 1, total_pages: 0, total_results: 0 };
-	}
-}
-
-/**
- * Strict variant of {@link searchTMDB}: rejects on upstream failure and only
- * resolves to an empty result set when TMDB genuinely matched nothing.
+ * Search media.
+ * Rejects on upstream failure.
+ * Resolves to an empty result set only when TMDB matched nothing.
  */
 export async function searchTMDBStrict(
 	query: string,
@@ -643,69 +572,6 @@ export async function searchTMDBStrict(
 /**
  * Discover media with filters
  */
-export interface DiscoverOptions {
-	type?: MediaType;
-	genres?: number[];
-	year?: string;
-	minRating?: number;
-	language?: string;
-	sortBy?: string;
-	page?: number;
-}
-
-export async function discoverMedia(
-	options: DiscoverOptions = {}
-): Promise<TMDBListResponse<TMDBBaseMedia>> {
-	const {
-		type = 'movie',
-		genres = [],
-		year,
-		minRating = 0,
-		language,
-		sortBy = 'popularity.desc',
-		page = 1,
-	} = options;
-
-	const params = new URLSearchParams({
-		language: 'en-US',
-		sort_by: sortBy,
-		page: page.toString(),
-		include_adult: 'false',
-	});
-
-	if (genres.length > 0) {
-		params.append('with_genres', genres.join(','));
-	}
-
-	if (year) {
-		if (type === 'movie') {
-			params.append('primary_release_year', year);
-		} else {
-			params.append('first_air_date_year', year);
-		}
-	}
-
-	if (minRating > 0) {
-		params.append('vote_average.gte', minRating.toString());
-		params.append('vote_count.gte', '50'); // Ensure minimum votes for quality
-	}
-
-	if (language) {
-		params.append('with_original_language', language);
-	}
-
-	const endpoint = `/discover/${type}?${params.toString()}`;
-
-	try {
-		return await tmdbFetch<TMDBListResponse<TMDBBaseMedia>>(endpoint, {
-			revalidate: CACHE_DURATIONS.MEDIUM,
-		});
-	} catch (error) {
-		console.error('Error discovering media:', error);
-		return { results: [], page: 1, total_pages: 0, total_results: 0 };
-	}
-}
-
 /**
  * Fetch season episodes
  */
@@ -727,32 +593,6 @@ export async function fetchSeasonEpisodes(
 	} catch (error) {
 		console.error('Error fetching season episodes:', error);
 		throw error;
-	}
-}
-
-/**
- * Fetch episode details
- */
-export async function fetchEpisodeDetails(
-	showId: string,
-	seasonNumber: number,
-	episodeNumber: number
-): Promise<TMDBEpisodeDetails | null> {
-	const endpoint = `/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}`;
-
-	try {
-		// Build URL with query params
-		const url = new URL(endpoint, 'http://dummy.com');
-		url.searchParams.set('language', 'en-US');
-		url.searchParams.set('append_to_response', 'credits,images');
-		const fullEndpoint = url.pathname + url.search;
-
-		return await tmdbFetch<TMDBEpisodeDetails>(fullEndpoint, {
-			revalidate: CACHE_DURATIONS.MEDIUM,
-		});
-	} catch (error) {
-		console.error('Error fetching episode details:', error);
-		return null;
 	}
 }
 
@@ -817,42 +657,3 @@ export async function fetchHeroItemsWithDetails(
 		return shows;
 	}
 }
-
-/**
- * Get new and popular shows (optimized parallel fetch)
- */
-export async function getNewAndPopularShows() {
-	try {
-		const [topRatedTV, topRatedMovie, trendingMovie, trendingTv] = await Promise.all([
-			fetchRowData('tv/top_rated'),
-			fetchRowData('movie/top_rated'),
-			fetchRowData('trending/movie/week'),
-			fetchRowData('trending/tv/week'),
-		]);
-
-		return {
-			topRatedTV,
-			topRatedMovie,
-			trendingTv,
-			trendingMovie,
-		};
-	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Unknown error';
-		throw new Error('Failed to fetch shows: ' + message);
-	}
-}
-
-// ============================================================================
-// Exports
-// ============================================================================
-
-/**
- * Get API key for client-side use (if needed)
- * Note: Only use this if absolutely necessary for client-side code
- */
-export const getClientAPIKey = () => {
-	if (typeof window !== 'undefined') {
-		return process.env.NEXT_PUBLIC_TMDB_API_KEY || '';
-	}
-	return '';
-};

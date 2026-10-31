@@ -202,20 +202,3 @@ export async function deleteRecentlyWatched(
 		where: { userId },
 	});
 }
-
-export async function getEpisodeProgress(
-	userId: string,
-	mediaId: number,
-	seasonNumber: number,
-	episodeNumber: number
-) {
-	return prisma.recentlyWatched.findFirst({
-		where: {
-			userId,
-			mediaId,
-			seasonNumber,
-			episodeNumber,
-			mediaType: MediaType.TV,
-		},
-	});
-}

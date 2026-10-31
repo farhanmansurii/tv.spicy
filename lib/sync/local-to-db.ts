@@ -136,21 +136,6 @@ export async function collectLocalData(): Promise<SyncData> {
 	return data;
 }
 
-export async function syncLocalToDatabase(): Promise<{
-	success: boolean;
-	results?: unknown;
-	data?: UserSyncResponse['data'];
-}> {
-	try {
-		const localData = await collectLocalData();
-		const response = await requestUserSync(localData);
-		return { success: true, results: response.results, data: response.data };
-	} catch (error) {
-		console.error('Error syncing to database:', error);
-		return { success: false };
-	}
-}
-
 export async function requestUserSync(localData: SyncData): Promise<UserSyncResponse> {
 	const response = await fetch('/api/sync', {
 		method: 'POST',

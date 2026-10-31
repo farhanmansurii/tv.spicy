@@ -4,7 +4,7 @@ import { PauseIcon, PlayIcon } from '@phosphor-icons/react';
 import { tmdbImage } from '@/lib/tmdb-image';
 import { cn } from '@/lib/utils';
 
-export interface EditorialRailItem {
+interface EditorialRailItem {
 	id: number;
 	title: string;
 	poster: string | null;
